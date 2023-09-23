@@ -1,31 +1,50 @@
 package com.example.projecthelper.config;
 
-import com.example.projecthelper.util.security.FastJsonRedisSerializer;
-import org.springframework.context.annotation.Bean ;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+
+@Getter
 @Configuration
+
+@EnableCaching
 public class RedisConfig {
+
+    @Value("${redis.default.ttl:7200}") // 默认值为7200秒，你也可以在application.properties中覆盖此值
+    private long defaultTTL;
+
     @Bean
-    @SuppressWarnings(value = {"unchecked","rawtypes"})
-    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory){
-        RedisTemplate<Object, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory) ;
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
 
-        FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(Object.class);
+        template.setConnectionFactory(factory);
 
-        // 使用stringRedisSerializer来序列化和反序列化redis的key值
+        // 使用StringRedisSerializer来序列化和反序列化Redis的key值
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(serializer);
-
-        // Hash的key也采用stringRedisSerializer的序列化方式
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(serializer);
 
+        // 使用GenericJackson2JsonRedisSerializer来序列化和反序列化Redis的value值
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        template.afterPropertiesSet();
+
+        return template;
+    }
+
+    @Bean
+    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory factory) {
+        StringRedisTemplate template = new StringRedisTemplate(factory);
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.afterPropertiesSet();
         return template;
     }
-}
 
+}

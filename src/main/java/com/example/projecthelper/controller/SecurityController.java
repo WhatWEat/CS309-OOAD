@@ -31,7 +31,7 @@ public class SecurityController {
 
     @PostMapping("/login")
     //TODO:@RequestBody 为user类型
-    public ResponseResult<?> login(){
+    public ResponseResult login(){
         return null;
     }
 

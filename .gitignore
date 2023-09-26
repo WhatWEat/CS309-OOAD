@@ -7,7 +7,7 @@ target/
 
 ### propertities
 src/main/resources/application.properties
-
+logging/ph.log
 
 ### STS ###
 .apt_generated

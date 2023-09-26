@@ -1,6 +1,5 @@
 # CS309-OOAD-ProjectHelper
 ## 前端: vue+quasar+
-## 后端：springboot+mybatis-plus+postgresql
 ### 页面
 大页面，例如登录页面，主页面等,目前计划设计如下页面，英文表示组件名字： 
 登录部分：
@@ -14,6 +13,7 @@
 - group 展示group成员，技术栈及leader等信息，学生在该页面只允许浏览、加入和退出，教师允许编辑信息（分配组员，设置leader等，具体看project要求），
 作业页面：
 - homework
+## 后端：springboot+mybatis-plus+postgresql
 ### springboot：
 
 1. 包名及其意义：

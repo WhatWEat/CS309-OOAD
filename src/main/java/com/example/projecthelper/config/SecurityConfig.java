@@ -38,13 +38,13 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(customUserDetailsService()); // 自定义的UserDetailsService
+        provider.setUserDetailsService(customUserDetailsServiceBean()); // 自定义的UserDetailsService
         provider.setPasswordEncoder(passwordEncoder()); // 密码编码器，例如BCryptPasswordEncoder
         return provider;
     }
 
     @Bean
-    public UserDetailsService customUserDetailsService() {
+    public UserDetailsService customUserDetailsServiceBean() {
         return new CustomUserDetailsService();
     }
 

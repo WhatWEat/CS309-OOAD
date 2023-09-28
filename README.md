@@ -34,3 +34,5 @@
     - mapper：将实体映射到数据库的表中
     - service：服务类，提供某种具体的服务
     - util：效用类，包装一些可复用的代码块，如cookie的设置与检查等
+### Controller接口
+#### /users/getUserlist

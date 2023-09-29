@@ -1,37 +1,33 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <CardComponent></CardComponent>
+  <q-page class="column items-center">
+    <CardComponent
+      v-for="card in cardData"
+      :key="card.title"
+      v-bind="card"
+      >
+    </CardComponent>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { Todo, Meta } from 'components/models';
-import CardComponent from 'components/MainIndex/CardComponent.vue';
-import { ref } from 'vue';
-
-const todos = ref<Todo[]>([
+import CardComponent, {CardInfoProps}from 'components/MainIndex/CardComponent.vue';
+const cardData: CardInfoProps[] = [
   {
-    id: 1,
-    content: 'ct1'
+    title: 'Announcements',
+    caption: 'Announcements',
+    icon: 'record_voice_over',
+    link: 'https://chat.quasar.dev',
+    color: 'green-1'
   },
   {
-    id: 2,
-    content: 'ct2'
+    title: 'Your Projects',
+    caption: 'Group',
+    icon: 'supervisor_account',
+    link: ''
   },
   {
-    id: 3,
-    content: 'ct3'
-  },
-  {
-    id: 4,
-    content: 'ct4'
-  },
-  {
-    id: 5,
-    content: 'ct5'
+    title: 'Released Homework',
+    caption: 'Released Homework',
   }
-]);
-const meta = ref<Meta>({
-  totalCount: 1200
-});
+]
 </script>

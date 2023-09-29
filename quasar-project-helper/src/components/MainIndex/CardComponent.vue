@@ -1,27 +1,29 @@
 <template>
-  <div class="q-pa-md col items-start q-gutter-md">
-
+  <div class="q-pa-md row ">
     <q-card class="my-card">
-      <q-card-section class="bg-green text-white">
-        <div class="text-h6">System Announcements</div>
+      <q-card-section class="bg-green-8 text-white">
+        <div class="text-h6">{{title}}</div>
       </q-card-section>
-      <q-card-actions align="around">
-      </q-card-actions>
-    </q-card>
-    <q-card class="my-card">
-      <q-card-section class="bg-green text-white">
-        <div class="text-h6">New Information</div>
+      <q-separator dark inset />
+      <q-card-section>
+        {{caption}}
       </q-card-section>
-      <q-card-actions align="around">
-      </q-card-actions>
     </q-card>
   </div>
 </template>
 
 <script setup lang="ts">
-
+export interface CardInfoProps {
+  title: string;
+  caption: string;
+  link: string;
+  icon: string;
+}
+withDefaults(defineProps<CardInfoProps>(), {
+});
 </script>
 
-<style scoped>
-
+<style lang="sass" scoped>
+.my-card
+  width: 80vh
 </style>

@@ -1,6 +1,5 @@
 <template>
-  <div class="q-pa-md col items-start q-gutter-md">
-
+  <div class="q-pa-md row items-start q-gutter-md">
     <q-card class="my-card">
       <q-card-section class="bg-green text-white">
         <div class="text-h6">System Announcements</div>
@@ -22,6 +21,8 @@
 
 </script>
 
-<style scoped>
-
+<style lang="sass" scoped>
+.my-card
+  width: 50vh
+  max-width: 50%
 </style>

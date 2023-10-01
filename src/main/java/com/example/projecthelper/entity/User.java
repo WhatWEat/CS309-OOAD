@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class user {
+public class User {
     private final Integer user_id;
 
     private final String identity;
@@ -28,7 +28,7 @@ public class user {
 
     private String intended_teammates;
 
-    public user(Integer user_id, String identity, String password, String name, String gender) {
+    public User(Integer user_id, String identity, String password, String name, String gender) {
         this.user_id = user_id;
         this.identity = identity;
         this.password = password;

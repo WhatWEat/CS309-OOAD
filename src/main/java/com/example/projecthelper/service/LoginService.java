@@ -1,7 +1,8 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
-import com.example.projecthelper.util.security.ResponseResult;
+import com.example.projecthelper.util.ResponseResult;
 import io.jsonwebtoken.JwtException;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,19 @@ public class LoginService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    //TODO: 判断是否登录以及identity,是的话返回JWT，否则返回null
+    public String checkLoginAndIdentity(){
+        return null;
+    }
+
+    //TODO: 判断身份
+    public IdentityCode checkIdentity(){
+        return IdentityCode.ADMINISTRATOR;
+    }
+
+
+
 
     //TODO：完成对是否login的判断，并返回一个User对象
 
@@ -55,7 +69,7 @@ public class LoginService {
             //TODO:用Mapper获取该用户权限
             int identityCode = 0;
             //TODO:如果认证通过，生成JWT
-            return ResponseResult.ok(identityCode, null, "Authentication successful", JWTUtil.createJWT(userId, String.valueOf(identityCode)));
+            return ResponseResult.ok(null, "Authentication successful", JWTUtil.createJWT(userId, String.valueOf(identityCode)));
 
             //TODO:将完整的用户信息存入redis
         } catch (AuthenticationException e) {

@@ -37,8 +37,8 @@
     - util：效用类，包装一些可复用的代码块，如cookie的设置与检查等
 ### Controller接口
 #### /
-**效果：**给出一个返回指定数量的project类的list
+**效果：** 给出一个返回指定数量的project类的list
 **具体要求：** 1. 需要支持分页，我会给定变量page和pagesize来限制返回的数量，但当请求不提供page和pagesize时，需要返回全部的project。
                2. project类中至少应该包含project的自增id和project的名字，
                3. 用户的id利用cookies查询，现在由于登录的cookies还没写好，请在后端先写死一个id来做样例
-**用途：**该接口用于主页上的展示
+**用途：** 该接口用于主页上的展示

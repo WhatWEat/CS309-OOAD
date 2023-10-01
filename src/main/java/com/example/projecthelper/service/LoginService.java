@@ -16,6 +16,9 @@ public class LoginService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    //TODO：完成对是否login的判断，并返回一个User对象
+
     //TODO:autowired获取Mapper,用于查看权限
 
 
@@ -31,7 +34,7 @@ public class LoginService {
         }
     }
     //TODO:获取user，返回ResponseResult
-    public ResponseResult login(){
+    public ResponseResult<Object> login(){
         try {
             //TODO:获取用户的用户名和密码，Authenticate进行用户认证
             String userId = "", password = "";
@@ -52,13 +55,13 @@ public class LoginService {
             //TODO:用Mapper获取该用户权限
             int identityCode = 0;
             //TODO:如果认证通过，生成JWT
-            return ResponseResult.ok(identityCode, "Authentication successful", JWTUtil.createJWT(userId, String.valueOf(identityCode)));
+            return ResponseResult.ok(identityCode, null, "Authentication successful", JWTUtil.createJWT(userId, String.valueOf(identityCode)));
 
             //TODO:将完整的用户信息存入redis
         } catch (AuthenticationException e) {
             // 这里处理认证失败的情况，如返回一个错误响应
             //TODO:如果认证没通过，给出提示
-            return ResponseResult.unAuthorize("Authentication failed");
+            return ResponseResult.unAuthorize(null, "Authentication failed");
         }
 
 

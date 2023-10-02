@@ -48,7 +48,7 @@
               <q-input
                 filled
                 v-model="loginValue"
-                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '手机号码'"
+                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '电话号码'"
                 :rules="getLoginValueRules()"
               />
 

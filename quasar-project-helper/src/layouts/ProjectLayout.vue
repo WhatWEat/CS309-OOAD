@@ -39,7 +39,7 @@
     </q-drawer>
 
     <q-page-container>
-        <router-view />
+      <router-view />
     </q-page-container>
   </q-layout>
 </template>
@@ -54,16 +54,27 @@ const essentialLinks: EssentialLinkProps[] = [
     icon: 'record_voice_over',
     link: 'https://chat.quasar.dev'
   },
+
   {
-    title: 'Projects',
-    icon: 'extension',
-    link: '/projects/1',
-    list: true
+    title: 'Group',
+    icon: 'supervisor_account',
+    link: 'https://github.com/quasarframework'
   },
   {
     title: 'Chat',
     icon: 'chat',
     link: 'https://forum.quasar.dev'
+  },
+  {
+    title: 'Homework',
+    caption: '@quasarframework',
+    icon: 'article',
+    link: 'https://twitter.quasar.dev'
+  },
+  {
+    title: 'Grade',
+    icon: 'school',
+    link: 'https://quasar.dev'
   },
   {
     title: 'Person',

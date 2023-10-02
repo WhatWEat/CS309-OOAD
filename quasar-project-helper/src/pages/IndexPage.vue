@@ -1,9 +1,10 @@
 <template>
-  <q-page class="column items-center">
+  <q-page class="q-ma-md content-start">
     <CardComponent
       v-for="card in cardData"
       :key="card.title"
       v-bind="card"
+      class="q-my-lg"
       >
     </CardComponent>
   </q-page>

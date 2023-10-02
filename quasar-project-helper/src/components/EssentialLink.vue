@@ -32,8 +32,11 @@
         </q-item-section>
       </q-item>
       <q-item clickable href="projects" class="row justify-end">
-        <q-item-section v-for="(number, index) in 16" :key="index">
-          <q-icon name="more_horiz" class="text-cyan-10"></q-icon>
+<!--        <q-item-section v-for="(number, index) in 2" :key="index">-->
+<!--          <q-icon name="more_horiz" class="text-cyan-10"></q-icon>-->
+<!--        </q-item-section>-->
+        <q-item-section>
+          <q-item-label class="text-blue-grey-8 text-caption justify-start">Click Here to See More!</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>

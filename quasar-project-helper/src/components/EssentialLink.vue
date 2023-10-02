@@ -25,12 +25,15 @@
       <q-item v-for="(item, index) in subItems" :key="index"
               :href="item.link" clickable v-ripple>
         <q-item-section>
-          <q-item-label class="text-blue-grey-9 text-caption">{{ item.label }}</q-item-label>
+          <q-icon name="workspaces"></q-icon>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="text-blue-grey-9 text-caption justify-start">{{ item.label }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable href="projects">
-        <q-item-section >
-          <q-item-label class="text-blue-grey-9 text-body2 text-weight-medium">see more?</q-item-label>
+      <q-item clickable href="projects" class="row justify-end">
+        <q-item-section v-for="(number, index) in 16" :key="index">
+          <q-icon name="more_horiz" class="text-cyan-10"></q-icon>
         </q-item-section>
       </q-item>
     </q-list>

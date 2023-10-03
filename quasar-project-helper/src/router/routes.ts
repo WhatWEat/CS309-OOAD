@@ -28,12 +28,8 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/Register.vue')
   },
   {
-    path: '/PhoneLogin',
-    component: () => import('pages/PhoneLogin.vue')
-  },
-  {
-    path: '/EmailLogin',
-    component: () => import('pages/EmailLogin.vue')
+    path: '/ForgotPassword',
+    component: () => import('pages/ForgotPassword.vue')
   },
 ];
 

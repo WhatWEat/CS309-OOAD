@@ -1,13 +1,9 @@
 <template>
-  <pdf src="D:\\1.pdf"></pdf>
+  <div>
+    <PDFViewer></PDFViewer>
+  </div>
 </template>
 
-<script>
-import pdf from 'vue-pdf'
-
-export default {
-  components: {
-    pdf
-  }
-}
+<script setup lang="ts">
+import PDFViewer from "components/ViewComponent/PDFViewer.vue";
 </script>

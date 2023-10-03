@@ -126,6 +126,7 @@ export default defineComponent({
 
     function login() {
       // 登录逻辑
+      router.push('/')
       console.log('登录:', loginValue.value, password.value)
     }
 

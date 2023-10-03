@@ -1,17 +1,13 @@
 <template>
-  <div class="row">
-    <div class="col-8">two thirds</div>
-    <div class="col-4">one sixth</div>
-    <div class="col">fills remaining available space</div>
-    <div class="col-auto">auto size based on content and available space</div>
-    <div class="col-auto">auto size based on content and available space</div>
-    <div class="col">fills remaining available space</div>
-  </div>
+  <pdf src="D:\\1.pdf"></pdf>
 </template>
 
-<script setup lang="ts">
+<script>
+import pdf from 'vue-pdf'
+
+export default {
+  components: {
+    pdf
+  }
+}
 </script>
-
-<style scoped>
-
-</style>

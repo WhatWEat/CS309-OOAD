@@ -17,50 +17,79 @@
           </q-card-section>
 
           <q-card-section>
-            <q-form
-              class="q-gutter-md"
-            >
+            <q-form class="q-gutter-md">
+              <div style="display: flex; justify-content: space-between;">
+                <div>
+                  <q-btn
+                    label="学号登录"
+                    type="button"
+                    color="primary"
+                    @click="goToStudentIdLogin"
+                  />
+                </div>
+                <div>
+                  <q-btn
+                    label="邮箱登录"
+                    type="button"
+                    color="primary"
+                    @click="goToEmailLogin"
+                  />
+                </div>
+                <div>
+                  <q-btn
+                    label="手机号码登录"
+                    type="button"
+                    color="primary"
+                    @click="goToPhoneLogin"
+                  />
+                </div>
+              </div>
+
               <q-input
                 filled
-                v-model="studentId"
-                label="StudentId"
-                lazy-rules
+                v-model="loginValue"
+                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '电话号码'"
+                :rules="getLoginValueRules()"
               />
 
               <q-input
                 type="password"
                 filled
                 v-model="password"
-                label="Password"
-                lazy-rules
-
+                label="密码"
+                :rules="getPasswordRules()"
               />
 
-              <div>
-                <q-btn label="Login" to="/" type="button" color="primary"/>
-              </div>
-
-              <div>
-                <q-btn label="Register" to="/Register" type="button" color="primary" />
-              </div>
-
-              <q-card-section class="q-pt-none">
-                <div class="q-mt-md">
+              <div style="display: flex; justify-content: space-between;">
+                <div>
                   <q-btn
-                    label="Phone Login"
+                    label="登录"
+                    type="button"
+                    color="primary"
+                    @click="login"
+                  />
+                </div>
+                <div>
+                  <q-btn
+                    label="注册"
+                    type="button"
+                    color="primary"
+                    @click="goToRegister"
+                  />
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <div>
+                  <q-btn
+                    label="忘记密码"
                     type="button"
                     color="primary"
                     class="q-mr-sm"
-                    @click="goToPhoneLogin"
-                  />
-                  <q-btn
-                    label="Email Login"
-                    type="button"
-                    color="primary"
-                    @click="goToEmailLogin"
+                    @click="goToForgotPassword"
                   />
                 </div>
-              </q-card-section>
+              </div>
+
             </q-form>
           </q-card-section>
         </q-card>
@@ -70,34 +99,78 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue'
-import {ref} from 'vue'
+import { defineComponent } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
   setup() {
     const router = useRouter()
 
-    function goToPhoneLogin() {
-      router.push('/PhoneLogin') // 替换为您的手机号码登录页面的路由路径
+    const loginType = ref('studentId') // 默认为学号登录
+    const loginValue = ref('')
+    const password = ref('')
+
+    function goToStudentIdLogin() {
+      loginType.value = 'studentId'
     }
 
     function goToEmailLogin() {
-      router.push('/EmailLogin') // 替换为您的邮箱登录页面的路由路径
+      loginType.value = 'email'
     }
 
-    return {
-      studentId: ref('111111'),
-      password: ref('123456'),
-      goToPhoneLogin,
-      goToEmailLogin
+    function goToPhoneLogin() {
+      loginType.value = 'phone'
     }
-  },
+
+    function getLoginValueRules() {
+      const rules = []
+
+      if (loginType.value === 'studentId') {
+        rules.push((val) => val.length === 8 || '学号必须为8位')
+      } else if (loginType.value === 'email') {
+        rules.push((val) => /.+@.+\..+/.test(val) || '邮箱格式不正确')
+      } else if (loginType.value === 'phone') {
+        rules.push((val) => val.length === 11 || '手机号码必须为11位')
+      }
+
+      return rules
+    }
+
+    function getPasswordRules() {
+      return [(val) => val.length >= 6 || '密码长度不能小于6位']
+    }
+
+    function login() {
+      // 登录逻辑
+      console.log('登录:', loginValue.value, password.value)
+    }
+
+    function goToRegister() {
+      router.push('/register')
+    }
+
+    function goToForgotPassword() {
+      router.push('/forgot-password')    }
+
+    return {
+      loginType,
+      loginValue,
+      password,
+      goToStudentIdLogin,
+      goToEmailLogin,
+      goToPhoneLogin,
+      getLoginValueRules,
+      getPasswordRules,
+      login,
+      goToRegister,
+      goToForgotPassword
+    }
+  }
 })
 </script>
 
 <style>
-
 .bg-image {
   background-image: linear-gradient(135deg, #7028e4 0%, #e5b2ca 100%);
 }

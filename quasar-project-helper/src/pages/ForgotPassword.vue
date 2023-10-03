@@ -1,5 +1,5 @@
 <template>
-  <q-layout>
+  <q-layout view="lHh Lpr lFf">
     <q-page-container>
       <q-page class="flex bg-image flex-center">
         <q-card v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'30%'}">
@@ -11,7 +11,7 @@
           <q-card-section>
             <div class="text-center q-pt-lg">
               <div class="col text-h6 ellipsis">
-                忘记密码
+                ForgotPassword
               </div>
             </div>
           </q-card-section>
@@ -90,7 +90,7 @@ export default defineComponent({
     }
 
     function goToLogin() {
-      router.push('/Login-1')
+      router.push('/Login')
     }
 
     return {
@@ -104,3 +104,11 @@ export default defineComponent({
 })
 </script>
 
+<style>
+.bg-image {
+  background-image: url('https://p8.itc.cn/images01/20210707/653f5d1b05cc4a3caabd0e15e676f7be.png');
+  background-size: cover;
+  backdrop-filter: blur(8px);
+}
+
+</style>

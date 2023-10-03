@@ -1,14 +1,14 @@
 <template>
-  <q-layout>
+  <q-layout view="lHh Lpr lFf">
     <q-page-container>
       <q-page class="flex bg-image flex-center">
-        <q-card v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'30%'}">
+        <q-card v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'30%'}" >
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
               <img src="profile.svg">
             </q-avatar>
           </q-card-section>
-          <q-card-section>
+          <q-card-section >
             <div class="text-center q-pt-lg">
               <div class="col text-h6 ellipsis">
                 Log in
@@ -18,37 +18,20 @@
 
           <q-card-section>
             <q-form class="q-gutter-md">
-              <div style="display: flex; justify-content: space-between;">
-                <div>
-                  <q-btn
-                    label="学号登录"
-                    type="button"
-                    color="primary"
-                    @click="goToStudentIdLogin"
-                  />
-                </div>
-                <div>
-                  <q-btn
-                    label="邮箱登录"
-                    type="button"
-                    color="primary"
-                    @click="goToEmailLogin"
-                  />
-                </div>
-                <div>
-                  <q-btn
-                    label="手机号码登录"
-                    type="button"
-                    color="primary"
-                    @click="goToPhoneLogin"
-                  />
-                </div>
-              </div>
+              <q-tabs
+                v-model="loginType"
+                no-caps
+                class="bg-white text-black"
+              >
+                <q-tab name="studentId" label="学号登录" />
+                <q-tab name="email" label="邮箱登录" />
+                <q-tab name="phone" label="手机号码登录" />
+              </q-tabs>
 
               <q-input
                 filled
                 v-model="loginValue"
-                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '电话号码'"
+                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '手机号码'"
                 :rules="getLoginValueRules()"
               />
 
@@ -147,7 +130,7 @@ export default defineComponent({
     }
 
     function goToRegister() {
-      router.push('/register')
+      router.push('/Register')
     }
 
     function goToForgotPassword() {
@@ -172,6 +155,9 @@ export default defineComponent({
 
 <style>
 .bg-image {
-  background-image: linear-gradient(135deg, #7028e4 0%, #e5b2ca 100%);
+  background-image: url('https://p8.itc.cn/images01/20210707/653f5d1b05cc4a3caabd0e15e676f7be.png');
+  background-size: cover;
+  backdrop-filter: blur(8px);
 }
+
 </style>

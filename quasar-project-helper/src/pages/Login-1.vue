@@ -151,7 +151,7 @@ export default defineComponent({
     }
 
     function goToForgotPassword() {
-      router.push('/forgot-password')    }
+      router.push('/ForgotPassword')    }
 
     return {
       loginType,

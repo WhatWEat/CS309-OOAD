@@ -103,7 +103,20 @@
             <artifactId>spring-data-redis</artifactId>
             <version>3.1.3</version>
         </dependency>
-
+        <dependency><!--word-->
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-words</artifactId>
+            <version>18.6</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/aspose-words-18.6-jdk16.jar</systemPath>
+        </dependency>
+        <dependency><!--slides-->
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-slides</artifactId>
+            <version>15.9</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/aspose.slides-15.9.0.jar</systemPath>
+        </dependency>
 
         <!--        &lt;!&ndash;   swagger   &ndash;&gt;-->
 <!--        <dependency>-->

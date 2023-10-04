@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PDFViewer></PDFViewer>
+    <MDViewer></MDViewer>
   </div>
 </template>
 
 <script setup lang="ts">
-import PDFViewer from "components/ViewComponent/PDFViewer.vue";
+import MDViewer from "components/ViewComponent/MDViewer.vue";
 </script>

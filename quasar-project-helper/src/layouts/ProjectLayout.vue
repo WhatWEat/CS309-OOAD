@@ -58,7 +58,7 @@ const essentialLinks: EssentialLinkProps[] = [
   {
     title: 'Group',
     icon: 'supervisor_account',
-    link: 'https://github.com/quasarframework'
+    link: '/teacher/:teacherId/GroupInfo'
   },
   {
     title: 'Chat',

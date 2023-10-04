@@ -31,7 +31,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 #### 组管理页面（李伟浩）：
 - groups 展示所有的group列表，允许点击进入对应的group页面，教师允许编辑信息（划分小组，create multiple groups based on group size, deadline, number and other information.等，具体看project要求）。 
 - group 展示group成员，技术栈及leader等信息，学生在该页面只允许浏览、加入和退出，教师允许编辑信息（分配组员，设置leader等，具体看project要求）， 
-10月3日 
+10月3日 超时一天未完成
 #### 作业页面（李伟浩）：
 - ass-list 展示所有作业，但是可以有分类，一个卡片下面是个人作业，一个卡片是下面是group work，支持点击去到ass-info，教师允许发布作业，教师支持查看布置的所有作业（设计ui的时候条例清晰） 
 - ass-info 展示作业具体信息，允许在当前页面提交信息，支持在线浏览，在提交后支持修改，同时教师允许在该页面打分 （汤玉磊完成PDF版本）  
@@ -58,7 +58,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 
 ##### /users/login/{user}/{password}
 
-**效果：**用于利用账号和密码或者验证码进行登录
+**效果：** 用于利用账号和密码或者验证码进行登录
 
 **具体要求：**
 
@@ -67,7 +67,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 
 ##### /users/reg/{user}/{password}
 
-**效果：**用于利用手机（还没好）和学号进行注册
+**效果：** 用于利用手机（还没好）和学号进行注册
 
 **具体要求：**
 

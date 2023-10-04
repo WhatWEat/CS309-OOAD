@@ -37,3 +37,4 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/application.properties
+/ demandAnalysis.md

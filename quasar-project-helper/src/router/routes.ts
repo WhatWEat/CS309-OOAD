@@ -30,6 +30,19 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
+  //Group——Routers
+  {
+    path: '/teacher/:teacherId/BatchImport',
+    component: () => import('pages/GroupPage/BatchImport.vue'),
+  },
+  {
+    path: '/teacher/:teacherId/GroupInfo',
+    component: () => import('pages/GroupPage/GroupTeacherPage.vue'),
+  },
+  {
+    path: '/groupInfo/:groupId',
+    component: () => import('pages/GroupPage/GroupInfo.vue'),
+  }
 ];
 
 export default routes;

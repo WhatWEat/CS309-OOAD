@@ -64,6 +64,10 @@ const routes: RouteRecordRaw[] = [
       },
     ]
   },
+  {
+    path: '/teacherAssignment',
+    component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
+  },
 
 
   // Always leave this as last one,

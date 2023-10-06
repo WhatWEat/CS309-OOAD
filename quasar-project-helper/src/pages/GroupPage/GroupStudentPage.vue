@@ -39,24 +39,16 @@
             <q-btn-dropdown color="primary" icon="menu">
               <q-list>
                 <q-item v-close-popup clickable @click="onItemClick">
-                  <q-item-label style="font-weight: bolder">Delete  selected  group</q-item-label>
+                  <q-item-label style="font-weight: bolder">View the Group</q-item-label>
                 </q-item>
 
-                <q-item v-close-popup clickable @click="onItemClick">
-                  <q-item-label style="font-weight: bolder">Modefy selected group</q-item-label>
-                </q-item>
-
-                <q-item v-close-popup clickable @click="fileLoader = true">
-                  <q-item-label style="font-weight: bolder">Upload   Groups   Info</q-item-label>
-                </q-item>
-
-                <q-item v-close-popup clickable @click="exportTable">
-                    <q-item-label style="font-weight: bolder">Export group info to csv </q-item-label>
+                <q-item v-close-popup clickable @click="onJoinClick">
+                  <q-item-label style="font-weight: bolder">Apply to join</q-item-label>
                 </q-item>
               </q-list>
             </q-btn-dropdown>
             <!--这里是搜索框-->
-            <q-input v-model="search" class="q-ml-md" dark dense input-class="text-right" standout>
+            <q-input v-model="search" class="q-ml-md" dark dense input-class="text-right" standout style="width: 160px">
               <template v-slot:append>
                 <q-icon v-if="search === ''" name="search"></q-icon>
                 <q-icon v-else class="cursor-pointer" name="clear" @click="search = ''"></q-icon>
@@ -76,20 +68,22 @@
 
 
   <!--  这里是弹窗部分-->
-  <q-dialog v-model="fileLoader" :position="position">
-    <q-card-section class="card">
-      <q-uploader
-        accept=".xlsx"
-        auto-upload="false"
-        headers={{headers}}
-        hide-upload-button="false"
-        label="Upload Group Info"
-        max-files="1"
-        style="height: 200px"
-        url="http://localhost:4444/upload"
-        @rejected="onRejected"
-      ></q-uploader>
-    </q-card-section>
+  <q-dialog v-model="Dialog" :position="position">
+    <q-card>
+      <q-toolbar>
+        <q-avatar>
+          <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg">
+        </q-avatar>
+
+        <q-toolbar-title><span class="text-weight-bold">Attention</span> here</q-toolbar-title>
+
+        <q-btn v-close-popup dense flat icon="close" round></q-btn>
+      </q-toolbar>
+
+      <q-card-section>
+        {{dialogMessage}}
+      </q-card-section>
+    </q-card>
   </q-dialog>
 
 
@@ -145,9 +139,27 @@ export default {
 
       selected: [],
 
-      fileLoader: false,
+      Dialog: false,
 
-      position:'top',
+      position: 'top',
+
+      isJoinValid: false,
+
+      dialogMessage: ''
+    }
+  },
+  methods: {
+    onJoinClick() {
+      if (this.selected.length == 0) {
+        this.dialogMessage = "Please select a group first!"
+        this.Dialog = true;
+      } else if (this.isJoinValid == true) {
+        this.dialogMessage = "You have already joined a group!"
+        this.Dialog = true
+      } else {
+        this.dialogMessage = "You have successfully apply to join the group!"
+        this.Dialog = true
+      }
     }
   }
 

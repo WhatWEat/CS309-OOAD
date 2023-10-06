@@ -48,7 +48,7 @@
 
 export interface EssentialLinkProps {
   title: string;
-  list: boolean;
+  list?: boolean;
   subItems?: Array<{
     label: string;
     index: string;

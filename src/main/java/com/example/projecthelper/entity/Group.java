@@ -1,20 +1,19 @@
 package com.example.projecthelper.entity;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Group {
-    private final Integer group_id;
-    private Integer leader_id;
+    private final long group_id;
+    private long leader_id;
 
     private String group_name;
-    private final Integer instructor_id;
+    private final long instructor_id;
 
-    private Integer maxsize;
+    private long maxsize;
 
-    public Group(Integer group_id, Integer leader_id, String group_name, Integer instructor_id, Integer maxsize) {
+    public Group(long group_id, long leader_id, String group_name, long instructor_id, long maxsize) {
         this.group_id = group_id;
         this.leader_id = leader_id;
         this.group_name = group_name;

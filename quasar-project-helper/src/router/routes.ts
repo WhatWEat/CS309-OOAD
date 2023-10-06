@@ -22,6 +22,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {path: '', component: () => import('pages/PersonPages/PersonInfo.vue')},
       {path: 'projects', component: () => import('pages/PersonPages/PersonProjects.vue')},],
+
   },
   {
     path: '/login',
@@ -35,11 +36,8 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
+
   //Group——Routers
-  {
-    path: '/teacher/:teacherId/BatchImport',
-    component: () => import('pages/GroupPage/BatchImport.vue'),
-  },
   {
     path: '/teacher/:teacherId/GroupInfo',
     component: () => import('pages/GroupPage/GroupTeacherPage.vue'),
@@ -48,6 +46,43 @@ const routes: RouteRecordRaw[] = [
     path: '/groupInfo/:groupId',
     component: () => import('pages/GroupPage/GroupInfo.vue'),
   },
+
+  {
+    path: '/student/GroupInfo',
+    component: () => import('pages/GroupPage/GroupStudentPage.vue')
+  },
+  {
+    path: '/student/Assignment',
+    component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
+    children: [
+      {
+        path: '/personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),
+        children: [
+          {
+            path: '/mengbi1/:assignmentId',
+            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
+          }
+        ]
+      },
+
+      {
+        path: '/group', component: () => import('pages/AssignmentPage/AssignmentStudent_group.vue'),
+        children: [
+          {
+            path: '/mengbi2/:assignmentId',
+            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
+          }
+        ]
+      },
+    ]
+  },
+  {
+    path: '/teacherAssignment',
+    component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
+  },
+
+
+
   // Always leave this as last one,
   // but you can also remove it
   {

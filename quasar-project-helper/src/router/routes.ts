@@ -4,27 +4,38 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{path: '', component: () => import('pages/IndexPage.vue')},
+    children: [{path: '', component: () => import('pages/IndexPages/IndexPage.vue')},
       {path: '/test', component: () => import('pages/TestPage.vue')}],
   },
   {
     path: '/projects/:projectID',
     component: () => import('layouts/ProjectLayout.vue'),
-    children: [{path: '', component: () => import('pages/TestPage.vue')}]
+    children:
+      [{path: '', component: () => import('pages/IndexProjectPages.vue')},
+        {path: 'group-list', component: () => import('pages/GroupPage/GroupInfo.vue')},
+        {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
+      ],
+  },
+  {
+    path: '/person/:personId',
+    component: () => import('layouts/PersonLayout.vue'),
+    children: [
+      {path: '', component: () => import('pages/PersonPages/PersonInfo.vue')},
+      {path: 'projects', component: () => import('pages/PersonPages/PersonProjects.vue')},],
+
   },
   {
     path: '/login',
-    component: () => import('pages/LoginPage/UserLogin.vue')
+    component: () => import('pages/LoginPages/UserLogin.vue')
   },
   {
     path: '/register',
-    component: () => import('pages/LoginPage/UserRegister.vue')
+    component: () => import('pages/LoginPages/UserRegister.vue')
   },
   {
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
-
 
   //Group——Routers
   {
@@ -35,6 +46,7 @@ const routes: RouteRecordRaw[] = [
     path: '/groupInfo/:groupId',
     component: () => import('pages/GroupPage/GroupInfo.vue'),
   },
+
   {
     path: '/student/GroupInfo',
     component: () => import('pages/GroupPage/GroupStudentPage.vue')
@@ -68,6 +80,7 @@ const routes: RouteRecordRaw[] = [
     path: '/teacherAssignment',
     component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
   },
+
 
 
   // Always leave this as last one,

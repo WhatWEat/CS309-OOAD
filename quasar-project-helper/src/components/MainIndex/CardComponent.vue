@@ -16,8 +16,7 @@
 export interface CardInfoProps {
   title: string;
   caption: string;
-  link: string;
-  icon: string;
+  link?: string;
 }
 withDefaults(defineProps<CardInfoProps>(), {
 });
@@ -25,5 +24,10 @@ withDefaults(defineProps<CardInfoProps>(), {
 
 <style lang="sass" scoped>
 .my-card
-  width: 80vh
+  width: 100%
+  border-radius: 10px
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25)
+  transition: box-shadow 0.25s ease-in-out
+  &:hover
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5)
 </style>

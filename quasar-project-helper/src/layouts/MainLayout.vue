@@ -10,10 +10,10 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
         <q-toolbar-title>
           Project Helper
         </q-toolbar-title>
+        <q-btn flat round dense icon="person" @click="goPersonInfo"/>
       </q-toolbar>
     </q-header>
 
@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import {useRouter} from 'vue-router';
 
 const essentialLinks: EssentialLinkProps[] = [
   {
@@ -71,9 +72,13 @@ const essentialLinks: EssentialLinkProps[] = [
     link: 'https://facebook.quasar.dev'
   },
 ];
-
+const router = useRouter()
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)
+function goPersonInfo() {
+  router.push('/person/0')
+  console.log('goPersonInfo')
+}
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }

@@ -12,13 +12,16 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/ProjectLayout.vue'),
     children:
       [{path: '', component: () => import('pages/IndexProjectPages.vue')},
-        {path: '/group-list', component: () => import('pages/GroupPage/GroupInfo.vue')},
-        {path: '/group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
+        {path: 'group-list', component: () => import('pages/GroupPage/GroupInfo.vue')},
+        {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
       ],
   },
   {
     path: '/person/:personId',
-    component: () => import('pages/PersonPages/PersonInfo.vue'),
+    component: () => import('layouts/PersonLayout.vue'),
+    children: [
+      {path: '', component: () => import('pages/PersonPages/PersonInfo.vue')},
+      {path: 'projects', component: () => import('pages/PersonPages/PersonProjects.vue')},],
   },
   {
     path: '/login',

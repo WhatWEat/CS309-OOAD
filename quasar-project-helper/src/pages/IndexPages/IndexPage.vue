@@ -12,6 +12,10 @@
 
 <script setup lang="ts">
 import CardComponent, {CardInfoProps}from 'components/MainIndex/CardComponent.vue';
+
+import {useUser} from "stores/user-store";
+const users = useUser()
+users.fetchUser()
 const cardData: CardInfoProps[] = [
   {
     title: 'Announcements',

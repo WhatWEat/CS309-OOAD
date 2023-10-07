@@ -2,7 +2,7 @@
   <div class="q-pa-md row justify-center">
     <q-card style="width: 50%">
       <q-card-section>
-        <div class="text-h6">Profile-{{personIdentity}}</div>
+        <div class="text-h6">Profile-{{ personIdentity }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -29,8 +29,8 @@
                   ></q-uploader>
                 </q-card-section>
                 <q-card-actions class="q-px-md">
-                  <q-btn label="Upload" color='green' @click="uploadAvatar" />
-                  <q-btn label="Cancel" color="red" @click="isShowDialog = false" />
+                  <q-btn label="Upload" color='green' @click="uploadAvatar"/>
+                  <q-btn label="Cancel" color="red" @click="isShowDialog = false"/>
                 </q-card-actions>
               </q-card>
             </q-dialog>
@@ -62,7 +62,10 @@
                     :options="genderList"
                     :readonly="!isEditing">
             <template v-slot:prepend>
-              <q-icon name="mail"/>
+              <q-icon name="male" v-if="gender==='Male'"/>
+              <q-icon name="female" v-else-if="gender==='Female'"/>
+              <q-icon name="transgender" v-else-if="gender==='Non-binary'"/>
+              <q-icon name="help_outline" v-else/>
             </template>
           </q-select>
           <q-input filled
@@ -77,13 +80,23 @@
             <template v-slot:append>
               <q-btn-dropdown dense flat :disable="!isEditing">
                 <q-list>
-                  <q-item clickable v-close-popup v-for="(item, index) in emailDomains" :key="index" @click="selectEmailDomain(index)">
+                  <q-item clickable v-close-popup v-for="(item, index) in emailDomains" :key="index"
+                          @click="selectEmailDomain(index)">
                     <q-item-section>
-                      <q-item-label>{{item}}</q-item-label>
+                      <q-item-label>{{ item }}</q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
               </q-btn-dropdown>
+            </template>
+          </q-input>
+          <q-input filled
+                   v-model="phone"
+                   type="tel"
+                   :readonly="!isEditing"
+                   prefix="Phone： &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;">
+            <template v-slot:prepend>
+              <q-icon name="phone"/>
             </template>
           </q-input>
 
@@ -125,36 +138,42 @@ import {useQuasar} from 'quasar';
 const $q = useQuasar()
 const {username, userid} = useUserStore()
 
-const email = ref('')
-const gender= ref('Male')
+const email = ref(''), gender = ref(''), phone = ref('')
 const avatarUrl = ref('https://cdn.quasar.dev/img/avatar2.jpg'), uploadUrl = ref('')
 const previewAvatarUrl = ref('https://cdn.quasar.dev/img/avatar2.jpg')
 
 const isEditing = ref(false), isShowDialog = ref(false)
 const selectedEmailDomain = ref('gmail.com')
-const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn', '@mail.sustech.edu.cn'])
+const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn',
+  '@mail.sustech.edu.cn'])
 const personIdentity = ref('')
-const genderList = ref(['Male', 'Female', 'Non-binary'])
+const genderList = ref(['Male', 'Female', 'Non-binary', 'Unknown'])
 
 personIdentity.value = 'Student'
+
 function saveProfile() {
   isEditing.value = false
 }
+
 function cancelEdit() {
   isEditing.value = false
 }
+
 function selectEmailDomain(index) {
   selectedEmailDomain.value = emailDomains.value[index]
 }
-function clickAvatar(){
-  if(isEditing.value){
+
+function clickAvatar() {
+  if (isEditing.value) {
     isShowDialog.value = true
   }
 }
-function uploadAvatar(){
+
+function uploadAvatar() {
   isShowDialog.value = false;
 }
-function onRejectUploader(rejectedEntries){
+
+function onRejectUploader(rejectedEntries) {
   $q.notify({
     type: 'warning',
     position: 'center',

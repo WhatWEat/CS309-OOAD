@@ -2,6 +2,8 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.util.JWTUtil;
+
 import com.example.projecthelper.service.*;
 import com.example.projecthelper.util.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,7 @@ public class TeacherController {
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         noticeService.postNotice(notice);
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/modifyNotice")
@@ -52,7 +54,7 @@ public class TeacherController {
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!noticeService.modifyNoticeWithUser(notice, jwt))
             return ResponseResult.unAuthorize(null, "unable to modify notices posted by other");
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/createGroup")
@@ -61,7 +63,7 @@ public class TeacherController {
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.createGroup(group);
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/modifyGroupInfo")
@@ -70,7 +72,7 @@ public class TeacherController {
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.modifyGroupInfo(group);
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/registerTea/{password}/{name}/{gender}")
     //注册教师,返回教师的user_id

@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.LoginService;
 import com.example.projecthelper.service.UserService;
+import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,7 @@ public class StudentController {
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!userService.editPersonInfo(user, jwt))
             return ResponseResult.unAuthorize(null, "unable to edit others information");
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/editPersonInfo")
@@ -42,6 +43,6 @@ public class StudentController {
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.joinGroup(group, jwt);
-        return ResponseResult.ok(null, "Success", jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 }

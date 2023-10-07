@@ -25,6 +25,19 @@ public class JWTUtil {
             .compact();
     }
 
+    public static String updateJWT(String token) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + 1000 * ttlMills);
+        return Jwts.builder()
+            .setHeaderParam("type", "JWT")
+            .setSubject(getUserIdByToken(token))   // 设置userId为JWT的subject
+            .claim("identityCode", getIdentityCodeByToken(token))   // 添加一个名为identityCode的claim
+            .setIssuedAt(now)
+            .setExpiration(expiration)
+            .signWith(SignatureAlgorithm.HS512, secret)
+            .compact();
+    }
+
     // 解析token以获取userId
     public static String getUserIdByToken(String token) throws JwtException {
         return Jwts.parser()

@@ -52,7 +52,7 @@ import {onMounted, ref} from 'vue';
 import EssentialLink, {EssentialLinkProps} from 'components/EssentialLink.vue';
 import {useRouter} from 'vue-router';
 import {useUserStore} from 'src/composables/useUserStore';
-import {watchEffect} from "vue-demi";
+import {watchEffect} from 'vue-demi';
 
 const {username, userid} = useUserStore()
 

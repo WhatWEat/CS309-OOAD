@@ -35,7 +35,6 @@ import {watchEffect} from 'vue-demi';
 const router = useRouter()
 const personId = ref(router.currentRoute.value.params.personId)
 const {username, userid} = useUserStore()
-console.log('userid', userid.value)
 
 const flag = ref(false)
 onMounted(() => {

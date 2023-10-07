@@ -128,6 +128,7 @@ export default defineComponent({
       // 登录逻辑
       router.push('/')
       console.log('登录:', loginValue.value, password.value)
+
     }
 
     function goToRegister() {

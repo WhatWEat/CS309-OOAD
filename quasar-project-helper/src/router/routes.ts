@@ -22,7 +22,6 @@ const routes: RouteRecordRaw[] = [
     children: [
       {path: '', component: () => import('pages/PersonPages/PersonInfo.vue')},
       {path: 'projects', component: () => import('pages/PersonPages/PersonProjects.vue')},],
-
   },
   {
     path: '/login',

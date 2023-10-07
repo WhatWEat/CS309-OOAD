@@ -36,7 +36,7 @@
             </q-dialog>
           </div>
           <q-input
-            v-model="userid"
+            v-model="person_id"
             prefix="ID：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             readonly
             filled
@@ -103,7 +103,7 @@
         </q-form>
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section v-if="person_id===userid">
         <div>
           <q-btn
             label="Edit"
@@ -134,10 +134,14 @@
 import {useUserStore} from 'src/composables/useUserStore';
 import {ref} from 'vue';
 import {useQuasar} from 'quasar';
+import {useCurrentPageUser} from 'stores/user-store';
+import {storeToRefs} from "pinia";
+const usePerson = useCurrentPageUser()
 
 const $q = useQuasar()
 const {username, userid} = useUserStore()
 
+const {person_id} = storeToRefs(usePerson)
 const email = ref(''), gender = ref(''), phone = ref('')
 const avatarUrl = ref('https://cdn.quasar.dev/img/avatar2.jpg'), uploadUrl = ref('')
 const previewAvatarUrl = ref('https://cdn.quasar.dev/img/avatar2.jpg')

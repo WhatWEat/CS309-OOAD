@@ -27,13 +27,17 @@
 </template>
 
 <script setup>
-import {useRouter} from 'vue-router';
 import {useUserStore} from 'src/composables/useUserStore';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
+import {useRouter} from 'vue-router';
+import {useCurrentPageUser} from 'stores/user-store';
+const usePerson = useCurrentPageUser()
 
 const router = useRouter()
+
 const personId = ref(router.currentRoute.value.params.personId)
+usePerson.$state.person_id = Number(personId.value)
 const {username, userid} = useUserStore()
 
 const flag = ref(false)

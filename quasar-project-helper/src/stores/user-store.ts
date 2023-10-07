@@ -20,3 +20,8 @@ export const useUser = defineStore('user', {
     }
   },
 });
+export const useCurrentPageUser = defineStore('currentPageUser',{
+  state: () => ({
+    person_id: -1
+  }),
+})

@@ -91,7 +91,7 @@
 
 <script>
 export default {
-  name: "GroupTeacherPage",
+  name: 'GroupTeacherPage',
   data() {
     return {
       columns: [
@@ -116,20 +116,20 @@ export default {
         {
           groupId: 1,
           groupSize: 4,
-          groupMember: "John, Mary, Peter, Paul, Liweihao",
-          instructor: "Dr. Smith",
-          projectName: "Project 1",
-          deadLine: "2021-10-01",
-          moreInfo: "https://www.google.com\n" + "测试多文字时显示效果\n"
+          groupMember: 'John, Mary, Peter, Paul, Liweihao',
+          instructor: 'Dr. Smith',
+          projectName: 'Project 1',
+          deadLine: '2021-10-01',
+          moreInfo: 'https://www.google.com\n' + "测试多文字时显示效果\n"
         },
         {
           groupId: 2,
           groupSize: 4,
-          groupMember: "John, Mary, Peter, Paul",
-          instructor: "Dr. Smith",
-          projectName: "Project 2",
-          deadLine: "2021-10-01",
-          moreInfo: "https://www.google.com"
+          groupMember: 'John, Mary, Peter, Paul',
+          instructor: 'Dr. Smith',
+          projectName: 'Project 2',
+          deadLine: '2021-10-01',
+          moreInfo: 'https://www.google.com'
         },
       ],
 

@@ -47,7 +47,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
-
+import { useRouter } from 'vue-router';
+const router = useRouter()
+const projectID = ref(router.currentRoute.value.params.projectID)
+console.log(projectID.value)
 const essentialLinks: EssentialLinkProps[] = [
   {
     title: 'Announcements',
@@ -58,7 +61,7 @@ const essentialLinks: EssentialLinkProps[] = [
   {
     title: 'Group',
     icon: 'supervisor_account',
-    link: '/teacher/:teacherId/GroupInfo'
+    link: `/projects/${projectID.value}/group-list`
   },
   {
     title: 'Chat',
@@ -69,7 +72,7 @@ const essentialLinks: EssentialLinkProps[] = [
     title: 'Homework',
     caption: '@quasarframework',
     icon: 'article',
-    link: 'https://twitter.quasar.dev'
+    link: `/projects/${projectID.value}/assignment-list`
   },
   {
     title: 'Grade',

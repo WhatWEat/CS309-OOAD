@@ -30,8 +30,13 @@ public class SecurityController {
 
     @GetMapping("/login")
     public String login_test(){
+        return loginService.checkLoginAndIdentity();
+    }
+
+    @GetMapping("/signup")
+    public String signup_test(){
         log.info("test, log successful");
-        return "hello";
+        return "signup";
     }
 
     @PostMapping("/login")

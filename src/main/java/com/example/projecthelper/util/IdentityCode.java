@@ -16,5 +16,12 @@ public enum IdentityCode {
         this.value = value;
     }
 
-
+    public static IdentityCode convertStringToInt(String s){
+        return switch (s) {
+            case "adm" -> IdentityCode.ADMINISTRATOR;
+            case "tea" -> IdentityCode.TEACHER;
+            case "ta" -> IdentityCode.TEACHER_ASSISTANT;
+            default -> IdentityCode.STUDENT;
+        };
+    }
 }

@@ -29,8 +29,8 @@ public class SecurityController {
     }
 
     @GetMapping("/login")
-    public String login_test(){
-        return loginService.checkLoginAndIdentity();
+    public ResponseResult<Object> login_test(){
+        return ResponseResult.ok(null, "原神，启动", loginService.checkLoginAndIdentity());
     }
 
     @GetMapping("/signup")

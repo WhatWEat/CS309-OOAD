@@ -12,9 +12,9 @@ import lombok.Setter;
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseResult<T>{
-    private int statusCode;
-    private T body;
-    private String msg;
+    private int statusCode; //状态码
+    private T body; //响应体
+    private String msg; //响应信息
     private String JWT_token;
 
     public ResponseResult(int statusCode, T bd, String msg, String JWT_token) {

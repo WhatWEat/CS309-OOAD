@@ -45,43 +45,56 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import {useUserStore} from 'src/composables/useUserStore';
+import { useRouter } from 'vue-router';
+import {useCurrentPageUser} from 'stores/user-store';
+import {watchEffect} from 'vue-demi';
 
-const essentialLinks: EssentialLinkProps[] = [
-  {
-    title: 'Announcements',
-    icon: 'record_voice_over',
-    link: 'https://chat.quasar.dev'
-  },
+const router = useRouter()
+const projectID = ref(router.currentRoute.value.params.projectID)
+const usePerson = useCurrentPageUser()
+const {userid} = useUserStore()
+const essentialLinks = ref<EssentialLinkProps[]>([])
+onMounted(() => {
+  watchEffect(() => {
+      essentialLinks.value = [
+        {
+          title: 'Announcements',
+          icon: 'record_voice_over',
+          link: 'https://chat.quasar.dev'
+        },
+        {
+          title: 'Group',
+          icon: 'supervisor_account',
+          link: `/projects/${projectID.value}/group-list`
+        },
+        {
+          title: 'Chat',
+          icon: 'chat',
+          link: 'https://forum.quasar.dev'
+        },
+        {
+          title: 'Homework',
+          caption: '@quasarframework',
+          icon: 'article',
+          link: `/projects/${projectID.value}/assignment-list`
+        },
+        {
+          title: 'Grade',
+          icon: 'school',
+          link: 'https://quasar.dev'
+        },
+        {
+          title: 'Person',
+          icon: 'account_box',
+          link: `/person/${userid}`
+        },
+      ];
+  })
+})
 
-  {
-    title: 'Group',
-    icon: 'supervisor_account',
-    link: '/teacher/:teacherId/GroupInfo'
-  },
-  {
-    title: 'Chat',
-    icon: 'chat',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Homework',
-    caption: '@quasarframework',
-    icon: 'article',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Grade',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Person',
-    icon: 'account_box',
-    link: 'https://facebook.quasar.dev'
-  },
-];
 
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)

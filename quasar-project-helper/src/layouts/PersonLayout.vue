@@ -19,8 +19,10 @@
       </q-tabs>
     </q-header>
 
-    <q-page-container>
-      <router-view/>
+    <q-page-container
+      transition-show="slide-right"
+      transition-hide="slide-left">
+      <router-view />
     </q-page-container>
 
   </q-layout>

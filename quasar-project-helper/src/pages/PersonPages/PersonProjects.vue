@@ -1,13 +1,16 @@
 <template>
-  <div>
-    test1
+  <div class="row justify-center">
+    <ProjectCard
+      class="q-ma-md"
+      style="width: 70%;"
+      v-for="i in 5" :key="i"></ProjectCard>
   </div>
 </template>
 
-<script>
-export default {
-  name: "PersonProjects"
-}
+<script setup>
+
+import ProjectCard from 'components/PersonIndex/ProjectCard.vue';
+
 </script>
 
 <style scoped>

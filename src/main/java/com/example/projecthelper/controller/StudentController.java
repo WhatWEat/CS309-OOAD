@@ -46,6 +46,10 @@ public class StudentController {
     }
 
 
+    
+  
+  
+    // 数据库功能测试
     @PostMapping("/registerStu/{password}/{name}/{gender}")
     //注册学生,返回学生的user_id
     public long registerTea(@PathVariable String password,
@@ -53,6 +57,7 @@ public class StudentController {
                             @PathVariable String gender){
         return userService.registerUser(0,password,name,gender);
     }
+
 
     @PostMapping("/stuJoinGroup/{group_id}/{stu_id}/{project_id}")
     //学生加入小组,如在该project仍未加入小组则加入成功，反之则失败

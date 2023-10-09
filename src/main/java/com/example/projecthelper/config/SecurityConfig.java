@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -52,12 +53,14 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder(){
 
         //TODO:提供密码加密器
+        //自动加盐的单向密码加密器
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/login", "/signup");
+        return (web) -> {web.ignoring().requestMatchers("/login", "/signup");web.ignoring().requestMatchers(
+            HttpMethod.POST, "/signup");};
     }
 
 }

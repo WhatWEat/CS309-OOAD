@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 @Mapper
 public interface UsersMapper extends BaseMapper<User> {
     @Select("select * from users where user_id = #{user_id};")
-    User findUserById(long user_id);
+    User findUserById(int user_id);
 
     @Insert("INSERT INTO users (identity, password, name, gender) " +
             "VALUES (#{identity}, #{password}, #{name},#{gender}) ")

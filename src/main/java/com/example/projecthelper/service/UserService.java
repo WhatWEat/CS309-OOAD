@@ -21,7 +21,7 @@ public class UserService {
         usersMapper.updateStuInformation(technology_stack,programming_skills,intended_teammates,user_id);
     }
 
-    public long registerUser(String identity, String password, String name, String gender){
+    public long registerUser(int identity, String password, String name, String gender){
         User user = new User(identity, password, name, gender);
         usersMapper.registerUser(user);
         return user.getUser_id();

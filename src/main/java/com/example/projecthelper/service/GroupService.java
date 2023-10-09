@@ -34,9 +34,9 @@ public class GroupService {
     public long[] createPluralGroup(long instructor_id, long max_size,
                                     long project_id, Timestamp team_time, Timestamp deadline, int number) {
         long[] GroupIds = new long[number];
-        for (long groupIds : GroupIds) {
+        for (int i = 0 ; i <GroupIds.length;i++) {
             String group_name = "new Group";
-            groupIds = groupMapper.createGroup(instructor_id, max_size, group_name, project_id, team_time, deadline);
+            GroupIds[i] = groupMapper.createGroup(instructor_id, max_size, group_name, project_id, team_time, deadline);
         }
         return GroupIds;
     }

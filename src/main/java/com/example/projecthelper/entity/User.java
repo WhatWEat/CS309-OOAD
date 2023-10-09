@@ -1,13 +1,16 @@
 package com.example.projecthelper.entity;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Date;
 
 @Getter
 @Setter
 public class User {
     private Integer user_id;
 
-    private final String identity;
+    private final int identity;
 
     private String password;
 
@@ -19,7 +22,7 @@ public class User {
 
     private final String gender;
 
-    private String birthday;
+    private Date birthday;
 
     private String technology_stack;
 
@@ -27,7 +30,7 @@ public class User {
 
     private String intended_teammates;
 
-    public User( String identity, String password, String name, String gender) {
+    public User( int identity, String password, String name, String gender) {
         this.identity = identity;
         this.password = password;
         this.name = name;

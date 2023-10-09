@@ -43,7 +43,7 @@ public interface GroupMapper {
     Group findGroupOfStuInProject(long stu_id, long project_id);
 
     @Select("""
-            SELECT g.group_id, leader_id, group_name, instructor_id, max_size, project_id, team_time, deadline
+            SELECT g.group_id, group_name, instructor_id, max_size, project_id, team_time, deadline
             FROM groups g
             LEFT JOIN stuInGroup s ON g.group_id = s.group_id
             WHERE g.project_id = #{project_id}

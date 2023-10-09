@@ -50,7 +50,7 @@ public class StudentController {
     public long registerTea(@PathVariable String password,
                             @PathVariable String name,
                             @PathVariable String gender){
-        return userService.registerUser("stu",password,name,gender);
+        return userService.registerUser(0,password,name,gender);
     }
 
     @PostMapping("/stuJoinGroup/{group_id}/{stu_id}/{project_id}")

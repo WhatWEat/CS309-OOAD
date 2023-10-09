@@ -77,7 +77,7 @@ public class TeacherController {
     public long registerTea(@PathVariable String password,
                             @PathVariable String name,
                             @PathVariable String gender) {
-        return userService.registerUser("tea", password, name, gender);
+        return userService.registerUser(1, password, name, gender);
     }
 
     @PostMapping("/createProject/{name}")

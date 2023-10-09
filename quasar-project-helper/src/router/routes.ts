@@ -11,9 +11,11 @@ const routes: RouteRecordRaw[] = [
     path: '/projects/:projectID',
     component: () => import('layouts/ProjectLayout.vue'),
     children:
-      [{path: '', component: () => import('pages/IndexProjectPages.vue')},
-        {path: 'group-list', component: () => import('pages/GroupPage/GroupInfo.vue')},
+      [{path: '', component: () => import('pages/IndexPages/IndexProjectPage.vue')},
+        {path: 'group-list', component: () => import('pages/GroupPage/GroupList.vue')},
         {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
+        {path: 'assignment-list', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue')},
+        {path: 'assignment-list/:assignmentId', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')},
       ],
   },
   {
@@ -35,21 +37,6 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
-
-  //Group——Routers
-  {
-    path: '/teacher/:teacherId/GroupInfo',
-    component: () => import('pages/GroupPage/GroupTeacherPage.vue'),
-  },
-  {
-    path: '/groupInfo/:groupId',
-    component: () => import('pages/GroupPage/GroupInfo.vue'),
-  },
-
-  {
-    path: '/student/GroupInfo',
-    component: () => import('pages/GroupPage/GroupStudentPage.vue')
-  },
   {
     path: '/student/Assignment',
     component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
@@ -65,7 +52,7 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
-        path: '/group', component: () => import('pages/AssignmentPage/AssignmentStudent_group.vue'),
+        path: '/group', component: () => import('pages/AssignmentPage/AssignmentList.vue'),
         children: [
           {
             path: '/mengbi2/:assignmentId',

@@ -20,5 +20,12 @@ public class UserService {
     }
 
 
+    
+    // 数据库功能测试
+    public long registerUser(int identity, String password, String name, String gender){
+        User user = new User(identity, password, name, gender);
+        usersMapper.registerUser(user);
+        return user.getUser_id();
+    }
 
 }

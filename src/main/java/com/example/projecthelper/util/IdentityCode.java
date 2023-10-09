@@ -1,6 +1,7 @@
 package com.example.projecthelper.util;
 
 import lombok.Getter;
+import org.apache.tomcat.util.bcel.Const;
 
 @Getter
 public enum IdentityCode {
@@ -8,7 +9,7 @@ public enum IdentityCode {
     TEACHER(1),
     TEACHER_ASSISTANT(2),
     STUDENT(3),
-    GROUP_LEADER(4);
+    UNDEFINED(4);
 
     private final int value;
 
@@ -16,12 +17,23 @@ public enum IdentityCode {
         this.value = value;
     }
 
-    public static IdentityCode convertStringToInt(String s){
+    public static IdentityCode getICByName(String s){
         return switch (s) {
-            case "adm" -> IdentityCode.ADMINISTRATOR;
-            case "tea" -> IdentityCode.TEACHER;
-            case "ta" -> IdentityCode.TEACHER_ASSISTANT;
-            default -> IdentityCode.STUDENT;
+            case "ADMINISTRATOR" -> ADMINISTRATOR;
+            case "TEACHER" -> TEACHER;
+            case "TEACHER_ASSISTANT" -> TEACHER_ASSISTANT;
+            case "STUDENT" -> STUDENT;
+            default -> UNDEFINED;
+        };
+    }
+
+    public static IdentityCode getICByCode(int code){
+        return switch (code) {
+            case 0 -> ADMINISTRATOR;
+            case 1 -> TEACHER;
+            case 2 -> TEACHER_ASSISTANT;
+            case 3 -> STUDENT;
+            default -> UNDEFINED;
         };
     }
 }

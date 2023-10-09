@@ -5,6 +5,7 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LoginService {
+public class AuthService {
     @Autowired
     private UsersMapper usersMapper;
 
@@ -68,6 +69,24 @@ public class LoginService {
     public long registerUser(User user){
         usersMapper.registerUser(user);
         return user.getUser_id();
+    }
+
+    public String login(KeyValueWrapper userPass){
+        try{
+            UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(userPass.getKey(), userPass.getValue());
+            authenticationManager.authenticate(authenticationToken);
+
+            //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
+            //TODO: 用userMapper获取含有userID与Identity的字段放入token中
+            String token = null;
+
+            return token;
+        }
+        catch (AuthenticationException e){
+            return null;
+        }
+
     }
 
 

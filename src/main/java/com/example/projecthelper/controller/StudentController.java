@@ -2,8 +2,8 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.GroupService;
-import com.example.projecthelper.service.LoginService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
@@ -15,20 +15,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/stu")
 public class StudentController {
-    private final LoginService loginService;
+    private final AuthService authService;
     private final UserService userService;
     private final GroupService groupService;
     @Autowired
-    public StudentController(LoginService loginService, UserService userService,
+    public StudentController(AuthService authService, UserService userService,
                              GroupService groupService) {
-        this.loginService = loginService;
+        this.authService = authService;
         this.userService = userService;
         this.groupService = groupService;
     }
 
     @PutMapping("/editPersonInfo")
     public ResponseResult<Object> editPersonInfo(User user){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!userService.editPersonInfo(user, jwt))
@@ -38,7 +38,7 @@ public class StudentController {
 
     @PostMapping("/editPersonInfo")
     public ResponseResult<Object> joinGroup(Group group){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.joinGroup(group, jwt);
@@ -46,10 +46,12 @@ public class StudentController {
     }
 
 
-    
-  
-  
-    // 数据库功能测试
+
+
+
+    /** 数据库功能测试
+     *
+     */
     @PostMapping("/registerStu/{password}/{name}/{gender}")
     //注册学生,返回学生的user_id
     public long registerTea(@PathVariable String password,

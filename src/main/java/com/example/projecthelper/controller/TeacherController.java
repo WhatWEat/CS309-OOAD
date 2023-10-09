@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 @RestController
 @RequestMapping("/tea")
 public class TeacherController {
-    private final LoginService loginService;
+    private final AuthService authService;
     private final NoticeService noticeService;
     private final GroupService groupService;
 
@@ -26,9 +26,9 @@ public class TeacherController {
     private ProjectService projectService;
 
     @Autowired
-    public TeacherController(LoginService loginService, NoticeService noticeService,
+    public TeacherController(AuthService authService, NoticeService noticeService,
                              GroupService groupService) {
-        this.loginService = loginService;
+        this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
     }
@@ -40,7 +40,7 @@ public class TeacherController {
 
     @PostMapping("/postNotice")
     public ResponseResult<Object> postNotice(@RequestBody Notice notice){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         noticeService.postNotice(notice);
@@ -49,7 +49,7 @@ public class TeacherController {
 
     @PutMapping("/modifyNotice")
     public ResponseResult<Object> modifyNotice(@RequestBody Notice notice){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!noticeService.modifyNoticeWithUser(notice, jwt))
@@ -59,7 +59,7 @@ public class TeacherController {
 
     @PostMapping("/createGroup")
     public ResponseResult<Object> createGroup(Group group){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.createGroup(group);
@@ -68,17 +68,19 @@ public class TeacherController {
 
     @PutMapping("/modifyGroupInfo")
     public ResponseResult<Object> modifyGroupInfo(Group group){
-        String jwt = loginService.checkLoginAndIdentity();
+        String jwt = authService.checkLoginAndIdentity();
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.modifyGroupInfo(group);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-  
-  
-  
-    // 数据库功能测试
+
+
+
+    /** 数据库功能测试
+     *
+     */
     @PostMapping("/registerTea/{password}/{name}/{gender}")
     //注册教师,返回教师的user_id
     public long registerTea(@PathVariable String password,

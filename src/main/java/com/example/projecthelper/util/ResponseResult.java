@@ -32,5 +32,9 @@ public class ResponseResult<T>{
         return new ResponseResult<>(StatusCode.UNAUTHORIZED.getValue(), bd, msg, "");
     }
 
+    public static <T> ResponseResult<T> accessDenied(T bd, String msg){
+        return new ResponseResult<>(StatusCode.ACCESS_DENIED.getValue(), bd, msg, "");
+    }
+
 
 }

@@ -13,17 +13,12 @@ public class UserService {
     //TODO:更新个人信息
     public boolean editPersonInfo(User user, String jwt){
         if(user.getUser_id().toString().equals(JWTUtil.getUserIdByToken(jwt))){
+            usersMapper.updateStuInformation(user.getTechnology_stack(), user.getProgramming_skills(),user.getIntended_teammates(), user.getUser_id());
             return true;
         }
         return false;
     }
-    public void updateStuInformation(String technology_stack, String programming_skills,String intended_teammates, long user_id){
-        usersMapper.updateStuInformation(technology_stack,programming_skills,intended_teammates,user_id);
-    }
 
-    public long registerUser(String identity, String password, String name, String gender){
-        User user = new User(identity, password, name, gender);
-        usersMapper.registerUser(user);
-        return user.getUser_id();
-    }
+
+
 }

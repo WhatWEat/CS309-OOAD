@@ -11,7 +11,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        //TODO: 查询对应的用户信息
+        //TODO: 用userId查询对应的用户信息
         //TODO：如果没有查询到，则抛出一个异常
         //TODO：将数据封装成UserDetails返回
         return null;

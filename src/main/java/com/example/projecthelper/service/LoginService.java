@@ -1,5 +1,6 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +21,9 @@ public class LoginService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     //TODO: 判断是否登录以及identity,是的话返回JWT，否则返回null
     public String checkLoginAndIdentity(){
@@ -60,6 +65,10 @@ public class LoginService {
         return IdentityCode.ADMINISTRATOR;
     }
 
+    public long registerUser(User user){
+        usersMapper.registerUser(user);
+        return user.getUser_id();
+    }
 
 
 

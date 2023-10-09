@@ -14,6 +14,8 @@ public interface UsersMapper extends BaseMapper<User> {
     @Options(useGeneratedKeys = true, keyProperty = "user_id")
     void registerUser(User user);
 
+    void createUser(User user);
+
     @Update("UPDATE users SET technology_stack = #{technology_stack},programming_skills = #{programming_skills}, " +
             "intended_teammates = #{intended_teammates} WHERE user_id = #{user_id};")
     void updateStuInformation(String technology_stack, String programming_skills,String intended_teammates, long user_id);

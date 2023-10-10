@@ -27,7 +27,7 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
     public final static String AUTH_HEADER = "Token";
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService = new CustomUserDetailService();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws
@@ -49,6 +49,10 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
         final String userId =  JWTUtil.getUserIdByToken(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        System.err.println(
+            "here"
+        );
+        userDetails.getAuthorities().forEach(e -> System.err.println(e.getAuthority()));
 
         // 注意，这里使用的是3个参数的构造方法，此构造方法将认证状态设置为true
         UsernamePasswordAuthenticationToken authentication =

@@ -1,5 +1,7 @@
 package com.example.projecthelper.util;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
 import org.apache.tomcat.util.bcel.Const;
 
@@ -35,5 +37,9 @@ public enum IdentityCode {
             case 3 -> STUDENT;
             default -> UNDEFINED;
         };
+    }
+
+    public static List<Integer> codeList(){
+        return Arrays.asList(0, 1, 2, 3, 4);
     }
 }

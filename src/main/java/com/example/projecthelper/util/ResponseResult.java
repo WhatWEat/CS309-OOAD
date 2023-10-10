@@ -15,13 +15,13 @@ public class ResponseResult<T>{
     private int statusCode; //状态码
     private T body; //响应体
     private String msg; //响应信息
-    private String JWT_token;
+    private String jwt_token;
 
     public ResponseResult(int statusCode, T bd, String msg, String JWT_token) {
         this.statusCode = statusCode;
         this.body = bd;
         this.msg = msg;
-        this.JWT_token = JWT_token;
+        this.jwt_token = JWT_token;
     }
 
     public static <T> ResponseResult<T> ok(T bd, String msg, String JWT_token){
@@ -35,6 +35,11 @@ public class ResponseResult<T>{
     public static <T> ResponseResult<T> accessDenied(T bd, String msg){
         return new ResponseResult<>(StatusCode.ACCESS_DENIED.getValue(), bd, msg, null);
     }
+
+    public static <T> ResponseResult<T> invalidContent(T bd, String msg){
+        return new ResponseResult<>(StatusCode.INVALID_CONTENT.getValue(), bd, msg, null);
+    }
+
 
 
 }

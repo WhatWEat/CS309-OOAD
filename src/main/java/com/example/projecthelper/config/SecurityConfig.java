@@ -91,10 +91,10 @@ public class SecurityConfig {
         httpSecurity
             .authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                    .requestMatchers("/adm/**").hasRole(IdentityCode.ADMINISTRATOR.name())
-                    .requestMatchers("/tea/**").hasRole(IdentityCode.TEACHER.name())
-                    .requestMatchers("/ta/**").hasRole(IdentityCode.TEACHER_ASSISTANT.name())
-                    .requestMatchers("/stu/**").hasRole(IdentityCode.STUDENT.name())
+                    .requestMatchers("/adm/**").hasAuthority(IdentityCode.ADMINISTRATOR.name())
+                    .requestMatchers("/tea/**").hasAuthority(IdentityCode.TEACHER.name())
+                    .requestMatchers("/ta/**").hasAuthority(IdentityCode.TEACHER_ASSISTANT.name())
+                    .requestMatchers("/stu/**").hasAuthority(IdentityCode.STUDENT.name())
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")

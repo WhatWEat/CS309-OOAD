@@ -4,11 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class User {
-    private Integer user_id;
+    private Integer userId;
 
     private final int identity;
 

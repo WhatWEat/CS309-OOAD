@@ -72,7 +72,7 @@ public class SecurityController {
     @PostMapping("/login")
     public ResponseResult<Object> login(@RequestBody KeyValueWrapper userPass){
         String jwt = authService.login(userPass);
-        //NOTE:
+        //NOTE: 校验失败后，spring-security自动跑出并捕获AuthenticationException异常
         return ResponseResult.ok(null, "success", jwt);
     }
 

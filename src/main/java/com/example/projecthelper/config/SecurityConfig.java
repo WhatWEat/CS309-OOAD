@@ -1,8 +1,9 @@
 package com.example.projecthelper.config;
 
+import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.security.JwtAuthenticationProvider;
-import com.example.projecthelper.security.JwtAuthenticationTokenFilter;
 import com.example.projecthelper.security.UnauthorizedHandler;
+import com.example.projecthelper.util.IdentityCode;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,12 +51,12 @@ public class SecurityConfig {
 
     //我们自定义的拦截器，只要JWT验证成功，直接通过，不再要求用户密码
     @Bean
-    public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter() {
-        return new JwtAuthenticationTokenFilter();
+    public CustomJwtAuthenticationTokenFilter jwtAuthenticationTokenFilter() {
+        return new CustomJwtAuthenticationTokenFilter();
     }
 
     @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(){
+    public JwtAuthenticationProvider jwtAuthProvider(){
         return new JwtAuthenticationProvider();
     }
 
@@ -68,14 +69,15 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> {web.ignoring().requestMatchers("/login", "/signup");web.ignoring().requestMatchers(
-            HttpMethod.POST, "/signup");};
+        return (web) -> {
+            web.ignoring().requestMatchers("/login", "/signup", "/logout");
+        };
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         //使用自定义provider
-        httpSecurity.authenticationProvider(jwtAuthenticationProvider());
+        httpSecurity.authenticationProvider(jwtAuthProvider());
         //添加JWT filter
         httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -84,6 +86,18 @@ public class SecurityConfig {
                 exception.authenticationEntryPoint(unauthorizedHandler)) //处理认证异常（账号密码错误）
             .exceptionHandling(exceptionHandling ->
                 exceptionHandling.accessDeniedHandler(accessDeniedHandler) //处理权限异常
+            );
+
+        httpSecurity
+            .authorizeHttpRequests((authorizeHttpRequests) ->
+                authorizeHttpRequests
+                    .requestMatchers("/adm/**").hasRole(IdentityCode.ADMINISTRATOR.name())
+                    .requestMatchers("/tea/**").hasRole(IdentityCode.TEACHER.name())
+                    .requestMatchers("/ta/**").hasRole(IdentityCode.TEACHER_ASSISTANT.name())
+                    .requestMatchers("/stu/**").hasRole(IdentityCode.STUDENT.name())
+            )
+            .formLogin(formLogin -> formLogin
+                .loginPage("/login")
             );
 
 

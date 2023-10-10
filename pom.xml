@@ -22,12 +22,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- hutool -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.8.22</version>
-        </dependency>
+<!--        &lt;!&ndash; hutool &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>cn.hutool</groupId>-->
+<!--            <artifactId>hutool-all</artifactId>-->
+<!--            <version>5.8.22</version>-->
+<!--        </dependency>-->
 
         <!-- lombok:自动产生getter，setter等 -->
         <dependency>

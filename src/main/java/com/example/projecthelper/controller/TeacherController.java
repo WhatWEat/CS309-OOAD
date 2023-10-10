@@ -2,10 +2,12 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 
 import com.example.projecthelper.service.*;
 import com.example.projecthelper.util.ResponseResult;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,8 +41,8 @@ public class TeacherController {
     }
 
     @PostMapping("/postNotice")
-    public ResponseResult<Object> postNotice(@RequestBody Notice notice){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> postNotice(HttpServletRequest request, @RequestBody Notice notice){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         noticeService.postNotice(notice);
@@ -48,8 +50,8 @@ public class TeacherController {
     }
 
     @PutMapping("/modifyNotice")
-    public ResponseResult<Object> modifyNotice(@RequestBody Notice notice){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!noticeService.modifyNoticeWithUser(notice, jwt))
@@ -58,8 +60,8 @@ public class TeacherController {
     }
 
     @PostMapping("/createGroup")
-    public ResponseResult<Object> createGroup(Group group){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group group){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.createGroup(group);
@@ -67,8 +69,8 @@ public class TeacherController {
     }
 
     @PutMapping("/modifyGroupInfo")
-    public ResponseResult<Object> modifyGroupInfo(Group group){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.modifyGroupInfo(group);

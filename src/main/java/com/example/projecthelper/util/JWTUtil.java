@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class JWTUtil {
 
-    private static final int ttlMills = 60 * 60;
+    private static final int ttlMills = 15 * 60;
     private static final String secret = "CS309-OOAD-ProjectHelper";
     static Map<String, Object> headerClaims;
     static {

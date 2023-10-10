@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class KeyValueWrapper {
-    String Key;
-    String Value;
+    String key;
+    String value;
 }

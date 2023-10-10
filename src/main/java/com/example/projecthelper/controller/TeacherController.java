@@ -83,13 +83,13 @@ public class TeacherController {
     /** 数据库功能测试
      *
      */
-    @PostMapping("/registerTea/{password}/{name}/{gender}")
-    //注册教师,返回教师的user_id
-    public long registerTea(@PathVariable String password,
-                            @PathVariable String name,
-                            @PathVariable String gender) {
-        return userService.registerUser(1, password, name, gender);
-    }
+//    @PostMapping("/registerTea/{password}/{name}/{gender}")
+//    //注册教师,返回教师的user_id
+//    public long registerTea(@PathVariable String password,
+//                            @PathVariable String name,
+//                            @PathVariable String gender) {
+//        return userService.registerUser(1, password, name, gender);
+//    }
 
 
     @PostMapping("/createProject/{name}")

@@ -17,14 +17,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final Integer user_id;
+    private final Integer userId;
     private final String password;
     private final int identity;
 
     // 根据您的需求添加其他字段
 
     public CustomUserDetails(User user) {
-        this.user_id = user.getUser_id();
+        this.userId = user.getUserId();
         this.password = user.getPassword();
         this.identity = user.getIdentity();
     }
@@ -46,7 +46,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return String.valueOf(user_id); // 如果您想使用身份作为用户名
+        return String.valueOf(userId); // 如果您想使用身份作为用户名
     }
 
     @Override

@@ -12,7 +12,7 @@ public enum StatusCode {
     ACCESS_DENIED(402),
     FORBIDDEN(403),
     NOT_FOUND(404),
-    INSECURE_CONTENT(405),
+    INVALID_CONTENT(405),
     INTERNAL_SERVER_ERROR(500);
     // ... 可根据需要继续添加其他状态码
 

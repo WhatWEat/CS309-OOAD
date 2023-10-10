@@ -64,8 +64,6 @@ public class SecurityController {
     @PostMapping("/signup")
     public ResponseResult<Long> signup(@RequestBody User user){
         String jwt = authService.registerUser(user);
-        if(jwt == null)
-            return ResponseResult.insecureContent(null, "密码强度太弱或身份错误");
         return ResponseResult.ok(null, "", jwt);
     }
 

@@ -12,7 +12,7 @@ create table if not exists users
     user_id            BIGSERIAL  primary key,
     --暂时仅有0（学生）、1（教师）、2（管理员）三种角色
     identity           integer  not null,
-    password           varchar(20)  not null,
+    password           varchar(500)  not null,
     phone              varchar(15)  ,
     mail               varchar(30)  ,
     name               varchar(100) not null,

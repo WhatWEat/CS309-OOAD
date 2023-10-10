@@ -53,20 +53,23 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-
+    @GetMapping("/hello123")
+    public String hello(){
+        return "hello";
+    }
 
 
 
     /** 数据库功能测试
      *
      */
-    @PostMapping("/registerStu/{password}/{name}/{gender}")
-    //注册学生,返回学生的user_id
-    public long registerTea(@PathVariable String password,
-                            @PathVariable String name,
-                            @PathVariable String gender){
-        return userService.registerUser(0,password,name,gender);
-    }
+//    @PostMapping("/registerStu/{password}/{name}/{gender}")
+//    //注册学生,返回学生的user_id
+//    public long registerTea(@PathVariable String password,
+//                            @PathVariable String name,
+//                            @PathVariable String gender){
+//        return userService.registerUser(0,password,name,gender);
+//    }
 
 
     @PostMapping("/stuJoinGroup/{group_id}/{stu_id}/{project_id}")

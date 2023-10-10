@@ -1,5 +1,6 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FormatUtil;
@@ -10,6 +11,7 @@ import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,12 +72,21 @@ public class AuthService {
      * @return JWT
      */
     public String registerUser(User user){
+
         boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
         boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
         if(!strongPass || !validIdentity)
-            return null;
-        usersMapper.registerUser(user);
-        return JWTUtil.createJWT(String.valueOf(user.getUser_id()), String.valueOf(user.getIdentity()));
+            throw new InvalidFormException("密码太弱或身份不合法");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        try {
+            usersMapper.registerUser(user);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            System.err.println("hello");
+            throw new InvalidFormException("信息不完整");
+        }
+        System.out.println(user);
+        return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
     }
 
     /**
@@ -91,9 +102,10 @@ public class AuthService {
 
         //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
         //TODO: 用userMapper获取含有userID与Identity的字段放入token中
+        System.err.println(userPass.getKey()+" "+userPass.getValue());
         User user = usersMapper.findUserById(Integer.parseInt(userPass.getKey()));
-
-        return JWTUtil.createJWT(String.valueOf(user.getUser_id()), String.valueOf(user.getIdentity()));
+        System.err.println(user);
+        return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
 
 
     }

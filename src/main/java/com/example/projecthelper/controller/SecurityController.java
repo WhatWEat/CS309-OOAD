@@ -2,11 +2,16 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.service.AuthService;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,9 +35,17 @@ public class SecurityController {
         return "hello231313";
     }
 
+    @PostMapping("/t1")
+    // 会自动跳转到/login
+    public String post(){
+        return "hello231313";
+    }
+
+
     @GetMapping("/login")
-    public ResponseResult<Object> login_test(){
-        return ResponseResult.ok(null, "原神，启动", authService.checkLoginAndIdentity());
+    public ResponseResult<Object> login_test(HttpServletRequest request){
+        System.out.println(request);
+        return ResponseResult.ok(null, "原神，启动", JWTUtil.createJWT("1", "启动"));
     }
 
     @GetMapping("/signup")
@@ -44,20 +57,31 @@ public class SecurityController {
     @PostMapping("/signup")
     public ResponseResult<Long> signup_test2(@RequestBody User user){
         log.info("test, log successful");
-        return ResponseResult.ok(authService.registerUser(user), "", "");
+        return ResponseResult.ok(null, "", authService.registerUser(user));
     }
 
     @PostMapping("/login")
     //TODO:@RequestBody 为user类型
-    public ResponseResult<Object> login(@RequestBody User user){
-        return ResponseResult.ok("hello", "hi", "");
+    public ResponseResult<Object> login(@RequestBody KeyValueWrapper userPass){
+        String jwt = authService.login(userPass);
+        return ResponseResult.ok(null, "success", jwt);
     }
 
-    @GetMapping("/id")
-    public ResponseResult<String> getId(){
-        String jwt = authService.checkLoginAndIdentity();
+    //登出：清理token
+    @DeleteMapping("/logout")
+    public ResponseResult<Object> logout(){
+        return ResponseResult.ok(null, "登出成功", authService.logout());
+    }
 
-        return ResponseResult.ok(JWTUtil.getUserIdByToken(jwt), "success", JWTUtil.updateJWT(jwt));
+
+
+
+    @GetMapping("/id")
+    public ResponseResult<String> getId(HttpServletRequest request){
+        String jwt = null;
+
+        return ResponseResult.ok(null, "success", null);
+
     }
 
 

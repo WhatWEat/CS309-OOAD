@@ -17,7 +17,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
         IOException, ServletException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
-        response.getWriter().write(JsonUtil.serialize(ResponseResult.accessDenied(null, "你没有进行当前操作的权限")));
+        response.getWriter().write(JsonUtil.serialize(ResponseResult.accessDenied(null, "权限不够")));
         response.getWriter().flush();
     }
 }

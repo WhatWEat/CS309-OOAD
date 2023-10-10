@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum StatusCode {
 
     OK(200),
+    LOGOUT(201),
     BAD_REQUEST(400),
     UNAUTHORIZED(401),
     ACCESS_DENIED(402),

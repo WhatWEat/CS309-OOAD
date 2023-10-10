@@ -5,8 +5,10 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.UserService;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +28,15 @@ public class StudentController {
         this.groupService = groupService;
     }
 
+
+    @GetMapping("/test")
+    public ResponseResult<Object> test(){
+        return ResponseResult.ok(null, "Success", null);
+    }
+
     @PutMapping("/editPersonInfo")
-    public ResponseResult<Object> editPersonInfo(User user){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> editPersonInfo(HttpServletRequest request, User user){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         if(!userService.editPersonInfo(user, jwt))
@@ -37,8 +45,8 @@ public class StudentController {
     }
 
     @PostMapping("/editPersonInfo")
-    public ResponseResult<Object> joinGroup(Group group){
-        String jwt = authService.checkLoginAndIdentity();
+    public ResponseResult<Object> joinGroup(HttpServletRequest request, Group group){
+        String jwt = null;
         if(jwt == null)
             return ResponseResult.unAuthorize(null, "authentication failed");
         groupService.joinGroup(group, jwt);

@@ -29,11 +29,11 @@ public class ResponseResult<T>{
     }
 
     public static <T> ResponseResult<T> unAuthorize(T bd, String msg){
-        return new ResponseResult<>(StatusCode.UNAUTHORIZED.getValue(), bd, msg, "");
+        return new ResponseResult<>(StatusCode.UNAUTHORIZED.getValue(), bd, msg, null);
     }
 
     public static <T> ResponseResult<T> accessDenied(T bd, String msg){
-        return new ResponseResult<>(StatusCode.ACCESS_DENIED.getValue(), bd, msg, "");
+        return new ResponseResult<>(StatusCode.ACCESS_DENIED.getValue(), bd, msg, null);
     }
 
 

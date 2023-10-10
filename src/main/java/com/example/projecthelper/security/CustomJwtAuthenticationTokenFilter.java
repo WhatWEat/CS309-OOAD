@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Objects;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Service
-public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
-    private final static String AUTH_HEADER = "Token";
-    private final static String AUTH_HEADER_TYPE = "Bearer";
+@Primary
+public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
+    public final static String AUTH_HEADER = "Token";
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -32,7 +34,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         ServletException, IOException {
         // get token from header:  Authorization: Bearer <token>
         String token = request.getHeader(AUTH_HEADER);
-        if (Objects.isNull(token) || !token.startsWith(AUTH_HEADER_TYPE)){
+        if (Objects.isNull(token)){
             filterChain.doFilter(request,response);
             return;
         }

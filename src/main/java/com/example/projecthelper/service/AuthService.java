@@ -2,10 +2,13 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -67,6 +70,10 @@ public class AuthService {
      * @return JWT
      */
     public String registerUser(User user){
+        boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
+        boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
+        if(!strongPass || !validIdentity)
+            return null;
         usersMapper.registerUser(user);
         return JWTUtil.createJWT(String.valueOf(user.getUser_id()), String.valueOf(user.getIdentity()));
     }

@@ -2,11 +2,16 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.service.AuthService;
+import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.HTTPUtil;
+import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,16 +59,20 @@ public class SecurityController {
         return "signup";
     }
 
+
+    //TODO:
     @PostMapping("/signup")
-    public ResponseResult<Long> signup_test2(@RequestBody User user){
-        log.info("test, log successful");
-        return ResponseResult.ok(null, "", authService.registerUser(user));
+    public ResponseResult<Long> signup(@RequestBody User user){
+        String jwt = authService.registerUser(user);
+        if(jwt == null)
+            return ResponseResult.insecureContent(null, "密码强度太弱或身份错误");
+        return ResponseResult.ok(null, "", jwt);
     }
 
     @PostMapping("/login")
-    //TODO:@RequestBody 为user类型
     public ResponseResult<Object> login(@RequestBody KeyValueWrapper userPass){
         String jwt = authService.login(userPass);
+        //NOTE:
         return ResponseResult.ok(null, "success", jwt);
     }
 

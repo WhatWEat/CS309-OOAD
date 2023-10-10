@@ -36,5 +36,9 @@ public class ResponseResult<T>{
         return new ResponseResult<>(StatusCode.ACCESS_DENIED.getValue(), bd, msg, null);
     }
 
+    public static <T> ResponseResult<T> insecureContent(T bd, String msg){
+        return new ResponseResult<>(StatusCode.INSECURE_CONTENT.getValue(), bd, msg, null);
+    }
+
 
 }

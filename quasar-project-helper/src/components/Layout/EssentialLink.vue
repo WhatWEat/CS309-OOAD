@@ -21,17 +21,17 @@
     :label="title"
     :icon="icon"
   >
-    <q-list bordered separator dense>
+    <q-list class="q-pl-lg">
       <q-item v-for="(item, index) in subItems" :key="index"
-              :href="item.link" clickable v-ripple>
-        <q-item-section>
-          <q-icon name="workspaces"></q-icon>
+              :to="item.link" active-class="q-item-no-link-highlighting">
+        <q-item-section avatar>
+          <q-icon :name="item.icon"></q-icon>
         </q-item-section>
         <q-item-section>
-          <q-item-label class="text-blue-grey-9 text-caption justify-start">{{ item.label }}</q-item-label>
+          <q-item-label>{{ item.label }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable :href='`/person/${userid}/projects`'  class="row justify-end">
+      <q-item :to='`/person/${userid}/projects`'  active-class="q-item-no-link-highlighting">
         <q-item-section>
           <q-item-label class="text-blue-grey-8 text-caption justify-start">Click Here to See More!</q-item-label>
         </q-item-section>
@@ -49,7 +49,8 @@ export interface EssentialLinkProps {
   subItems?: Array<{
     label: string;
     index: string;
-    link: string
+    link: string;
+    icon: string;
   }>;
   caption?: string;
   link?: string;
@@ -64,11 +65,13 @@ withDefaults(defineProps<EssentialLinkProps>(), {
   subItems: () => [{
     label: 'test-CS309',
     index: '1',
-    link: '/projects/1'
+    link: '/projects/1',
+    icon: 'list'
   }, {
     label: 'test-CS307',
     index: '2',
-    link: '/projects/2'
+    link: '/projects/2',
+    icon: 'list'
   }]
 });
 </script>

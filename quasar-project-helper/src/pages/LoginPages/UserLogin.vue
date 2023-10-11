@@ -85,6 +85,7 @@
 import { defineComponent } from 'vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import {api} from 'boot/axios';
 
 export default defineComponent({
   setup() {
@@ -127,8 +128,12 @@ export default defineComponent({
     function login() {
       // 登录逻辑
       router.push('/')
+      api.post('/login', {
+        loginType: loginType.value,
+        loginValue: loginValue.value,
+        password: password.value
+      })
       console.log('登录:', loginValue.value, password.value)
-
     }
 
     function goToRegister() {

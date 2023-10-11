@@ -14,9 +14,7 @@
           <span> Welcome to Project Helper</span>&nbsp;
           <q-icon name="waving_hand"></q-icon>
         </q-toolbar-title>
-        <span class="text-blue-grey-2 text-h6">{{ username }}</span>
-        <q-btn flat round dense icon="person" @click="() => router.push(`/person/${userid}`)"
-        />
+        <PersonBar></PersonBar>
       </q-toolbar>
     </q-header>
 
@@ -49,13 +47,13 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import EssentialLink, {EssentialLinkProps} from 'components/EssentialLink.vue';
+import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink.vue';
 import {useRouter} from 'vue-router';
 import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
+import PersonBar from "components/Layout/PersonBar.vue";
 
 const {username, userid} = useUserStore()
-
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {
   watchEffect(() => {
@@ -95,3 +93,35 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+<style>
+.fa-beat {
+  animation: fa-beat 5s ease infinite;
+}
+
+@keyframes fa-beat {
+  0% {
+    transform: scale(1);
+  }
+  5% {
+    transform: scale(1.25);
+  }
+  20% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25);
+  }
+  50% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.25);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+</style>

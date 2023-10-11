@@ -53,7 +53,7 @@ public class TeacherController {
         System.err.println("this");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         if(!noticeService.modifyNoticeWithUser(notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt))))
-            return ResponseResult.unAuthorize(null, "无权修改别人发布的公告");
+            return ResponseResult.accessDenied(null, "无权修改别人发布的公告");
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

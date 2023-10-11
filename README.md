@@ -109,7 +109,47 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 }
 ```
 前端要自行将header中的Token删掉
-
+4. /tea/**
+必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
+5. /tea/postNotice POST
+请求体：
+```json
+{
+    "title": "new title",
+    "content": "new content"
+}
+```
+响应体：
+```
+"statusCode": 200成功,401“认证失败”（用户名密码错误），
+```
+```json
+{
+	"statusCode": 200,
+	"msg": "success",
+	"jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+}
+```
+6. /tea/modifyNotice PUT
+   请求体：
+```json
+{
+   "noticeId":1,
+   "title":"new title 1",
+   "content": "new content 1"
+}
+```
+响应体：
+```
+"statusCode": 200成功,401“认证失败”（用户名密码错误）,405"无权修改别人发布的公告"
+```
+```json
+{
+	"statusCode": 200,
+	"msg": "success",
+	"jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+}
+```
 
 
 

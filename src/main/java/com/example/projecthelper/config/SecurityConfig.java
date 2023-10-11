@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -77,9 +78,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         //使用自定义provider
-        httpSecurity.authenticationProvider(jwtAuthProvider());
+        httpSecurity
+            .authenticationProvider(jwtAuthProvider());
         //添加JWT filter
-        httpSecurity.addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity
+            .addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity
             .exceptionHandling((exception)->
@@ -99,6 +102,9 @@ public class SecurityConfig {
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")
             );
+
+        httpSecurity
+            .csrf(AbstractHttpConfigurer::disable);
 
 
         return httpSecurity.build();

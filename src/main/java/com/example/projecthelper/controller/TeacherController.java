@@ -7,7 +7,8 @@ import com.example.projecthelper.util.JWTUtil;
 
 import com.example.projecthelper.service.*;
 import com.example.projecthelper.util.ResponseResult;
-import javax.servlet.http.HttpServletRequest;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,29 +36,28 @@ public class TeacherController {
         this.groupService = groupService;
     }
 
-    @GetMapping("/test")
-    public String get(){
+    @PostMapping("/test")
+    public String get(@RequestBody KeyValueWrapper notice, HttpServletRequest request){
         return "hello231313";
     }
 
     @PostMapping("/postNotice")
-    public ResponseResult<Object> postNotice(HttpServletRequest request, @RequestBody Notice notice){
-        String jwt = null;
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        noticeService.postNotice(notice);
+    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        noticeService.postNotice(notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/modifyNotice")
     public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
-        String jwt = null;
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        if(!noticeService.modifyNoticeWithUser(notice, jwt))
-            return ResponseResult.unAuthorize(null, "unable to modify notices posted by other");
+        System.err.println("this");
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        if(!noticeService.modifyNoticeWithUser(notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt))))
+            return ResponseResult.accessDenied(null, "无权修改别人发布的公告");
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+
+
 
     @PostMapping("/createGroup")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group group){

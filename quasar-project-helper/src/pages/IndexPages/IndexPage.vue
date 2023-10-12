@@ -1,15 +1,20 @@
 <template>
   <q-page class="q-ma-md content-start">
-    <CardComponent
-      v-for="card in cardData"
-      :key="card.title"
-      v-bind="card"
-      @click="() => {
+    <CardSocial icon_position="right"></CardSocial>
+    <CardCharts></CardCharts>
+    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+      <CardComponent
+        v-for="card in cardData"
+        :key="card.title"
+        v-bind="card"
+        @click="() => {
         router.push(card.link as string)
       }"
-      class="q-my-lg"
-    >
-    </CardComponent>
+        class="q-ma-xs no-shadow"
+      >
+      </CardComponent>
+    </div>
+
   </q-page>
 </template>
 
@@ -19,6 +24,8 @@ import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
+import CardSocial from 'components/MainIndex/CardSocial.vue';
+import CardCharts from "components/MainIndex/CardCharts.vue";
 
 const router = useRouter()
 

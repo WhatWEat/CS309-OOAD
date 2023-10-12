@@ -25,10 +25,10 @@
       @mouseover="miniState = false"
       @mouseout="miniState = true"
 
-      :width="200"
+      :width="300"
       :breakpoint="500"
       bordered
-      class="bg-grey-3"
+      class="text-h6 text-weight-bolder"
     >
       <q-list>
         <EssentialLink

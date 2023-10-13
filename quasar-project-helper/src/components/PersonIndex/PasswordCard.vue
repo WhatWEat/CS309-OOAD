@@ -1,5 +1,5 @@
 <template>
-  <div class="col-lg-6 col-md-8 col-xs-12 col-sm-12">
+  <div class="col-lg-7 col-md-8 col-xs-12 col-sm-12">
     <q-form>
       <q-card :class="props.bg_color">
         <q-card-section class="text-h6 q-pa-sm">

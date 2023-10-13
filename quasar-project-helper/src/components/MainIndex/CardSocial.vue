@@ -39,7 +39,7 @@ const items = ref(computed(() => {
       {
         title: 'Profile',
         icon: 'person',
-        value: '200',
+        value: '1',
         color1: '#5064b5',
         color2: '#3e51b5'
       },
@@ -69,7 +69,7 @@ const items = ref(computed(() => {
       {
         title: 'Profile',
         icon: 'person',
-        value: '200',
+        value: '1',
         color1: '#5064b5',
         color2: '#3e51b5'
       },

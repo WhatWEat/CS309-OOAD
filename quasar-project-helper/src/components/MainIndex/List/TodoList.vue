@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import {ref,defineAsyncComponent} from 'vue'
+import {defineAsyncComponent} from 'vue'
 
 const TodoComponent = defineAsyncComponent(() =>  import('components/MainIndex/List/TodoComponent.vue'))
 

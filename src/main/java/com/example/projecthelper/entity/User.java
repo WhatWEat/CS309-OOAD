@@ -1,4 +1,5 @@
 package com.example.projecthelper.entity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +11,10 @@ import lombok.ToString;
 @Setter
 @ToString
 public class User {
+    @TableField("user_id")
     private Integer userId;
 
-    private final int identity;
+    private int identity;
 
     private String password;
 
@@ -20,23 +22,26 @@ public class User {
 
     private String mail;
 
-    private final String name;
+    private String name;
 
-    private final String gender;
+    private String gender;
 
     private Date birthday;
-
-    private String technology_stack;
-
-    private String programming_skills;
-
-    private String intended_teammates;
+    @TableField("technology_stack")
+    private String technologyStack;
+    @TableField("programming_skills")
+    private String programmingSkills;
+    @TableField("intended_teammates")
+    private String intendedTeammates;
 
     public User( int identity, String password, String name, String gender) {
         this.identity = identity;
         this.password = password;
         this.name = name;
         this.gender = gender;
+    }
+
+    public User() {
     }
 }
 

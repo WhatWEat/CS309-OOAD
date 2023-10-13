@@ -1,31 +1,37 @@
 package com.example.projecthelper.entity;
 
 import java.sql.Timestamp;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Comment {
-    private final long comment_id;
-    private final long comment_group;
+    @TableField("comment_id")
+    private  long commentId;
+    @TableField("comment_group")
+    private  long commentGroup;
+    @TableField("commented_group")
+    private  long commentedGroup;
 
-    private final long commented_group;
+    private  long grade;
+    @TableField("comment_time")
+    private  Timestamp commentTime;
 
-    private final long grade;
+    private  String content;
 
-    private final Timestamp comment_time;
-
-    private final String content;
-
-    public Comment(long comment_id, long comment_group, long commented_group,
-                   long grade, Timestamp comment_time, String content) {
-        this.comment_id = comment_id;
-        this.comment_group = comment_group;
-        this.commented_group = commented_group;
+    public Comment(long commentId, long commentGroup, long commentedGroup,
+                   long grade, Timestamp commentTime, String content) {
+        this.commentId = commentId;
+        this.commentGroup = commentGroup;
+        this.commentedGroup = commentedGroup;
         this.grade = grade;
-        this.comment_time = comment_time;
+        this.commentTime = commentTime;
         this.content = content;
     }
 
+    public Comment() {
+    }
 }

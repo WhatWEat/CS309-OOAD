@@ -106,26 +106,24 @@ public class TeacherController {
         noticeService.createNotice(title, content, creator_id);
     }
 
-    @PostMapping("/createPluralGroup/{instructor_id}/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
+    @PostMapping("/createPluralGroup/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
     //创建复数个新的小组,其中number代表创建小组的数量，team_time表示组队截止时间，instructor_id表示指导老师的id
-    public long[] createPluralGroup(@PathVariable long instructor_id,
-                                    @PathVariable long max_size,
+    public long[] createPluralGroup(@PathVariable long max_size,
                                     @PathVariable long project_id,
                                     @PathVariable Timestamp team_time,
                                     @PathVariable Timestamp deadline,
                                     @PathVariable int number) {
-        return groupService.createPluralGroup(instructor_id, max_size, project_id, team_time, deadline, number);
+        return groupService.createPluralGroup( max_size, project_id, team_time, deadline, number);
     }
 
-    @PostMapping("/createOneGroup/{instructor_id}/{max_size}/{project_id}/{team_time}/{deadline}/{group_name}")
+    @PostMapping("/createOneGroup/{max_size}/{project_id}/{team_time}/{deadline}/{group_name}")
     //创建单个小组，team_time表示组队截止时间，instructor_id表示指导老师的id
-    public long createOneGroup(@PathVariable long instructor_id,
-                               @PathVariable long max_size,
+    public long createOneGroup(@PathVariable long max_size,
                                @PathVariable long project_id,
                                @PathVariable Timestamp team_time,
                                @PathVariable Timestamp deadline,
                                @PathVariable String group_name) {
-        return groupService.createOneGroup(instructor_id, max_size, project_id, team_time, deadline, group_name);
+        return groupService.createOneGroup( max_size, project_id, team_time, deadline, group_name);
     }
 
     @PostMapping("/updateGroupSize/{max_size}/{group_id}")
@@ -135,12 +133,12 @@ public class TeacherController {
         groupService.updateGroupSize(max_size, group_id);
     }
 
-    @PostMapping("/updateGroupInstructor/{instructor_id}/{group_id}")
-    //修改某一小组的指导老师
-    public void updateGroupInstructor(@PathVariable long instructor_id,
-                                      @PathVariable long group_id) {
-        groupService.updateGroupInstructor(instructor_id, group_id);
-    }
+//    @PostMapping("/updateGroupInstructor/{instructor_id}/{group_id}")
+//    //修改某一小组的指导老师
+//    public void updateGroupInstructor(@PathVariable long instructor_id,
+//                                      @PathVariable long group_id) {
+//        groupService.updateGroupInstructor(instructor_id, group_id);
+//    }
 
 
 

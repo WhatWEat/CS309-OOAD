@@ -9,6 +9,7 @@ import java.util.List;
 
 @Mapper
 public interface GroupMapper {
+    //TODO:修改部分传参过多的方法
 
     @Insert("insert into groups ( max_size,group_name, project_id, team_time, deadline)" +
             "VALUES (#{max_size},#{group_name},#{project_id},#{team_time},#{deadline});")

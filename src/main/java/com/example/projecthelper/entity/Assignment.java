@@ -1,24 +1,28 @@
 package com.example.projecthelper.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Assignment {
-    private final long assignment_id;
+    @TableField("assignment_id")
+    private long assignmentId;
     private String title;
     private String description;
+    private String type;
+    @TableField("creator_id")
+    private long creatorId;
 
-    private final String type;
-    private final long creator_id;
-
-    public Assignment(long assignment_id, String title, String description, String type, long creator_id) {
-        this.assignment_id = assignment_id;
+    public Assignment(long assignmentId, String title, String description, String type, long creatorId) {
+        this.assignmentId = assignmentId;
         this.title = title;
         this.description = description;
         this.type = type;
-        this.creator_id = creator_id;
+        this.creatorId = creatorId;
     }
 
+    public Assignment() {
+    }
 }

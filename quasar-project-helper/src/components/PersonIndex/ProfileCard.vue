@@ -1,5 +1,5 @@
 <template>
-  <div class="col-lg-6 col-md-8 col-xs-12 col-sm-12">
+  <div class="col-lg-7 col-md-8 col-xs-12 col-sm-12">
     <q-card :class="props.bg_color">
       <q-card-section>
         <div class="text-h6">Profile-{{ personIdentity }}</div>
@@ -202,7 +202,6 @@ import {ref, defineProps} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
 import {storeToRefs} from 'pinia';
-import {watchEffect} from "vue-demi";
 
 const props = defineProps({
   bg_color: {

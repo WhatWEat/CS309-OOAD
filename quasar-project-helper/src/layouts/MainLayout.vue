@@ -53,9 +53,9 @@ import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink
 import {useRouter} from 'vue-router';
 import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
-import PersonBar from "components/Layout/PersonBar.vue";
+import PersonBar from 'components/Layout/PersonBar.vue';
 
-const {username, userid} = useUserStore()
+const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {
   watchEffect(() => {

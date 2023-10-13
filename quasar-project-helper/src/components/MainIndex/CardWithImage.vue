@@ -2,7 +2,7 @@
   <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="height: 300px">
     <q-card class="my-card no-shadow" bordered>
       <q-img
-        src="https://cdn.quasar.dev/img/parallax1.jpg"
+        src="https://cdn.quasar.dev/img/parallax2.jpg"
         basic
         height="350px"
       >
@@ -11,7 +11,7 @@
             28 <sup>o</sup>
           </div>
           <div class="text-h5">
-            India
+            USA
           </div>
         </div>
       </q-img>

@@ -11,17 +11,15 @@
 </template>
 
 <script setup lang="ts">
-import CardComponent, {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
+import {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
 import {useUserStore} from 'src/composables/useUserStore';
-import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
 import CardSocial from 'components/MainIndex/CardSocial.vue';
-import CardCharts from "components/MainIndex/CardInformation.vue";
-import TodoList from "components/MainIndex/List/TodoList.vue";
-import CardWithImage from "components/MainIndex/CardWithImage.vue";
+import CardCharts from 'components/MainIndex/CardInformation.vue';
+import TodoList from 'components/MainIndex/List/TodoList.vue';
+import CardWithImage from 'components/MainIndex/CardWithImage.vue';
 
-const router = useRouter()
 
 const userStore = useUserStore()
 const cardData = ref<CardInfoProps[]>([]);

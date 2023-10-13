@@ -40,7 +40,7 @@ const $q = useQuasar()
 function handleClickPerson() {
   router.push(`/person/${userid.value}`)
 }
-const avatarSrc = ref("https://cdn.quasar.dev/img/boy-avatar.png")
+const avatarSrc = ref('https://cdn.quasar.dev/img/boy-avatar.png')
 </script>
 
 <style scoped>

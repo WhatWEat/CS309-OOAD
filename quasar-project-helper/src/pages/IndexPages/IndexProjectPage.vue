@@ -20,7 +20,7 @@ import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
-import CardSocial from "components/MainIndex/CardSocial.vue";
+import CardSocial from 'components/MainIndex/CardSocial.vue';
 
 const router = useRouter()
 

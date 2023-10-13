@@ -25,15 +25,15 @@
       <q-item v-for="(item, index) in subItems" :key="index"
               :to="item.link" active-class="q-item-no-link-highlighting">
         <q-item-section avatar>
-          <q-icon :name="item.icon"></q-icon>
+          <q-icon name="pages"></q-icon>
         </q-item-section>
-        <q-item-section>
+        <q-item-section class="text-h6 text-weight-bolder">
           <q-item-label>{{ item.label }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item :to='`/person/${userid}/projects`'  active-class="q-item-no-link-highlighting">
         <q-item-section>
-          <q-item-label class="text-blue-grey-8 text-caption justify-start">Click Here to See More!</q-item-label>
+          <q-item-label class="text-h6 ">Click Here to See More!</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>

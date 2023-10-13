@@ -1,7 +1,7 @@
 <template>
   <span>
     <q-list bordered class="bg-white no-shadow rounded-borders text-black">
-      <q-scroll-area style="height: 240px">
+      <q-scroll-area style="height: 230px">
         <q-item v-for="todo in todos" :key="todo.id">
         <q-item-section avatar>
           <q-checkbox

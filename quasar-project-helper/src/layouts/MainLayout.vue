@@ -11,8 +11,10 @@
           @click="toggleLeftDrawer"
         />
         <q-toolbar-title>
-          <span> Welcome to Project Helper</span>&nbsp;
-          <q-icon name="waving_hand"></q-icon>
+          <span class="gt-xs"> Welcome to Project Helper</span>&nbsp;
+          <span class="lt-sm"> Project Helper</span>&nbsp;
+
+          <q-icon class="gt-sm" name="waving_hand"></q-icon>
         </q-toolbar-title>
         <PersonBar></PersonBar>
       </q-toolbar>

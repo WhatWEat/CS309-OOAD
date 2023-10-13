@@ -1,6 +1,7 @@
 <template>
   <div class="q-gutter-sm row items-center no-wrap">
-    <span class="text-h6">Hello, {{username}}!</span>
+    <span class="text-h6 gt-sm">Hello, {{username}}!</span>
+    <span class="text-h6 lt-md">{{username}}!</span>
     <q-btn round dense flat color="white" :icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
            @click="$q.fullscreen.toggle()"
            v-if="$q.screen.gt.sm">

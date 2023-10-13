@@ -91,7 +91,7 @@ onMounted(() => {
       {
         title: 'Person',
         icon: 'account_box',
-        link: `/person/${userid}`
+        link: `/person/${userid.value}`
       },
     ];
   })

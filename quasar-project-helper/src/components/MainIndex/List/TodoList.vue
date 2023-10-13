@@ -24,7 +24,5 @@
 import {ref,defineAsyncComponent} from 'vue'
 
 const TodoComponent = defineAsyncComponent(() =>  import('components/MainIndex/List/TodoComponent.vue'))
-const layout = ref('dense')
-const side = ref('right')
 
 </script>

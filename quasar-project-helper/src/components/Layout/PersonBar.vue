@@ -1,6 +1,6 @@
 <template>
   <div class="q-gutter-sm row items-center no-wrap">
-    <span class="text-h6">Hello, {{username}}!</span>
+    <span class="text-h6 gt-sm">Hello, {{username}}!</span>
     <q-btn round dense flat color="white" :icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
            @click="$q.fullscreen.toggle()"
            v-if="$q.screen.gt.sm">
@@ -22,7 +22,7 @@
     </q-btn>
     <q-btn round flat @click="handleClickPerson">
       <q-avatar size="26px">
-        <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+        <img :src="avatarSrc">
       </q-avatar>
     </q-btn>
   </div>
@@ -33,12 +33,14 @@ import Messages from 'components/Layout/CardMessages.vue';
 import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {useQuasar} from 'quasar';
+import {ref} from 'vue';
 const router = useRouter()
 const {username, userid} = useUserStore()
 const $q = useQuasar()
 function handleClickPerson() {
   router.push(`/person/${userid.value}`)
 }
+const avatarSrc = ref("https://cdn.quasar.dev/img/boy-avatar.png")
 </script>
 
 <style scoped>

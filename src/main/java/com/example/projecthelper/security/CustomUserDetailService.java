@@ -3,6 +3,7 @@ package com.example.projecthelper.security;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.LogUtil;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,12 @@ public class CustomUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         int userId = Integer.parseInt(username);
-        User user = usersMapper.findUserById(userId);
+        User user = null;
+        try {
+            user = usersMapper.findUserById(userId);
+        } catch (PSQLException e) {
+            throw new RuntimeException(e);
+        }
 
         if (user == null) {
             LogUtil.log("User not found with userId: " + userId, LogUtil.WARN);

@@ -11,12 +11,12 @@
           @click="toggleLeftDrawer"
         />
         <q-toolbar-title>
-          <span> Welcome to Project Helper</span>&nbsp;
-          <q-icon name="waving_hand"></q-icon>
+          <span class="gt-xs"> Welcome to Project Helper</span>&nbsp;
+          <span class="lt-sm"> Project Helper</span>&nbsp;
+
+          <q-icon class="gt-sm" name="waving_hand"></q-icon>
         </q-toolbar-title>
-        <span class="text-blue-grey-2 text-h6">{{ username }}</span>
-        <q-btn flat round dense icon="person" @click="() => router.push(`/person/${userid}`)"
-        />
+        <PersonBar></PersonBar>
       </q-toolbar>
     </q-header>
 
@@ -27,10 +27,10 @@
       @mouseover="miniState = false"
       @mouseout="miniState = true"
 
-      :width="200"
+      :width="300"
       :breakpoint="500"
       bordered
-      class="bg-grey-3"
+      class="text-h6 text-weight-bolder"
     >
       <q-list>
         <EssentialLink
@@ -49,13 +49,13 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import EssentialLink, {EssentialLinkProps} from 'components/EssentialLink.vue';
+import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink.vue';
 import {useRouter} from 'vue-router';
 import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
+import PersonBar from 'components/Layout/PersonBar.vue';
 
-const {username, userid} = useUserStore()
-
+const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {
   watchEffect(() => {
@@ -95,3 +95,35 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
+<style>
+.fa-beat {
+  animation: fa-beat 5s ease infinite;
+}
+
+@keyframes fa-beat {
+  0% {
+    transform: scale(1);
+  }
+  5% {
+    transform: scale(1.25);
+  }
+  20% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25);
+  }
+  50% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.25);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+</style>

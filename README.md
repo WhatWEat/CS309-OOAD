@@ -43,6 +43,20 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 - grade-list教师支持查看各种分类的得分（按照个人，按照小组），排序也支持按照字母升序/降序，按照分数  
 10月10日 
 ## 后端：springboot+mybatis-plus+postgresql
+### https的配置
+1. 请将`keystore.p12`放置在resource目录下（`keystore.p12`已放至qq群）
+2. 请在application.properties中增加如下信息
+   ```properties
+   # https
+   server.port=8443
+   server.ssl.key-store-type=PKCS12
+   server.ssl.key-store=classpath:keystore.p12
+   server.ssl.key-store-password=andycheng
+   server.ssl.key-alias=tomcat
+   ```
+3. 现在，访问后端的端口变成了https://localhost:8443/
+4. 使用Google Chrome（或其他现代浏览器）访问HTTPS网站时，浏览器会检查网站的SSL/TLS证书是否由一个受信任的证书颁发机构（CA）签发。因为暂时使用的证书是`java -keytool`提供的，浏览器会显示一个安全警告，不用理会。
+   ![访问效果图](image/访问图.png)
 ### springboot：
 
 1. 包名及其意义：

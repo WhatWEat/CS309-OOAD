@@ -27,7 +27,6 @@ public class User {
     private Date birthday;
 
     private String technology_stack;
-
     private String programming_skills;
 
     private String intended_teammates;

@@ -20,9 +20,6 @@ public class CustomUserDetailService implements UserDetailsService {
     @Autowired
     private UsersMapper usersMapper;
 
-
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         int userId = Integer.parseInt(username);

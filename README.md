@@ -44,6 +44,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 10月10日 
 ## 后端：springboot+mybatis-plus+postgresql
 ### https的配置
+0. 确保已经pull最新版gitignore
 1. 请将`keystore.p12`放置在resource目录下（`keystore.p12`已放至qq群）
 2. 请在application.properties中增加如下信息
    ```properties

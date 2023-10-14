@@ -73,98 +73,123 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 3. 如果操作失败了，返回的ResponseResult的jwt_token为null。
 ### 后端已经完成基本测试的接口：
 1. /signup POST
-
-请求体
-```json
-{
-   "identity":0,
-   "password":"Aa@123456",
-   "name":"Andy",
-   "gender":"m"
-}
-```
-响应体
-```
-"statusCode": 200成功, 405密码太弱或身份不合法/"信息不完整"
-```
-```json
-{
-   "statusCode":200, 
-   "msg":"",
-   "jwt_token":"eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIxMCIsImV4cCI6MTY5Njk0NDg1MSwiaWRlbnRpdHlDb2RlIjoiMCIsImlhdCI6MTY5Njk0Mzk1MX0.A6hDRUi06U-EmpRHgVNajRubZQzfMDUcOyEr_EoUBN-GR7uHpDkdSyikrKw6TxyE2eEH57xaBAKyJ3oWVkcTqA"
-}
-```
+   
+   请求体
+   ```json
+   {
+      "identity":0,
+      "password":"Aa@123456",
+      "name":"Andy",
+      "gender":"m"
+   }
+   ```
+   响应体
+   ```
+   "statusCode": 200成功, 405密码太弱或身份不合法/"信息不完整"
+   ```
+   ```json
+   {
+      "statusCode":200, 
+      "msg":"",
+      "jwt_token":"eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIxMCIsImV4cCI6MTY5Njk0NDg1MSwiaWRlbnRpdHlDb2RlIjoiMCIsImlhdCI6MTY5Njk0Mzk1MX0.A6hDRUi06U-EmpRHgVNajRubZQzfMDUcOyEr_EoUBN-GR7uHpDkdSyikrKw6TxyE2eEH57xaBAKyJ3oWVkcTqA"
+   }
+   ```
 2. /login POST
-
-请求体
-```json
-{
-   "key":"10",
-   "value":"Aa@123456"
-}
-```
-响应体
-```
-"statusCode": 200成功,401“认证失败”（用户名密码错误）
-```
-```json
-{
-	"statusCode": 200,
-	"msg": "success",
-	"jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
-}
-```
+   
+   请求体
+   ```json
+   {
+      "key":"10",
+      "value":"Aa@123456"
+   }
+   ```
+   响应体
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误）
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
 3. /logout DELETE
-请求体:任意
-响应体：
-```json
-{
-	"statusCode": 200,
-	"msg": "登出成功"
-}
-```
-前端要自行将header中的Token删掉
+   请求体:任意
+   响应体：
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "登出成功"
+   }
+   ```
+   前端要自行将header中的Token删掉
 4. /tea/**
 必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
-5. /tea/postNotice POST
-请求体：
-```json
-{
-    "title": "new title",
-    "content": "new content"
-}
-```
-响应体：
-```
-"statusCode": 200成功,401“认证失败”（用户名密码错误），
-```
-```json
-{
-	"statusCode": 200,
-	"msg": "success",
-	"jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
-}
-```
-6. /tea/modifyNotice PUT
+5. /tea/postNotice POST 
+   
    请求体：
-```json
-{
-   "noticeId":1,
-   "title":"new title 1",
-   "content": "new content 1"
-}
-```
-响应体：
-```
-"statusCode": 200成功,401“认证失败”（用户名密码错误）,405"无权修改别人发布的公告"
-```
-```json
-{
-	"statusCode": 200,
-	"msg": "success",
-	"jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
-}
-```
+   ```json
+   {
+       "title": "new title",
+       "content": "new content"
+   }
+   ```
+   响应体：
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误），
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
+6. /tea/modifyNotice PUT
+
+   请求体：
+   ```json
+   {
+      "noticeId":1,
+      "title":"new title 1",
+      "content": "new content 1"
+   }
+   ```
+   响应体：
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误）,405"无权修改别人发布的公告"
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
+7. /stu/**必须以学生身份访问，identity为3, 否则权限不够
+8. /stu/editPersonInfo PUT
+   
+   请求体：
+   
+   ```json
+   {
+    "technologyStack": "ts1",
+    "programmingSkills": "ps1",
+    "intendedTeammates": "it1"
+   }
+   ```
+   
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+9. /
 
 
 

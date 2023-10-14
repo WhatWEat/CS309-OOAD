@@ -4,6 +4,8 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.JWTUtil;
 import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,17 +13,16 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     private UsersMapper usersMapper;
+
+    private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
     //TODO:更新个人信息
-    public boolean editPersonInfo(User user, String jwt){
-        if(user.getUserId().toString().equals(JWTUtil.getUserIdByToken(jwt))){
-            try {
-                usersMapper.updateStuInformation(user.getTechnologyStack(), user.getProgrammingSkills(),user.getIntendedTeammates(), user.getUserId());
-            } catch (PSQLException e) {
-                throw new RuntimeException(e);
-            }
-            return true;
+    public void editPersonInfo(User user, String jwt){
+        try {
+            usersMapper.updateStuInformation(user.getTechnologyStack(), user.getProgrammingSkills(),user.getIntendedTeammates(), Integer.parseInt(JWTUtil.getUserIdByToken(jwt)));
+        } catch (PSQLException e) {
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
 

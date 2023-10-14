@@ -50,7 +50,6 @@ public class TeacherController {
 
     @PutMapping("/modifyNotice")
     public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
-        System.err.println("this");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         if(!noticeService.modifyNoticeWithUser(notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt))))
             return ResponseResult.accessDenied(null, "无权修改别人发布的公告");
@@ -58,13 +57,11 @@ public class TeacherController {
     }
 
 
-
     @PostMapping("/createGroup")
-    public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group group){
-        String jwt = null;
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        groupService.createGroup(group);
+    public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+
+        groupService.createGroup(gp);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
@@ -106,25 +103,25 @@ public class TeacherController {
         noticeService.createNotice(title, content, creator_id);
     }
 
-    @PostMapping("/createPluralGroup/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
-    //创建复数个新的小组,其中number代表创建小组的数量，team_time表示组队截止时间，instructor_id表示指导老师的id
-    public long[] createPluralGroup(@PathVariable long max_size,
-                                    @PathVariable long project_id,
-                                    @PathVariable Timestamp team_time,
-                                    @PathVariable Timestamp deadline,
-                                    @PathVariable int number) {
-        return groupService.createPluralGroup( max_size, project_id, team_time, deadline, number);
-    }
+//    @PostMapping("/createPluralGroup/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
+//    //创建复数个新的小组,其中number代表创建小组的数量，team_time表示组队截止时间，instructor_id表示指导老师的id
+//    public long[] createPluralGroup(@PathVariable long max_size,
+//                                    @PathVariable long project_id,
+//                                    @PathVariable Timestamp team_time,
+//                                    @PathVariable Timestamp deadline,
+//                                    @PathVariable int number) {
+//        return groupService.createPluralGroup( max_size, project_id, team_time, deadline, number);
+//    }
 
-    @PostMapping("/createOneGroup/{max_size}/{project_id}/{team_time}/{deadline}/{group_name}")
-    //创建单个小组，team_time表示组队截止时间，instructor_id表示指导老师的id
-    public long createOneGroup(@PathVariable long max_size,
-                               @PathVariable long project_id,
-                               @PathVariable Timestamp team_time,
-                               @PathVariable Timestamp deadline,
-                               @PathVariable String group_name) {
-        return groupService.createOneGroup( max_size, project_id, team_time, deadline, group_name);
-    }
+//    @PostMapping("/createOneGroup/{max_size}/{project_id}/{team_time}/{deadline}/{group_name}")
+//    //创建单个小组，team_time表示组队截止时间，instructor_id表示指导老师的id
+//    public long createOneGroup(@PathVariable long max_size,
+//                               @PathVariable long project_id,
+//                               @PathVariable Timestamp team_time,
+//                               @PathVariable Timestamp deadline,
+//                               @PathVariable String group_name) {
+//        return groupService.createOneGroup( max_size, project_id, team_time, deadline, group_name);
+//    }
 
     @PostMapping("/updateGroupSize/{max_size}/{group_id}")
     //修改某一小组的最大人数

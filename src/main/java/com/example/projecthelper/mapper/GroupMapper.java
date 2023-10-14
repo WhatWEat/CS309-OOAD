@@ -1,5 +1,6 @@
 package com.example.projecthelper.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Group;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
@@ -8,15 +9,14 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Mapper
-public interface GroupMapper {
+public interface GroupMapper extends BaseMapper<Group> {
     //TODO:修改部分传参过多的方法
 
     @Insert("insert into groups ( max_size,group_name, project_id, team_time, deadline)" +
-            "VALUES (#{max_size},#{group_name},#{project_id},#{team_time},#{deadline});")
-    @Options(useGeneratedKeys = true, keyProperty = "group_id", keyColumn = "group_id")
+            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{deadline});")
+    @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "group_id")
     //max_size、group_name、project_id不能为空
-    long createGroup (long max_size, String group_name,
-                     long project_id, Timestamp team_time, Timestamp deadline) throws PSQLException;
+    long createGroup (Group group) throws PSQLException;
 
     @Update("update groups set max_size =#{max_size} where group_id = #{group_id};")
     //group_id需要真实存在（这是需要说的吗

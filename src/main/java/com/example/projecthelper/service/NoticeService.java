@@ -4,6 +4,8 @@ import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.util.ResponseResult;
 import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 public class NoticeService {
     @Autowired
     private NoticeMapper noticeMapper;
+
+    private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     //TODO：发布Notice
     public void postNotice(Notice notice, Long creator_id){
@@ -23,25 +27,16 @@ public class NoticeService {
 
     //TODO:先匹配jwt中的id与notice中的id，防止篡改他人内容。验证之后才进行更改Notice
     public boolean modifyNoticeWithUser(Notice notice, Long currentUserId){
-        long creatorId = 0;
         try {
-            creatorId = noticeMapper.findNoticeById(notice.getNoticeId()).getCreatorId();
+            long creatorId = noticeMapper.findNoticeById(notice.getNoticeId()).getCreatorId();
+
+            if(creatorId != currentUserId)
+                return false;
+            noticeMapper.updateNotice(notice.getTitle(), notice.getContent(), creatorId);
+            return true;
         } catch (PSQLException e) {
             throw new RuntimeException(e);
         }
-        try {
-            System.err.println(noticeMapper.findNoticeById(notice.getNoticeId()));
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-        if(creatorId != currentUserId)
-            return false;
-        try {
-            noticeMapper.updateNotice(notice.getTitle(), notice.getContent(), notice.getNoticeId());
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-        return true;
     }
 
 

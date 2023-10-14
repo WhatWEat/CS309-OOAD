@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 public class SecurityController {
     private final AuthService authService;
@@ -45,6 +46,7 @@ public class SecurityController {
     public String post(){
         return "hello231313";
     }
+
 
 
     @GetMapping("/login")

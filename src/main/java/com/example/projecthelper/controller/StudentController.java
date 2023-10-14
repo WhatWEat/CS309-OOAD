@@ -8,7 +8,7 @@ import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +17,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/stu")
 public class StudentController {
-    private final AuthService authService;
     private final UserService userService;
     private final GroupService groupService;
+
     @Autowired
-    public StudentController(AuthService authService, UserService userService,
+    public StudentController(UserService userService,
                              GroupService groupService) {
-        this.authService = authService;
         this.userService = userService;
         this.groupService = groupService;
     }
@@ -35,23 +34,17 @@ public class StudentController {
     }
 
     @PutMapping("/editPersonInfo")
-    public ResponseResult<Object> editPersonInfo(HttpServletRequest request, User user){
-        String jwt = null;
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        if(!userService.editPersonInfo(user, jwt))
-            return ResponseResult.unAuthorize(null, "unable to edit others information");
+    public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/editPersonInfo")
-    public ResponseResult<Object> joinGroup(HttpServletRequest request, Group group){
-        String jwt = null;
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        groupService.joinGroup(group, jwt);
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+
+
+
+
+
 
     @GetMapping("/hello123")
     public String hello(){

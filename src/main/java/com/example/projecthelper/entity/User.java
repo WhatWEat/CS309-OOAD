@@ -27,12 +27,14 @@ public class User {
     private String gender;
 
     private Date birthday;
+
     @TableField("technology_stack")
     private String technologyStack;
     @TableField("programming_skills")
     private String programmingSkills;
     @TableField("intended_teammates")
     private String intendedTeammates;
+
 
     public User( int identity, String password, String name, String gender) {
         this.identity = identity;

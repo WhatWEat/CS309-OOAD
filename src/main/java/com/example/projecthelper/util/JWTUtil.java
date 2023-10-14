@@ -15,7 +15,7 @@ public class JWTUtil {
 
     private static final int ttlMills = 60 * 60;
     private static final String secret = "CS309-OOAD-ProjectHelper";
-    static Map<String, Object> headerClaims;
+    private static final Map<String, Object> headerClaims;
     static {
         headerClaims = new HashMap<>();
         headerClaims.put("type", "JWT");

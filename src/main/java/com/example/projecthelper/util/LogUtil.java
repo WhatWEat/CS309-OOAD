@@ -10,7 +10,7 @@ public class LogUtil {
     public static final short WARN = 2;
     public static final short ERROR = 3;
 
-    public static void log(String msg, int level){
+    public static void log(String msg, short level){
         switch (level){
             case INFO -> logger.info(msg);
             case DEBUG -> logger.debug(msg);

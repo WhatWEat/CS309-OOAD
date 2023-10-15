@@ -4,13 +4,12 @@
     <q-header elevated class="bg-primary text-white" height-hint="98">
       <q-toolbar>
         <q-toolbar-title>
-          <q-btn dense @click="handleIconClick">
+          <q-btn dense @click="router.push('/')">
             <q-icon name="home"></q-icon>
           </q-btn>
           <span v-if="flag">{{personId}}'s Person Information</span>
         </q-toolbar-title>
-        <span class="text-h6">Hello, {{username}}!</span>
-        <q-btn flat round dense icon="person" @click="goPersonInfo"/>
+        <PersonBar></PersonBar>
       </q-toolbar>
 
       <q-tabs align="left">
@@ -34,6 +33,7 @@ import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
 import {useRouter} from 'vue-router';
 import {useCurrentPageUser} from 'stores/user-store';
+import PersonBar from "components/Layout/PersonBar.vue";
 const usePerson = useCurrentPageUser()
 
 const router = useRouter()
@@ -50,12 +50,6 @@ onMounted(() => {
     }
   })
 })
-function handleIconClick() {
-  router.push('/')
-}
-function goPersonInfo() {
-  router.push(`/person/${userid.value}`)
-}
 </script>
 
 <style scoped>

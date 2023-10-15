@@ -1,27 +1,33 @@
-drop table if exists stuViewNotice,stuInGroup,stuAssignment,
+drop table if exists defenseTeaOfGroup,leaderOfGroup,taOfProject,stuViewNotice,stuInGroup,stuAssignment,
     groupAssignment,stuSubmit,groupSubmit,
     chat,comment,submittedAssignment,assignment,groups,notice,users,project;
 create table if not exists project
 (
     project_id BIGSERIAL  primary key,
     name varchar(200) not null
-);
+    );
 
 create table if not exists users
 (
     user_id            BIGSERIAL  primary key,
-    --暂时仅有tea（教师）、ta（教师助理）、stu（学生）、adm（管理员）四种角色
-    identity           varchar(10)  not null,
-    password           varchar(20)  not null,
-    phone              varchar(10)  ,
+    --暂时仅有0（学生）、1（教师）、2（管理员）三种角色
+    identity           integer  not null,
+    password           varchar(500)  not null,
+    phone              varchar(15)  ,
     mail               varchar(30)  ,
     name               varchar(100) not null,
-    --仅有male、female两种
-    gender             varchar(10)  not null,
-    birthday           varchar(50),
+    --仅有m(male)、f(female)两种
+    gender             varchar(1)  not null,
+    birthday           date,
     technology_stack   varchar(500),
     programming_skills varchar(500),
     intended_teammates varchar(500)
+    );
+
+create table if not exists taOfProject
+(
+    project_id bigint not null ,
+    ta_id bigint not null
 );
 
 create table if not exists notice
@@ -31,7 +37,7 @@ create table if not exists notice
     content       varchar(5000) not null,
     creator_id bigint        not null
 --     foreign key (creator_id) references users (user_id)
-);
+    );
 
 create table if not exists stuViewNotice
 (
@@ -40,20 +46,33 @@ create table if not exists stuViewNotice
 --     foreign key (notice_id) references notice (notice_id),
 --     foreign key (stu_id) references users (user_id),
     primary key (notice_id, stu_id)
-);
+    );
 
 create table if not exists groups
 (
     group_id      BIGSERIAL  primary key,
-    leader_id bigint,
+--     leader_id bigint,
 --     foreign key (leader_id) references users(user_id),
     group_name    varchar(100) not null,
-    instructor_id bigint       not null,
+    --     instructor_id bigint       not null,
 --     foreign key (instructor_id) references users (user_id),
     max_size      bigint       not null,
+
     project_id bigint not null ,
     team_time timestamp ,
     deadline timestamp
+    );
+
+create table if not exists leaderOfGroup
+(
+    group_id bigint not null ,
+    leader_id bigint not null
+);
+
+create table if not exists defenseTeaOfGroup
+(
+    defense_teacher_id bigint not null ,
+    group_id bigint not null
 );
 
 create table if not exists stuInGroup
@@ -63,7 +82,9 @@ create table if not exists stuInGroup
 --     foreign key (group_id) references groups (group_id),
 --     foreign key (stu_id) references users (user_id),
     primary key (group_id, stu_id)
-);
+    );
+
+
 
 create table if not exists assignment
 (
@@ -75,7 +96,7 @@ create table if not exists assignment
     type          varchar(20)   not null,
     creator_id    bigint        not null
 --     foreign key (creator_id) references users (user_id)
-);
+    );
 
 create table if not exists stuAssignment
 (
@@ -84,7 +105,7 @@ create table if not exists stuAssignment
 --     foreign key (assignment_id) references assignment(assignment_id),
 --     foreign key (stu_id) references users(user_id),
     primary key (assignment_id,stu_id)
-);
+    );
 
 create table if not exists groupAssignment
 (
@@ -93,7 +114,7 @@ create table if not exists groupAssignment
 --     foreign key (assignment_id) references assignment(assignment_id),
 --     foreign key (group_id) references groups(group_id),
     primary key (assignment_id,group_id)
-);
+    );
 
 create table if not exists submittedAssignment
 (
@@ -105,7 +126,7 @@ create table if not exists submittedAssignment
     text varchar(1000),
     comment varchar(1000) ,
     filepath varchar(200)
-);
+    );
 
 create table if not exists stuSubmit
 (
@@ -114,7 +135,7 @@ create table if not exists stuSubmit
 --     foreign key (submit_id) references submittedAssignment(submit_id),
 --     foreign key (stu_id) references users(user_id),
     primary key (submit_id,stu_id)
-);
+    );
 
 create table if not exists groupSubmit
 (
@@ -123,7 +144,7 @@ create table if not exists groupSubmit
 --     foreign key (submit_id) references submittedAssignment(submit_id),
 --     foreign key (group_id) references groups(group_id),
     primary key (submit_id,group_id)
-);
+    );
 
 create table if not exists comment
 (
@@ -136,7 +157,7 @@ create table if not exists comment
     comment_time timestamp not null ,
     content varchar(1000) not null ,
     submit_id BIGINT not null
-);
+    );
 
 create table if not exists chat
 (
@@ -147,4 +168,4 @@ create table if not exists chat
 --     foreign key (to_id) references users(user_id),
     chatTime timestamp not null ,
     content varchar(500) not null
-);
+    );

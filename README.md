@@ -43,6 +43,21 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 - grade-list教师支持查看各种分类的得分（按照个人，按照小组），排序也支持按照字母升序/降序，按照分数  
 10月10日 
 ## 后端：springboot+mybatis-plus+postgresql
+### https的配置
+0. 确保已经pull最新版gitignore
+1. 请将`keystore.p12`放置在resource目录下（`keystore.p12`已放至qq群）
+2. 请在application.properties中增加如下信息
+   ```properties
+   # https
+   server.port=8443
+   server.ssl.key-store-type=PKCS12
+   server.ssl.key-store=classpath:keystore.p12
+   server.ssl.key-store-password=andycheng
+   server.ssl.key-alias=tomcat
+   ```
+3. 现在，访问后端的端口变成了https://localhost:8443/
+4. 使用Google Chrome（或其他现代浏览器）访问HTTPS网站时，浏览器会检查网站的SSL/TLS证书是否由一个受信任的证书颁发机构（CA）签发。因为暂时使用的证书是`java -keytool`提供的，浏览器会显示一个安全警告，不用理会。
+   ![访问效果图](image/访问图.png)
 ### springboot：
 
 1. 包名及其意义：
@@ -52,6 +67,132 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
     - mapper：将实体映射到数据库的表中
     - service：服务类，提供某种具体的服务
     - util：效用类，包装一些可复用的代码块，如cookie的设置与检查等
+### 前端像后端端点访问需要注意的事情
+1. 响应体一定是ResponseResult<T>类，请见`com.example.projecthelper.util.ResponseResult`
+2. ResponseResult中有状态码，请以该状态码为准
+3. 如果操作失败了，返回的ResponseResult的jwt_token为null。
+### 后端已经完成基本测试的接口：
+1. /signup POST
+   
+   请求体
+   ```json
+   {
+      "identity":0,
+      "password":"Aa@123456",
+      "name":"Andy",
+      "gender":"m"
+   }
+   ```
+   响应体
+   ```
+   "statusCode": 200成功, 405密码太弱或身份不合法/"信息不完整"
+   ```
+   ```json
+   {
+      "statusCode":200, 
+      "msg":"",
+      "jwt_token":"eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIxMCIsImV4cCI6MTY5Njk0NDg1MSwiaWRlbnRpdHlDb2RlIjoiMCIsImlhdCI6MTY5Njk0Mzk1MX0.A6hDRUi06U-EmpRHgVNajRubZQzfMDUcOyEr_EoUBN-GR7uHpDkdSyikrKw6TxyE2eEH57xaBAKyJ3oWVkcTqA"
+   }
+   ```
+2. /login POST
+   
+   请求体
+   ```json
+   {
+      "key":"10",
+      "value":"Aa@123456"
+   }
+   ```
+   响应体
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误）
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
+3. /logout DELETE
+   请求体:任意
+   响应体：
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "登出成功"
+   }
+   ```
+   前端要自行将header中的Token删掉
+4. /tea/**
+必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
+5. /tea/postNotice POST 
+   
+   请求体：
+   ```json
+   {
+       "title": "new title",
+       "content": "new content"
+   }
+   ```
+   响应体：
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误），
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
+6. /tea/modifyNotice PUT
+
+   请求体：
+   ```json
+   {
+      "noticeId":1,
+      "title":"new title 1",
+      "content": "new content 1"
+   }
+   ```
+   响应体：
+   ```
+   "statusCode": 200成功,401“认证失败”（用户名密码错误）,405"无权修改别人发布的公告"
+   ```
+   ```json
+   {
+       "statusCode": 200,
+       "msg": "success",
+       "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
+   }
+   ```
+7. /stu/**必须以学生身份访问，identity为3, 否则权限不够
+8. /stu/editPersonInfo PUT
+   
+   请求体：
+   
+   ```json
+   {
+    "technologyStack": "ts1",
+    "programmingSkills": "ps1",
+    "intendedTeammates": "it1"
+   }
+   ```
+   
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+9. /
+
+
+
 ### Controller接口
 
 所有请求地址名字都暂定，后端可以为了统一修改请求地址

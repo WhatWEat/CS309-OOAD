@@ -22,6 +22,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+<!--        &lt;!&ndash; hutool &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>cn.hutool</groupId>-->
+<!--            <artifactId>hutool-all</artifactId>-->
+<!--            <version>5.8.22</version>-->
+<!--        </dependency>-->
+
         <!-- lombok:自动产生getter，setter等 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -34,6 +41,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+
 
 
 
@@ -93,6 +101,14 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- Servlet API -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!--数据连接池 druid-->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -119,23 +135,6 @@
             <systemPath>${basedir}/lib/aspose.slides-15.9.0.jar</systemPath>
         </dependency>
 
-        <!--        &lt;!&ndash;   swagger   &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger2</artifactId>-->
-<!--            <version>3.0.0</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger-ui</artifactId>-->
-<!--            <version>3.0.0</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>javax.servlet</groupId>-->
-<!--            <artifactId>javax.servlet-api</artifactId>-->
-<!--            <version>4.0.1</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
     </dependencies>
 
     <repositories>

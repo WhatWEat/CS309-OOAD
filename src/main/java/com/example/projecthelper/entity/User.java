@@ -1,13 +1,20 @@
 package com.example.projecthelper.entity;
+import com.baomidou.mybatisplus.annotation.TableField;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
+import lombok.ToString;
+
 @Getter
 @Setter
+@ToString
 public class User {
-    private Integer user_id;
+    @TableField("user_id")
+    private Integer userId;
 
-    private final String identity;
+    private int identity;
 
     private String password;
 
@@ -15,23 +22,28 @@ public class User {
 
     private String mail;
 
-    private final String name;
+    private String name;
 
-    private final String gender;
+    private String gender;
 
-    private String birthday;
+    private Date birthday;
 
-    private String technology_stack;
+    @TableField("technology_stack")
+    private String technologyStack;
+    @TableField("programming_skills")
+    private String programmingSkills;
+    @TableField("intended_teammates")
+    private String intendedTeammates;
 
-    private String programming_skills;
 
-    private String intended_teammates;
-
-    public User( String identity, String password, String name, String gender) {
+    public User( int identity, String password, String name, String gender) {
         this.identity = identity;
         this.password = password;
         this.name = name;
         this.gender = gender;
+    }
+
+    public User() {
     }
 }
 

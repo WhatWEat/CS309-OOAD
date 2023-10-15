@@ -2,11 +2,13 @@ package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.GroupService;
-import com.example.projecthelper.service.LoginService;
 import com.example.projecthelper.service.UserService;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,44 +17,53 @@ import java.util.List;
 @RestController
 @RequestMapping("/stu")
 public class StudentController {
-    private final LoginService loginService;
     private final UserService userService;
     private final GroupService groupService;
+
     @Autowired
-    public StudentController(LoginService loginService, UserService userService,
+    public StudentController(UserService userService,
                              GroupService groupService) {
-        this.loginService = loginService;
         this.userService = userService;
         this.groupService = groupService;
     }
 
+
+    @GetMapping("/test")
+    public ResponseResult<Object> test(){
+        return ResponseResult.ok(null, "Success", null);
+    }
+
     @PutMapping("/editPersonInfo")
-    public ResponseResult<Object> editPersonInfo(User user){
-        String jwt = loginService.checkLoginAndIdentity();
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        if(!userService.editPersonInfo(user, jwt))
-            return ResponseResult.unAuthorize(null, "unable to edit others information");
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
-
-    @PostMapping("/editPersonInfo")
-    public ResponseResult<Object> joinGroup(Group group){
-        String jwt = loginService.checkLoginAndIdentity();
-        if(jwt == null)
-            return ResponseResult.unAuthorize(null, "authentication failed");
-        groupService.joinGroup(group, jwt);
+    public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
 
-    @PostMapping("/registerStu/{password}/{name}/{gender}")
-    //注册学生,返回学生的user_id
-    public long registerTea(@PathVariable String password,
-                            @PathVariable String name,
-                            @PathVariable String gender){
-        return userService.registerUser("stu",password,name,gender);
+
+
+
+
+
+    @GetMapping("/hello123")
+    public String hello(){
+        return "hello";
     }
+
+
+
+    /** 数据库功能测试
+     *
+     */
+//    @PostMapping("/registerStu/{password}/{name}/{gender}")
+//    //注册学生,返回学生的user_id
+//    public long registerTea(@PathVariable String password,
+//                            @PathVariable String name,
+//                            @PathVariable String gender){
+//        return userService.registerUser(0,password,name,gender);
+//    }
+
 
     @PostMapping("/stuJoinGroup/{group_id}/{stu_id}/{project_id}")
     //学生加入小组,如在该project仍未加入小组则加入成功，反之则失败

@@ -8,6 +8,7 @@ target/
 ### propertities
 src/main/resources/application.properties
 logging/ph.log
+src/main/resources/keystore.p12
 
 ### STS ###
 .apt_generated

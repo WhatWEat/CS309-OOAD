@@ -150,13 +150,13 @@ export default {
   data() {
     return {
       info: [
-        "Group     ID",
-        "Group   Size",
-        "Group Member",
-        " Instructor ",
-        "Project Name",
-        "  deadLine  ",
-        "  MoreInfo  "
+        'Group     ID',
+        'Group   Size',
+        'Group Member',
+        ' Instructor ',
+        'Project Name',
+        '  deadLine  ',
+        '  MoreInfo  '
       ],
       detailInfo: [
         "Group     ID",

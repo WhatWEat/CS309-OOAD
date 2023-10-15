@@ -13,7 +13,10 @@
 
         <q-toolbar-title>
           Project Helper
+          <q-btn dense flat icon="home" @click="router.push('/')">
+          </q-btn>
         </q-toolbar-title>
+        <PersonBar></PersonBar>
       </q-toolbar>
     </q-header>
 
@@ -39,22 +42,21 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink.vue';
 import {useUserStore} from 'src/composables/useUserStore';
-import { useRouter } from 'vue-router';
-import {useCurrentPageUser} from 'stores/user-store';
+import {useRouter} from 'vue-router';
 import {watchEffect} from 'vue-demi';
+import PersonBar from 'components/Layout/PersonBar.vue';
 
 const router = useRouter()
 const projectID = ref(router.currentRoute.value.params.projectID)
-const usePerson = useCurrentPageUser()
 const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([])
 onMounted(() => {
@@ -89,15 +91,17 @@ onMounted(() => {
         {
           title: 'Person',
           icon: 'account_box',
-          link: `/person/${userid}`
+          link: `/person/${userid.value}`
         },
       ];
+
   })
 })
 
 
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)
+
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }

@@ -3,6 +3,9 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.JWTUtil;
+import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,20 +13,25 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     private UsersMapper usersMapper;
+
+    private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
     //TODO:更新个人信息
-    public boolean editPersonInfo(User user, String jwt){
-        if(user.getUser_id().toString().equals(JWTUtil.getUserIdByToken(jwt))){
-            return true;
+    public void editPersonInfo(User user, String jwt){
+        try {
+            usersMapper.updateStuInformation(user.getTechnologyStack(), user.getProgrammingSkills(),user.getIntendedTeammates(), Integer.parseInt(JWTUtil.getUserIdByToken(jwt)));
+        } catch (PSQLException e) {
+            throw new RuntimeException(e);
         }
-        return false;
-    }
-    public void updateStuInformation(String technology_stack, String programming_skills,String intended_teammates, long user_id){
-        usersMapper.updateStuInformation(technology_stack,programming_skills,intended_teammates,user_id);
     }
 
-    public long registerUser(String identity, String password, String name, String gender){
-        User user = new User(identity, password, name, gender);
-        usersMapper.registerUser(user);
-        return user.getUser_id();
-    }
+
+    
+    // 数据库功能测试
+//    public long registerUser(int identity, String password, String name, String gender){
+//        User user = new User(identity, password, name, gender);
+//        usersMapper.registerUser(user);
+//        return user.getUser_id();
+//    }
+
 }

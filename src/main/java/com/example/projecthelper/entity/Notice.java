@@ -1,22 +1,29 @@
 package com.example.projecthelper.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class Notice {
-    private final long notice_id;
-
+    @TableField("notice_id")
+    private long noticeId;
     private String title;
     private String content;
-    private final long creator_id;
+    @TableField("creator_id")
+    private long creatorId;
 
-    public Notice(long notice_id, String title, String content, long creator_id) {
-        this.notice_id = notice_id;
+    public Notice(long noticeId, String title, String content, long creatorId) {
+        this.noticeId = noticeId;
         this.title = title;
         this.content = content;
-        this.creator_id = creator_id;
+        this.creatorId = creatorId;
+    }
+
+    public Notice(){
     }
 
 

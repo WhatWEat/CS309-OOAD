@@ -1,16 +1,22 @@
 package com.example.projecthelper.entity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Project {
-    private final long project_id;
+
+    @TableField("project_id")
+    private long projectId;
 
     private String name;
 
-    public Project(long project_id, String name) {
-        this.project_id = project_id;
+    public Project(long projectId, String name) {
+        this.projectId = projectId;
         this.name = name;
+    }
+
+    public Project() {
     }
 }

@@ -1,5 +1,6 @@
 package com.example.projecthelper.util;
 
+import com.example.projecthelper.entity.User;
 import lombok.Getter;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -19,7 +20,7 @@ public class CachingUtil {
         //TODO:向数据库删除对应的user
     }
 
-    @CachePut(value = "UserById", key = "#Id")
+    @CachePut(value = "user", key = "#user")
     public void updateUser(String Id) {
         //TODO:向数据库更新对应的user
     }

@@ -1,5 +1,6 @@
 <template>
   <q-page class="q-ma-md content-start">
+    <CardSocial></CardSocial>
     <CardComponent
       v-for="card in cardData"
       :key="card.title"
@@ -19,6 +20,7 @@ import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
+import CardSocial from 'components/MainIndex/CardSocial.vue';
 
 const router = useRouter()
 

@@ -1,26 +1,25 @@
 <template>
   <q-page class="q-ma-md content-start">
-    <CardComponent
-      v-for="card in cardData"
-      :key="card.title"
-      v-bind="card"
-      @click="() => {
-        router.push(card.link as string)
-      }"
-      class="q-my-lg"
-    >
-    </CardComponent>
+    <CardSocial icon_position="right"></CardSocial>
+    <CardCharts></CardCharts>
+
+    <div class="row q-col-gutter-sm  q-py-sm">
+      <TodoList></TodoList>
+      <CardWithImage/>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import CardComponent, {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
+import {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
 import {useUserStore} from 'src/composables/useUserStore';
-import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
+import CardSocial from 'components/MainIndex/CardSocial.vue';
+import CardCharts from 'components/MainIndex/CardInformation.vue';
+import TodoList from 'components/MainIndex/List/TodoList.vue';
+import CardWithImage from 'components/MainIndex/CardWithImage.vue';
 
-const router = useRouter()
 
 const userStore = useUserStore()
 const cardData = ref<CardInfoProps[]>([]);

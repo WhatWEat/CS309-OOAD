@@ -1,23 +1,24 @@
 <template>
   <div id="q-app" style="min-height: 100vh;">
-    <!--    这里是顶栏部分-->
-    <q-toolbar class="bg-primary text-white shadow-2">
-      <q-btn flat label="GroupAdminister"></q-btn>
-      <q-toolbar-title></q-toolbar-title>
 
-      <q-space></q-space>
+      <!--    这里是顶栏部分,先将顶栏部分屏蔽掉-->
+<!--    <q-toolbar class="bg-primary text-white shadow-2">-->
+<!--      <q-btn flat label="GroupAdminister"></q-btn>-->
+<!--      <q-toolbar-title></q-toolbar-title>-->
 
-      <!--
-        notice shrink property since we are placing it
-        as child of QToolbar
-      -->
-      <q-tabs v-model="separator" shrink>
-        <q-tab label="Cell" name="cell"></q-tab>
-        <q-tab label="Herizontal" name="horizontal"></q-tab>
-        <q-tab label="Vertical" name="vertical"></q-tab>
-        <q-tab label="None" name="none"></q-tab>
-      </q-tabs>
-    </q-toolbar>
+<!--      <q-space></q-space>-->
+
+<!--      &lt;!&ndash;-->
+<!--        notice shrink property since we are placing it-->
+<!--        as child of QToolbar-->
+<!--      &ndash;&gt;-->
+<!--      <q-tabs v-model="separator" shrink>-->
+<!--        <q-tab label="Cell" name="cell"></q-tab>-->
+<!--        <q-tab label="Herizontal" name="horizontal"></q-tab>-->
+<!--        <q-tab label="Vertical" name="vertical"></q-tab>-->
+<!--        <q-tab label="None" name="none"></q-tab>-->
+<!--      </q-tabs>-->
+<!--    </q-toolbar>-->
 
     <!--这里是表格部分-->
     <div class="q-pa-md ">
@@ -31,12 +32,17 @@
         row-key="groupId"
         selection="single"
         title="Groups Info"
+        card-class="bg-grey-2"
       >
+        <!--        标题字体插槽-->
+        <template v-slot:top-left>
+          <b style=" font-size: 22px;">Group List</b>
+        </template>
         <!--        右上方按钮插槽-->
         <template v-slot:top-right>
-          <q-toolbar class="bg-primary text-white rounded-borders">
+          <q-toolbar class="bg-grey-5 text-white rounded-borders ">
             <!--            这里是下拉框-->
-            <q-btn-dropdown color="primary" icon="menu">
+            <q-btn-dropdown color="grey-5" icon="menu">
               <q-list>
                 <q-item v-close-popup clickable @click="onItemClick">
                   <q-item-label style="font-weight: bolder">Delete  selected  group</q-item-label>
@@ -76,6 +82,7 @@
 
 
   <!--  这里是弹窗部分-->
+  <!--  文件上传弹窗-->
   <q-dialog v-model="fileLoader" :position="position">
     <q-card-section class="card">
       <q-uploader
@@ -149,8 +156,12 @@ export default {
 
       position:'top',
     }
+  },
+  methods: {
+    onItemClick() {
+      this.$router.push('group-list/1');
+    },
   }
-
 }
 </script>
 

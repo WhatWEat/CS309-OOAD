@@ -14,7 +14,23 @@ const routes: RouteRecordRaw[] = [
       [{path: '', component: () => import('pages/IndexPages/IndexProjectPage.vue')},
         {path: 'group-list', component: () => import('pages/GroupPage/GroupList.vue')},
         {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
-        {path: 'assignment-list', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue')},
+        {
+          path: 'assignment-list', component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
+          children: [
+            {
+              path: 'personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),
+              children: [
+                {path: 'assignmentDetail', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')}
+              ]
+            },
+            {
+              path: 'group', component: () => import('pages/AssignmentPage/AssignmentsStudent_Group.vue'),
+              children: [
+                {path: 'assignmentDetail', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')}
+              ]
+            }
+          ]
+        },
         {path: 'assignment-list/:assignmentId', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')},
       ],
   },
@@ -37,6 +53,7 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
+
   {
     path: '/student/Assignment',
     component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
@@ -52,7 +69,7 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
-        path: '/group', component: () => import('pages/AssignmentPage/AssignmentList.vue'),
+        path: '/group', component: () => import('pages/AssignmentPage/AssignmentsStudent_Group.vue'),
         children: [
           {
             path: '/mengbi2/:assignmentId',
@@ -66,7 +83,6 @@ const routes: RouteRecordRaw[] = [
     path: '/teacherAssignment',
     component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
   },
-
 
 
   // Always leave this as last one,

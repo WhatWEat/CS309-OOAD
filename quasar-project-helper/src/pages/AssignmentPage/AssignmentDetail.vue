@@ -3,7 +3,7 @@
     <div id="q-app" style="">
       <div class="q-pa-md" style="">
         <div class="justify-between row">
-          <q-card class="my-card" style="width: 800px;left: 0px;min-height: 200px">
+          <q-card class="my-card" style="width: 700px;left: 0px;min-height: 200px">
             <q-item>
               <q-item-section avatar>
                 <q-avatar>
@@ -71,7 +71,6 @@
                 <q-item-label style="font-weight: bolder;font-size: x-large">Here to Submit</q-item-label>
               </q-item-section>
             </q-item>
-
             <q-item>
               <q-item-section>
                 <q-uploader

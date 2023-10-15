@@ -1,18 +1,14 @@
 <template>
-  <q-toolbar class="bg-primary text-white rounded-borders">
+  <q-toolbar class="bg-grey-4 text-black rounded-borders">
     <q-btn
       flat
       label="AssignMents"
     ></q-btn>
 
-    <q-toolbar-title ></q-toolbar-title>
+    <q-toolbar-title></q-toolbar-title>
     <q-btn-group push>
-      <router-link v-slot:default="props" custom to="/personal">
-        <q-btn color="blue" icon="perm_identity" label="Personal" v-bind="buttonProps(props)" push></q-btn>
-      </router-link>
-      <router-link v-slot:default="props" custom to="/group">
-        <q-btn color="blue" icon="groups" label="Group" push  v-bind="buttonProps(props)" ></q-btn>
-      </router-link>
+      <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>
+      <q-btn :color="color_group" icon="groups" label="Group" push @click="buttonHandle"></q-btn>
     </q-btn-group>
   </q-toolbar>
 
@@ -22,20 +18,41 @@
 <script>
 export default {
   name: "AssignmentStudent",
-  methods:{
-    buttonProps ({ href, route, isActive, isExactActive }) {
-      const props = {
-        noCaps: false,
-        outline: false,
-        to: href
+  data() {
+    return {
+      path: '',
+      color_personal: 'grey-5' ,
+      color_group: 'grey-4'
+    }
+  },
+  methods: {
+    buttonHandle() {
+      const regex  = /\/personal$/;
+      const regex2 = /\/group$/;
+      this.path = this.$route.path
+      console.log(this.path)
+
+      if (regex.test(this.path)) {
+        const newpath = this.path.replace(/\/[^/]*$/, '/group')
+        console.log("newpath", newpath)
+        this.$router.push(newpath)
+        this.color_group = 'grey-5'
+        this.color_personal = 'grey-4'
       }
-      if (isActive === true) {
-        props.color = isExactActive === true ? 'amber-9' : 'amber-9'
+      else if (regex2.test(this.path)) {
+        const newpath = this.path.replace(/\/[^/]*$/, '/personal')
+        console.log("newpath", newpath)
+        this.$router.push(newpath)
+        this.color_group = 'grey-4'
+        this.color_personal = 'grey-5'
       }
       else {
-        props.color = 'blue'
+        const newpath = this.path.replace(/\/[^/]*$/, '')
+        console.log("newpath", newpath)
+        this.$router.push(newpath)
+        this.color_group = 'grey-4'
+        this.color_personal = 'grey-5'
       }
-      return props
     }
   }
 }

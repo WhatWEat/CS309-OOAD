@@ -1,10 +1,5 @@
 <template>
-  <q-toolbar class="bg-primary text-white rounded-borders">
-    <q-btn
-      flat
-      label="GroupInfo"
-    ></q-btn>
-
+  <q-toolbar class="text-black rounded-borders" >
     <q-toolbar-title></q-toolbar-title>
     <q-btn-group push>
       <q-btn color="blue" icon="timeline" label="Modify" push></q-btn>
@@ -15,6 +10,7 @@
 
   <p></p>
 
+<!--  主题部分界面-->
   <div>
     <q-input v-model="detailInfo[0]" label="GroupId" outlined>
       <template v-slot:before>
@@ -126,6 +122,8 @@
     </q-input>
   </div>
 
+
+<!--  弹窗部分界面-->
   <div>
     <q-dialog v-model="confirm" persistent>
       <q-card>
@@ -141,6 +139,7 @@
       </q-card>
     </q-dialog>
   </div>
+
 
 
 </template>

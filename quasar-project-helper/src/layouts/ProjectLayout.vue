@@ -79,7 +79,7 @@ onMounted(() => {
           title: 'Homework',
           caption: '@quasarframework',
           icon: 'article',
-          link: `/projects/${projectID.value}/assignment-list`
+          link: `/projects/${projectID.value}/assignment-list/personal`
         },
         {
           title: 'Grade',

@@ -59,14 +59,20 @@ public class JWTUtil {
         return jwt.getClaim("identityCode").asString();
     }
 
+    public static String getExpiredTime(String token){
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getExpiresAt().toString();
+    }
+
     public static boolean verifyToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC512(secret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
             return true; // token is valid
-        } catch (JWTVerificationException e) {
+        } catch (JWTVerificationException | NullPointerException e) {
             // Invalid token
+            System.err.println(e.getMessage());
             return false;
         }
     }

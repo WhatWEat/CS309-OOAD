@@ -57,6 +57,21 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 3. 现在，访问后端的端口变成了https://localhost:8443/
 4. 使用Google Chrome（或其他现代浏览器）访问localhost时，浏览器会弹出类似下图的安全警告，不用理会，部署到云上面就能够解决这个问题
    ![访问效果图](image/访问图.png)
+### redis的配置
+1. 将application.properties中`#redis`改为如下信息：
+   ```properties
+   # redis
+   spring.data.redis.host=124.71.110.18
+   spring.data.redis.port=6379
+   spring.cache.type=redis
+   spring.data.redis.password=G4t!mP8#r2LqX0wV
+   ```
+2. 如果想要可视化的看到数据源中的信息，请在`IDEA`或`DataGrip`中配置数据源
+   - 要下载driver文件
+   - url为jdbc:redis://124.71.110.18:6379/0
+   - 密码请输入G4t!mP8#r2LqX0wV
+   - 不需要账户名
+   - 使用test connection尝试连接，确保可行
 ### springboot：
 
 1. 包名及其意义：
@@ -122,7 +137,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
        "msg": "登出成功"
    }
    ```
-   前端要自行将header中的Token删掉
+   ~~前端要自行将header中的Token删掉~~已经使用redis完善了该功能
 4. /tea/**
 必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
 5. /tea/postNotice POST 

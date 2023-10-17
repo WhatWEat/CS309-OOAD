@@ -44,6 +44,8 @@ public class TeacherController {
     @PostMapping("/postNotice")
     public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        System.err.println(jwt);
+        System.err.println(JWTUtil.getExpiredTime(jwt));
         noticeService.postNotice(notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }

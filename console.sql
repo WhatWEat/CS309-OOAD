@@ -1,10 +1,11 @@
-drop table if exists taOfProject,stuViewNotice,stuInGroup,stuAssignment,groupAssignment,stuSubmit,groupSubmit,
+drop table if exists taOfProject,stuInProject,stuViewNotice,stuInGroup,stuAssignment,groupAssignment,stuSubmit,groupSubmit,
     project,users,notice,groups,assignment,submittedAssignment,evaluation,massage,chat;
 create table if not exists project
 (
     project_id BIGSERIAL primary key,
     name       varchar(200) not null,
-    description varchar(2000)
+    description varchar(2000),
+    teacher_id bigint not null
     );
 
 create table if not exists users
@@ -25,6 +26,12 @@ create table if not exists users
     );
 
 create table if not exists taOfProject
+(
+    project_id bigint not null,
+    ta_id      bigint not null
+);
+
+create table if not exists stuInProject
 (
     project_id bigint not null,
     ta_id      bigint not null

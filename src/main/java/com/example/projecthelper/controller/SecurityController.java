@@ -1,6 +1,7 @@
 package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.HTTPUtil;
@@ -78,8 +79,13 @@ public class SecurityController {
 
     //登出：清理token
     @DeleteMapping("/logout")
-    public ResponseResult<Object> logout(){
-        return ResponseResult.ok(null, "登出成功", authService.logout());
+    public ResponseResult<Object> logout(HttpServletRequest request){
+        //NOTE: 如果还没登陆
+        String token = HTTPUtil.getHeader(request, CustomJwtAuthenticationTokenFilter.AUTH_HEADER);
+        if(token == null || !JWTUtil.verifyToken(token))
+            return ResponseResult.ok(null, "登出成功", null);
+        //NOTE：如果已经登陆了，要拉黑名单
+        return ResponseResult.ok(null, "登出成功", authService.logout(JWTUtil.getUserIdByToken(token)));
     }
 
 

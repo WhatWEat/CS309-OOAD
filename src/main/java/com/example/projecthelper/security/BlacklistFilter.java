@@ -1,0 +1,50 @@
+package com.example.projecthelper.security;
+
+import com.example.projecthelper.service.LogoutBLKService;
+import com.example.projecthelper.util.JWTUtil;
+import com.example.projecthelper.util.LogUtil;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+public class BlacklistFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private LogoutBLKService logoutBLKService;
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+        throws IOException, ServletException {
+        // 获取请求的信息，例如IP地址或用户名
+
+        // 如果token无效，直接进行下一环
+        String token = request.getHeader(CustomJwtAuthenticationTokenFilter.AUTH_HEADER);
+        if (Objects.isNull(token)){
+            filterChain.doFilter(request,response);
+            return;
+        }
+        if (!JWTUtil.verifyToken(token)) {
+            LogUtil.log("invalid token" , LogUtil.WARN);
+            filterChain.doFilter(request,response);
+            return;
+        }
+        // 检查是否在黑名单中
+        if (isBlacklisted(JWTUtil.getUserIdByToken(token))) {
+
+            throw new AuthenticationServiceException("Blocked: You are on the blacklist");
+        }
+        // 不在黑名单，继续
+        filterChain.doFilter(request, response);
+    }
+
+    private boolean isBlacklisted(String id) {
+        // 实现你的黑名单检查逻辑，例如查询数据库或检查一个列表
+        return logoutBLKService.isBlacklisted(id); // 示例返回值，实际应根据你的逻辑进行判断
+    }
+}
+

@@ -33,6 +33,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private LogoutBLKService logoutBLKService;
+
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     /**
@@ -70,7 +73,9 @@ public class AuthService {
         authenticationManager.authenticate(authenticationToken);
 
         //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
-        //TODO: 用userMapper获取含有userID与Identity的字段放入token中
+        //NOTE: 拉出黑名单
+        logoutBLKService.removeFromBlacklist(userPass.getKey());
+        //NOTE: 用userMapper获取含有userID与Identity的字段放入token中
         System.err.println(userPass.getKey()+" "+userPass.getValue());
         User user = null;
         try {
@@ -79,7 +84,10 @@ public class AuthService {
             throw new RuntimeException(e);
         }
         System.err.println(user);
-        return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+        String
+            jwt = JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+        System.err.println(JWTUtil.getExpiredTime(jwt));
+        return jwt;
 
 
     }
@@ -89,7 +97,9 @@ public class AuthService {
      * @return JWT
      * @Improved 一个更可靠的办法是：将相关的token放进黑名单（存redis），然后调用的时候如果在黑名单则认证失败
      */
-    public String logout(){
+    public String logout(String userId){
+        //NOTE: 加入黑名单
+        logoutBLKService.addToBlacklist(userId);
         return null;
     }
 

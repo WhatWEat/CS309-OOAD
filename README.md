@@ -61,7 +61,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 1. 将application.properties中`#redis`改为如下信息：
    ```properties
    # redis
-   spring.data.redis.host=124.71.110.18
+   spring.data.redis.host=www.genshin2.fun
    spring.data.redis.port=6379
    spring.cache.type=redis
    spring.data.redis.password=G4t!mP8#r2LqX0wV

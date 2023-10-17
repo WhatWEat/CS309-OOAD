@@ -122,7 +122,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
        "msg": "登出成功"
    }
    ```
-   前端要自行将header中的Token删掉
+   ~~前端要自行将header中的Token删掉~~已经使用redis完善了该功能
 4. /tea/**
 必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
 5. /tea/postNotice POST 

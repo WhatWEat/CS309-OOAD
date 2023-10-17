@@ -11,12 +11,13 @@
       row-key="AssignmentName"
       selection="single"
       title="Group"
+      card-class="bg-grey-2"
     >
       <!--        右上方按钮插槽-->
       <template v-slot:top-right>
-        <q-toolbar class="bg-primary text-white rounded-borders">
+        <q-toolbar class="bg-grey-5 text-white rounded-borders">
           <!--            这里是下拉框-->
-          <q-btn-dropdown color="primary" icon="menu">
+          <q-btn-dropdown color="grey-5" icon="menu">
             <q-list>
               <q-item v-close-popup clickable @click="viewDetails">
                 <q-item-section>
@@ -113,9 +114,9 @@ export default {
   methods:{
       viewDetails() {
         // 根据需要替换为您的路由链接
-        let temp;
-        temp = 1
-        this.$router.push('/mengbi1/' + temp)
+        //这个跳转还需要进一步的完善
+        const newpath = this.$route.path + '/assignmentDetail'
+        this.$router.push(newpath)
       }
   }
 }

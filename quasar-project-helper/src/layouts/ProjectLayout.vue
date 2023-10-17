@@ -61,39 +61,40 @@ const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([])
 onMounted(() => {
   watchEffect(() => {
-    essentialLinks.value = [
-      {
-        title: 'Announcements',
-        icon: 'record_voice_over',
-        link: 'https://chat.quasar.dev'
-      },
-      {
-        title: 'Group',
-        icon: 'supervisor_account',
-        link: `/projects/${projectID.value}/group-list`
-      },
-      {
-        title: 'Chat',
-        icon: 'chat',
-        link: 'https://forum.quasar.dev'
-      },
-      {
-        title: 'Homework',
-        caption: '@quasarframework',
-        icon: 'article',
-        link: `/projects/${projectID.value}/assignment-list`
-      },
-      {
-        title: 'Grade',
-        icon: 'school',
-        link: 'https://quasar.dev'
-      },
-      {
-        title: 'Person',
-        icon: 'account_box',
-        link: `/person/${userid.value}`
-      },
-    ];
+      essentialLinks.value = [
+        {
+          title: 'Announcements',
+          icon: 'record_voice_over',
+          link: 'https://chat.quasar.dev'
+        },
+        {
+          title: 'Group',
+          icon: 'supervisor_account',
+          link: `/projects/${projectID.value}/group-list`
+        },
+        {
+          title: 'Chat',
+          icon: 'chat',
+          link: 'https://forum.quasar.dev'
+        },
+        {
+          title: 'Homework',
+          caption: '@quasarframework',
+          icon: 'article',
+          link: `/projects/${projectID.value}/assignment-list/personal`
+        },
+        {
+          title: 'Grade',
+          icon: 'school',
+          link: 'https://quasar.dev'
+        },
+        {
+          title: 'Person',
+          icon: 'account_box',
+          link: `/person/${userid.value}`
+        },
+      ];
+
   })
 })
 

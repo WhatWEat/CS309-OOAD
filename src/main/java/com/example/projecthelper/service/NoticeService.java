@@ -53,7 +53,25 @@ public class NoticeService {
 //        }
 //    }
 
-    public boolean stuViewNotice(long notice_id, long stu_id,long user_id){
+
+    public boolean stuViewNotice(long notice_id, long[] stu_id,long user_id){
+        //多个学生看到通知
+        long creator_id;
+        creator_id = noticeMapper.findCreatorByNotice(notice_id);
+        if (user_id == creator_id) {
+            for (long stuId : stu_id) {
+                try {
+                    noticeMapper.stuViewNotice(notice_id, stuId);
+                } catch (PSQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    public boolean stu1ViewNotice(long notice_id, long stu_id,long user_id){
+        //一个学生
         long creator_id;
         creator_id = noticeMapper.findCreatorByNotice(notice_id);
         if (user_id == creator_id) {
@@ -66,7 +84,6 @@ public class NoticeService {
         }
         return false;
     }
-
     public boolean deleteStuViewNotice(long notice_id, long stu_id,long user_id){
         long creator_id;
         creator_id = noticeMapper.findCreatorByNotice(notice_id);

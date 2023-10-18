@@ -78,11 +78,7 @@ public class AuthService {
         //NOTE: 用userMapper获取含有userID与Identity的字段放入token中
         System.err.println(userPass.getKey()+" "+userPass.getValue());
         User user = null;
-        try {
-            user = usersMapper.findUserById(Integer.parseInt(userPass.getKey()));
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        user = usersMapper.findUserById(Integer.parseInt(userPass.getKey()));
         System.err.println(user);
         String
             jwt = JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));

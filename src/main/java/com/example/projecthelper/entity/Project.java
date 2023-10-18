@@ -9,12 +9,15 @@ public class Project {
 
     @TableField("project_id")
     private long projectId;
-
+    private String description;
     private String name;
+    @TableField("teacher_id")
+    private long teacherId;
 
-    public Project(long projectId, String name) {
-        this.projectId = projectId;
+    public Project(long projectId, String name, long teacherId) {
+        this.teacherId = teacherId;
         this.name = name;
+        this.projectId = projectId;
     }
 
     public Project() {

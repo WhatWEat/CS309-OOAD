@@ -97,13 +97,13 @@ public class TeacherController {
         projectService.createProject(name);
     }
 
-    @PostMapping("/createNotice/{title}/{content}/{creator_id}")
-    //创建新的notice
-    public void createNotice(@PathVariable String title,
-                             @PathVariable String content,
-                             @PathVariable Integer creator_id) {
-        noticeService.createNotice(title, content, creator_id);
-    }
+//    @PostMapping("/createNotice/{title}/{content}/{creator_id}")
+//    //创建新的notice
+//    public void createNotice(@PathVariable String title,
+//                             @PathVariable String content,
+//                             @PathVariable Integer creator_id) {
+//        noticeService.createNotice(title, content, creator_id);
+//    }
 
 //    @PostMapping("/createPluralGroup/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
 //    //创建复数个新的小组,其中number代表创建小组的数量，team_time表示组队截止时间，instructor_id表示指导老师的id
@@ -125,12 +125,12 @@ public class TeacherController {
 //        return groupService.createOneGroup( max_size, project_id, team_time, deadline, group_name);
 //    }
 
-    @PostMapping("/updateGroupSize/{max_size}/{group_id}")
-    //修改某一小组的最大人数
-    public void updateGroupSize(@PathVariable long max_size,
-                                @PathVariable long group_id) {
-        groupService.updateGroupSize(max_size, group_id);
-    }
+//    @PostMapping("/updateGroupSize/{max_size}/{group_id}")
+//    //修改某一小组的最大人数
+//    public void updateGroupSize(@PathVariable long max_size,
+//                                @PathVariable long group_id) {
+//        groupService.updateGroupSize(max_size, group_id);
+//    }
 
 //    @PostMapping("/updateGroupInstructor/{instructor_id}/{group_id}")
 //    //修改某一小组的指导老师
@@ -140,19 +140,18 @@ public class TeacherController {
 //    }
 
 
+//    @PostMapping("/updateGroupTime/{team_time}/{group_id}")
+//    //修改某一小组的组队截止时间
+//    public void updateGroupTime(@PathVariable Timestamp team_time,
+//                                @PathVariable long group_id) {
+//        groupService.updateGroupTime(team_time, group_id);
+//    }
 
-    @PostMapping("/updateGroupTime/{team_time}/{group_id}")
-    //修改某一小组的组队截止时间
-    public void updateGroupTime(@PathVariable Timestamp team_time,
-                                @PathVariable long group_id) {
-        groupService.updateGroupTime(team_time, group_id);
-    }
-
-    @PostMapping("/updateGroupDeadline/{deadline}/{group_id}")
-    //修改某一小组的答辩时间
-    public void updateGroupDeadline(@PathVariable Timestamp deadline,
-                                    @PathVariable long group_id) {
-        groupService.updateGroupDeadline(deadline, group_id);
-    }
+//    @PostMapping("/updateGroupDeadline/{deadline}/{group_id}")
+//    //修改某一小组的答辩时间
+//    public void updateGroupDeadline(@PathVariable Timestamp deadline,
+//                                    @PathVariable long group_id) {
+//        groupService.updateGroupDeadline(deadline, group_id);
+//    }
 
 }

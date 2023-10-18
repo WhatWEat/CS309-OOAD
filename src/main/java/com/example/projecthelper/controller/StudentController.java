@@ -71,7 +71,7 @@ public class StudentController {
                                @PathVariable long stu_id,
                                @PathVariable long project_id){
         if (groupService.findGroupOfStuInProject(stu_id,project_id)!=null) {
-            groupService.stuJoinGroup(group_id, stu_id);
+//            groupService.stuJoinGroup(group_id, stu_id);
             return "join successful";
         }else {
             return "you have joined another group";
@@ -82,7 +82,7 @@ public class StudentController {
     //修改某一小组的小组名
     public void updateGroupName(@PathVariable String group_name,
                                 @PathVariable long group_id) {
-        groupService.updateGroupName(group_name, group_id);
+        //groupService.updateGroupName(group_name, group_id);
     }
 
     @PostMapping("/stuLeaveGroup/{group_id}/{stu_id}")

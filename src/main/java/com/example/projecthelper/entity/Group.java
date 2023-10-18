@@ -12,15 +12,22 @@ public class Group {
     private  long groupId;
     @TableField("group_name")
     private String groupName;
+    @TableField("instructor_id")
+    private long instructorId;
+    @TableField("leader_id")
+    private long leaderID;
     @TableField("max_size")
     private long maxsize;
     @TableField("project_id")
     private long projectId;
     @TableField("team_time")
     private Timestamp teamTime;
-    private Timestamp deadline;
-    public Group(long groupId, String groupName, long maxsize, long projectId) {
+    @TableField("report_time")
+    private Timestamp reportTime;
+    private String description;
+    public Group(long groupId,long instructorId, String groupName, long maxsize, long projectId) {
         this.groupId = groupId;
+        this.instructorId = instructorId;
         this.groupName = groupName;
         this.maxsize = maxsize;
         this.projectId = projectId;

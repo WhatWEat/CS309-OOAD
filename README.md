@@ -45,19 +45,33 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 ## 后端：springboot+mybatis-plus+postgresql
 ### https的配置
 0. 确保已经pull最新版gitignore
-1. 请将`keystore.p12`放置在resource目录下（`keystore.p12`已放至qq群）
+1. 请将`genshin2.fun.jks`放置在resource目录下（`genshin2.fun.jks`已放至qq群）
 2. 请在application.properties中增加如下信息
    ```properties
    # https
    server.port=8443
-   server.ssl.key-store-type=PKCS12
-   server.ssl.key-store=classpath:keystore.p12
-   server.ssl.key-store-password=andycheng
-   server.ssl.key-alias=tomcat
+   server.ssl.key-store-type=JKS
+   server.ssl.key-store=classpath:genshin2.fun.jks
+   server.ssl.key-store-password=9wbhq255k7
    ```
 3. 现在，访问后端的端口变成了https://localhost:8443/
-4. 使用Google Chrome（或其他现代浏览器）访问HTTPS网站时，浏览器会检查网站的SSL/TLS证书是否由一个受信任的证书颁发机构（CA）签发。因为暂时使用的证书是`java -keytool`提供的，浏览器会显示一个安全警告，不用理会。
+4. 使用Google Chrome（或其他现代浏览器）访问localhost时，浏览器会弹出类似下图的安全警告，不用理会，部署到云上面就能够解决这个问题
    ![访问效果图](image/访问图.png)
+### redis的配置
+1. 将application.properties中`#redis`改为如下信息：
+   ```properties
+   # redis
+   spring.data.redis.host=www.genshin2.fun
+   spring.data.redis.port=6379
+   spring.cache.type=redis
+   spring.data.redis.password=G4t!mP8#r2LqX0wV
+   ```
+2. 如果想要可视化的看到数据源中的信息，请在`IDEA`或`DataGrip`中配置数据源
+   - 要下载driver文件
+   - url为jdbc:redis://124.71.110.18:6379/0
+   - 密码请输入G4t!mP8#r2LqX0wV
+   - 不需要账户名
+   - 使用test connection尝试连接，确保可行
 ### springboot：
 
 1. 包名及其意义：
@@ -123,7 +137,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
        "msg": "登出成功"
    }
    ```
-   前端要自行将header中的Token删掉
+   ~~前端要自行将header中的Token删掉~~已经使用redis完善了该功能
 4. /tea/**
 必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
 5. /tea/postNotice POST 

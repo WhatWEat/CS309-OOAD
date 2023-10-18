@@ -27,15 +27,19 @@ public class GroupService {
     public long createGroup(Group group){
         group.setTeamTime(new Timestamp(new Date().getTime()));
         try{
+            // 如果组名称为空，则设置组名称为new group
             if(group.getGroupName() == null)
                 group.setGroupName("new group");
+            // 调用groupMapper的createGroup方法，创建组
             long Id = groupMapper.createGroup(group);
             System.err.println("Id:"+Id); // 这个是错的
             System.err.println(group.getGroupId()); // 这个是对的
+            // 返回组ID
             return group.getGroupId();
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
+        // 如果出现异常，返回0
         return 0;
     }
 

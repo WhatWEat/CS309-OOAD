@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.projecthelper.mapper.GroupMapper;
+import com.example.projecthelper.mapper.ProjectMapper;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,16 @@ import org.springframework.stereotype.Service;
 public class GroupService {
     @Autowired
     private GroupMapper groupMapper;
+    @Autowired
+    private ProjectMapper projectMapper;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     //TODO:创建group
+
     public long createGroup(Group group){
+        //引入了查询project创建者的方法在这里
+        long creatorId = projectMapper.findTeacherByProject(group.getProjectId());
         group.setTeamTime(new Timestamp(new Date().getTime()));
         try{
             // 如果组名称为空，则设置组名称为new group
@@ -78,11 +84,29 @@ public class GroupService {
 //        }
 //    }
 
-    public void updateGroupSize(long max_size, long group_id) {
-        try {
-            groupMapper.updateGroupSize(max_size, group_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
+    public void updateGroupForTea(Group group, long user_id) {
+        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+        long creator_id;
+        creator_id = groupMapper.findCreatorByGroup(group.getGroupId());
+        if (creator_id == user_id) {
+            try {
+                groupMapper.updateGroupForTea(group);
+            } catch (PSQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void updateGroupForLeader(Group group, long user_id) {
+        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+        long leader_id;
+        leader_id = groupMapper.findLeaderByGroup(group.getGroupId());
+        if (leader_id == user_id) {
+            try {
+                groupMapper.updateGroupForLeader(group);
+            } catch (PSQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -94,76 +118,25 @@ public class GroupService {
 //        }
 //    }
 
-    public void updateGroupName(String group_name, long group_id) {
-        try {
-            groupMapper.updateGroupName(group_name, group_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void updateGroupTime(Timestamp team_time, long group_id) {
-        try {
-            groupMapper.updateGroupTime(team_time, group_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void updateGroupDeadline(Timestamp deadline, long group_id) {
-        try {
-            groupMapper.updateGroupDeadline(deadline, group_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void stuJoinGroup(long group_id,long stu_id){
-        try {
-            groupMapper.stuJoinGroup(group_id, stu_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public void stuLeaveGroup(long group_id,long stu_id){
-        try {
-            groupMapper.stuLeaveGroup(group_id, stu_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        groupMapper.stuLeaveGroup(group_id, stu_id);
     }
 
     public Group findGroupOfStuInProject(long stu_id, long project_id){
-        try {
-            return groupMapper.findGroupOfStuInProject(stu_id,project_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        return groupMapper.findGroupOfStuInProject(stu_id,project_id);
     }
 
     public List<Group> findUndermannedGroup(long project_id){
-        try {
-            return groupMapper.findUndermannedGroup(project_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        return groupMapper.findUndermannedGroup(project_id);
     }
 
     public List<Group> findAllGroup(long project_id){
-        try {
-            return groupMapper.findAllGroup(project_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        return groupMapper.findAllGroup(project_id);
     }
 
     public int findMemberOfGroup(long group_id){
-        try {
-            return groupMapper.findMemberOfGroup(group_id);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        return groupMapper.findMemberOfGroup(group_id);
     }
 
 }

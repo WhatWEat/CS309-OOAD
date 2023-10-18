@@ -18,6 +18,7 @@ public class UserService {
 
     //TODO:更新个人信息
     public void editPersonInfo(User user, String jwt){
+        //此处mapper中传参已经改为user，可以更改名字、身份、id、性别外的所有信息
         try {
             usersMapper.updateStuInformation(user.getTechnologyStack(), user.getProgrammingSkills(),user.getIntendedTeammates(), Integer.parseInt(JWTUtil.getUserIdByToken(jwt)));
         } catch (PSQLException e) {

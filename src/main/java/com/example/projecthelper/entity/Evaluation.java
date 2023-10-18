@@ -8,30 +8,34 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Comment {
-    @TableField("comment_id")
-    private  long commentId;
+public class Evaluation {
+    @TableField("evaluation_id")
+    private  long evaluationId;
+    @TableField("project_id")
+    private long projectId;
     @TableField("comment_group")
     private  long commentGroup;
     @TableField("commented_group")
     private  long commentedGroup;
-
-    private  long grade;
+    private  float grade;
     @TableField("comment_time")
     private  Timestamp commentTime;
-
     private  String content;
+    @TableField("submit_id")
+    private long submitId;
 
-    public Comment(long commentId, long commentGroup, long commentedGroup,
-                   long grade, Timestamp commentTime, String content) {
-        this.commentId = commentId;
+    public Evaluation(long evaluationId, long projectId, long commentGroup, long commentedGroup,
+                      float grade, Timestamp commentTime, String content, long submitId) {
+        this.evaluationId = evaluationId;
+        this.projectId = projectId;
         this.commentGroup = commentGroup;
         this.commentedGroup = commentedGroup;
         this.grade = grade;
         this.commentTime = commentTime;
         this.content = content;
+        this.submitId = submitId;
     }
 
-    public Comment() {
+    public Evaluation() {
     }
 }

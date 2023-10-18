@@ -4,27 +4,20 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
-
 @Getter
 @Setter
 public class Chat {
     @TableField("chat_id")
     private long chatId;
-    @TableField("from_id")
-    private long fromId;
-    @TableField("to_id")
-    private long toId;
-    private Timestamp chatTime;
+    @TableField("user1_id")
+    private long user1Iid;
+    @TableField("user2_id")
+    private long user2Id;
 
-    private String content;
-
-    public Chat(long chatId, long fromId, long toId, Timestamp chatTime, String content) {
+    public Chat(long chatId, long user1Iid, long user2Id) {
         this.chatId = chatId;
-        this.fromId = fromId;
-        this.toId = toId;
-        this.chatTime = chatTime;
-        this.content = content;
+        this.user1Iid = user1Iid;
+        this.user2Id = user2Id;
     }
 
     public Chat() {

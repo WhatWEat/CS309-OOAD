@@ -10,31 +10,32 @@ import java.util.List;
 @Mapper
 public interface NoticeMapper extends BaseMapper<Notice> {
 
-    @Select("select * from notice where noticeId = #{noticeId};")
-    Notice findNoticeById(long noticeId) throws PSQLException;
+    @Select("select * from notice where notice_id = #{noticeId};")
+    Notice findNoticeById(long noticeId);
 
-    @Select("select * from notice where creatorId = #{creatorId};")
-    List<Notice> findNoticeByCreator(long creatorId) throws PSQLException;
+    @Select("select creator_id from notice where notice_id = #{notice_id};")
+    long findCreatorByNotice(long notice_id);
 
-    @Insert("insert into notice ( title, content, creatorId)\n" +
-            "VALUES (#{title},#{content},#{creatorId});")
-    //title、content、creatorId均不为空，title长度上限为200，content为5000
-    void createNotice(String title,String content,long creatorId) throws PSQLException;
+    @Insert("insert into notice ( title, content, creator_id， project_id)\n" +
+            "VALUES (#{title},#{content},#{creatorId},#{project_id});")
+    //title、content、creatorId、project_id均不为空，title长度上限为200，content为5000
+    void createNotice(Notice notice) throws PSQLException;
 
     @Insert("insert into stuviewnotice (notice_id, stu_id) VALUES (#{notice_id}, #{stu_id});")
+    //二者同时不为空
     void stuViewNotice(long notice_id, long stu_id) throws PSQLException;
 
     @Update("UPDATE notice SET title = #{title}, content = #{content} " +
-            "WHERE noticeId = #{noticeId};")
+            "WHERE notice_id = #{noticeId};")
     //title、content、creatorId均不为空，title长度上限为200，content为5000
-    void updateNotice(String title, String content, long noticeId) throws PSQLException;
+    void updateNotice(Notice notice) throws PSQLException;
 
-    @Delete("DELETE FROM notice WHERE noticeId = #{noticeIId};")
-    void deleteNotice(long noticeId) throws PSQLException;
+    @Delete("DELETE FROM notice WHERE notice_id = #{noticeId};")
+    void deleteNotice(long noticeId);
 
     @Delete("DELETE FROM stuViewNotice WHERE notice_id = #{notice_id} AND stu_id = #{stu_id};")
-    void deleteStuViewNoticeByStu(long notice_id, long stu_id) throws PSQLException;
+    void deleteStuViewNoticeByStu(long notice_id, long stu_id);
 
     @Delete("DELETE FROM stuViewNotice WHERE notice_id = #{notice_id};")
-    void deleteStuViewNoticeByNotice(long notice_id) throws PSQLException;
+    void deleteStuViewNoticeByNotice(long notice_id);
 }

@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString
 public class User {
     @TableField("user_id")
-    private Integer userId;
+    private long userId;
 
     private int identity;
 

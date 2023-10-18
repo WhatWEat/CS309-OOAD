@@ -9,14 +9,17 @@ import lombok.Setter;
 public class Assignment {
     @TableField("assignment_id")
     private long assignmentId;
+    @TableField("project_id")
+    private long projectID;
     private String title;
     private String description;
     private String type;
     @TableField("creator_id")
     private long creatorId;
 
-    public Assignment(long assignmentId, String title, String description, String type, long creatorId) {
+    public Assignment(long assignmentId,long projectID, String title, String description, String type, long creatorId) {
         this.assignmentId = assignmentId;
+        this.projectID = projectID;
         this.title = title;
         this.description = description;
         this.type = type;

@@ -55,7 +55,7 @@ public class NoticeService {
 
 
     public boolean stuViewNotice(long notice_id, long[] stu_id,long user_id){
-        //多个学生
+        //多个学生看到通知
         long creator_id;
         creator_id = noticeMapper.findCreatorByNotice(notice_id);
         if (user_id == creator_id) {

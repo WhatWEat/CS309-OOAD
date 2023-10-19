@@ -9,16 +9,13 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class massage {
-    @TableField("massage_id")
-    private long massageId;
-    @TableField("from_id")
-    private long fromId;
-    @TableField("to_id")
-    private long toId;
+    private Long massageId;
+    private Long fromId;
+    private Long toId;
     private Timestamp chatTime;
     private String content;
 
-    public massage(long massageId, long fromId, long toId, Timestamp chatTime, String content) {
+    public massage(Long massageId, Long fromId, Long toId, Timestamp chatTime, String content) {
         this.massageId = massageId;
         this.fromId = fromId;
         this.toId = toId;

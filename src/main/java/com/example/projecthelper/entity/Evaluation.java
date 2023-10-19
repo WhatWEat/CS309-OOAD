@@ -9,20 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Evaluation {
-    @TableField("evaluation_id")
-    private  long evaluationId;
-    @TableField("project_id")
-    private long projectId;
-    @TableField("comment_group")
-    private  long commentGroup;
-    @TableField("commented_group")
-    private  long commentedGroup;
-    private  float grade;
-    @TableField("comment_time")
+    private  Long evaluationId;
+    private Long projectId;
+    private  Long commentGroup;
+    private  Long commentedGroup;
+    private  Float grade;
     private  Timestamp commentTime;
     private  String content;
-    @TableField("submit_id")
-    private long submitId;
+    private Long submitId;
 
     public Evaluation(long evaluationId, long projectId, long commentGroup, long commentedGroup,
                       float grade, Timestamp commentTime, String content, long submitId) {

@@ -7,14 +7,12 @@ import lombok.Setter;
 @Setter
 public class Project {
 
-    @TableField("project_id")
-    private long projectId;
+    private Long projectId;
     private String description;
     private String name;
-    @TableField("teacher_id")
-    private long teacherId;
+    private Long teacherId;
 
-    public Project(long projectId, String name, long teacherId) {
+    public Project(Long projectId, String name, Long teacherId) {
         this.teacherId = teacherId;
         this.name = name;
         this.projectId = projectId;

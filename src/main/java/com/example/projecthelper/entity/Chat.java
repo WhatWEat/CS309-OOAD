@@ -7,14 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Chat {
-    @TableField("chat_id")
-    private long chatId;
-    @TableField("user1_id")
-    private long user1Iid;
-    @TableField("user2_id")
-    private long user2Id;
+    private Long chatId;
+    private Long user1Iid;
+    private Long user2Id;
 
-    public Chat(long chatId, long user1Iid, long user2Id) {
+    public Chat(Long chatId, Long user1Iid, Long user2Id) {
         this.chatId = chatId;
         this.user1Iid = user1Iid;
         this.user2Id = user2Id;

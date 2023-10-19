@@ -7,18 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class submittedAssignment {
-    @TableField("submit_id")
-    private long submitId;
-    @TableField("assignment_id")
-    private long assignmentId;
-    private float grade;
-    @TableField("project_id")
-    private long projectId;
+    private Long submitId;
+    private Long assignmentId;
+    private Float grade;
+    private Long projectId;
     private String text;
     private String comment;
     private String filepath;
 
-    public submittedAssignment(long submitId, long assignmentId, long projectId) {
+    public submittedAssignment(Long submitId, Long assignmentId, Long projectId) {
         this.submitId = submitId;
         this.assignmentId = assignmentId;
         this.projectId = projectId;

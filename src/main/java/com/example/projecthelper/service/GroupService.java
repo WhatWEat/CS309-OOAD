@@ -1,20 +1,27 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
 
+import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,74 +35,55 @@ public class GroupService {
 
     //TODO:创建group
 
-    public long createGroup(Group group){
-        //引入了查询project创建者的方法在这里
-        long creatorId = projectMapper.findTeacherByProject(group.getProjectId());
-        group.setTeamTime(new Timestamp(new Date().getTime()));
+    public void createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
+        // FUNC: 给行projectId，调用者是否有权限使用
+        if(!accessProject.test(group.getProjectId())){
+            throw new AccessDeniedException("无权创建小组");
+        }
         try{
-            // 如果组名称为空，则设置组名称为new group
-            if(group.getGroupName() == null)
-                group.setGroupName("new group");
-            // 调用groupMapper的createGroup方法，创建组
-            long Id = groupMapper.createGroup(group);
-            System.err.println("Id:"+Id); // 这个是错的
+            group.setCreatorId(creatorId);
+            groupMapper.createGroup(group);
             System.err.println(group.getGroupId()); // 这个是对的
-            // 返回组ID
-            return group.getGroupId();
         }catch (Exception e){
             System.err.println(e.getMessage());
+            throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
         }
-        // 如果出现异常，返回0
-        return 0;
+    }
+    public void createGroup(ObjectCountWrapper<Group> ocw, Long creatorId, Predicate<Long> accessProject){
+        // FUNC: 给行projectId，调用者是否有权限使用
+        if(!accessProject.test(ocw.getObj().getProjectId())){
+            throw new AccessDeniedException("无权创建小组");
+        }
+        if(ocw.getObj().getGroupName() == null || ocw.getObj().getMaxsize() == null || ocw.getObj().getInstructorId() == null)
+            throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
+        List<Group> groups = Stream.generate(ocw::getObj).limit(ocw.getCount()).toList();
+        // 设置时间
+        groups.forEach(g -> {
+            g.setCreatorId(creatorId);
+        });
+        groupMapper.createGroups(groups);
     }
 
-    //TODO:修改group的信息
-    public void modifyGroupInfo(Group group){
 
-    }
-
-    //TODO:学生加入group
-    public void joinGroup(Group group, String jwt){
-
-    }
-//    public long[] createPluralGroup( long max_size,
-//                                    long project_id, Timestamp team_time, Timestamp deadline, int number) {
-//        long[] GroupIds = new long[number];
-//        for (int i = 0 ; i <GroupIds.length;i++) {
-//            String group_name = "new Group";
-//            try {
-//                GroupIds[i] = groupMapper.createGroup( max_size, group_name, project_id, team_time, deadline);
-//            } catch (PSQLException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//        return GroupIds;
-//    }
-
-//    public long createOneGroup(long max_size,long project_id,
-//                               Timestamp team_time, Timestamp deadline, String group_name) {
-//        if (group_name == null) {
-//            group_name = "new Group";
-//        }
-//        try {
-//            return groupMapper.createGroup( max_size, group_name, project_id, team_time, deadline);
-//        } catch (PSQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    public void updateGroupForTea(Group group, long user_id) {
+    public void updateGroupForTea(Group group, Predicate<Long> accessGroup) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
-        long creator_id;
-        creator_id = groupMapper.findCreatorByGroup(group.getGroupId());
-        if (creator_id == user_id) {
+        if (accessGroup.test(group.getGroupId())) {
             try {
                 groupMapper.updateGroupForTea(group);
             } catch (PSQLException e) {
                 throw new RuntimeException(e);
             }
         }
+        else
+            throw new AccessDeniedException("无权修改小组信息");
     }
+
+    //TODO:学生加入group
+    public void joinGroup(Group group, String jwt){
+
+    }
+
+
 
     public void updateGroupForLeader(Group group, long user_id) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
@@ -137,6 +125,10 @@ public class GroupService {
 
     public int findMemberOfGroup(long group_id){
         return groupMapper.findMemberOfGroup(group_id);
+    }
+
+    public Long findCreatorByGroup(Long groupId){
+        return groupMapper.findCreatorByGroup(groupId);
     }
 
 }

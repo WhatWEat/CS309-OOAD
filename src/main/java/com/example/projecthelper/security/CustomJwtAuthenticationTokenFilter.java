@@ -42,7 +42,7 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
         LogUtil.log(token , LogUtil.INFO);
         //verify token
         if (!JWTUtil.verifyToken(token)) {
-            System.err.println(JWTUtil.getUserIdByToken(token));
+            System.err.println(token);
             LogUtil.log("invalid token" , LogUtil.WARN);
             filterChain.doFilter(request,response);
             return;

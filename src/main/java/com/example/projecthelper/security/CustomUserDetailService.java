@@ -23,14 +23,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        int userId = Integer.parseInt(username);
+        Long userId = Long.parseLong(username);
         User user = null;
-        try {
-            user = usersMapper.findUserById(userId);
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
-
+        user = usersMapper.findUserById(userId);
         if (user == null) {
             LogUtil.log("User not found with userId: " + userId, LogUtil.WARN);
             throw new UsernameNotFoundException("User not found with userId: " + userId);

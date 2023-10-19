@@ -1,12 +1,22 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
+import com.example.projecthelper.mapper.UsersMapper;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,35 +25,77 @@ public class NoticeService {
     private NoticeMapper noticeMapper;
     @Autowired
     private ProjectMapper projectMapper;
+    @Autowired
+    private UsersMapper usersMapper;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
-    //TODO：发布Notice,现在creator_id已经重新移入notice类中
-    public void postNotice(Notice notice, Long creator_id){
-        long creatorId = projectMapper.findTeacherByProject(notice.getProjectId());
-        if (creator_id == creatorId) {
+    private Set<Long> toStu(Notice notice){
+        Set<Long> toIds = null;
+        if(notice.getToAll()){
+            //FUNC:在这个proj的学生都能看到
+            toIds = new HashSet<>(projectMapper.findStuIdsByProject(notice.getProjectId()));
+        }
+        else {
+            List<Long> ids = notice.getStuView();
+            //FUNC: 筛选掉identity不等于3的
+            toIds = usersMapper
+                .findUsersById(ids)
+                .stream()
+                .filter(user -> Objects.equals(user.getIdentity(), 3))
+                .map(User::getUserId).collect(Collectors.toSet());
+        }
+
+        return toIds;
+    }
+
+    //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert
+    public void postNotice(Notice notice, Long creatorId, Predicate<Long> accessProject){
+        if (accessProject.test(notice.getProjectId())) {
             try {
+                notice.setCreatorId(creatorId);
                 noticeMapper.createNotice(notice);
+                System.err.println(notice.getNoticeId());
+                Set<Long> toIds = toStu(notice);
+                noticeMapper.insertStuView(toIds, notice.getNoticeId());
             } catch (PSQLException e) {
-                throw new RuntimeException(e);
+                throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
             }
         }
-    }
-
-    //TODO:先匹配jwt中的id与notice中的id，防止篡改他人内容。验证之后才进行更改Notice
-    public boolean modifyNoticeWithUser(Notice notice, Long currentUserId){
-        try {
-            long creatorId = noticeMapper.findNoticeById(notice.getNoticeId()).getCreatorId();
-
-            if(creatorId != currentUserId)
-                return false;
-            noticeMapper.updateNotice(notice);
-            return true;
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
+        else {
+            throw new AccessDeniedException("您没有权限发布该公告");
         }
     }
 
+    //PROC：get Notice --> get noticeId --> compare creatorId and id in JWT --> update
+    public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice){
+        try {
+            if(!accessNotice.test(notice.getNoticeId()))
+                throw new AccessDeniedException("您没有权限修改该公告");
+            notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+            noticeMapper.updateNotice(notice);
+            Set<Long> toIds = toStu(notice);
+            noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
+            System.err.println("toIds"+toIds);
+            noticeMapper.insertStuView(toIds, notice.getNoticeId());
+        } catch (PSQLException e) {
+            throw new InvalidFormException("title or content is null");
+        }
+    }
+
+    //PROC：get noticeId --> compare creatorId and id in JWT --> delete --> deleteStuView
+    public void deleteNotice(Long noticeId, Predicate<Long> accessNotice){
+        if (accessNotice.test(noticeId)) {
+            noticeMapper.deleteNotice(noticeId);
+            noticeMapper.deleteStuViewNoticeByNotice(noticeId);
+        }
+        else
+            throw new AccessDeniedException("您没有权限删除该公告");
+    }
+
+    public Notice findNoticeById(Long noticeId){
+        return noticeMapper.findNoticeById(noticeId);
+    }
 
 //    public void createNotice(String title,String content,Integer creatorId){
 //        try {
@@ -93,14 +145,5 @@ public class NoticeService {
         }
         return false;
     }
-    public boolean deleteNotice(long notice_id,long user_id){
-        long creator_id;
-        creator_id = noticeMapper.findCreatorByNotice(notice_id);
-        if (user_id == creator_id) {
-            noticeMapper.deleteNotice(notice_id);
-            noticeMapper.deleteStuViewNoticeByNotice(notice_id);
-            return true;
-        }
-        return false;
-    }
+
 }

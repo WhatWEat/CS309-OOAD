@@ -145,8 +145,10 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    请求体：
    ```json
    {
-       "title": "new title",
-       "content": "new content"
+      "title":"t1",
+      "content":"c1",
+      "projectId": 1, 
+      "stuView": [3, 4, 5, 6, 7]
    }
    ```
    响应体：
@@ -166,8 +168,10 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    ```json
    {
       "noticeId":1,
-      "title":"new title 1",
-      "content": "new content 1"
+      "title":"t2",
+      "content": "c2",
+      "stuView": [3],
+      "toAll": true
    }
    ```
    响应体：
@@ -203,9 +207,145 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-9. /
+9. /adm/createMultipleUsers
 
+   请求体：
 
+   ```json
+   {
+    "obj":{
+        "identity": 3,
+        "password": "Aa@123456",
+        "name": "Andy",
+        "gender": "m"
+    },
+    "count": 10
+   }
+   ```
+   `identity, password, name, gender, count`均不能为空
+
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+10. /tea/createProject
+
+   请求体：
+
+   ```json
+   {
+    "name": "CS309"
+   }
+   ```
+   `name`均不能为空
+
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+11. /tea/addStuToProject
+
+   请求体：
+   
+   ```json
+   {
+    "key": 1,
+    "value": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+   }  
+   ```
+   `key, value`均不能为空
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+12. /tea/createGroup
+
+   请求体：
+
+   ```json
+   {
+    "maxsize": 5,
+    "groupName": "gp1",
+    "projectId": 1,
+    "instructorId": 1
+   }
+   ```
+   `maxsize, groupName, projectId, instructorId`均不能为空
+
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+13. /tea/createMultipleGroups
+
+   请求体：
+
+   ```json
+   {
+    "obj": {
+    "maxsize": 10,
+    "groupName":"gp2",
+    "projectId": 1,
+    "instructorId": 1
+    },
+    "count": 10
+   }
+   ```
+   `maxsize, groupName, projectId, instructorId, count`均不能为空
+
+   响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+14. /tea/modifyGroupInfo
+
+   请求体：
+
+   ```json
+   {
+   "maxsize": 500,
+   "groupName": "gp3",
+   "instructorId": 1,
+   "groupId": 4
+   }
+   ```
+   `maxsize, groupName, groupId, instructorId`均不能为空
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
 
 ### Controller接口
 

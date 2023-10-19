@@ -11,10 +11,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class User {
-    @TableField("user_id")
-    private long userId;
+    private Long userId;
 
-    private int identity;
+    private Integer identity;
 
     private String password;
 
@@ -28,11 +27,8 @@ public class User {
 
     private Date birthday;
 
-    @TableField("technology_stack")
     private String technologyStack;
-    @TableField("programming_skills")
     private String programmingSkills;
-    @TableField("intended_teammates")
     private String intendedTeammates;
 
 

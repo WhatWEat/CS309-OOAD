@@ -14,11 +14,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-            .allowedOrigins("http://localhost:9090")
+            .allowedOrigins("http://localhost:9000")
             .allowedMethods("*")
             .allowedOriginPatterns("*").allowCredentials(true);
         registry.addMapping("/static/**")
-            .allowedOrigins("http://localhost:9090")
+            .allowedOrigins("http://localhost:9000")
             .allowedMethods("*")
             .allowedOriginPatterns("*").allowCredentials(true);
     }

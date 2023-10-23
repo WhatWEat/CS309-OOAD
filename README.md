@@ -85,6 +85,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 1. 响应体一定是ResponseResult<T>类，请见`com.example.projecthelper.util.ResponseResult`
 2. ResponseResult中有状态码，请以该状态码为准
 3. 如果操作失败了，返回的ResponseResult的jwt_token为null。
+4. 如果发现你一直被导向login页面，你可以打开后端，然后进入/test,使用“start genshin”来获取一个用于test的token
 ### 后端已经完成基本测试的接口：
 1. /signup POST
    

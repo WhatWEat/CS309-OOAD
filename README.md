@@ -351,33 +351,26 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 
 所有请求地址名字都暂定，后端可以为了统一修改请求地址
 
-#### 登录
+#### 校验 （前端10.23提出）
 
-##### /users/login/{user}/{password}
+get /getIden
 
-**效果：** 用于利用账号和密码或者验证码进行登录
+无请求体，仅携带jwt_token
 
-**具体要求：**
+响应体
 
-1. 需要对user和password进行验证，支持多种方式判定，例如user既可以代表学号，也可以代表邮箱和手机号，只要一个验证通过就返回true
-2. 在验证通过之后需要将秘钥或者其他的注入到cookies里
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "data": {
+      "username": "123"
+      "userid": 12
+   }
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
 
-##### /users/reg/{user}/{password}
-
-**效果：** 用于利用手机（还没好）和学号进行注册
-
-**具体要求：**
-
-1. 暂时没什么要求，能检验学号，手机号有咩有冲突就好
-
-#### 主页面
-
-##### /projects/{page}/{pagesize}
-
-**效果：** 给出一个返回指定数量的project类的list ，有cookies
-**具体要求：**   
-
-1. 需要支持分页，我会给定变量page和pagesize来限制返回的数量，但当请求不提供page和pagesize时，需要返回全部的project。  
 2. project类中至少应该包含project的自增id和project的名字，  
 3. ~~用户的id利用cookies查询，现在由于登录的cookies还没写好，请在后端先写死一个id来做样例~~
 

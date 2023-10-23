@@ -5,7 +5,11 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [{path: '', component: () => import('pages/IndexPages/IndexPage.vue')},
-      {path: '/test', component: () => import('pages/TestPage.vue')}],
+      {path: '/test', component: () => import('pages/TestPage.vue'),
+        meta: {
+          freeLogin: true
+        }
+      }],
   },
   {
     path: '/projects/:projectID',
@@ -43,10 +47,16 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/login',
+    meta: {
+      freeLogin: true
+    },
     component: () => import('pages/LoginPages/UserLogin.vue')
   },
   {
     path: '/register',
+    meta: {
+      freeLogin: true
+    },
     component: () => import('pages/LoginPages/UserRegister.vue')
   },
   {
@@ -92,5 +102,4 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/ErrorNotFound.vue'),
   },
 ];
-
 export default routes;

@@ -117,7 +117,7 @@ export default defineComponent({
       } else if (loginType.value === 'phone') {
         rules.push((val) => val.length === 11 || '手机号码必须为11位')
       }
-      
+
       return rules
     }
 
@@ -132,7 +132,10 @@ export default defineComponent({
         loginValue: loginValue.value,
         password: password.value
       }).then((res) => {
+
         console.log(res)
+      //   不要改动以下代码
+
       }).catch((err) => {
         console.log(err)
       })

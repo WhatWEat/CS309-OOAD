@@ -93,9 +93,7 @@ module.exports = configure(function (/* ctx */) {
           target: 'https://localhost:8443',
           changeOrigin: true,
           secure: false,
-          pathRewrite: {
-            '^/api': ''
-          }
+          rewrite: (path) => path.replace(/^\/api/, ''),
         }
       },
       open: true // opens browser window automatically

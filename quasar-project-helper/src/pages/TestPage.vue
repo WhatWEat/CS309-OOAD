@@ -1,15 +1,34 @@
 <template>
   <q-page class="q-pa-sm">
     <div class="row q-col-gutter-sm justify-center">
-      <q-btn @click="testLogin"></q-btn>
+      <q-btn @click="testSign"></q-btn>
+      <q-btn label="Start Genshin"
+        @click="startGenshin"></q-btn>
     </div>
   </q-page>
 </template>
 
 <script setup>
 import {api} from 'boot/axios';
-function testLogin(){
-  api.get('/api/login',{
+function startGenshin(){
+  api.get('/login',{
+    withCredentials: true
+  }).then((response) => {
+    let jwt = response.data.jwt_token;
+    localStorage.setItem('Token', jwt);
+    console.log(jwt);
+    console.log(response);
+  }).catch((error) => {
+    console.log(error);
+  });
+}
+function testSign(){
+  api.post('/signup',{
+    identity: 0,
+    password: '123456',
+    name: 'Andy',
+    gender: 'm'
+  },{
     withCredentials: true
   }).then((response) => {
     console.log(response);

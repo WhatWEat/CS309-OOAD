@@ -27,6 +27,16 @@ export default route(function (/* { store, ssrContext } */) {
     // history: createHistory(process.env.VUE_ROUTER_BASE),
     // history: createHistory('history'),
   });
-
+  Router.beforeEach((to, from, next) => {
+    if (to.meta.freeLogin) {
+      next();
+    } else {
+      const token = localStorage.getItem('Token');
+      if (!token) {
+        next('/login');
+      }
+      next();
+    }
+  })
   return Router;
 });

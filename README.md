@@ -354,7 +354,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 
 #### 校验 （前端10.23提出）
 
-get /getIden
+##### get /getIden
 
 无请求体，仅携带jwt_token
 
@@ -371,8 +371,60 @@ get /getIden
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
+#### todo-list (前端10.24提出）
+##### get /todo/add
 
-2. project类中至少应该包含project的自增id和project的名字，  
-3. ~~用户的id利用cookies查询，现在由于登录的cookies还没写好，请在后端先写死一个id来做样例~~
+用于添加一个todo的item
 
-**用途：** 该接口用于主页上的展示
+请求体：
+
+   ```json
+   {
+   description: "Finish the homework"
+   }
+   ```
+
+响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+##### get /todo/remove/{id}
+
+用于删除一个todo list的item
+
+无请求体
+
+响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+
+##### get /todo/list
+
+用于展示所有的todo list
+
+无请求体
+
+响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "data": [
+      {id: 1, description: "finish math"},
+      {id: 2, description: "finish science"},
+   ]
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```

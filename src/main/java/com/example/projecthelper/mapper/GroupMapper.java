@@ -35,8 +35,16 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
-    @Select("select * from group where groupid = #{groupId}")
+    @Select("select * from groups where groupid = #{groupId}")
     Group findGroupById(long groupId);
+
+    @Select("select g.groupId from groups g join stuInGroup sIG on g.groupId = sIG.groupId where g.projectId = #{projectId} and sIG.stuId = #{userId}; ")
+    Long findGroupIdOfUserInAProj(long userId, long projectId);
+
+    @Insert("insert into stuInGroup values (#{groupId}, #{stuId})")
+    void stuJoinGroup(Long stuId, Long groupId);
+    @Delete("delete from stuingroup where stuId = #{stuId};")
+    void stuLeaveGroup(long stuId);
 
     @Update("update groups set " +
             "groupName =#{groupName}, " +
@@ -56,8 +64,7 @@ public interface GroupMapper extends BaseMapper<Group> {
             "where groupId = #{groupId};")
     void updateGroupForLeader(Group group) throws PSQLException;
 
-    @Delete("delete from stuingroup where groupId = #{groupId} and stuId = #{stuId};")
-    void stuLeaveGroup(long groupId,long stuId);
+
 
     @Select("""
             select * from groups where groupId in (

@@ -78,9 +78,24 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
     }
 
-    //TODO:学生加入group
-    public void joinGroup(Group group, String jwt){
 
+    public void joinGroup(Long groupId, Long stuId){
+        //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
+        Group gp = groupMapper.findGroupById(groupId);
+        if(gp == null){
+            throw new InvalidFormException("小组不存在");
+        }
+        if(projectMapper.checkStuInGroup(stuId, gp.getProjectId()) == null){
+            throw new AccessDeniedException("无权加入小组");
+        }
+        if(groupMapper.findGroupIdOfUserInAProj(stuId, gp.getProjectId()) != null){
+            // 在这个proj中学生加入了其他小组
+            throw new AccessDeniedException("您已经在其他小组中");
+        }
+        groupMapper.stuJoinGroup(stuId, groupId);
+    }
+    public void leaveGroup(Long stuId){
+        groupMapper.stuLeaveGroup(stuId);
     }
 
 
@@ -106,10 +121,6 @@ public class GroupService {
 //        }
 //    }
 
-
-    public void stuLeaveGroup(long group_id,long stu_id){
-        groupMapper.stuLeaveGroup(group_id, stu_id);
-    }
 
     public Group findGroupOfStuInProject(long stu_id, long project_id){
         return groupMapper.findGroupOfStuInProject(stu_id,project_id);

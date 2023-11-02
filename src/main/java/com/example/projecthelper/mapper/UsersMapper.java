@@ -48,9 +48,10 @@ public interface UsersMapper extends BaseMapper<User> {
     void createUser(User user);
 
     @Update("UPDATE users SET " +
-            "password = #{password},"+
             "phone = #{phone},"+
             "mail = #{mail},"+
+            "name = #{name},"+
+            "gender = #{gender},"+
             "birthday = #{birthday},"+
             "technologyStack = #{technologyStack}," +
             "programmingSkills = #{programmingSkills}, " +

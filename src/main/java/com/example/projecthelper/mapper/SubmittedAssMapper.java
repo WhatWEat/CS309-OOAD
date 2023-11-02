@@ -9,14 +9,20 @@ import java.util.List;
 
 @Mapper
 public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
-    @Insert("insert into submittedassignment(assignmentid, projectid, text, comment, filepath)\n" +
-            "VALUES (#{assignmentId}, #{projectId}, #{text}, #{comment}, #{filepath});")
+    @Insert("insert into submittedassignment(assignmentId, submitterId, text, comment, filepath)\n" +
+            "VALUES (#{assignmentId}, #{submitterId}, #{text}, #{comment}, #{filepath});")
 
         //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
-    @Options(useGeneratedKeys = true, keyProperty = "submitId")
+    @Options(useGeneratedKeys = true, keyProperty = "submitId", keyColumn = "submitid")
     void submitAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
-    @Insert("insert into stuassignment (assignmentid, stuid) VALUES (#{assignmentId},#{stuId});")
+    @Delete("delete from submittedAssignment where assignmentId = #{assignmentId} and submitterId = #{submitterId};")
+    void deleteOriginalSubmit(SubmittedAssignment submittedAssignment);
+
+    @Select("select * from submittedAssignment where submitId = #{submitId}")
+    SubmittedAssignment findSubmittedAssignmentById(long submitId);
+
+    @Insert("insert into stuassignment (assignmentId, stuid) VALUES (#{assignmentId},#{stuId});")
     void stuSubmitAss(long assignmentId,long stuId) throws PSQLException;
 
     @Insert("insert into groupassignment (assignmentid, groupid) VALUES (#{assignmentId},#{groupId}")
@@ -64,14 +70,14 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     SubmittedAssignment findGroupSubByAss( long assignmentId, long groupId);
 
 
-    @Select("select * from submittedassignment where projectid = #{projectId} and assignmentid = #{assignmentId};")
-    List<SubmittedAssignment> findAllSub(long projectId,long assignmentId);
+    @Select("select * from submittedassignment where assignmentid = #{assignmentId};")
+    List<SubmittedAssignment> findAllSub(long assignmentId);
 
     @Select("select * from submittedassignment where submitid = #{submitId};")
     SubmittedAssignment viewSub(long submitId);
 
     @Update("UPDATE submittedAssignment SET grade = #{grade}, comment = #{comment}, review = #{review} WHERE submitid = #{submitId};")
-    void gradeAss(float grade, String comment ,long submitId,String review) throws PSQLException;
+    void gradeAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
 
 

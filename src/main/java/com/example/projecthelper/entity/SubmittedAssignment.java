@@ -1,28 +1,32 @@
 package com.example.projecthelper.entity;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class SubmittedAssignment {
     private Long submitId;
     private Long assignmentId;
     private Float grade;
-    private Long projectId;
+    private Long submitterId;
     private String text;
     private String comment;
     private String filepath;
     private String review;
-    public SubmittedAssignment(Long submitId, Long assignmentId, Long projectId) {
+    private LocalDateTime submitTime;
+    public SubmittedAssignment(Long submitId, Long assignmentId, Long submitterId) {
         this.submitId = submitId;
         this.assignmentId = assignmentId;
-        this.projectId = projectId;
+        this.submitterId = submitterId;
     }
 
-    public SubmittedAssignment(Long assignmentId, Long projectId, String text, String filepath) {
+    public SubmittedAssignment(Long assignmentId, Long submitterId, String text, String filepath) {
         this.assignmentId = assignmentId;
-        this.projectId = projectId;
+        this.submitterId = submitterId;
         this.text = text;
         this.filepath = filepath;
     }

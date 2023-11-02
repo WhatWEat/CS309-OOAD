@@ -9,8 +9,8 @@ import org.postgresql.util.PSQLException;
 
 @Mapper
 public interface AssignmentMapper extends BaseMapper<Assignment> {
-    @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId)\n" +
-            "VALUES (#{title}, #{fullMark}, #{projectId}, #{description}, #{type}, #{creatorId}")
+    @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId, deadline)\n" +
+            "VALUES (#{title}, #{fullMark}, #{projectId}, #{description}, #{type}, #{creatorId}, #{deadline})")
     /*此处所有变量均不为空，其中title长度200，description为2000
     type仅有i(individual)、g(group)两种模式*/
     void createAss(Assignment assignment) throws PSQLException;
@@ -19,3 +19,14 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     Assignment findAssById(long assignmentId);
 
 }
+
+
+
+
+
+
+
+
+
+
+

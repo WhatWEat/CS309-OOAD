@@ -53,4 +53,8 @@ public class ProjectService {
     public Long findTeacherByProject(Long projectId){
         return projectMapper.findTeacherByProject(projectId);
     }
+
+    public void stuInProject(long projectId, long stuId){
+        usersMapper.stuInProject(projectId,stuId);
+    }
 }

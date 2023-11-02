@@ -36,7 +36,7 @@ public class StudentController {
     @PutMapping("/editPersonInfo")
     public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        userService.editPersonInfo(user, jwt);
+        //userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

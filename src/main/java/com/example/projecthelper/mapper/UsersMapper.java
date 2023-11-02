@@ -21,6 +21,13 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     List<User> findUsersById(List<Long> userIds);
 
+    @Select("select projectid from stuinproject where stuid= #{stuId};")
+    List<Long> findProByStu(long stuId);
+
+
+    @Insert("insert into stuinproject (projectid, stuid) VALUES (#{projectId},#{projectId});")
+    void stuInProject(long projectId, long stuId);
+
     @Insert("INSERT INTO users (identity, password, name, gender) " +
             "VALUES (#{identity}, #{password}, #{name},#{gender}) ")
     @Options(useGeneratedKeys = true, keyProperty = "userId")

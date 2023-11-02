@@ -35,6 +35,9 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
+    @Select("select * from group where groupid = #{groupId}")
+    Group findGroupById(long groupId);
+
     @Update("update groups set " +
             "groupName =#{groupName}, " +
             "leaderId =#{leaderId}, " +

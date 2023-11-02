@@ -1,12 +1,11 @@
 package com.example.projecthelper.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class submittedAssignment {
+public class SubmittedAssignment {
     private Long submitId;
     private Long assignmentId;
     private Float grade;
@@ -14,13 +13,20 @@ public class submittedAssignment {
     private String text;
     private String comment;
     private String filepath;
-
-    public submittedAssignment(Long submitId, Long assignmentId, Long projectId) {
+    private String review;
+    public SubmittedAssignment(Long submitId, Long assignmentId, Long projectId) {
         this.submitId = submitId;
         this.assignmentId = assignmentId;
         this.projectId = projectId;
     }
 
-    public submittedAssignment() {
+    public SubmittedAssignment(Long assignmentId, Long projectId, String text, String filepath) {
+        this.assignmentId = assignmentId;
+        this.projectId = projectId;
+        this.text = text;
+        this.filepath = filepath;
+    }
+
+    public SubmittedAssignment() {
     }
 }

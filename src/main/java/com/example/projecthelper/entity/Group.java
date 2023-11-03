@@ -1,5 +1,6 @@
 package com.example.projecthelper.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,19 +9,19 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class Group {
-    @TableField("group_id")
-    private  long groupId;
-    @TableField("group_name")
+    private Long groupId;
     private String groupName;
-    @TableField("max_size")
-    private long maxsize;
-    @TableField("project_id")
-    private long projectId;
-    @TableField("team_time")
+    private Long creatorId;
+    private Long instructorId;
+    private Long leaderId;
+    private Long maxsize;
+    private Long projectId;
     private Timestamp teamTime;
-    private Timestamp deadline;
-    public Group(long groupId, String groupName, long maxsize, long projectId) {
+    private Timestamp reportTime;
+    private String description;
+    public Group(Long groupId,Long instructorId, String groupName, Long maxsize, Long projectId) {
         this.groupId = groupId;
+        this.instructorId = instructorId;
         this.groupName = groupName;
         this.maxsize = maxsize;
         this.projectId = projectId;

@@ -1,6 +1,7 @@
 package com.example.projecthelper.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,15 +10,21 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Notice {
-    @TableField("notice_id")
-    private long noticeId;
+    private Long noticeId;
+    private Long projectId;
     private String title;
     private String content;
-    @TableField("creator_id")
-    private long creatorId;
+    private Long creatorId;
 
-    public Notice(long noticeId, String title, String content, long creatorId) {
+    @TableField(exist = false)
+    private List<Long> stuView;
+
+    @TableField(exist = false)
+    private Boolean toAll = false;
+
+    public Notice(Long noticeId, Long projectId, String title, String content, Long creatorId) {
         this.noticeId = noticeId;
+        this.projectId = projectId;
         this.title = title;
         this.content = content;
         this.creatorId = creatorId;

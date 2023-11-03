@@ -1,5 +1,6 @@
 package com.example.projecthelper.config;
 
+import com.example.projecthelper.security.BlacklistFilter;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.security.JwtAuthenticationProvider;
 import com.example.projecthelper.security.UnauthorizedHandler;
@@ -57,6 +58,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public BlacklistFilter blackListFilter(){
+        return new BlacklistFilter();
+    }
+
+    @Bean
     public JwtAuthenticationProvider jwtAuthProvider(){
         return new JwtAuthenticationProvider();
     }
@@ -80,9 +86,12 @@ public class SecurityConfig {
         //使用自定义provider
         httpSecurity
             .authenticationProvider(jwtAuthProvider());
-        //添加JWT filter
+
         httpSecurity
-            .addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+            //添加JWT filter
+            .addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+            // 添加黑名单filter
+            .addFilterBefore(blackListFilter(), jwtAuthenticationTokenFilter().getClass());
 
         httpSecurity
             .exceptionHandling((exception)->

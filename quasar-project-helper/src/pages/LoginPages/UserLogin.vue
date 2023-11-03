@@ -124,7 +124,6 @@ export default defineComponent({
     function getPasswordRules() {
       return [(val) => val.length >= 6 || '密码长度不能小于6位']
     }
-
     function login() {
       // 登录逻辑
       router.push('/')
@@ -132,6 +131,13 @@ export default defineComponent({
         loginType: loginType.value,
         loginValue: loginValue.value,
         password: password.value
+      }).then((res) => {
+
+        console.log(res)
+      //   不要改动以下代码
+
+      }).catch((err) => {
+        console.log(err)
       })
       console.log('登录:', loginValue.value, password.value)
     }

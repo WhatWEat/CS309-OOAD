@@ -8,9 +8,12 @@ import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private LogoutBLKService logoutBLKService;
+
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     /**
@@ -51,11 +57,28 @@ public class AuthService {
             usersMapper.registerUser(user);
         }catch (Exception e){
             System.err.println(e.getMessage());
-            System.err.println("hello");
             throw new InvalidFormException("信息不完整");
         }
         System.out.println(user);
         return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+    }
+
+    //NOTE: 这个方法只给adm使用
+    public String registerUser(ObjectCountWrapper<User> multiUsers){
+        User user = multiUsers.getObj();
+        boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
+        boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
+        if(!strongPass || !validIdentity)
+            throw new InvalidFormException("密码太弱或身份不合法");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        try {
+            List<User> users = Stream.generate(multiUsers::getObj).limit(multiUsers.getCount()).toList();
+            usersMapper.registerUsers(users);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            throw new InvalidFormException("信息不完整");
+        }
+        return null;
     }
 
     /**
@@ -63,23 +86,24 @@ public class AuthService {
      * @param userPass 用户密码
      * @return JWT
      */
-    public String login(KeyValueWrapper userPass){
+    public String login(KeyValueWrapper<String, String> userPass){
 
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(userPass.getKey(), userPass.getValue());
         authenticationManager.authenticate(authenticationToken);
 
         //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
-        //TODO: 用userMapper获取含有userID与Identity的字段放入token中
+        //NOTE: 拉出黑名单
+        logoutBLKService.removeFromBlacklist(userPass.getKey());
+        //NOTE: 用userMapper获取含有userID与Identity的字段放入token中
         System.err.println(userPass.getKey()+" "+userPass.getValue());
         User user = null;
-        try {
-            user = usersMapper.findUserById(Integer.parseInt(userPass.getKey()));
-        } catch (PSQLException e) {
-            throw new RuntimeException(e);
-        }
+        user = usersMapper.findUserById(Long.parseLong(userPass.getKey()));
         System.err.println(user);
-        return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+        String
+            jwt = JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+        System.err.println(JWTUtil.getExpiredTime(jwt));
+        return jwt;
 
 
     }
@@ -89,7 +113,9 @@ public class AuthService {
      * @return JWT
      * @Improved 一个更可靠的办法是：将相关的token放进黑名单（存redis），然后调用的时候如果在黑名单则认证失败
      */
-    public String logout(){
+    public String logout(String userId){
+        //NOTE: 加入黑名单
+        logoutBLKService.addToBlacklist(userId);
         return null;
     }
 

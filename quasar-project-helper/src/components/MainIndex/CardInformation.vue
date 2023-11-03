@@ -105,7 +105,7 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
-import {computed} from "vue-demi";
+import {computed} from 'vue-demi';
 const selectedDate = ref(today())
 const CURRENT_DAY = new Date()
 
@@ -272,14 +272,14 @@ computed(() => {
   console.log(map)
   return map
 })
-function badgeClasses(event, type) {
+function badgeClasses(event) {
   return {
     [`text-white bg-${event.bgcolor}`]: true,
     'rounded-border': true
   }
 }
 
-function badgeStyles(day, event) {
+function badgeStyles() {
   const s = {}
   return s
 }

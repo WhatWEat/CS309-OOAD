@@ -1,14 +1,18 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.entity.User;
-import com.example.projecthelper.service.AuthService;
+import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +23,14 @@ import java.util.List;
 public class StudentController {
     private final UserService userService;
     private final GroupService groupService;
+    private final AssignmentService assignmentService;
 
     @Autowired
     public StudentController(UserService userService,
-                             GroupService groupService) {
+                             GroupService groupService, AssignmentService assignmentService) {
         this.userService = userService;
         this.groupService = groupService;
+        this.assignmentService = assignmentService;
     }
 
 
@@ -40,7 +46,48 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/joinGroup")
+    public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.joinGroup(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @DeleteMapping("/leaveGroup")
+    public ResponseResult<Object> leaveGroup(HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.leaveGroup(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
+    @PostMapping("/submitAssignment")
+    public ResponseResult<Object> submitAssignment(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.submitAss(
+            submittedAssignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/removeAss")
+    public ResponseResult<Object> removeAss(HttpServletRequest request, @RequestBody Long submitId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.removeAss(
+            submitId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/viewSub")
+    public ResponseResult<SubmittedAssignment> viewSub(HttpServletRequest request, @RequestBody Long submitId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        SubmittedAssignment submittedAssignment = assignmentService.viewSubByStu(
+            submitId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(submittedAssignment, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 
 
@@ -71,7 +118,7 @@ public class StudentController {
                                @PathVariable long stu_id,
                                @PathVariable long project_id){
         if (groupService.findGroupOfStuInProject(stu_id,project_id)!=null) {
-            groupService.stuJoinGroup(group_id, stu_id);
+//            groupService.stuJoinGroup(group_id, stu_id);
             return "join successful";
         }else {
             return "you have joined another group";
@@ -82,15 +129,10 @@ public class StudentController {
     //修改某一小组的小组名
     public void updateGroupName(@PathVariable String group_name,
                                 @PathVariable long group_id) {
-        groupService.updateGroupName(group_name, group_id);
+        //groupService.updateGroupName(group_name, group_id);
     }
 
-    @PostMapping("/stuLeaveGroup/{group_id}/{stu_id}")
-    //学生退出小组
-    public void stuLeaveGroup(@PathVariable long group_id,
-                              @PathVariable long stu_id){
-        groupService.stuLeaveGroup(group_id, stu_id);
-    }
+
 
     @GetMapping("/findGroupByProject/{stu_id}/{project_id}")
     //寻找特定project下学生已经加入的小组

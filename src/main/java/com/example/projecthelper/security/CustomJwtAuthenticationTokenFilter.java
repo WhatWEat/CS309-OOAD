@@ -42,16 +42,14 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
         LogUtil.log(token , LogUtil.INFO);
         //verify token
         if (!JWTUtil.verifyToken(token)) {
-            LogUtil.log("invalid token" , LogUtil.INFO);
+            System.err.println(token);
+            LogUtil.log("invalid token" , LogUtil.WARN);
             filterChain.doFilter(request,response);
             return;
         }
 
         final String userId =  JWTUtil.getUserIdByToken(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-        System.err.println(
-            "here"
-        );
         userDetails.getAuthorities().forEach(e -> System.err.println(e.getAuthority()));
 
         // 注意，这里使用的是3个参数的构造方法，此构造方法将认证状态设置为true

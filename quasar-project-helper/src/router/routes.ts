@@ -53,6 +53,13 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
+  //#####################测试使用，后期删除#######################
+  {
+    path: '/temp',
+    component: () => import('pages/AssignmentPages/AssignmentFramework.vue')
+  },
+  //#####################测试使用，后期删除#######################
+
   // Always leave this as last one,
   // but you can also remove it
   {

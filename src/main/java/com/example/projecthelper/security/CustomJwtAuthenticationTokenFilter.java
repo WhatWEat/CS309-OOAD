@@ -38,7 +38,6 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request,response);
             return;
         }
-
         LogUtil.log(token , LogUtil.INFO);
         //verify token
         if (!JWTUtil.verifyToken(token)) {
@@ -51,7 +50,6 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
         final String userId =  JWTUtil.getUserIdByToken(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         userDetails.getAuthorities().forEach(e -> System.err.println(e.getAuthority()));
-
         // 注意，这里使用的是3个参数的构造方法，此构造方法将认证状态设置为true
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());

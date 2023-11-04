@@ -85,22 +85,24 @@ create table if not exists assignment
     description   varchar(5000) not null,
     --仅有i(individual)、g(group)两种模式
     type          varchar(1)   not null,
-    creatorId    bigint        not null
+    creatorId    bigint        not null,
+    fullMark int not null,
+    deadline timestamp not null
     );
-drop table if exists stuAssignment;
-create table if not exists stuAssignment
-(
-    assignmentId bigint not null,
-    stuId        bigint not null,
-    primary key (assignmentId, stuId)
-    );
-drop table if exists groupAssignment;
-create table if not exists groupAssignment
-(
-    assignmentId bigint not null,
-    groupId      bigint not null,
-    primary key (assignmentId, groupId)
-    );
+-- drop table if exists stuAssignment;
+-- create table if not exists stuAssignment
+-- (
+--     assignmentId bigint not null,
+--     stuId        bigint not null,
+--     primary key (assignmentId, stuId)
+-- );
+-- drop table if exists groupAssignment;
+-- create table if not exists groupAssignment
+-- (
+--     assignmentId bigint not null,
+--     groupId      bigint not null,
+--     primary key (assignmentId, groupId)
+-- );
 drop table if exists submittedAssignment;
 create table if not exists submittedAssignment
 (
@@ -108,27 +110,29 @@ create table if not exists submittedAssignment
     submitId     BIGSERIAL primary key,
     assignmentId bigint not null,
     grade         float,
-    projectId bigint not null ,
+    submitterId bigint not null ,
     text          varchar(1000),
     comment       varchar(1000),
-    filepath      varchar(200)
+    review        varchar(100),
+    filepath      varchar(200),
+    submitTime    timestamp not null
     );
 
 -- 这张表与下groupSubmit均代表提交的作业与提交者的关系
-drop table if exists stuSubmit;
-create table if not exists stuSubmit
-(
-    submitId bigint not null,
-    stuId    bigint not null,
-    primary key (submitId, stuId)
-    );
-drop table if exists groupSubmit;
-create table if not exists groupSubmit
-(
-    submitId bigint not null,
-    groupId  bigint not null,
-    primary key (submitId, groupId)
-    );
+-- drop table if exists stuSubmit;
+-- create table if not exists stuSubmit
+-- (
+--     submitId bigint not null,
+--     stuId    bigint not null,
+--     primary key (submitId, stuId)
+-- );
+-- drop table if exists groupSubmit;
+-- create table if not exists groupSubmit
+-- (
+--     submitId bigint not null,
+--     groupId  bigint not null,
+--     primary key (submitId, groupId)
+-- );
 drop table if exists evaluation;
 create table if not exists evaluation
 (
@@ -141,8 +145,8 @@ create table if not exists evaluation
     content         varchar(1000) not null,
     submitId       BIGINT        not null
     );
-drop table if exists massage;
-create table if not exists massage
+drop table if exists message;
+create table if not exists message
 (
     massageId bigint not null ,
     chatId bigint not null ,

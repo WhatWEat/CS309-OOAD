@@ -85,6 +85,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 1. 响应体一定是ResponseResult<T>类，请见`com.example.projecthelper.util.ResponseResult`
 2. ResponseResult中有状态码，请以该状态码为准
 3. 如果操作失败了，返回的ResponseResult的jwt_token为null。
+4. 如果发现你一直被导向login页面，你可以打开后端，然后进入/test,使用“start genshin”来获取一个用于test的token
 ### 后端已经完成基本测试的接口：
 1. /signup POST
    
@@ -192,12 +193,17 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    
    ```json
    {
+    "phone": "123456",
+    "mail": "usr@gmail.com",
+    "name": "Alice",
+    "gender": "f",
+    "birthday": "2023-11-02",
     "technologyStack": "ts1",
     "programmingSkills": "ps1",
     "intendedTeammates": "it1"
    }
    ```
-   
+   `name, gender`不能为空
    响应体
 
    ```json
@@ -207,7 +213,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-9. /adm/createMultipleUsers
+9. /adm/createMultipleUsers POST
 
    请求体：
 
@@ -233,7 +239,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-10. /tea/createProject
+10. /tea/createProject POST
 
    请求体：
 
@@ -253,7 +259,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-11. /tea/addStuToProject
+11. /tea/addStuToProject POST
 
    请求体：
    
@@ -274,7 +280,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-12. /tea/createGroup
+12. /tea/createGroup POST
 
    请求体：
 
@@ -297,7 +303,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-13. /tea/createMultipleGroups
+13. /tea/createMultipleGroups POST
 
    请求体：
 
@@ -323,7 +329,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-14. /tea/modifyGroupInfo
+14. /tea/modifyGroupInfo PUT
 
    请求体：
 
@@ -347,38 +353,232 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    }
    ```
 
+15. /stu/joinGroup POST
+    请求体：
+   
+   ```json
+   1
+   ```
+   一个数字，表示groupId
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+16. /stu/leaveGroup DELETE
+    响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+17. /tea/postAssignment POST
+
+   请求体：
+   
+   ```json
+   {
+    "title": "ass1",
+    "description": "write an essay",
+    "projectId": 1,
+    "fullMark": 100,
+    "type": "g",
+    "deadline": "2024-11-02T15:45:30"
+   }
+   ```
+   `title, description, projectId, fullMark, type, deadline`均不能为空
+   `type`取值范围：`g`表示group，`i`表示individual
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+18. /stu/submitAssignment POST
+    请求体：
+
+   ```json
+   {
+    "assignmentId": 1,
+    "text": "test111",
+    "filepath": "file/121"
+   }
+   ```
+   `assignmentId`不能为空,如果是错误的`assignmentId`会产生异常
+
+   如果之前提交过了，会自动覆盖旧的作业
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+19. /stu/removeAss DELETE
+    请求体：
+   
+   ```json
+   1
+   ```
+   表示提交的Id
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+20. /tea/viewAllSubmittedAss GET
+    请求体：
+   
+   ```json
+   1
+   ```
+   表示作业的Id，根据作业的`assignmentId`查看所有的已经提交的作业
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+21. /tea/gradeAss POST
+    请求体：
+   
+   ```json
+   {
+    "grade": 88,
+    "submitId": 1,
+    "comment": "hello",
+    "review": "review_test"
+   }
+   ```
+   `submitId`不能为空
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+22. /stu/viewSub GET
+    请求体：
+
+   ```json
+   1
+   ```
+   表示提交的Id
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
 ### Controller接口
 
 所有请求地址名字都暂定，后端可以为了统一修改请求地址
 
-#### 登录
+#### 校验 （前端10.23提出）
 
-##### /users/login/{user}/{password}
+##### get /getIden
 
-**效果：** 用于利用账号和密码或者验证码进行登录
+无请求体，仅携带jwt_token
 
-**具体要求：**
+响应体
 
-1. 需要对user和password进行验证，支持多种方式判定，例如user既可以代表学号，也可以代表邮箱和手机号，只要一个验证通过就返回true
-2. 在验证通过之后需要将秘钥或者其他的注入到cookies里
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "data": {
+      "username": "123", 
+      "userid": 12
+   }, 
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+#### todo-list (前端10.24提出）
+##### get /todo/add
 
-##### /users/reg/{user}/{password}
+用于添加一个todo的item
 
-**效果：** 用于利用手机（还没好）和学号进行注册
+请求体：
 
-**具体要求：**
+   ```json
+   {
+   "description": "Finish the homework"
+   }
+   ```
 
-1. 暂时没什么要求，能检验学号，手机号有咩有冲突就好
+响应体
 
-#### 主页面
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+##### get /todo/remove/{id}
 
-##### /projects/{page}/{pagesize}
+用于删除一个todo list的item
 
-**效果：** 给出一个返回指定数量的project类的list ，有cookies
-**具体要求：**   
+无请求体
 
-1. 需要支持分页，我会给定变量page和pagesize来限制返回的数量，但当请求不提供page和pagesize时，需要返回全部的project。  
-2. project类中至少应该包含project的自增id和project的名字，  
-3. ~~用户的id利用cookies查询，现在由于登录的cookies还没写好，请在后端先写死一个id来做样例~~
+响应体
 
-**用途：** 该接口用于主页上的展示
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+
+##### get /todo/list
+
+用于展示所有的todo list
+
+无请求体
+
+响应体
+
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "data": [
+      {"id": 1, "description": "finish math"},
+      {"id": 2, "description": "finish science"}
+   ],
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```

@@ -1,8 +1,10 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 
@@ -26,6 +28,7 @@ public class TeacherController {
     private final AuthService authService;
     private final NoticeService noticeService;
     private final GroupService groupService;
+    private final AssignmentService assignmentService;
 
     @Autowired
     private UserService userService;
@@ -35,10 +38,11 @@ public class TeacherController {
 
     @Autowired
     public TeacherController(AuthService authService, NoticeService noticeService,
-                             GroupService groupService) {
+                             GroupService groupService, AssignmentService assignmentService) {
         this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
+        this.assignmentService = assignmentService;
     }
 
 
@@ -143,6 +147,48 @@ public class TeacherController {
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @PostMapping("/postAssignment")
+    public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.createAss(
+            assignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            pjId -> Objects.equals(
+                projectService.findTeacherByProject(pjId),
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            )
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/viewAllSubmittedAss")
+    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(HttpServletRequest request, @RequestBody Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<SubmittedAssignment> submittedAssignments = assignmentService.viewAllSub(
+            assignmentId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/gradeAss")
+    public ResponseResult<Object> gradeAss(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.gradeAss(
+            submittedAssignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+
+//    @GetMapping("/getIfStuSub")
+//    public ResponseResult<Object> getIfStuSub(HttpServletRequest request, @RequestBody KeyValueWrapper assignment){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        boolean sub = assignmentService.ifStuSub()
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
 

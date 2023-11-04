@@ -8,7 +8,6 @@ target/
 ### propertities
 src/main/resources/application.properties
 logging/ph.log
-src/main/resources/genshin2.fun.jks
 
 ### STS ###
 .apt_generated

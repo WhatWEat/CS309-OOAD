@@ -107,6 +107,7 @@ public class SecurityConfig {
                     .requestMatchers("/tea/**").hasAuthority(IdentityCode.TEACHER.name())
                     .requestMatchers("/ta/**").hasAuthority(IdentityCode.TEACHER_ASSISTANT.name())
                     .requestMatchers("/stu/**").hasAuthority(IdentityCode.STUDENT.name())
+                    .anyRequest().authenticated()
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")

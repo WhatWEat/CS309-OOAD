@@ -64,8 +64,9 @@ public class SecurityController {
 
 
     //TODO:
-    @GetMapping("/wa")
+    @GetMapping("/getPersonalInfo")
     public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
+        System.err.println("here");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         User user = authService.getPersonalInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));

@@ -64,6 +64,12 @@ public class SecurityController {
 
 
     //TODO:
+    @GetMapping("/wa")
+    public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        User user = authService.getPersonalInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
+    }
     @PostMapping("/signup")
     public ResponseResult<Long> signup(@RequestBody User user){
         String jwt = authService.registerUser(user);

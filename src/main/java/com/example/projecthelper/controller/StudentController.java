@@ -52,27 +52,27 @@ public class StudentController {
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/editPersonInfo")
+    @PutMapping("/edit_person_info")
     public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/joinGroup")
+    @PostMapping("/join_group")
     public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.joinGroup(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
-    @DeleteMapping("/leaveGroup")
+    @DeleteMapping("/leave_group")
     public ResponseResult<Object> leaveGroup(HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.leaveGroup(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/submitAssignment")
+    @PostMapping("/submit_assignment")
     public ResponseResult<Object> submitAssignment(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.submitAss(
@@ -82,7 +82,7 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/removeAss")
+    @DeleteMapping("/remove_ass")
     public ResponseResult<Object> removeAss(HttpServletRequest request, @RequestBody Long submitId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.removeAss(
@@ -92,7 +92,7 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/viewSub")
+    @GetMapping("/view_sub")
     public ResponseResult<SubmittedAssignment> viewSub(HttpServletRequest request, @RequestBody Long submitId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         SubmittedAssignment submittedAssignment = assignmentService.viewSubByStu(

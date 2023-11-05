@@ -28,20 +28,18 @@ public interface UsersMapper extends BaseMapper<User> {
     @Insert("insert into stuinproject (projectid, stuid) VALUES (#{projectId},#{projectId});")
     void stuInProject(long projectId, long stuId);
 
-    @Insert("INSERT INTO users (identity, password, name, gender) " +
-            "VALUES (#{identity}, #{password}, #{name},#{gender}) ")
-    @Options(useGeneratedKeys = true, keyProperty = "userId")
+    @Insert("INSERT INTO users (userId, identity, password, name, gender) " +
+            "VALUES (#{userId}, #{identity}, #{password}, #{name},#{gender}) ")
     void registerUser(User user) throws PSQLException;
 
     @Insert({
         "<script>",
-        "INSERT INTO users (identity, password, name, gender) VALUES",
+        "INSERT INTO users (userId, identity, password, name, gender) VALUES",
         "<foreach collection='users' item='user' separator=','>",
-        "(#{user.identity}, #{user.password}, #{user.name}, #{user.gender})",
+        "(#{user.userId}, #{user.identity}, #{user.password}, #{user.name}, #{user.gender})",
         "</foreach>",
         "</script>"
     })
-    @Options(useGeneratedKeys = true, keyProperty = "userId")
     void registerUsers(List<User> users) throws PSQLException;
 
 

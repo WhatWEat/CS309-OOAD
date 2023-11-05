@@ -1,18 +1,17 @@
 package com.example.projecthelper.controller;
 
-import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.GroupService;
+import com.example.projecthelper.service.NoticeService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
-import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +21,15 @@ import java.util.List;
 @RequestMapping("/stu")
 public class StudentController {
     private final UserService userService;
+    private final NoticeService noticeService;
     private final GroupService groupService;
     private final AssignmentService assignmentService;
 
     @Autowired
     public StudentController(UserService userService,
-                             GroupService groupService, AssignmentService assignmentService) {
+                             NoticeService noticeService, GroupService groupService, AssignmentService assignmentService) {
         this.userService = userService;
+        this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
     }
@@ -37,6 +38,18 @@ public class StudentController {
     @GetMapping("/test")
     public ResponseResult<Object> test(){
         return ResponseResult.ok(null, "Success", null);
+    }
+
+    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
+                                                @PathVariable("page") long page,
+                                                @PathVariable("page_size") long pageSize,
+                                                   HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Notice> result = noticeService.getNotices(userId, projectId, page, pageSize);
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/editPersonInfo")

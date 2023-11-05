@@ -17,6 +17,16 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select creatorId from notice where noticeId = #{noticeId};")
     Long findCreatorByNotice(Long noticeId);
 
+    //FUNC: 寻找一个学生在proj中的所有notice
+    @Select("select * from notice n join stuviewnotice s on n.noticeid = s.noticeid " +
+        "where s.stuid = #{stuId} and n.projectid = #{projId} limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfStuAndProj(Long stuId, Long projId, Long limit, Long offset);
+
+    //FUNC: 寻找一个学生的所有notice
+    @Select("select * from notice n join stuviewnotice s on n.noticeid = s.noticeid " +
+        "where s.stuid = #{stuId} limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfStu(Long stuId, Long limit, Long offset);
+
     @Insert("insert into notice ( title, content, creatorId, projectId)\n" +
             "VALUES (#{title},#{content},#{creatorId},#{projectId});")
     @Options(useGeneratedKeys = true, keyProperty = "noticeId", keyColumn = "noticeid")

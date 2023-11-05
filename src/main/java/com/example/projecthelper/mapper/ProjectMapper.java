@@ -33,5 +33,5 @@ public interface ProjectMapper extends BaseMapper<Project> {
     void insertStuIds(@Param("projectId") Long projectId, @Param("stuIds") Set<Long> stuIds);
 
     @Select("select stuId from stuInProject where stuId = #{stuId} and projectId = #{projectId}; ")
-    Long checkStuInGroup(Long stuId, Long projectId);
+    Long checkStuInProj(Long stuId, Long projectId);
 }

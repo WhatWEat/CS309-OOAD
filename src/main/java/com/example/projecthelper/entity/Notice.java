@@ -1,6 +1,7 @@
 package com.example.projecthelper.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,13 @@ public class Notice {
     private String title;
     private String content;
     private Long creatorId;
+    private LocalDateTime createTime;
+
+    @TableField(exist = false)
+    private String creatorName;
+
+    @TableField(exist = false)
+    private String projectName;
 
     @TableField(exist = false)
     private List<Long> stuView;

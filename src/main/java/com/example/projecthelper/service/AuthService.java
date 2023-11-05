@@ -6,22 +6,15 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
-import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +57,7 @@ public class AuthService {
     }
 
     //NOTE: 这个方法只给adm使用
-    public String registerUser(ObjectCountWrapper<User> multiUsers){
+    public void registerUser(ObjectCountWrapper<User> multiUsers){
         User user = multiUsers.getObj();
         boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
         boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
@@ -78,7 +71,6 @@ public class AuthService {
             System.err.println(e.getMessage());
             throw new InvalidFormException("信息不完整");
         }
-        return null;
     }
 
     /**
@@ -106,6 +98,15 @@ public class AuthService {
         return jwt;
 
 
+    }
+
+    public User getPersonalInfo(Long userId){
+        User user = usersMapper.findUserById(userId);
+        if(user != null){
+            user.setPassword(null);
+            return user;
+        }
+        return null;
     }
 
     /**

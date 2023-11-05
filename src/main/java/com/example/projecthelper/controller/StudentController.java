@@ -1,9 +1,12 @@
 package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.entity.User;
-import com.example.projecthelper.service.AuthService;
+import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.GroupService;
+import com.example.projecthelper.service.NoticeService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
@@ -18,13 +21,17 @@ import java.util.List;
 @RequestMapping("/stu")
 public class StudentController {
     private final UserService userService;
+    private final NoticeService noticeService;
     private final GroupService groupService;
+    private final AssignmentService assignmentService;
 
     @Autowired
     public StudentController(UserService userService,
-                             GroupService groupService) {
+                             NoticeService noticeService, GroupService groupService, AssignmentService assignmentService) {
         this.userService = userService;
+        this.noticeService = noticeService;
         this.groupService = groupService;
+        this.assignmentService = assignmentService;
     }
 
 
@@ -33,14 +40,67 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", null);
     }
 
-    @PutMapping("/editPersonInfo")
+    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
+                                                @PathVariable("page") long page,
+                                                @PathVariable("page_size") long pageSize,
+                                                   HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Notice> result = noticeService.getNotices(userId, projectId, page, pageSize);
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PutMapping("/edit_person_info")
     public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/join_group")
+    public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.joinGroup(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @DeleteMapping("/leave_group")
+    public ResponseResult<Object> leaveGroup(HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.leaveGroup(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
+    @PostMapping("/submit_assignment")
+    public ResponseResult<Object> submitAssignment(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.submitAss(
+            submittedAssignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/remove_ass")
+    public ResponseResult<Object> removeAss(HttpServletRequest request, @RequestBody Long submitId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.removeAss(
+            submitId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/view_sub")
+    public ResponseResult<SubmittedAssignment> viewSub(HttpServletRequest request, @RequestBody Long submitId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        SubmittedAssignment submittedAssignment = assignmentService.viewSubByStu(
+            submitId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(submittedAssignment, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 
 
@@ -85,12 +145,7 @@ public class StudentController {
         //groupService.updateGroupName(group_name, group_id);
     }
 
-    @PostMapping("/stuLeaveGroup/{group_id}/{stu_id}")
-    //学生退出小组
-    public void stuLeaveGroup(@PathVariable long group_id,
-                              @PathVariable long stu_id){
-        groupService.stuLeaveGroup(group_id, stu_id);
-    }
+
 
     @GetMapping("/findGroupByProject/{stu_id}/{project_id}")
     //寻找特定project下学生已经加入的小组

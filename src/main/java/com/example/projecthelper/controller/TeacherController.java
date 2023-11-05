@@ -1,8 +1,10 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 
@@ -26,6 +28,7 @@ public class TeacherController {
     private final AuthService authService;
     private final NoticeService noticeService;
     private final GroupService groupService;
+    private final AssignmentService assignmentService;
 
     @Autowired
     private UserService userService;
@@ -35,15 +38,16 @@ public class TeacherController {
 
     @Autowired
     public TeacherController(AuthService authService, NoticeService noticeService,
-                             GroupService groupService) {
+                             GroupService groupService, AssignmentService assignmentService) {
         this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
+        this.assignmentService = assignmentService;
     }
 
 
 
-    @PostMapping("/createProject")
+    @PostMapping("/create_project")
     public  ResponseResult<Object> createProject(@RequestBody Project proj, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         proj.setTeacherId(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
@@ -51,14 +55,14 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/addStuToProject")
+    @PostMapping("/add_stu_to_project")
     public ResponseResult<Object> addStuToProject(HttpServletRequest request, @RequestBody
     KeyValueWrapper<Long, List<Long>> pjId_stuId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         projectService.addStuToProject(pjId_stuId.getKey(), pjId_stuId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
-    @PostMapping("/postNotice")
+    @PostMapping("/post_notice")
     public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         System.err.println(jwt);
@@ -74,7 +78,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/modifyNotice")
+    @PutMapping("/modify_notice")
     public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.modifyNoticeWithUser(
@@ -87,7 +91,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/deleteNotice")
+    @DeleteMapping("/delete_notice")
     public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody Long noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.deleteNotice(
@@ -101,7 +105,7 @@ public class TeacherController {
     }
 
 
-    @PostMapping("/createGroup")
+    @PostMapping("/create_group")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
@@ -116,7 +120,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/createMultipleGroups")
+    @PostMapping("/create_multiple_groups")
     public ResponseResult<Object> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
@@ -131,7 +135,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/modifyGroupInfo")
+    @PutMapping("/modify_group_info")
     public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.updateGroupForTea(
@@ -143,6 +147,48 @@ public class TeacherController {
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @PostMapping("/post_assignment")
+    public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.createAss(
+            assignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            pjId -> Objects.equals(
+                projectService.findTeacherByProject(pjId),
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            )
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/view_all_submitted_ass")
+    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(HttpServletRequest request, @RequestBody Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<SubmittedAssignment> submittedAssignments = assignmentService.viewAllSub(
+            assignmentId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/grade_ass")
+    public ResponseResult<Object> gradeAss(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.gradeAss(
+            submittedAssignment,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+
+//    @GetMapping("/getIfStuSub")
+//    public ResponseResult<Object> getIfStuSub(HttpServletRequest request, @RequestBody KeyValueWrapper assignment){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        boolean sub = assignmentService.ifStuSub()
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
 

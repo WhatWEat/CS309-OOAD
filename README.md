@@ -142,7 +142,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    ~~前端要自行将header中的Token删掉~~已经使用redis完善了该功能
 4. /tea/**
 必须以教师身份访问，否则返回的响应体的"statusCode" = 402“权限不够”（比如说学生来发）
-5. /tea/postNotice POST 
+5. /tea/post_notice POST 
    
    请求体：
    ```json
@@ -164,7 +164,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
        "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiJudWxsIiwiZXhwIjoxNjk2OTQ1ODQxLCJpZGVudGl0eUNvZGUiOiIwIiwiaWF0IjoxNjk2OTQ0OTQxfQ.Ivu-LmaUnoEJ_tP0vWPnWBcg4w1dNrYliOOMyrZvO-ycXABDJGUxhxb30qyfGxihSjCZsA8rc_ZwnJFhBdvI1g"
    }
    ```
-6. /tea/modifyNotice PUT
+6. /tea/modify_notice PUT
 
    请求体：
    ```json
@@ -188,18 +188,23 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    }
    ```
 7. /stu/**必须以学生身份访问，identity为3, 否则权限不够
-8. /stu/editPersonInfo PUT
+8. /stu/edit_person_info PUT
    
    请求体：
    
    ```json
    {
+    "phone": "123456",
+    "mail": "usr@gmail.com",
+    "name": "Alice",
+    "gender": "f",
+    "birthday": "2023-11-02",
     "technologyStack": "ts1",
     "programmingSkills": "ps1",
     "intendedTeammates": "it1"
    }
    ```
-   
+   `name, gender`不能为空
    响应体
 
    ```json
@@ -209,7 +214,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-9. /adm/createMultipleUsers
+9. /adm/create_multiple_users POST
 
    请求体：
 
@@ -235,7 +240,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-10. /tea/createProject
+10. /tea/create_project POST
 
    请求体：
 
@@ -255,7 +260,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-11. /tea/addStuToProject
+11. /tea/add_stu_to_Project POST
 
    请求体：
    
@@ -276,7 +281,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-12. /tea/createGroup
+12. /tea/create_group POST
 
    请求体：
 
@@ -299,7 +304,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-13. /tea/createMultipleGroups
+13. /tea/create_multiple_groups POST
 
    请求体：
 
@@ -325,7 +330,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
-14. /tea/modifyGroupInfo
+14. /tea/modify_group_info PUT
 
    请求体：
 
@@ -349,6 +354,155 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    }
    ```
 
+15. /stu/join_group POST
+    请求体：
+   
+   ```json
+   1
+   ```
+   一个数字，表示groupId
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+16. /stu/leave_group DELETE
+    响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+17. /tea/post_assignment POST
+
+   请求体：
+   
+   ```json
+   {
+    "title": "ass1",
+    "description": "write an essay",
+    "projectId": 1,
+    "fullMark": 100,
+    "type": "g",
+    "deadline": "2024-11-02T15:45:30"
+   }
+   ```
+   `title, description, projectId, fullMark, type, deadline`均不能为空
+   `type`取值范围：`g`表示group，`i`表示individual
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+18. /stu/submit_assignment POST
+    请求体：
+
+   ```json
+   {
+    "assignmentId": 1,
+    "text": "test111",
+    "filepath": "file/121"
+   }
+   ```
+   `assignmentId`不能为空,如果是错误的`assignmentId`会产生异常
+
+   如果之前提交过了，会自动覆盖旧的作业
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+19. /stu/remove_ass DELETE
+    请求体：
+   
+   ```json
+   1
+   ```
+   表示提交的Id
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+20. /tea/view_all_submitted_ass GET
+    请求体：
+   
+   ```json
+   1
+   ```
+   表示作业的Id，根据作业的`assignmentId`查看所有的已经提交的作业
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+21. /tea/grade_ass POST
+    请求体：
+   
+   ```json
+   {
+    "grade": 88,
+    "submitId": 1,
+    "comment": "hello",
+    "review": "review_test"
+   }
+   ```
+   `submitId`不能为空
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
+22. /stu/view_sub GET
+    请求体：
+
+   ```json
+   1
+   ```
+   表示提交的Id
+   
+   响应体
+   
+   ```json
+   {
+   "statusCode": 200,
+   "msg": "Success",
+   "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
+   }
+   ```
 ### Controller接口
 
 所有请求地址名字都暂定，后端可以为了统一修改请求地址
@@ -366,9 +520,9 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "statusCode": 200,
    "msg": "Success",
    "data": {
-      "username": "123"
+      "username": "123", 
       "userid": 12
-   }
+   }, 
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```
@@ -381,7 +535,7 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
 
    ```json
    {
-   description: "Finish the homework"
+   "description": "Finish the homework"
    }
    ```
 
@@ -423,9 +577,9 @@ vue组件存在**不同层级**：layout，page，component，请大家根据自
    "statusCode": 200,
    "msg": "Success",
    "data": [
-      {id: 1, description: "finish math"},
-      {id: 2, description: "finish science"},
-   ]
+      {"id": 1, "description": "finish math"},
+      {"id": 2, "description": "finish science"}
+   ],
    "jwt_token": "eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIyIiwiZXhwIjoxNjk3Mjc3OTgzLCJpZGVudGl0eUNvZGUiOiIzIiwiaWF0IjoxNjk3Mjc0MzgzfQ.Awh6vlRDj3mPQs3T2OAcC5D-2JD7kGX9qBHtVdEohTo6Xnz_B_tMDbAFtTNP9DvF8E6XftkOi-UQ_D4H_NGHug"
    }
    ```

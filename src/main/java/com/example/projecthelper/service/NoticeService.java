@@ -6,6 +6,7 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +65,7 @@ public class NoticeService {
         if (accessProject.test(notice.getProjectId())) {
             try {
                 notice.setCreatorId(creatorId);
+                notice.setCreateTime(LocalDateTime.now());
                 noticeMapper.createNotice(notice);
                 System.err.println(notice.getNoticeId());
                 Set<Long> toIds = toStu(notice);

@@ -105,7 +105,7 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
-import {truncate} from "src/composables/usefulFunction";
+import {truncate} from 'src/composables/usefulFunction';
 import {computed} from 'vue-demi';
 const selectedDate = ref(today())
 const CURRENT_DAY = new Date()

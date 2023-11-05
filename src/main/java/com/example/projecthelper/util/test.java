@@ -2,7 +2,7 @@ package com.example.projecthelper.util;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(generateValidJWT("1", "1"));
+        System.out.println(generateValidJWT("3", "3"));
 
     }
 

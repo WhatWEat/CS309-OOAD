@@ -47,7 +47,7 @@ public class TeacherController {
 
 
 
-    @PostMapping("/createProject")
+    @PostMapping("/create_project")
     public  ResponseResult<Object> createProject(@RequestBody Project proj, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         proj.setTeacherId(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
@@ -55,7 +55,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/addStuToProject")
+    @PostMapping("/add_stu_to_project")
     public ResponseResult<Object> addStuToProject(HttpServletRequest request, @RequestBody
     KeyValueWrapper<Long, List<Long>> pjId_stuId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -105,7 +105,7 @@ public class TeacherController {
     }
 
 
-    @PostMapping("/createGroup")
+    @PostMapping("/create_group")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
@@ -120,7 +120,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/createMultipleGroups")
+    @PostMapping("/create_multiple_groups")
     public ResponseResult<Object> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
@@ -135,7 +135,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/modifyGroupInfo")
+    @PutMapping("/modify_group_info")
     public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.updateGroupForTea(
@@ -148,7 +148,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/postAssignment")
+    @PostMapping("/post_assignment")
     public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.createAss(
@@ -162,7 +162,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/viewAllSubmittedAss")
+    @GetMapping("/view_all_submitted_ass")
     public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(HttpServletRequest request, @RequestBody Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<SubmittedAssignment> submittedAssignments = assignmentService.viewAllSub(
@@ -172,7 +172,7 @@ public class TeacherController {
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/gradeAss")
+    @PostMapping("/grade_ass")
     public ResponseResult<Object> gradeAss(HttpServletRequest request, @RequestBody SubmittedAssignment submittedAssignment){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.gradeAss(

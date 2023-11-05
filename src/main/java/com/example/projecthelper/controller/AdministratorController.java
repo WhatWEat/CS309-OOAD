@@ -28,7 +28,7 @@ public class AdministratorController {
         return ResponseResult.ok(null, "Success", null);
     }
 
-    @PostMapping("/createMultipleUsers")
+    @PostMapping("/create_multiple_users")
     public ResponseResult<Object> createMultipleUsers(@RequestBody ObjectCountWrapper<User> multiUsers, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         authService.registerUser(multiUsers);

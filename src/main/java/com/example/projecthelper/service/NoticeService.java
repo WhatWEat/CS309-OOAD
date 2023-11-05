@@ -49,6 +49,16 @@ public class NoticeService {
         return toIds;
     }
 
+    public List<Notice> getNotices(Long userId, Long projId, Long page, Long pageSize){
+        Long checker = projectMapper.checkStuInProj(userId, projId);
+        if(checker == null && projId != -1){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        if(projId == -1)
+            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize);
+        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize);
+    }
+
     //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert
     public void postNotice(Notice notice, Long creatorId, Predicate<Long> accessProject){
         if (accessProject.test(notice.getProjectId())) {

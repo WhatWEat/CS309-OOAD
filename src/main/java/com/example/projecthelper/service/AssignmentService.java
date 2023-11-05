@@ -49,7 +49,7 @@ public class AssignmentService {
     public void submitAss(SubmittedAssignment submittedAss, Long userId){
         //FUNC: 检查学生是否有权限提交作业, 即是否在proj中
         Assignment originAss = assignmentMapper.findAssById(submittedAss.getAssignmentId());
-        if(originAss == null || projectMapper.checkStuInGroup(userId, originAss.getProjectId()) == null){
+        if(originAss == null || projectMapper.checkStuInProj(userId, originAss.getProjectId()) == null){
             throw new AccessDeniedException("无权提交作业");
         }
         //PROC: 先判断这个是group assignment还是individual assignment

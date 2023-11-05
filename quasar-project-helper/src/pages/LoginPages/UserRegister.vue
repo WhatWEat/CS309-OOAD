@@ -69,9 +69,12 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import {useRouter} from "vue-router";
+import { useQuasar } from 'quasar';
+import {api} from "boot/axios";
 
 export default defineComponent({
   setup() {
+    const $q = useQuasar()
     const router = useRouter()
     const studentId = ref('')
     const password = ref('')
@@ -82,8 +85,29 @@ export default defineComponent({
       router.push('/Login')  // 替换为您登录页面的路由路径
     }
     function register() {
-      // Add your registration logic here
-      // You can access the entered studentId, password, and confirmPassword values using studentId.value, password.value, and confirmPassword.value
+
+
+      api.post('/signup', {
+
+        identity: 0,
+        password: password.value,
+        name: studentId.value,
+        gender: "m",
+      }).then((res) => {
+        console.log(res)
+        router.push('/')
+        //   不要改动以下代码
+
+      }).catch((err) => {
+          $q.notify({
+            message: '信息不完整',
+            position: 'center'
+          });
+
+        console.log(err)
+
+      })
+
     }
 
     return {

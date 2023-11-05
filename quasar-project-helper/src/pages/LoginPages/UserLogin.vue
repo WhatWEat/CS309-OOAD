@@ -85,12 +85,13 @@
 import { defineComponent } from 'vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar';
 import {api} from 'boot/axios';
 
 export default defineComponent({
   setup() {
     const router = useRouter()
-
+    const $q = useQuasar()
     const loginType = ref('studentId') // 默认为学号登录
     const loginValue = ref('')
     const password = ref('')
@@ -125,18 +126,22 @@ export default defineComponent({
       return [(val) => val.length >= 6 || '密码长度不能小于6位']
     }
     function login() {
-      // 登录逻辑
-      router.push('/')
+
+
+
       api.post('/login', {
-        loginType: loginType.value,
-        loginValue: loginValue.value,
-        password: password.value
+
+        key: password,
+        value: identity
       }).then((res) => {
 
+        router.push('/')
         console.log(res)
       //   不要改动以下代码
 
       }).catch((err) => {
+        $q.notify(  {message: 'Message',
+          position: "center"})
         console.log(err)
       })
       console.log('登录:', loginValue.value, password.value)

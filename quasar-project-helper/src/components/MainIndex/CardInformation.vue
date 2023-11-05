@@ -105,6 +105,7 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
+import {truncate} from "src/composables/usefulFunction";
 import {computed} from 'vue-demi';
 const selectedDate = ref(today())
 const CURRENT_DAY = new Date()
@@ -283,12 +284,7 @@ function badgeStyles() {
   const s = {}
   return s
 }
-function truncate(str) {
-  if (str.length > 15) {
-    return str.substring(0, 15) + '...';  // 如果超过15个字符，添加省略号
-  }
-  return str;  // 如果不超过15个字符，直接返回原字符串
-}
+
 </script>
 <style>
 .my-event {

@@ -22,20 +22,20 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     @Select("select * from submittedAssignment where submitId = #{submitId}")
     SubmittedAssignment findSubmittedAssignmentById(long submitId);
 
-    @Insert("insert into stuassignment (assignmentId, stuid) VALUES (#{assignmentId},#{stuId});")
-    void stuSubmitAss(long assignmentId,long stuId) throws PSQLException;
-
-    @Insert("insert into groupassignment (assignmentid, groupid) VALUES (#{assignmentId},#{groupId}")
-    void groupSubmitAss(long assignmentId,long groupId) throws PSQLException;
+//    @Insert("insert into stuassignment (assignmentId, stuid) VALUES (#{assignmentId},#{stuId});")
+//    void stuSubmitAss(long assignmentId,long stuId) throws PSQLException;
+//
+//    @Insert("insert into groupassignment (assignmentid, groupid) VALUES (#{assignmentId},#{groupId}")
+//    void groupSubmitAss(long assignmentId,long groupId) throws PSQLException;
 
     @Delete("delete from submittedassignment where submitid = #{submitId};")
     void removeAss(long submitId);
 
-    @Delete("delete from stuassignment where assignmentid = #{assignmentId} and stuid = #{stuId};")
-    void removeStuAss(long assignmentId, long stuId);
-
-    @Delete("delete from groupassignment where assignmentid = #{assignmentId} and groupid = #{groupId};")
-    void removeGroupAss(long assignmentId, long groupId);
+//    @Delete("delete from stuassignment where assignmentid = #{assignmentId} and stuid = #{stuId};")
+//    void removeStuAss(long assignmentId, long stuId);
+//
+//    @Delete("delete from groupassignment where assignmentid = #{assignmentId} and groupid = #{groupId};")
+//    void removeGroupAss(long assignmentId, long groupId);
 
     @Select("""
             SELECT sa.submitId, sa.assignmentId, sa.grade, sa.projectId, sa.text, sa.comment, sa.filepath, sa.review
@@ -80,6 +80,21 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     void gradeAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
 
+    @Update({
+            "<script>",
+            "UPDATE submittedAssignment SET grade = ",
+            "<foreach item='grade' index='index' collection='gradeList' separator=','>",
+            "#{grade}",
+            "</foreach>",
+            " WHERE assignmentId = #{assignment} AND submitterId IN ",
+            "<foreach item='submitterId' index='index' collection='submitterIdList' open='(' separator=',' close=')'>",
+            "#{submitterId}",
+            "</foreach>",
+            "</script>"
+    })
+    void updateGrades(@Param("submitterIdList") List<Long> submitterIdList,
+                      @Param("gradeList") List<Float> gradeList,
+                      @Param("assignmentId") long assignmentId);
 
 
 }

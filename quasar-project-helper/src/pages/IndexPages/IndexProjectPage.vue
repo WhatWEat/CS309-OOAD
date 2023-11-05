@@ -1,26 +1,23 @@
 <template>
   <q-page class="q-ma-md content-start">
     <CardSocial></CardSocial>
-    <CardComponent
-      v-for="card in cardData"
-      :key="card.title"
-      v-bind="card"
-      @click="() => {
-        router.push(card.link as string)
-      }"
-      class="q-my-lg"
-    >
-    </CardComponent>
+    <div class="row">
+      <NoticeCard></NoticeCard>
+      <HomeworkCard></HomeworkCard>
+    </div>
+
   </q-page>
 </template>
 
 <script setup lang="ts">
-import CardComponent, {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
+import {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
 import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
 import CardSocial from 'components/MainIndex/CardSocial.vue';
+import NoticeCard from 'components/ProjectIndex/NoticeCard.vue';
+import HomeworkCard from 'components/ProjectIndex/HomeworkCard.vue';
 
 const router = useRouter()
 

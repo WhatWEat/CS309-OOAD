@@ -62,7 +62,7 @@ public class TeacherController {
         projectService.addStuToProject(pjId_stuId.getKey(), pjId_stuId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
-    @PostMapping("/postNotice")
+    @PostMapping("/post_notice")
     public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         System.err.println(jwt);
@@ -78,7 +78,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/modifyNotice")
+    @PutMapping("/modify_notice")
     public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.modifyNoticeWithUser(
@@ -91,7 +91,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/deleteNotice")
+    @DeleteMapping("/delete_notice")
     public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody Long noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.deleteNotice(

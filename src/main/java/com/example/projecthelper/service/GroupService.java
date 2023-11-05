@@ -85,7 +85,7 @@ public class GroupService {
         if(gp == null){
             throw new InvalidFormException("小组不存在");
         }
-        if(projectMapper.checkStuInGroup(stuId, gp.getProjectId()) == null){
+        if(projectMapper.checkStuInProj(stuId, gp.getProjectId()) == null){
             throw new AccessDeniedException("无权加入小组");
         }
         if(groupMapper.findGroupIdOfUserInAProj(stuId, gp.getProjectId()) != null){

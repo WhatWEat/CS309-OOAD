@@ -17,8 +17,24 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select creatorId from notice where noticeId = #{noticeId};")
     Long findCreatorByNotice(Long noticeId);
 
-    @Insert("insert into notice ( title, content, creatorId, projectId)\n" +
-            "VALUES (#{title},#{content},#{creatorId},#{projectId});")
+    //FUNC: 寻找一个学生在proj中的所有notice
+    @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
+        "    join stuviewnotice s on n.noticeid = s.noticeid" +
+        "    join project p on p.projectid= n.projectid" +
+        "    join users u on u.userid = n.creatorid" +
+        " where s.stuid = #{stuId} and n.projectid = #{projId} limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfStuAndProj(Long stuId, Long projId, Long limit, Long offset);
+
+    //FUNC: 寻找一个学生的所有notice
+    @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
+        "    join stuviewnotice s on n.noticeid = s.noticeid" +
+        "    join project p on p.projectid= n.projectid" +
+        "    join users u on u.userid = n.creatorid" +
+        " where s.stuid = #{stuId} limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfStu(Long stuId, Long limit, Long offset);
+
+    @Insert("insert into notice ( title, content, creatorId, projectId, createTime)\n" +
+            "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime});")
     @Options(useGeneratedKeys = true, keyProperty = "noticeId", keyColumn = "noticeid")
         //title、content、creatorId、projectId均不为空，title长度上限为200，content为5000
     void createNotice(Notice notice) throws PSQLException;

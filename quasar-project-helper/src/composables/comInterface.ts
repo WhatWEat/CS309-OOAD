@@ -28,3 +28,4 @@ export const defaultNotice: noticeProps = {
   stuView: null,
   toAll: false,
 }
+

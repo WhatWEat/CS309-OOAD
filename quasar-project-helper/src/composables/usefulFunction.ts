@@ -7,3 +7,10 @@ export function truncate(str: string, num = 15, endSymbol = '...'): string {
   return str;
 }
 
+import {useRoute} from 'vue-router';
+
+export function useProjectId() {
+  const route = useRoute();
+  const projectId = route.params.projectID as string;
+  return Number(projectId);
+}

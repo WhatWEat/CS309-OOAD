@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import CardComponent, {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
+import {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
 import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';

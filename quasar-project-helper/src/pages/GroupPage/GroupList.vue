@@ -1,24 +1,24 @@
 <template>
   <div id="q-app" style="min-height: 100vh;">
 
-      <!--    这里是顶栏部分,先将顶栏部分屏蔽掉-->
-<!--    <q-toolbar class="bg-primary text-white shadow-2">-->
-<!--      <q-btn flat label="GroupAdminister"></q-btn>-->
-<!--      <q-toolbar-title></q-toolbar-title>-->
+<!--        这里是顶栏部分,先将顶栏部分屏蔽掉-->
+<!--        <q-toolbar class="bg-primary text-white shadow-2">-->
+<!--          <q-btn flat label="GroupAdminister"></q-btn>-->
+<!--          <q-toolbar-title></q-toolbar-title>-->
 
-<!--      <q-space></q-space>-->
+<!--          <q-space></q-space>-->
 
-<!--      &lt;!&ndash;-->
-<!--        notice shrink property since we are placing it-->
-<!--        as child of QToolbar-->
-<!--      &ndash;&gt;-->
-<!--      <q-tabs v-model="separator" shrink>-->
-<!--        <q-tab label="Cell" name="cell"></q-tab>-->
-<!--        <q-tab label="Herizontal" name="horizontal"></q-tab>-->
-<!--        <q-tab label="Vertical" name="vertical"></q-tab>-->
-<!--        <q-tab label="None" name="none"></q-tab>-->
-<!--      </q-tabs>-->
-<!--    </q-toolbar>-->
+<!--          &lt;!&ndash;-->
+<!--            notice shrink property since we are placing it-->
+<!--            as child of QToolbar-->
+<!--          &ndash;&gt;-->
+<!--          <q-tabs v-model="separator" shrink>-->
+<!--            <q-tab label="Cell" name="cell"></q-tab>-->
+<!--            <q-tab label="Herizontal" name="horizontal"></q-tab>-->
+<!--            <q-tab label="Vertical" name="vertical"></q-tab>-->
+<!--            <q-tab label="None" name="none"></q-tab>-->
+<!--          </q-tabs>-->
+<!--        </q-toolbar>-->
 
     <!--这里是表格部分-->
     <div class="q-pa-md ">
@@ -28,11 +28,14 @@
         :filter="search"
         :rows="rows"
         :separator="separator"
+        card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
-        selection="single"
-        title="Groups Info"
-        card-class="bg-grey-2"
+        title="Groups List"
+        @row-dblclick="handleRowDbclick($event, $event.row, $event.index)"
+        @row-contextmenu="handleRowContextmenu($event, $event.row, $event.index)"
+        @contextmenu.prevent
+        selected="none"
       >
         <!--        标题字体插槽-->
         <template v-slot:top-left>
@@ -45,7 +48,7 @@
             <q-btn-dropdown color="grey-5" icon="menu">
               <q-list>
                 <q-item v-close-popup clickable @click="onItemClick">
-                  <q-item-label style="font-weight: bolder">Delete  selected  group</q-item-label>
+                  <q-item-label style="font-weight: bolder">Delete selected group</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="onItemClick">
@@ -53,11 +56,11 @@
                 </q-item>
 
                 <q-item v-close-popup clickable @click="fileLoader = true">
-                  <q-item-label style="font-weight: bolder">Upload   Groups   Info</q-item-label>
+                  <q-item-label style="font-weight: bolder">Upload Groups Info</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="exportTable">
-                    <q-item-label style="font-weight: bolder">Export group info to csv </q-item-label>
+                  <q-item-label style="font-weight: bolder">Export group info to csv</q-item-label>
                 </q-item>
               </q-list>
             </q-btn-dropdown>
@@ -72,6 +75,7 @@
         </template>
       </q-table>
     </div>
+
 
     <!--    这里是表格之下的其他内容-->
     <div class="q-mt-md">
@@ -98,11 +102,40 @@
       ></q-uploader>
     </q-card-section>
   </q-dialog>
+  <!--    这里是删除修改按钮的弹窗部分-->
+  <!--    位置根据参数p_x和p_y确定-->
+  <div >
+      <q-card>
+        <q-card-section>
+          <q-item>
+            <q-item-section>
+              <q-item-label class="text-h6">Delete Group</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-card-section>
 
+        <q-card-section>
+          <q-item>
+            <q-item-section>
+              <q-item-label class="text-h6">Are you sure to delete this group?</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat color="primary" label="Cancel" v-close-popup></q-btn>
+          <q-btn flat color="primary" label="Delete" v-close-popup></q-btn>
+        </q-card-actions>
+      </q-card>
+    <q-btn v-show="true" flat color="primary" label="Delete" v-close-popup class="pos"></q-btn>
+  </div>
 
 </template>
 
-<script>
+<script lang="ts">
+import {ref} from "vue";
+import {useUserStore} from 'src/composables/useUserStore';
+
 export default {
   name: "GroupTeacherPage",
   data() {
@@ -154,12 +187,28 @@ export default {
 
       fileLoader: false,
 
-      position:'top',
+      position: 'top',
+
+      show_button_1: false,
     }
   },
   methods: {
     onItemClick() {
       this.$router.push('group-list/1');
+    },
+    handleRowDbclick(evt, row, index) {
+      //获得被选中的行的groupId
+      const groupId = row.groupId;
+      //进行弹窗展示
+    },
+    handleRowContextmenu(evt, row, index) {
+      //获得被选中的行的groupId
+      // const groupId = row.groupId;
+      //获得右键的坐标
+      // const x = evt.clientX;
+      // const y = evt.clientY;
+      //进行弹窗展示删除和修改按钮
+      this.show_button_1 = true;
     },
   }
 }
@@ -167,5 +216,9 @@ export default {
 
 
 <style scoped>
-
+  .pos {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+  }
 </style>

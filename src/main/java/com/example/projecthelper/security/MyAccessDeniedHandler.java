@@ -19,7 +19,8 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
         System.err.println(Arrays.toString(accessDeniedException.getStackTrace()));
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
-        response.getWriter().write(JsonUtil.serialize(ResponseResult.accessDenied(null, "权限不够")));
+        response.getWriter().write(JsonUtil.serialize(ResponseResult.accessDenied(null,
+            accessDeniedException.getMessage())));
         response.getWriter().flush();
     }
 }

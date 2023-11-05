@@ -64,7 +64,7 @@ public class SecurityController {
 
 
     //TODO:
-    @GetMapping("/getPersonalInfo")
+    @GetMapping("/get_personal_info")
     public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
         System.err.println("here");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

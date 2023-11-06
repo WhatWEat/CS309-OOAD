@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import {api} from 'boot/axios';
+import {Notify} from 'quasar';
 export const useUser = defineStore('user', {
   state: () => ({
     username: null,
@@ -11,10 +12,20 @@ export const useUser = defineStore('user', {
       if(this.username != null) return;
       try{
         await api.get('/get_personal_info').then((response) => {
-          this.userid = response.data.body.userId;
-          this.identity = response.data.body.identity
-          this.username = response.data.body.name;
           // console.log(response.data)
+          if (response.data.statusCode !== 200) {
+            console.log(response.data.msg);
+            Notify.create({
+              message: 'Login expired, please log in again.',
+              position: 'top',
+            })
+            this.router.push('/login');
+            return;
+          } else {
+            this.userid = response.data.body.userId;
+            this.identity = response.data.body.identity
+            this.username = response.data.body.name;
+          }
         }).catch((error) => {
           console.log(error);
         });

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import {api} from 'boot/axios';
 import {Notify} from 'quasar';
+import {LocalStorage} from 'quasar';
+
 export const useUser = defineStore('user', {
   state: () => ({
     username: null,
@@ -20,7 +22,10 @@ export const useUser = defineStore('user', {
               position: 'top',
             })
             this.router.push('/login');
-            return;
+            localStorage.clear();
+            this.userid = -1;
+            this.username = null;
+            this.identity = -1;
           } else {
             this.userid = response.data.body.userId;
             this.identity = response.data.body.identity

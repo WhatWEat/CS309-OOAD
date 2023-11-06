@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class User {
+public class User implements Cloneable{
     private Long userId;
 
     private Integer identity;
@@ -40,6 +40,15 @@ public class User {
     }
 
     public User() {
+    }
+
+    @Override
+    public User clone() {
+        try {
+            return (User) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
 

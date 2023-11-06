@@ -104,17 +104,11 @@
   </q-dialog>
   <!--    这里是删除修改按钮的弹窗部分-->
   <!--    位置根据参数p_x和p_y确定-->
-  <div v-if="show_button_1">
-    <transition
-      enter-active-class="animated fadeIn"
-      leave-active-class="animated fadeOut"
-    >
-      <q-btn-group :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}"
-                   transition-show='fade'>
-        <q-btn color="grey-1" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
-        <q-btn color="grey-1" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
-      </q-btn-group>
-    </transition>
+  <div>
+    <q-btn-group v-if="show_button_1"  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
+      <q-btn color="grey-1" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
+      <q-btn color="grey-1" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+    </q-btn-group>
   </div>
   <!-- Example with wrapping only one DOM element / component -->
 
@@ -186,6 +180,7 @@ export default {
         'row': '',
         'index': '',
       },
+      show: false,
     }
   },
   methods: {

@@ -17,7 +17,8 @@ public class UnauthorizedHandler implements AuthenticationEntryPoint {
         IOException, ServletException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
-        response.getWriter().write(JsonUtil.serialize(ResponseResult.unAuthorize(null, "认证失败")));
+        response.getWriter().write(JsonUtil.serialize(ResponseResult.unAuthorize(null,
+            authException.getMessage())));
         response.getWriter().flush();
     }
 }

@@ -13,6 +13,7 @@ import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class StudentController {
 
     @GetMapping("/test")
     public ResponseResult<Object> test(){
-        return ResponseResult.ok(null, "Success", null);
+        throw new AccessDeniedException("test");
     }
 
     @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")

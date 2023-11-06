@@ -42,15 +42,17 @@ public class AuthService {
     public String registerUser(User user){
 
         boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
+        boolean validUserId = FormatUtil.match(String.valueOf(user.getUserId()), FormatUtil.userIdPredicate());
         boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
-        if(!strongPass || !validIdentity)
-            throw new InvalidFormException("密码太弱或身份不合法");
+        if(!strongPass || !validIdentity || !validUserId)
+            throw new InvalidFormException("密码太弱或身份不合法或id不合法");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
+
             usersMapper.registerUser(user);
         }catch (Exception e){
             System.err.println(e.getMessage());
-            throw new InvalidFormException("信息不完整");
+            throw new InvalidFormException("信息不完整或id已经存在");
         }
         System.out.println(user);
         return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
@@ -59,17 +61,23 @@ public class AuthService {
     //NOTE: 这个方法只给adm使用
     public void registerUser(ObjectCountWrapper<User> multiUsers){
         User user = multiUsers.getObj();
+        long userId = user.getUserId();
         boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
+        boolean validUserId = FormatUtil.match(String.valueOf(user.getUserId()), FormatUtil.userIdPredicate());
         boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList()));
-        if(!strongPass || !validIdentity)
-            throw new InvalidFormException("密码太弱或身份不合法");
+        if(!strongPass || !validIdentity || !validUserId)
+            throw new InvalidFormException("密码太弱或身份不合法或id不合法");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
-            List<User> users = Stream.generate(multiUsers::getObj).limit(multiUsers.getCount()).toList();
+            List<User> users = Stream.generate(() -> multiUsers.getObj().clone()).limit(multiUsers.getCount()).toList();
+            for(User usr: users){
+                usr.setUserId(userId++);
+//                System.err.println(usr);
+            }
             usersMapper.registerUsers(users);
         }catch (Exception e){
             System.err.println(e.getMessage());
-            throw new InvalidFormException("信息不完整");
+            throw new InvalidFormException("信息不完整或id已经存在");
         }
     }
 

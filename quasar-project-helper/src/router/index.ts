@@ -3,8 +3,8 @@ import {
   createRouter,
   createWebHistory,
 } from 'vue-router';
-import {useUserStore} from 'src/composables/useUserStore';
 import routes from './routes';
+import {useUser} from 'stores/user-store';
 
 /*
  * If not building with SSR mode, you can
@@ -27,12 +27,20 @@ export default route(function (/* { store, ssrContext } */) {
     // history: createHistory(process.env.VUE_ROUTER_BASE),
     // history: createHistory('history'),
   });
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     if (to.meta.freeLogin) {
       next();
     } else {
-      const {userid} = useUserStore();
-      if (userid.value == -1) {
+      const userStore = useUser();
+      let flag = true
+      if (userStore.userid == -1) {
+        const try_user = await userStore.fetchUser();
+        if (try_user === -1) {
+          flag = false
+        }
+      }
+      if (!flag) {
+        console.log('not login in router')
         next('/login');
       }
       next();

@@ -1,7 +1,5 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 import {api} from 'boot/axios';
-import {Notify} from 'quasar';
-import {LocalStorage} from 'quasar';
 
 export const useUser = defineStore('user', {
   state: () => ({
@@ -13,15 +11,10 @@ export const useUser = defineStore('user', {
     async fetchUser() {
       if(this.username != null) return;
       try{
-        await api.get('/get_personal_info').then((response) => {
+        return await api.get('/get_personal_info').then((response) => {
           // console.log(response.data)
           if (response.data.statusCode !== 200) {
-            console.log(response.data.msg);
-            Notify.create({
-              message: 'Login expired, please log in again.',
-              position: 'top',
-            })
-            this.router.push('/login');
+            console.log('pinia', response.data.msg);
             localStorage.clear();
             this.userid = -1;
             this.username = null;
@@ -31,12 +24,20 @@ export const useUser = defineStore('user', {
             this.identity = response.data.body.identity
             this.username = response.data.body.name;
           }
+
+          return this.userid;
         }).catch((error) => {
+          localStorage.clear();
+          this.userid = -1;
+          this.username = null;
+          this.identity = -1;
           console.log(error);
+          return this.userid;
         });
       } catch (error) {
         console.log('该部分在pinaia的user-store.ts中');
         console.log(error);
+        return this.userid;
       }
     }
   },

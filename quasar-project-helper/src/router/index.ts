@@ -5,7 +5,7 @@ import {
 } from 'vue-router';
 import routes from './routes';
 import {useUser} from 'stores/user-store';
-
+import {Notify} from 'quasar';
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -33,14 +33,21 @@ export default route(function (/* { store, ssrContext } */) {
     } else {
       const userStore = useUser();
       let flag = true
-      if (userStore.userid == -1) {
+      const saved_jwt_token = localStorage.getItem('Token');
+      console.log('jwt_token', saved_jwt_token)
+      if (saved_jwt_token == null) {
         const try_user = await userStore.fetchUser();
-        if (try_user === -1) {
+        console.log('try_user', try_user)
+        if (try_user === undefined || try_user === -1) {
           flag = false
         }
       }
+
       if (!flag) {
-        console.log('not login in router')
+        Notify.create({
+          message: 'login is expired, please login again',
+          position: 'top',
+        })
         next('/login');
       }
       next();

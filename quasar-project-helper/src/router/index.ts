@@ -3,7 +3,7 @@ import {
   createRouter,
   createWebHistory,
 } from 'vue-router';
-
+import {useUserStore} from 'src/composables/useUserStore';
 import routes from './routes';
 
 /*
@@ -31,8 +31,8 @@ export default route(function (/* { store, ssrContext } */) {
     if (to.meta.freeLogin) {
       next();
     } else {
-      const token = localStorage.getItem('Token');
-      if (!token) {
+      const {userid} = useUserStore();
+      if (userid.value == -1) {
         next('/login');
       }
       next();

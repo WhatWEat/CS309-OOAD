@@ -89,18 +89,20 @@ export default defineComponent({
 
       api.post('/signup', {
 
-        identity: 0,
+        identity: 3,
         password: password.value,
         name: studentId.value,
         gender: "m",
       }).then((res) => {
         console.log(res)
-        router.push('/')
+        if (res.data.statusCode === 200) {
+          router.push('/');
+        }
         //   不要改动以下代码
 
       }).catch((err) => {
           $q.notify({
-            message: '信息不完整',
+            message: err.response.data.msg,
             position: 'center'
           });
 

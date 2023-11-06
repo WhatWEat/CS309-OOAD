@@ -12,17 +12,17 @@ import java.util.List;
 public interface GroupMapper extends BaseMapper<Group> {
     //TODO:修改部分传参过多的方法
 
-    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime,instructorId, creatorId)" +
-            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime},#{instructorId}, #{creatorId});")
+    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime,instructorId, creatorId, description)" +
+            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime},#{instructorId}, #{creatorId}, #{description});")
     @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "groupid")
     //maxsize、groupName、projectId。instructorId不能为空
     void createGroup (Group group) throws PSQLException;
 
     @Insert({
         "<script>",
-        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId) VALUES",
+        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId, description) VALUES",
         "<foreach item='group' index='index' collection='groupList' separator=','>",
-        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, #{group.reportTime}, #{group.instructorId}, #{group.creatorId})",
+        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, #{group.reportTime}, #{group.instructorId}, #{group.creatorId}, #{description})",
         "</foreach>",
         "</script>"
     })

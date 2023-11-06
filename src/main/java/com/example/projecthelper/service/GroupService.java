@@ -4,9 +4,11 @@ import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
 
+import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -21,11 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GroupService {
+    @Autowired
+    private UsersMapper usersMapper;
     @Autowired
     private GroupMapper groupMapper;
     @Autowired
@@ -40,8 +45,14 @@ public class GroupService {
         if(!accessProject.test(group.getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
+        if(!group.getReportTime().isAfter(LocalDateTime.now()))
+            throw new InvalidFormException("报告时间不能早于当前时间");
+        User usr = usersMapper.findUserById(group.getInstructorId());
+        if(usr == null || usr.getIdentity() > 2)
+            throw new InvalidFormException("instructorId不存在或不合法");
         try{
             group.setCreatorId(creatorId);
+            group.setTeamTime(LocalDateTime.now());
             groupMapper.createGroup(group);
             System.err.println(group.getGroupId()); // 这个是对的
         }catch (Exception e){
@@ -56,10 +67,18 @@ public class GroupService {
         }
         if(ocw.getObj().getGroupName() == null || ocw.getObj().getMaxsize() == null || ocw.getObj().getInstructorId() == null)
             throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
+        if(!ocw.getObj().getReportTime().isAfter(LocalDateTime.now()))
+            throw new InvalidFormException("报告时间不能早于当前时间");
+
+        Long instructorId = ocw.getObj().getInstructorId();
+        User usr = usersMapper.findUserById(instructorId);
+        if(usr == null || usr.getIdentity() > 2)
+            throw new InvalidFormException("instructorId不存在或不合法");
         List<Group> groups = Stream.generate(ocw::getObj).limit(ocw.getCount()).toList();
         // 设置时间
         groups.forEach(g -> {
             g.setCreatorId(creatorId);
+            g.setTeamTime(LocalDateTime.now());
         });
         groupMapper.createGroups(groups);
     }

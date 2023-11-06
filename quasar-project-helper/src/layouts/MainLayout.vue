@@ -86,7 +86,6 @@ onMounted(() => {
   })
 
 });
-const router = useRouter()
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)
 

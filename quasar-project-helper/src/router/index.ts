@@ -3,9 +3,9 @@ import {
   createRouter,
   createWebHistory,
 } from 'vue-router';
-import {useUserStore} from 'src/composables/useUserStore';
 import routes from './routes';
-
+import {useUser} from 'stores/user-store';
+import {Notify} from 'quasar';
 /*
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
@@ -27,12 +27,27 @@ export default route(function (/* { store, ssrContext } */) {
     // history: createHistory(process.env.VUE_ROUTER_BASE),
     // history: createHistory('history'),
   });
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     if (to.meta.freeLogin) {
       next();
     } else {
-      const {userid} = useUserStore();
-      if (userid.value == -1) {
+      const userStore = useUser();
+      let flag = true
+      const saved_jwt_token = localStorage.getItem('Token');
+      console.log('jwt_token', saved_jwt_token)
+      if (saved_jwt_token == null) {
+        const try_user = await userStore.fetchUser();
+        console.log('try_user', try_user)
+        if (try_user === undefined || try_user === -1) {
+          flag = false
+        }
+      }
+
+      if (!flag) {
+        Notify.create({
+          message: 'login is expired, please login again',
+          position: 'top',
+        })
         next('/login');
       }
       next();

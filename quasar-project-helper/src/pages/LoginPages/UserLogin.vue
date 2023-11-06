@@ -130,15 +130,16 @@ export default defineComponent({
       return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
     }
     function login() {
-
       api.post('/login', {
-        key: loginValue,
-        value: password
+        key: loginValue.value,
+        value: password.value
       }).then((res) => {
+        console.log(res.data)
         if (res.data.statusCode === 200) {
+          localStorage.setItem('Token', res.data.jwt_token);
           router.push('/');
+
         }
-        console.log(res)
       //   不要改动以下代码
       }).catch((err) => {
         $q.notify({

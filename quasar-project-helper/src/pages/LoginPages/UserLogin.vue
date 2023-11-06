@@ -25,7 +25,6 @@
                 no-caps
                 dense
                 class="bg-white text-black"
-                v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'100%'}"
               >
                 <q-tab name="studentId" label="ID" />
                 <q-tab name="email" label="Email" />

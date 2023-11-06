@@ -1,24 +1,24 @@
 <template>
   <div id="q-app" style="min-height: 100vh;">
 
-<!--        这里是顶栏部分,先将顶栏部分屏蔽掉-->
-<!--        <q-toolbar class="bg-primary text-white shadow-2">-->
-<!--          <q-btn flat label="GroupAdminister"></q-btn>-->
-<!--          <q-toolbar-title></q-toolbar-title>-->
+    <!--        这里是顶栏部分,先将顶栏部分屏蔽掉-->
+    <!--        <q-toolbar class="bg-primary text-white shadow-2">-->
+    <!--          <q-btn flat label="GroupAdminister"></q-btn>-->
+    <!--          <q-toolbar-title></q-toolbar-title>-->
 
-<!--          <q-space></q-space>-->
+    <!--          <q-space></q-space>-->
 
-<!--          &lt;!&ndash;-->
-<!--            notice shrink property since we are placing it-->
-<!--            as child of QToolbar-->
-<!--          &ndash;&gt;-->
-<!--          <q-tabs v-model="separator" shrink>-->
-<!--            <q-tab label="Cell" name="cell"></q-tab>-->
-<!--            <q-tab label="Herizontal" name="horizontal"></q-tab>-->
-<!--            <q-tab label="Vertical" name="vertical"></q-tab>-->
-<!--            <q-tab label="None" name="none"></q-tab>-->
-<!--          </q-tabs>-->
-<!--        </q-toolbar>-->
+    <!--          &lt;!&ndash;-->
+    <!--            notice shrink property since we are placing it-->
+    <!--            as child of QToolbar-->
+    <!--          &ndash;&gt;-->
+    <!--          <q-tabs v-model="separator" shrink>-->
+    <!--            <q-tab label="Cell" name="cell"></q-tab>-->
+    <!--            <q-tab label="Herizontal" name="horizontal"></q-tab>-->
+    <!--            <q-tab label="Vertical" name="vertical"></q-tab>-->
+    <!--            <q-tab label="None" name="none"></q-tab>-->
+    <!--          </q-tabs>-->
+    <!--        </q-toolbar>-->
 
     <!--这里是表格部分-->
     <div class="q-pa-md ">
@@ -31,11 +31,11 @@
         card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
-        title="Groups List"
-        @row-dblclick="handleRowDbclick($event, $event.row, $event.index)"
-        @row-contextmenu="handleRowContextmenu($event, $event.row, $event.index)"
-        @contextmenu.prevent
         selected="none"
+        title="Groups List"
+        @row-dblclick="handleRowDbclick"
+        @row-contextmenu="handleRowContextmenu"
+        @contextmenu.prevent
       >
         <!--        标题字体插槽-->
         <template v-slot:top-left>
@@ -104,37 +104,26 @@
   </q-dialog>
   <!--    这里是删除修改按钮的弹窗部分-->
   <!--    位置根据参数p_x和p_y确定-->
-  <div >
-      <q-card>
-        <q-card-section>
-          <q-item>
-            <q-item-section>
-              <q-item-label class="text-h6">Delete Group</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-card-section>
-
-        <q-card-section>
-          <q-item>
-            <q-item-section>
-              <q-item-label class="text-h6">Are you sure to delete this group?</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat color="primary" label="Cancel" v-close-popup></q-btn>
-          <q-btn flat color="primary" label="Delete" v-close-popup></q-btn>
-        </q-card-actions>
-      </q-card>
-    <q-btn v-show="true" flat color="primary" label="Delete" v-close-popup class="pos"></q-btn>
+  <div v-if="show_button_1">
+    <transition
+      enter-active-class="animated fadeIn"
+      leave-active-class="animated fadeOut"
+    >
+      <q-btn-group :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}"
+                   transition-show='fade'>
+        <q-btn color="grey-1" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
+        <q-btn color="grey-1" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+      </q-btn-group>
+    </transition>
   </div>
+  <!-- Example with wrapping only one DOM element / component -->
+
 
 </template>
 
-<script lang="ts">
-import {ref} from "vue";
-import {useUserStore} from 'src/composables/useUserStore';
+<script>
+import {api} from 'boot/axios';
+import {ref} from 'vue';
 
 export default {
   name: "GroupTeacherPage",
@@ -187,9 +176,16 @@ export default {
 
       fileLoader: false,
 
-      position: 'top',
+      show_button_1: ref(false),
 
-      show_button_1: false,
+      p_x: ref('200'),
+
+      p_y: ref('200'),
+
+      selected_row: {
+        'row': '',
+        'index': '',
+      },
     }
   },
   methods: {
@@ -198,27 +194,50 @@ export default {
     },
     handleRowDbclick(evt, row, index) {
       //获得被选中的行的groupId
-      const groupId = row.groupId;
+      // const groupId = row.groupId;
       //进行弹窗展示
     },
     handleRowContextmenu(evt, row, index) {
-      //获得被选中的行的groupId
-      // const groupId = row.groupId;
-      //获得右键的坐标
-      // const x = evt.clientX;
-      // const y = evt.clientY;
-      //进行弹窗展示删除和修改按钮
+      // 更新弹窗位置
+      this.p_x = evt.clientY + 'px';
+      this.p_y = evt.clientX + 'px';
+      // 更新弹窗显示
       this.show_button_1 = true;
+
+      // 更新被选中的行的内容
+      this.selected_row.row = row;
+      this.selected_row.index = index;
+    },
+    handleEditClick() {
+      // 更新弹窗显示, 隐藏弹窗
+      this.show_button_1 = false;
+      // 跳转到编辑页面
+    },
+    handleDeleClick() {
+      // 更新弹窗显示, 隐藏弹窗
+      this.show_button_1 = false;
+      // 删除被选中的行
+    },
+    testConnection() {
+      console.log("test");
+      api.post('/tea/create_group', {
+          "maxsize": 5,
+          "groupName": "gp1",
+          "projectId": 1,
+          "instructorId": 1
+        }
+      ).then((response) => {
+        console.log("responseHere");
+        console.log(response.data);
+      }).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      })
     },
   }
 }
 </script>
 
-
 <style scoped>
-  .pos {
-    position: absolute;
-    top: 100px;
-    left: 100px;
-  }
+
 </style>

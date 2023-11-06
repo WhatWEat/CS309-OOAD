@@ -224,6 +224,16 @@ module.exports = configure(function (/* ctx */) {
 
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
-    }
+    },
+
+    // embedding all animations
+    animations: 'all',
+
+    // or embedding only specific animations
+    animations: [
+      'bounceInLeft',
+      'bounceOutRight'
+    ]
   }
 });
+

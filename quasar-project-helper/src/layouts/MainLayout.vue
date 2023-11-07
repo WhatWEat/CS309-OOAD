@@ -38,21 +38,21 @@
           :key="link.title"
           v-bind="link"
         />
-        <q-item
-          tag="a"
-          clickable
-          @click="clickLoginOut"
-        >
-          <q-item-section
-            avatar
-          >
-            <q-icon name="logout"/>
-          </q-item-section>
+<!--        <q-item-->
+<!--          tag="a"-->
+<!--          clickable-->
+<!--          @click="clickLogOut"-->
+<!--        >-->
+<!--          <q-item-section-->
+<!--            avatar-->
+<!--          >-->
+<!--            <q-icon name="logout"/>-->
+<!--          </q-item-section>-->
 
-          <q-item-section>
-            <q-item-label>Login out</q-item-label>
-          </q-item-section>
-        </q-item>
+<!--          <q-item-section>-->
+<!--            <q-item-label>Log out</q-item-label>-->
+<!--          </q-item-section>-->
+<!--        </q-item>-->
       </q-list>
     </q-drawer>
 
@@ -65,10 +65,12 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink.vue';
+import { useRouter } from 'vue-router'
 import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
 import PersonBar from 'components/Layout/PersonBar.vue';
 
+const router = useRouter()
 const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {
@@ -96,6 +98,11 @@ onMounted(() => {
           icon: 'account_box',
           link: `/person/${userid.value}`
         },
+        {
+          title: 'Logout',
+          icon: 'logout',
+          link: `/logout/${userid.value}`
+        },
       ]
   })
 
@@ -107,9 +114,7 @@ const miniState = ref(true)
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
-function clickLoginOut(){
-  console.log("login out")
-}
+
 </script>
 <style>
 .fa-beat {

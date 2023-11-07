@@ -53,6 +53,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/LoginPages/UserLogin.vue')
   },
   {
+    path: '/logout/:userid',
+    meta: {
+      freeLogin: true
+    },
+    component: () => import('pages/LoginPages/UserLogout.vue')
+  },
+  {
     path: '/register',
     meta: {
       freeLogin: true

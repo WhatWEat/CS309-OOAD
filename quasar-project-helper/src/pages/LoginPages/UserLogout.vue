@@ -1,0 +1,172 @@
+<template>
+  <q-layout view="lHh Lpr lFf">
+    <q-page-container>
+      <q-page class="flex bg-image flex-center row">
+        <q-card class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
+          <q-card-section>
+            <q-avatar size="103px" class="absolute-center shadow-10">
+              <img src="profile.svg">
+            </q-avatar>
+          </q-card-section>
+          <q-card-section >
+            <div class="text-center q-pt-lg">
+              <div class="col text-h6 ellipsis">
+                Log in
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-section >
+            <q-form class="q-gutter-md">
+              <q-tabs
+                v-model="loginType"
+                no-caps
+                dense
+                class="bg-white text-black"
+              >
+                <q-tab name="studentId" label="ID" />
+              </q-tabs>
+
+<!--              <q-input-->
+<!--                filled-->
+<!--                v-model="userid.value"-->
+<!--                :label="loginType"-->
+<!--              />-->
+              <q-item-label>{{ userid }}</q-item-label>
+
+              <q-input
+                type="password"
+                filled
+                v-model="password"
+                label="password"
+                :rules="getPasswordRules()"
+                autocomplete="current-password"
+              />
+
+              <div style="display: flex; justify-content: space-between;">
+                <div>
+                  <q-btn
+                    label="login"
+                    type="button"
+                    color="primary"
+                    @click="login"
+                  />
+                </div>
+                <div>
+                  <q-btn
+                    label="register"
+                    type="button"
+                    color="primary"
+                    @click="goToRegister"
+                  />
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <div>
+                  <q-btn
+                    label="forgot"
+                    type="button"
+                    color="primary"
+                    class="q-mr-sm"
+                    @click="goToForgotPassword"
+                  />
+                </div>
+              </div>
+
+            </q-form>
+          </q-card-section>
+        </q-card>
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script>
+import { defineComponent } from 'vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar';
+import {api} from 'boot/axios';
+import {useUserStore} from 'src/composables/useUserStore';
+
+export default defineComponent({
+  setup() {
+    const router = useRouter()
+    const $q = useQuasar()
+    const loginType = ref('studentId') // 默认为学号登录
+    const password = ref('')
+    const {userid} = useUserStore()
+
+
+    function goToStudentIdLogin() {
+      loginType.value = 'studentId'
+    }
+
+    function goToEmailLogin() {
+      loginType.value = 'email'
+    }
+
+    function goToPhoneLogin() {
+      loginType.value = 'phone'
+    }
+
+
+    function getPasswordRules() {
+      return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
+    }
+    function login() {
+      api.post('/login', {
+        key: userid.value,
+        value: password.value
+      }).then((res) => {
+        console.log(res.data)
+        console.log(userid.value)
+        if (res.data.statusCode === 200) {
+          localStorage.setItem('Token', res.data.jwt_token);
+          router.push('/');
+
+        }
+        //   不要改动以下代码
+      }).catch((err) => {
+        $q.notify({
+          message: err.response.data.msg,
+          position: 'center'
+        });
+        console.log(err)
+        console.log(password)
+      })
+    }
+
+    function goToRegister() {
+      router.push('/Register')
+    }
+
+    function goToForgotPassword() {
+      router.push('/ForgotPassword')    }
+
+    return {
+      loginType,
+      password,
+      goToStudentIdLogin,
+      goToEmailLogin,
+      goToPhoneLogin,
+      getPasswordRules,
+      login,
+      goToRegister,
+      goToForgotPassword
+    }
+  }
+})
+</script>
+
+<style>
+.bg-image {
+  background-image: url('https://p8.itc.cn/images01/20210707/653f5d1b05cc4a3caabd0e15e676f7be.png');
+  background-size: cover;
+  backdrop-filter: blur(8px);
+}
+
+
+
+
+</style>

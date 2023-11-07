@@ -102,22 +102,29 @@
       ></q-uploader>
     </q-card-section>
   </q-dialog>
-  <!--    这里是删除修改按钮的弹窗部分-->
-  <!--    位置根据参数p_x和p_y确定-->
+  <!--  这里是删除修改按钮的弹窗部分-->
   <div>
-    <q-btn-group v-if="show_button_1"  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-1" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
-      <q-btn color="grey-1" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+    <q-btn-group v-if="show_button_1"
+                 :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
+      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
+      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
     </q-btn-group>
   </div>
-  <!-- Example with wrapping only one DOM element / component -->
-
+  <!--  这里是小组详情弹窗部分-->
+    <div class="row q-col-gutter-sm">
+        <q-dialog v-model="show_button_1">
+          <directory-card :avatar="card_data.avatar" :des="card_data.des" :email="card_data.email"
+                          :name="card_data.name"
+                          class="col-lg-4 fit col-md-4 col-sm-12 col-xs-12">
+          </directory-card>
+        </q-dialog>
+    </div>
 
 </template>
 
 <script>
 import {api} from 'boot/axios';
-import {ref} from 'vue';
+import {defineAsyncComponent, ref} from 'vue';
 
 export default {
   name: "GroupTeacherPage",
@@ -180,7 +187,20 @@ export default {
         'row': '',
         'index': '',
       },
+
       show: false,
+
+      card_data: [
+        {
+          name: 'Pratik Patel',
+          Crated_Date: '15/3/2020',
+          Project: 'Quasar Admin',
+          avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+          progress: 80,
+          des: 'Solutions Developer',
+          email: 'test@gmail.com'
+        }
+      ]
     }
   },
   methods: {
@@ -202,10 +222,13 @@ export default {
       // 更新被选中的行的内容
       this.selected_row.row = row;
       this.selected_row.index = index;
+      document.addEventListener('click', () => {
+        this.show_button_1 = false;
+      })
     },
     handleEditClick() {
       // 更新弹窗显示, 隐藏弹窗
-      this.show_button_1 = false;
+      // this.show_button_1 = false;
       // 跳转到编辑页面
     },
     handleDeleClick() {
@@ -229,8 +252,13 @@ export default {
         console.log(error);
       })
     },
-  }
+  },
+  components: {
+    DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue'))
+  },
 }
+
+
 </script>
 
 <style scoped>

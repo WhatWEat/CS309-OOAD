@@ -2,7 +2,9 @@
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
       <q-page class="flex bg-image flex-center">
-        <q-card v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'30%'}" >
+        <q-card  v-bind:style="{
+        width: $q.screen.lt.sm && $q.screen.width < 400 ? '100%' : ($q.screen.gt.sm ? '30%' : '80%')
+      }">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
               <img src="profile.svg">
@@ -16,22 +18,24 @@
             </div>
           </q-card-section>
 
-          <q-card-section>
+          <q-card-section >
             <q-form class="q-gutter-md">
               <q-tabs
                 v-model="loginType"
                 no-caps
+                dense
                 class="bg-white text-black"
+                v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'100%'}"
               >
-                <q-tab name="studentId" label="学号登录" />
-                <q-tab name="email" label="邮箱登录" />
-                <q-tab name="phone" label="手机号码登录" />
+                <q-tab name="studentId" label="ID" />
+                <q-tab name="email" label="Email" />
+                <q-tab name="phone" label="Phone" />
               </q-tabs>
 
               <q-input
                 filled
                 v-model="loginValue"
-                :label="loginType === 'studentId' ? '学号' : loginType === 'email' ? '邮箱' : '手机号码'"
+                :label="loginType === 'studentId' ? 'ID' : loginType === 'email' ? 'Email' : 'Phone'"
                 :rules="getLoginValueRules()"
               />
 
@@ -39,14 +43,14 @@
                 type="password"
                 filled
                 v-model="password"
-                label="密码"
+                label="password"
                 :rules="getPasswordRules()"
               />
 
               <div style="display: flex; justify-content: space-between;">
                 <div>
                   <q-btn
-                    label="登录"
+                    label="login"
                     type="button"
                     color="primary"
                     @click="login"
@@ -54,7 +58,7 @@
                 </div>
                 <div>
                   <q-btn
-                    label="注册"
+                    label="register"
                     type="button"
                     color="primary"
                     @click="goToRegister"
@@ -64,7 +68,7 @@
               <div style="display: flex; justify-content: space-between;">
                 <div>
                   <q-btn
-                    label="忘记密码"
+                    label="forgot"
                     type="button"
                     color="primary"
                     class="q-mr-sm"
@@ -85,12 +89,13 @@
 import { defineComponent } from 'vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar';
 import {api} from 'boot/axios';
 
 export default defineComponent({
   setup() {
     const router = useRouter()
-
+    const $q = useQuasar()
     const loginType = ref('studentId') // 默认为学号登录
     const loginValue = ref('')
     const password = ref('')
@@ -111,32 +116,36 @@ export default defineComponent({
       const rules = []
 
       if (loginType.value === 'studentId') {
-        rules.push((val) => val.length === 8 || '学号必须为8位')
+        rules.push((val) => val.length === 8 || 'Student ID must be 8 digits')
       } else if (loginType.value === 'email') {
-        rules.push((val) => /.+@.+\..+/.test(val) || '邮箱格式不正确')
+        rules.push((val) => /.+@.+\..+/.test(val) || 'Incorrect email format')
       } else if (loginType.value === 'phone') {
-        rules.push((val) => val.length === 11 || '手机号码必须为11位')
+        rules.push((val) => val.length === 11 || 'Phone number must be 11 digits')
       }
 
       return rules
     }
 
     function getPasswordRules() {
-      return [(val) => val.length >= 6 || '密码长度不能小于6位']
+      return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
     }
     function login() {
-      // 登录逻辑
-      router.push('/')
       api.post('/login', {
-        loginType: loginType.value,
-        loginValue: loginValue.value,
-        password: password.value
+        key: loginValue.value,
+        value: password.value
       }).then((res) => {
+        console.log(res.data)
+        if (res.data.statusCode === 200) {
+          localStorage.setItem('Token', res.data.jwt_token);
+          router.push('/');
 
-        console.log(res)
+        }
       //   不要改动以下代码
-
       }).catch((err) => {
+        $q.notify({
+          message: err.response.data.msg,
+          position: 'center'
+        });
         console.log(err)
       })
       console.log('登录:', loginValue.value, password.value)
@@ -172,5 +181,8 @@ export default defineComponent({
   background-size: cover;
   backdrop-filter: blur(8px);
 }
+
+
+
 
 </style>

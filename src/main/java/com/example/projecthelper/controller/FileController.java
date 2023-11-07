@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @RestController
+@RequestMapping("/file")
 public class FileController {
 
     @PostMapping("/upload")

@@ -50,7 +50,19 @@ public class NoticeService {
         return toIds;
     }
 
-    public List<Notice> getNotices(Long userId, Long projId, Long page, Long pageSize){
+
+    public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize){
+        if(projId == -1)
+            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize);
+        Long teaOfProj = projectMapper.findTeacherByProject(projId);
+        if(!Objects.equals(teaOfProj, userId)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+    }
+
+
+    public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize){
         Long checker = projectMapper.checkStuInProj(userId, projId);
         if(checker == null && projId != -1){
             throw new AccessDeniedException("无权访问该project");
@@ -69,8 +81,9 @@ public class NoticeService {
                 noticeMapper.createNotice(notice);
                 System.err.println(notice.getNoticeId());
                 Set<Long> toIds = toStu(notice);
-                noticeMapper.insertStuView(toIds, notice.getNoticeId());
-            } catch (PSQLException e) {
+                if(!toIds.isEmpty())
+                    noticeMapper.insertStuView(toIds, notice.getNoticeId());
+            } catch (Exception e) {
                 throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
             }
         }
@@ -89,8 +102,9 @@ public class NoticeService {
             Set<Long> toIds = toStu(notice);
             noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
             System.err.println("toIds"+toIds);
-            noticeMapper.insertStuView(toIds, notice.getNoticeId());
-        } catch (PSQLException e) {
+            if(!toIds.isEmpty())
+                noticeMapper.insertStuView(toIds, notice.getNoticeId());
+        } catch (Exception e) {
             throw new InvalidFormException("title or content is null");
         }
     }

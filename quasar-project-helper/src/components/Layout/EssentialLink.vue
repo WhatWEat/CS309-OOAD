@@ -27,8 +27,8 @@
         <q-item-section avatar>
           <q-icon name="pages"></q-icon>
         </q-item-section>
-        <q-item-section class="text-h6 text-weight-bolder">
-          <q-item-label>{{ item.label }}</q-item-label>
+        <q-item-section>
+          <q-item-label class="text-h12 q-mt-sm q-mb-xs text-grey-8">{{ item.label }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item :to='`/person/${userid}/projects`'  active-class="q-item-no-link-highlighting">

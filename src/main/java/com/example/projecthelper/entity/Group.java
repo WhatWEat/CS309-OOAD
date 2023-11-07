@@ -1,5 +1,6 @@
 package com.example.projecthelper.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.time.LocalDateTime;
 import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,8 +17,8 @@ public class Group {
     private Long leaderId;
     private Long maxsize;
     private Long projectId;
-    private Timestamp teamTime;
-    private Timestamp reportTime;
+    private LocalDateTime teamTime;
+    private LocalDateTime reportTime;
     private String description;
     public Group(Long groupId,Long instructorId, String groupName, Long maxsize, Long projectId) {
         this.groupId = groupId;

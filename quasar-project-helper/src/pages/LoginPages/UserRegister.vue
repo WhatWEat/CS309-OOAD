@@ -33,6 +33,7 @@
                 v-model="password"
                 label="密码"
                 lazy-rules
+                autocomplete="current-password"
               />
 
               <q-input
@@ -41,6 +42,7 @@
                 v-model="confirmPassword"
                 label="确认密码"
                 lazy-rules
+                autocomplete="current-password"
                 :rules="[
                   val => val === password || '前后两次输入密码不匹配'
                 ]"
@@ -97,6 +99,7 @@ export default defineComponent({
         console.log(res)
         if (res.data.statusCode === 200) {
           router.push('/');
+
         }
         //   不要改动以下代码
 

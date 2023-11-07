@@ -1,10 +1,8 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-      <q-page class="flex bg-image flex-center">
-        <q-card  v-bind:style="{
-        width: $q.screen.lt.sm && $q.screen.width < 400 ? '100%' : ($q.screen.gt.sm ? '30%' : '80%')
-      }">
+      <q-page class="flex bg-image flex-center row">
+        <q-card class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
               <img src="profile.svg">
@@ -44,6 +42,7 @@
                 v-model="password"
                 label="password"
                 :rules="getPasswordRules()"
+                autocomplete="current-password"
               />
 
               <div style="display: flex; justify-content: space-between;">
@@ -99,6 +98,7 @@ export default defineComponent({
     const loginValue = ref('')
     const password = ref('')
 
+
     function goToStudentIdLogin() {
       loginType.value = 'studentId'
     }
@@ -131,8 +131,8 @@ export default defineComponent({
     function login() {
 
       api.post('/login', {
-        key: loginValue,
-        value: password
+        key: loginValue.value,
+        value: password.value
       }).then((res) => {
         if (res.data.statusCode === 200) {
           router.push('/');
@@ -145,6 +145,8 @@ export default defineComponent({
           position: 'center'
         });
         console.log(err)
+        console.log(loginValue)
+        console.log(password)
       })
       console.log('登录:', loginValue.value, password.value)
     }

@@ -1,5 +1,6 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.Exceptions.FileProcessingException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,8 +24,7 @@ public class FileController {
             Files.write(Paths.get(filePath), bytes);
             return "upload successfully!";
         } catch (IOException e) {
-            e.printStackTrace();
-            return "upload failed";
+            throw new FileProcessingException("文件写入失败");
         }
     }
 

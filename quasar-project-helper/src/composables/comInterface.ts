@@ -29,3 +29,10 @@ export const defaultNotice: noticeProps = {
   toAll: false,
 }
 
+export interface projectProps {
+  projectId: number,
+  projectName: string,
+  projectDescription: string,
+  teacherId: number,
+  teacherName: string,
+}

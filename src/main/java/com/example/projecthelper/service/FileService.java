@@ -2,9 +2,11 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.FileProcessingException;
 import com.example.projecthelper.entity.Assignment;
+import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.AssignmentMapper;
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
+import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,7 +18,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -26,12 +27,43 @@ public class FileService {
     private final AssignmentMapper assignmentMapper;
     private final ProjectMapper projectMapper;
     private final GroupMapper groupMapper;
+    private final UsersMapper usersMapper;
 
     @Autowired
-    public FileService(AssignmentMapper assignmentMapper, ProjectMapper projectMapper, GroupMapper groupMapper) {
+    public FileService(AssignmentMapper assignmentMapper, ProjectMapper projectMapper, GroupMapper groupMapper,
+                       UsersMapper usersMapper) {
         this.assignmentMapper = assignmentMapper;
         this.projectMapper = projectMapper;
         this.groupMapper = groupMapper;
+        this.usersMapper = usersMapper;
+    }
+
+    public Resource getAvatar(Long userId){
+        User user = usersMapper.findUserById(userId);
+        try{
+            Resource rec = new UrlResource(Paths.get(user.getAvatarPath()).normalize().toUri());
+            if(rec.exists()){
+                return rec;
+            }
+            else
+                throw new FileProcessingException("找不到文件");
+        }catch (MalformedURLException | FileProcessingException e){
+            throw new FileProcessingException("找不到文件");
+        }
+    }
+
+    public void removeOriAvatar(Long userId){
+        User user = usersMapper.findUserById(userId);
+        if(user.getAvatarPath() != null){
+            Path pth = Paths.get(user.getAvatarPath());
+            try {
+                Files.delete(pth);
+            } catch (IOException e) {
+                // Handle the possible IOException here
+                System.err.println(e.getMessage());
+            }
+        }
+
     }
 
     public Resource getFilesOfAssByTea(Long userId, Long assId, String fileName){

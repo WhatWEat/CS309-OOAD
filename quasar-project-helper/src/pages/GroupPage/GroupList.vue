@@ -111,15 +111,15 @@
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
-    <div class="row q-col-gutter-sm">
-        <q-dialog v-model="show_button_1">
-          <directory-card :avatar="card_data.avatar" :des="card_data.des" :email="card_data.email"
-                          :name="card_data.name"
-                          class="col-lg-4 fit col-md-4 col-sm-12 col-xs-12">
-          </directory-card>
-        </q-dialog>
-    </div>
-
+  <div>
+    <q-dialog v-model="show_button_2" transition-duration="500">
+      <directory-card :avatar=card_data.avatar :group-id="card_data.groupId" :group-size="card_data.groupSize"
+                      :members="card_data.members" :deadline="card_data.deadline" :detail="card_data.detail"
+                      :style="{width: '50%' ,height: '45%'}"
+      >
+      </directory-card>
+    </q-dialog>
+  </div>
 </template>
 
 <script>
@@ -179,6 +179,8 @@ export default {
 
       show_button_1: ref(false),
 
+      show_button_2: ref(false),
+
       p_x: ref('200'),
 
       p_y: ref('200'),
@@ -190,17 +192,16 @@ export default {
 
       show: false,
 
-      card_data: [
+      card_data:
         {
-          name: 'Pratik Patel',
-          Crated_Date: '15/3/2020',
-          Project: 'Quasar Admin',
           avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
-          progress: 80,
-          des: 'Solutions Developer',
-          email: 'test@gmail.com'
+          groupId: 12345,
+          groupSize: 4,
+          members: 'liweihao,ceshi1,ceshi2',
+          instructor: 'Dr. Smith',
+          deadline: '2021/10/01',
+          detail: 'https://www.google.com'
         }
-      ]
     }
   },
   methods: {
@@ -208,9 +209,7 @@ export default {
       this.$router.push('group-list/1');
     },
     handleRowDbclick(evt, row, index) {
-      //获得被选中的行的groupId
-      // const groupId = row.groupId;
-      //进行弹窗展示
+      this.show_button_2 = true;
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置

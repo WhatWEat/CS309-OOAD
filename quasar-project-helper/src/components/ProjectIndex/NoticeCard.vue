@@ -27,12 +27,12 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {truncate, useProjectId} from 'src/composables/usefulFunction';
-import {noticeProps, defaultNotice} from 'src/composables/comInterface';
+import {noticeProps} from 'src/composables/comInterface';
 import {api} from "boot/axios";
-const messages = ref<noticeProps[]>([defaultNotice]);
+const messages = ref<noticeProps[]>([]);
 onMounted(() => {
   let id = useProjectId()
-  api.get(`/stu/notice-list/${id}/0/10`).then((res) => {
+  api.get(`/stu/notice-list/-1/0/10`).then((res) => {
     messages.value = res.data.body;
   }).catch((err) => {
     console.log('err',err)

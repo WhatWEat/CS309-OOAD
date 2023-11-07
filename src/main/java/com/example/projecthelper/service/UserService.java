@@ -2,6 +2,7 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.JWTUtil;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private FileService fileService;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
@@ -21,10 +24,24 @@ public class UserService {
         //此处mapper中传参已经改为user，可以更改名字、身份、id、性别外的所有信息
         try {
             user.setUserId(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+            fileService.removeOriAvatar(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+            if(user.getAvatar() != null){
+
+                String path = FileUtil.generateAvatarPath(user.getUserId());
+                String avP = FileUtil.saveFile(path, user.getAvatar().getOriginalFilename(), user.getAvatar());
+                user.setAvatarPath(avP);
+            }
             usersMapper.updateStuInformation(user);
         } catch (PSQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public User getPersonInfo(Long userId){
+        User user = usersMapper.findUserById(userId);
+        user.setAvatarPath(null);
+        user.setPassword(null);
+        return user;
     }
 
 

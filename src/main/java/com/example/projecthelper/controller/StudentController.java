@@ -15,8 +15,10 @@ import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -65,10 +67,48 @@ public class StudentController {
     }
 
     @PutMapping("/edit_person_info")
-    public ResponseResult<Object> editPersonInfo(HttpServletRequest request, @RequestBody User user){
+    public ResponseResult<Object> editPersonInfo(
+        HttpServletRequest request,
+        @RequestParam("phone") String phone,
+        @RequestParam("email") String email,
+        @RequestParam("name") String name,
+        @RequestParam("gender") String gender,
+        @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
+        @RequestParam("programmingSkills") List<String> programmingSkills,
+        @RequestParam("avatar") MultipartFile avatar){
+        User user = new User();
+        user.setPhone(phone);
+        user.setEmail(email);
+        user.setName(name);
+        user.setGender(gender);
+        user.setBirthday(birthday);
+        user.setProgrammingSkills(programmingSkills);
+        user.setAvatar(avatar);
+
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         userService.editPersonInfo(user, jwt);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_person_info")
+    public ResponseResult<User> getPersonInfo(HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+
+        return ResponseResult.ok(userService.getPersonInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt))), "Success", JWTUtil.updateJWT(jwt));
+
+    }
+
+    @GetMapping("/get_avatar")
+    public ResponseEntity<Resource> getAvatar(HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getAvatar(userId);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
     }
 
     @PostMapping("/join_group")

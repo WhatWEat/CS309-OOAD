@@ -32,6 +32,7 @@ public class FileUtil {
     public static final String PATH_PREFIX = "Files/";
     public static final String TEA_PREFIX = "tea";
     public static final String STU_PREFIX = "stu";
+    public static final String AVATAR_PREFIX = "avatar";
     public static int TEA_ID_OF_ASS_OR_SUBMITTED_ASS_PATH = 1;
     public static int ASS_ID_OF_ASS_OR_SUBMITTED_ASS_PATH = 2;
     public static int SUBMITTER_ID_OF_SUBMITTED_ASS_PATH = 3;
@@ -53,6 +54,10 @@ public class FileUtil {
 
     public static String generateSubmittedAssPath(Assignment assignment, Long submitterId){
         return generateDir(FileUtil.TEA_PREFIX, String.valueOf(assignment.getCreatorId()), String.valueOf(assignment.getAssignmentId()), String.valueOf(submitterId));
+    }
+
+    public static String generateAvatarPath(Long userId){
+        return generateDir(FileUtil.AVATAR_PREFIX, String.valueOf(userId));
     }
 
     public static String getIdFromPath(String path, int idIndex){

@@ -20,10 +20,10 @@
               <q-input
                 filled
                 v-model="studentId"
-                label="学号"
+                label="studentId"
                 lazy-rules
                 :rules="[
-                  val => /^[0-9]{8}$/.test(val) || '请输入8位有效学号'
+                  val => /^[0-9]{8}$/.test(val) || 'Please enter an 8-digit valid student ID'
                 ]"
               />
 
@@ -31,7 +31,7 @@
                 type="password"
                 filled
                 v-model="password"
-                label="密码"
+                label="password"
                 lazy-rules
                 autocomplete="current-password"
               />
@@ -40,25 +40,25 @@
                 type="password"
                 filled
                 v-model="confirmPassword"
-                label="确认密码"
+                label="confirmPassword"
                 lazy-rules
                 autocomplete="current-password"
                 :rules="[
-                  val => val === password || '前后两次输入密码不匹配'
+                  val => val === password || 'The passwords entered before and after do not match'
                 ]"
               />
 
               <q-input
                 filled
                 v-model="phoneNumber"
-                label="手机号码"
+                label="phoneNumber"
               />
 
               <div>
-                <q-btn label="注册" type="button" color="primary" @click="register" />
+                <q-btn label="Register" type="button" color="primary" @click="register" />
               </div>
               <div>
-                <q-btn label="重新登录" type="button" color="primary" @click="goToLogin" />
+                <q-btn label="Return to login" type="button" color="primary" @click="goToLogin" />
               </div>
             </q-form>
           </q-card-section>

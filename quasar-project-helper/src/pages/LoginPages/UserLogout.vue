@@ -5,7 +5,7 @@
         <q-card class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
-              <img src="profile.svg">
+              <img src="http://localhost:9001/profile.svg">
             </q-avatar>
           </q-card-section>
           <q-card-section >
@@ -18,21 +18,17 @@
 
           <q-card-section >
             <q-form class="q-gutter-md">
-              <q-tabs
-                v-model="loginType"
-                no-caps
-                dense
-                class="bg-white text-black"
-              >
-                <q-tab name="studentId" label="ID" />
-              </q-tabs>
 
 <!--              <q-input-->
 <!--                filled-->
-<!--                v-model="userid.value"-->
-<!--                :label="loginType"-->
+<!--                v-model="personId"-->
+<!--                label="ID"-->
 <!--              />-->
-              <q-item-label>{{ userid }}</q-item-label>
+              <q-item class="col-12">
+                <q-item-section>
+                  <q-item-label>{{ userid }}</q-item-label>
+                </q-item-section>
+              </q-item>
 
               <q-input
                 type="password"
@@ -93,23 +89,9 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const $q = useQuasar()
-    const loginType = ref('studentId') // 默认为学号登录
     const password = ref('')
     const {userid} = useUserStore()
-
-
-    function goToStudentIdLogin() {
-      loginType.value = 'studentId'
-    }
-
-    function goToEmailLogin() {
-      loginType.value = 'email'
-    }
-
-    function goToPhoneLogin() {
-      loginType.value = 'phone'
-    }
-
+    const personId = ref(router.currentRoute.value.params.userid)
 
     function getPasswordRules() {
       return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
@@ -120,7 +102,6 @@ export default defineComponent({
         value: password.value
       }).then((res) => {
         console.log(res.data)
-        console.log(userid.value)
         if (res.data.statusCode === 200) {
           localStorage.setItem('Token', res.data.jwt_token);
           router.push('/');
@@ -132,6 +113,8 @@ export default defineComponent({
           message: err.response.data.msg,
           position: 'center'
         });
+        console.log(userid.value)
+        console.log(personId.value)
         console.log(err)
         console.log(password)
       })
@@ -145,11 +128,7 @@ export default defineComponent({
       router.push('/ForgotPassword')    }
 
     return {
-      loginType,
       password,
-      goToStudentIdLogin,
-      goToEmailLogin,
-      goToPhoneLogin,
       getPasswordRules,
       login,
       goToRegister,

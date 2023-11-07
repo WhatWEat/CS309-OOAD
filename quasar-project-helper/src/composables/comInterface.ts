@@ -30,9 +30,17 @@ export const defaultNotice: noticeProps = {
 }
 
 export interface projectProps {
+  // 用于记录Project的各类属性
   projectId: number,
   projectName: string,
   projectDescription: string,
   teacherId: number,
   teacherName: string,
+}
+
+export interface GroupMember{
+  // 用于记录Group中Member的各类属性
+  name: string,
+  id: number,
+  skills: string[],
 }

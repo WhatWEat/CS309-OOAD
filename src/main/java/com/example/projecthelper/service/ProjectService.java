@@ -57,4 +57,12 @@ public class ProjectService {
     public void stuInProject(long projectId, long stuId){
         usersMapper.stuInProject(projectId,stuId);
     }
+
+    public List<String> getIntendedTeammates(long projectId, Long stuId){
+        return projectMapper.getIntendedTeammates(projectId, stuId);
+    }
+
+    public void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates){
+        projectMapper.setIntendedTeammates(projectId, stuId, intendedTeammates);
+    }
 }

@@ -64,12 +64,19 @@ public class SecurityController {
 
 
     //TODO:
-    @GetMapping("/get_personal_info")
-    public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
-        System.err.println("here");
+//    @GetMapping("/get_personal_info")
+//    public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
+//        System.err.println("here");
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        User user = authService.getPersonalInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+//        return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
+//    }
+
+    @PostMapping("/change_password")
+    public ResponseResult<Object> changePassword(HttpServletRequest request, @RequestBody KeyValueWrapper<String, KeyValueWrapper<String, String>> kvw){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        User user = authService.getPersonalInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
-        return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
+        authService.changePass(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), kvw.getKey(), kvw.getValue().getKey(), kvw.getValue().getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/signup")
     public ResponseResult<Long> signup(@RequestBody User user){

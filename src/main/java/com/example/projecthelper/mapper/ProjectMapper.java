@@ -2,12 +2,16 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.util.StringListArrayTypeHandler;
 import java.util.List;
 import java.util.Set;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.postgresql.util.PSQLException;
 
 @Mapper
@@ -34,4 +38,13 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     @Select("select stuId from stuInProject where stuId = #{stuId} and projectId = #{projectId}; ")
     Long checkStuInProj(Long stuId, Long projectId);
+
+    @Select("select intendedTeammates from stuInProject where projectId = #{projectId} and stuId = #{stuId}; ")
+    @Results({
+        @Result(property = "intendedTeammates", column = "intendedteammates", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<String> getIntendedTeammates(long projectId, Long stuId);
+
+    @Update("update stuInProject set intendedTeammates = #{intendedTeammates, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where projectId = #{projectId} and stuId = #{stuId}; ")
+    void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates);
 }

@@ -33,8 +33,6 @@ public class User implements Cloneable{
     @TableField(exist = false)
     private MultipartFile avatar;
     @TableField(exist = false)
-    private List<String> technicalStack;
-    @TableField(exist = false)
     private List<String> intendedTeammates;
 
 

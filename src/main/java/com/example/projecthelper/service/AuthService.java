@@ -9,6 +9,7 @@ import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,20 @@ public class AuthService {
         }
     }
 
+    public void changePass(Long userId, String oriPass, String pass1, String pass2){
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(String.valueOf(userId), oriPass);
+
+        authenticationManager.authenticate(authenticationToken);
+        //上一步没有抛出异常说明认证成功
+        boolean strongPass = FormatUtil.match(pass1, FormatUtil.strongPasswordPredicate());
+        if(!Objects.equals(pass1, pass2) || !strongPass){
+            throw new InvalidFormException("密码太弱两次密码不同");
+        }
+        usersMapper.changePass(userId, passwordEncoder.encode(pass1));
+
+    }
+
     /**
      * 登录
      * @param userPass 用户密码
@@ -108,14 +123,14 @@ public class AuthService {
 
     }
 
-    public User getPersonalInfo(Long userId){
-        User user = usersMapper.findUserById(userId);
-        if(user != null){
-            user.setPassword(null);
-            return user;
-        }
-        return null;
-    }
+//    public User getPersonalInfo(Long userId){
+//        User user = usersMapper.findUserById(userId);
+//        if(user != null){
+//            user.setPassword(null);
+//            return user;
+//        }
+//        return null;
+//    }
 
     /**
      * 登出

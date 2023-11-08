@@ -9,11 +9,13 @@ import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.FileService;
 import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.NoticeService;
+import com.example.projecthelper.service.ProjectService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +38,18 @@ public class StudentController {
     private final GroupService groupService;
     private final AssignmentService assignmentService;
     private final FileService fileService;
+    private final ProjectService projectService;
 
     @Autowired
     public StudentController(UserService userService,
                              NoticeService noticeService, GroupService groupService, AssignmentService assignmentService,
-                             FileService fileService) {
+                             FileService fileService, ProjectService projectService) {
         this.userService = userService;
         this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
         this.fileService = fileService;
+        this.projectService = projectService;
     }
 
 
@@ -66,7 +70,7 @@ public class StudentController {
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/edit_person_info")
+    @PostMapping("/edit_person_info")
     public ResponseResult<Object> editPersonInfo(
         HttpServletRequest request,
         @RequestParam("phone") String phone,
@@ -109,6 +113,25 @@ public class StudentController {
             .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
             .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
             .body(rec);
+    }
+
+    @GetMapping("/intend_teammates/{project_id}")
+    public ResponseResult<List<String>> getIntendTeammates(HttpServletRequest request, @PathVariable Long project_id){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        return ResponseResult.ok(projectService.getIntendedTeammates(project_id, userId), "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/set_intend_teammates")
+    public ResponseResult<Object> setIntendTeammates(
+        HttpServletRequest request,
+        @RequestBody KeyValueWrapper<Long, List<String>> kvw){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        projectService.setIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/join_group")

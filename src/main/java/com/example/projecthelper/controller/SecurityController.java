@@ -1,5 +1,6 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.service.AuthService;
@@ -98,24 +99,24 @@ public class SecurityController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/get_personal_info/{search_id}")
+    @GetMapping({"/get_personal_info/{search_id}", "/get_personal_info"})
     public ResponseResult<User> getPersonalInfo(
         HttpServletRequest request,
-        @PathVariable Long search_id){
+        @PathVariable(required = false) Long search_id){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Long searchId = search_id == -1 ? userId: search_id;
+        Long searchId = search_id == null ? userId: search_id;
         User user = userService.getPersonInfo(searchId);
         return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/get_avatar/{search_id}")
+    @GetMapping({"/get_avatar/{search_id}", "/get_avatar"})
     public ResponseEntity<Resource> getAvatar(HttpServletRequest request,
-                                              @PathVariable Long search_id) {
-
+                                              @PathVariable(required = false) Long search_id) {
+        System.err.println("search_id"+search_id);
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Long searchId = search_id == -1 ? userId: search_id;
+        Long searchId = search_id == null ? userId: search_id;
         Resource rec = fileService.getAvatar(searchId);
         System.err.println(rec.getFilename());
         return ResponseEntity.ok()

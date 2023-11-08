@@ -138,7 +138,7 @@ function setGroup() {
 
 // skill method
 const handleClose = (tag: string) => {
-  skillTags.value.splice(skillTags.value.indexOf(tag), 1)
+  TeammateRequire.value.splice(TeammateRequire.value.indexOf(tag), 1)
 }
 const showInput = () => {
   inputVisible.value = true
@@ -150,7 +150,7 @@ const showInput = () => {
 }
 const handleInputConfirm = () => {
   if (inputTagsValue.value) {
-    skillTags.value.push(inputTagsValue.value)
+    TeammateRequire.value.push(inputTagsValue.value)
   }
   inputVisible.value = false
   inputTagsValue.value = ''

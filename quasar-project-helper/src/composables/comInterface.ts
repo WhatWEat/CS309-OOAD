@@ -57,3 +57,14 @@ export interface personProps {
   birthday: string,
   programmingSkills: string[]
 }
+export const defaultPerson: personProps = {
+  userid: 0,
+  identity: 3,
+  password: null,
+  phone: '',
+  email: '',
+  name: '',
+  gender: '',
+  birthday: '',
+  programmingSkills: ['']
+}

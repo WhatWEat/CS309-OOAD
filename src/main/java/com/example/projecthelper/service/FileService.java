@@ -1,6 +1,7 @@
 package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.FileProcessingException;
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.AssignmentMapper;
@@ -40,6 +41,8 @@ public class FileService {
 
     public Resource getAvatar(Long userId){
         User user = usersMapper.findUserById(userId);
+        if(user == null)
+            throw new InvalidFormException("找不到用户");
         try{
             Resource rec = new UrlResource(Paths.get(user.getAvatarPath()).normalize().toUri());
             if(rec.exists()){

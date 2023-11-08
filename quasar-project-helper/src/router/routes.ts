@@ -53,6 +53,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/LoginPages/UserLogin.vue')
   },
   {
+    path: '/logout/:userid',
+    meta: {
+      freeLogin: true
+    },
+    component: () => import('pages/LoginPages/UserLogout.vue')
+  },
+  {
     path: '/register',
     meta: {
       freeLogin: true
@@ -63,37 +70,12 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
-
+  //#####################测试使用，后期删除#######################
   {
-    path: '/student/Assignment',
-    component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
-    children: [
-      {
-        path: '/personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),
-        children: [
-          {
-            path: '/mengbi1/:assignmentId',
-            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
-          }
-        ]
-      },
-
-      {
-        path: '/group', component: () => import('pages/AssignmentPage/AssignmentsStudent_Group.vue'),
-        children: [
-          {
-            path: '/mengbi2/:assignmentId',
-            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
-          }
-        ]
-      },
-    ]
+    path: '/temp',
+    component: () => import('pages/AssignmentPages/AssignmentFramework.vue')
   },
-  {
-    path: '/teacherAssignment',
-    component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
-  },
-
+  //#####################测试使用，后期删除#######################
 
   // Always leave this as last one,
   // but you can also remove it

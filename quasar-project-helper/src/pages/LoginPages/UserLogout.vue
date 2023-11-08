@@ -5,7 +5,7 @@
         <q-card class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
-              <img src="profile.svg">
+              <img src="http://localhost:9001/profile.svg">
             </q-avatar>
           </q-card-section>
           <q-card-section >
@@ -18,23 +18,17 @@
 
           <q-card-section >
             <q-form class="q-gutter-md">
-              <q-tabs
-                v-model="loginType"
-                no-caps
-                dense
-                class="bg-white text-black"
-              >
-                <q-tab name="studentId" label="ID" />
-                <q-tab name="email" label="Email" />
-                <q-tab name="phone" label="Phone" />
-              </q-tabs>
 
-              <q-input
-                filled
-                v-model="loginValue"
-                :label="loginType === 'studentId' ? 'ID' : loginType === 'email' ? 'Email' : 'Phone'"
-                :rules="getLoginValueRules()"
-              />
+<!--              <q-input-->
+<!--                filled-->
+<!--                v-model="personId"-->
+<!--                label="ID"-->
+<!--              />-->
+              <q-item class="col-12">
+                <q-item-section>
+                  <q-item-label>{{ userid }}</q-item-label>
+                </q-item-section>
+              </q-item>
 
               <q-input
                 type="password"
@@ -89,48 +83,22 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar';
 import {api} from 'boot/axios';
+import {useUserStore} from 'src/composables/useUserStore';
 
 export default defineComponent({
   setup() {
     const router = useRouter()
     const $q = useQuasar()
-    const loginType = ref('studentId') // 默认为学号登录
-    const loginValue = ref('')
     const password = ref('')
-
-
-    function goToStudentIdLogin() {
-      loginType.value = 'studentId'
-    }
-
-    function goToEmailLogin() {
-      loginType.value = 'email'
-    }
-
-    function goToPhoneLogin() {
-      loginType.value = 'phone'
-    }
-
-    function getLoginValueRules() {
-      const rules = []
-
-      if (loginType.value === 'studentId') {
-        rules.push((val) => val.length === 8 || 'Student ID must be 8 digits')
-      } else if (loginType.value === 'email') {
-        rules.push((val) => /.+@.+\..+/.test(val) || 'Incorrect email format')
-      } else if (loginType.value === 'phone') {
-        rules.push((val) => val.length === 11 || 'Phone number must be 11 digits')
-      }
-
-      return rules
-    }
+    const {userid} = useUserStore()
+    const personId = ref(router.currentRoute.value.params.userid)
 
     function getPasswordRules() {
       return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
     }
     function login() {
       api.post('/login', {
-        key: loginValue.value,
+        key: userid.value,
         value: password.value
       }).then((res) => {
         console.log(res.data)
@@ -139,17 +107,17 @@ export default defineComponent({
           router.push('/');
 
         }
-      //   不要改动以下代码
+        //   不要改动以下代码
       }).catch((err) => {
         $q.notify({
           message: err.response.data.msg,
           position: 'center'
         });
+        console.log(userid.value)
+        console.log(personId.value)
         console.log(err)
-        console.log(loginValue)
         console.log(password)
       })
-      console.log('登录:', loginValue.value, password.value)
     }
 
     function goToRegister() {
@@ -160,13 +128,7 @@ export default defineComponent({
       router.push('/ForgotPassword')    }
 
     return {
-      loginType,
-      loginValue,
       password,
-      goToStudentIdLogin,
-      goToEmailLogin,
-      goToPhoneLogin,
-      getLoginValueRules,
       getPasswordRules,
       login,
       goToRegister,

@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
 import com.example.projecthelper.entity.SubmittedAssignment;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 
@@ -13,13 +14,20 @@ import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -29,6 +37,7 @@ public class TeacherController {
     private final NoticeService noticeService;
     private final GroupService groupService;
     private final AssignmentService assignmentService;
+    private final FileService fileService;
 
     @Autowired
     private UserService userService;
@@ -38,11 +47,13 @@ public class TeacherController {
 
     @Autowired
     public TeacherController(AuthService authService, NoticeService noticeService,
-                             GroupService groupService, AssignmentService assignmentService) {
+                             GroupService groupService, AssignmentService assignmentService,
+                             FileService fileService) {
         this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
+        this.fileService = fileService;
     }
 
 
@@ -160,8 +171,68 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
+                                                   @PathVariable("page") long page,
+                                                   @PathVariable("page_size") long pageSize,
+                                                   HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Assignment> result = assignmentService.getAssignmentsByTea(userId, projectId, page, pageSize);
+        System.err.println(result.get(0).getFilePaths());
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/get_ass_file/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssFile(@PathVariable("assignment_id") Long assignmentId,
+                                                     @PathVariable("filename") String filename,
+                                                     HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByTea(userId, assignmentId, filename);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
+//    @PostMapping("/post_assignment")
+//    public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        assignmentService.createAss(
+//            assignment,
+//            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+//            pjId -> Objects.equals(
+//                projectService.findTeacherByProject(pjId),
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//            )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
     @PostMapping("/post_assignment")
-    public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
+    public ResponseResult<Object> postAssignment(HttpServletRequest request,
+        @RequestParam("title") String title,
+        @RequestParam("description") String description,
+        @RequestParam("projectId") Long projectId,
+        @RequestParam("fullMark") Integer fullMark,
+        @RequestParam("type") String type,
+        @RequestParam("deadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        LocalDateTime deadline,
+        @RequestParam("requireExtension") String requireExtension,
+        @RequestParam("files") List<MultipartFile> files) {
+        Assignment assignment = new Assignment();
+        assignment.setTitle(title);
+        assignment.setDescription(description);
+        assignment.setProjectId(projectId);
+        assignment.setFullMark(fullMark);
+        assignment.setType(type);
+        assignment.setDeadline(deadline);
+        assignment.setFiles(files);
+        assignment.setRequireExtension(requireExtension);
+
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.createAss(
             assignment,
@@ -171,17 +242,52 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
+        System.err.println("assId"+assignment.getAssignmentId());
+
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+
+    }
+
+    @DeleteMapping("delete_ass")
+    public ResponseResult<Object> deleteAss(@RequestBody Long assId, HttpServletRequest request){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), assId);
+        assignmentService.deleteAss(assId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/view_all_submitted_ass")
-    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(HttpServletRequest request, @RequestBody Long assignmentId){
+    @GetMapping("/view_all_submitted_ass/{assignment_id}/{page}/{page_size}")
+    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(
+        HttpServletRequest request,
+        @PathVariable("assignment_id") Long assignmentId,
+        @PathVariable("page") Long page,
+        @PathVariable("page_size") Long page_size){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<SubmittedAssignment> submittedAssignments = assignmentService.viewAllSub(
             assignmentId,
-            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            page,
+            page_size
         );
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{stu_id}/{filename}")
+    public ResponseEntity<Resource> getSubmittedAssFile(
+        @PathVariable("assignment_id") Long assignmentId,
+        @PathVariable("stu_id") Long stuId,
+        @PathVariable("filename") String filename,
+        HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfSubmittedAssByTea(userId, stuId, assignmentId, filename);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
     }
 
     @PostMapping("/grade_ass")
@@ -192,6 +298,17 @@ public class TeacherController {
             Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/grade_ass_with_file")
+    public ResponseResult<Object> gradeAssWithFile(
+        HttpServletRequest request,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("assignmentId") Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.gradeAssWithFile(file, assignmentId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+
     }
 
 

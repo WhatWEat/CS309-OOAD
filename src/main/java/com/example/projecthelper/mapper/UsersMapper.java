@@ -2,6 +2,7 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.util.StringListArrayTypeHandler;
 import java.util.List;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
@@ -9,6 +10,9 @@ import org.postgresql.util.PSQLException;
 @Mapper
 public interface UsersMapper extends BaseMapper<User> {
     @Select("select * from users where userId = #{userId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
     User findUserById(Long userId);
     @Select({
         "<script>",
@@ -18,6 +22,9 @@ public interface UsersMapper extends BaseMapper<User> {
         "#{id}",
         "</foreach>",
         "</script>"
+    })
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
     List<User> findUsersById(List<Long> userIds);
 
@@ -43,17 +50,14 @@ public interface UsersMapper extends BaseMapper<User> {
     void registerUsers(List<User> users) throws PSQLException;
 
 
-    void createUser(User user);
-
     @Update("UPDATE users SET " +
             "phone = #{phone},"+
-            "mail = #{mail},"+
+            "email = #{email},"+
             "name = #{name},"+
             "gender = #{gender},"+
             "birthday = #{birthday},"+
-            "technologyStack = #{technologyStack}," +
-            "programmingSkills = #{programmingSkills}, " +
-            "intendedTeammates = #{intendedTeammates} " +
+            "programmingSkills = #{programmingSkills, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, " +
+            "avatarPath = #{avatarPath} "+
             "WHERE userId = #{userId};")
     //identity, password, name, gender均不为空，identity为整数
     void updateStuInformation(User user)throws PSQLException;

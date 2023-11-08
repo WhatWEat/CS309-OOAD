@@ -80,7 +80,7 @@ onMounted(() => {
         {
           title: 'Announcements',
           icon: 'record_voice_over',
-          link: 'https://chat.quasar.dev'
+          link: '/announcement'
         },
         {
           title: 'Projects',

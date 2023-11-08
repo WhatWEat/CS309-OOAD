@@ -50,10 +50,10 @@
                 </div>
                 <div>
                   <q-btn
-                    label="register"
+                    label="Switch"
                     type="button"
                     color="primary"
-                    @click="goToRegister"
+                    @click="goToLogin"
                   />
                 </div>
               </div>
@@ -120,8 +120,8 @@ export default defineComponent({
       })
     }
 
-    function goToRegister() {
-      router.push('/Register')
+    function goToLogin() {
+      router.push('/login')
     }
 
     function goToForgotPassword() {
@@ -131,7 +131,7 @@ export default defineComponent({
       password,
       getPasswordRules,
       login,
-      goToRegister,
+      goToLogin,
       goToForgotPassword
     }
   }

@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.ibatis.type.BaseTypeHandler;
@@ -28,7 +29,16 @@ public class StringListArrayTypeHandler extends BaseTypeHandler<List<String>> {
 
     @Override
     public List<String> getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        return arrayToList(rs.getArray(columnName));
+        String arrayAsString = rs.getString(columnName);
+        if (arrayAsString == null) {
+            return null;
+        }
+        // PostgreSQL returns arrays in the format "{val1,val2,val3}", so we need to strip the braces and split the string
+        arrayAsString = arrayAsString.substring(1, arrayAsString.length() - 1); // Remove the braces
+        String[] elements = arrayAsString.split(",");
+        List<String> result = new ArrayList<>(Arrays.asList(elements));
+        System.err.println(result);
+        return result;
     }
 
     @Override

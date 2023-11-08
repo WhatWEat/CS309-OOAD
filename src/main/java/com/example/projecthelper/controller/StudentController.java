@@ -123,14 +123,25 @@ public class StudentController {
         return ResponseResult.ok(projectService.getIntendedTeammates(project_id, userId), "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/set_intend_teammates")
-    public ResponseResult<Object> setIntendTeammates(
+    @PostMapping("/add_intend_teammates")
+    public ResponseResult<Object> addIntendTeammates(
         HttpServletRequest request,
-        @RequestBody KeyValueWrapper<Long, List<String>> kvw){
+        @RequestBody KeyValueWrapper<Long, String> kvw){
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        projectService.setIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        projectService.addIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/delete_intend_teammates")
+    public ResponseResult<Object> deleteIntendTeammates(
+        HttpServletRequest request,
+        @RequestBody KeyValueWrapper<Long, String> kvw){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        projectService.deleteIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 

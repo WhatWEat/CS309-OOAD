@@ -44,3 +44,16 @@ export interface GroupMember{
   id: number,
   skills: string[],
 }
+
+export interface personProps {
+  // 用于记录Person的各类属性
+  userid: number,
+  identity: number,
+  password: string | null,
+  phone: string,
+  email: string,
+  name: string,
+  gender: string,
+  birthday: string,
+  programmingSkills: string[]
+}

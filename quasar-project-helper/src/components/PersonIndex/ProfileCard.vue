@@ -117,6 +117,23 @@
           <q-item class="col-12">
             <q-item-section class="col-sm-3 col-xs-5">
               <q-item-label>
+                <q-avatar icon="school"/>
+                Skills
+              </q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-input outlined dense
+                       v-model="phone"
+                       type="tel"
+                       color="white"
+                       v-if="isEditing">
+              </q-input>
+              <q-item-label v-else>{{ phone }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item class="col-12">
+            <q-item-section class="col-sm-3 col-xs-5">
+              <q-item-label>
                 <q-avatar icon="email"/>
                 Email
               </q-item-label>

@@ -58,7 +58,7 @@
         <q-tab-panel name="skill">
           <div class="row">
             <el-tag
-              v-for="(tag,index) in skillTags"
+              v-for="(tag,index) in TeammateRequire"
               :key="tag"
               class="q-pa-xs"
               closable
@@ -95,7 +95,7 @@
       >
         <q-tab name="des" label="Description"/>
         <q-tab name="group" label="Group"/>
-        <q-tab name="skill" label="Skills"/>
+        <q-tab name="skill" label="Intended teammates"/>
       </q-tabs>
     </q-card>
   </q-expansion-item>
@@ -118,9 +118,9 @@ const GroupMember = ref<GroupMember[]>([{name: 'andy', id: 1, skills: ['java','c
 const leader = ref<GroupMember>()
 setGroup()
 
-// skill
+// skill change to intended teammate
 const inputVisible = ref<boolean>(false)
-const skillTags = ref<string[]>(['java', 'springboot'])
+const TeammateRequire = ref<string[]>(['会java', '懂springboot'])
 const inputTagsValue = ref<string>('')
 const InputRef = ref<InstanceType<typeof ElInput>>()
 const tagsColor = ref<("success" | "info" | "warning" | "danger")[]>([

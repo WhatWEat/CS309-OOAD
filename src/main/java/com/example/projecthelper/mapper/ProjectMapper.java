@@ -2,7 +2,10 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.entity.User;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import com.example.projecthelper.util.Wrappers.ObjectWrapper;
 import java.util.List;
 import java.util.Set;
 import org.apache.ibatis.annotations.Insert;
@@ -39,11 +42,11 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("select stuId from stuInProject where stuId = #{stuId} and projectId = #{projectId}; ")
     Long checkStuInProj(Long stuId, Long projectId);
 
-    @Select("select intendedTeammates from stuInProject where projectId = #{projectId} and stuId = #{stuId}; ")
+    @Select("SELECT intendedteammates FROM stuInProject WHERE projectId = #{projectId} AND stuId = #{stuId};")
     @Results({
-        @Result(property = "intendedTeammates", column = "intendedteammates", typeHandler = StringListArrayTypeHandler.class)
+        @Result(property = "object", column = "intendedteammates", javaType = List.class, typeHandler = StringListArrayTypeHandler.class)
     })
-    List<String> getIntendedTeammates(long projectId, Long stuId);
+    ObjectWrapper<List<String>> getIntendedTeammates(long projectId, Long stuId);
 
     @Update("update stuInProject set intendedTeammates = #{intendedTeammates, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where projectId = #{projectId} and stuId = #{stuId}; ")
     void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates);

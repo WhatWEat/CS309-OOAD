@@ -9,11 +9,13 @@ import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.FileService;
 import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.NoticeService;
+import com.example.projecthelper.service.ProjectService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +38,18 @@ public class StudentController {
     private final GroupService groupService;
     private final AssignmentService assignmentService;
     private final FileService fileService;
+    private final ProjectService projectService;
 
     @Autowired
     public StudentController(UserService userService,
                              NoticeService noticeService, GroupService groupService, AssignmentService assignmentService,
-                             FileService fileService) {
+                             FileService fileService, ProjectService projectService) {
         this.userService = userService;
         this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
         this.fileService = fileService;
+        this.projectService = projectService;
     }
 
 
@@ -66,49 +70,79 @@ public class StudentController {
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/edit_person_info")
-    public ResponseResult<Object> editPersonInfo(
-        HttpServletRequest request,
-        @RequestParam("phone") String phone,
-        @RequestParam("email") String email,
-        @RequestParam("name") String name,
-        @RequestParam("gender") String gender,
-        @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
-        @RequestParam("programmingSkills") List<String> programmingSkills,
-        @RequestParam("avatar") MultipartFile avatar){
-        User user = new User();
-        user.setPhone(phone);
-        user.setEmail(email);
-        user.setName(name);
-        user.setGender(gender);
-        user.setBirthday(birthday);
-        user.setProgrammingSkills(programmingSkills);
-        user.setAvatar(avatar);
+//    @PostMapping("/edit_person_info")
+//    public ResponseResult<Object> editPersonInfo(
+//        HttpServletRequest request,
+//        @RequestParam("phone") String phone,
+//        @RequestParam("email") String email,
+//        @RequestParam("name") String name,
+//        @RequestParam("gender") String gender,
+//        @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
+//        @RequestParam("programmingSkills") List<String> programmingSkills,
+//        @RequestParam("avatar") MultipartFile avatar){
+//        User user = new User();
+//        user.setPhone(phone);
+//        user.setEmail(email);
+//        user.setName(name);
+//        user.setGender(gender);
+//        user.setBirthday(birthday);
+//        user.setProgrammingSkills(programmingSkills);
+//        user.setAvatar(avatar);
+//
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        userService.editPersonInfo(user, jwt);
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
+//
+//    @GetMapping("/get_person_info")
+//    public ResponseResult<User> getPersonInfo(HttpServletRequest request){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//
+//        return ResponseResult.ok(userService.getPersonInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt))), "Success", JWTUtil.updateJWT(jwt));
+//
+//    }
+//
+//    @GetMapping("/get_avatar")
+//    public ResponseEntity<Resource> getAvatar(HttpServletRequest request) {
+//
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+//        Resource rec = fileService.getAvatar(userId);
+//        System.err.println(rec.getFilename());
+//        return ResponseEntity.ok()
+//            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+//            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+//            .body(rec);
+//    }
 
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        userService.editPersonInfo(user, jwt);
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
-
-    @GetMapping("/get_person_info")
-    public ResponseResult<User> getPersonInfo(HttpServletRequest request){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-
-        return ResponseResult.ok(userService.getPersonInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt))), "Success", JWTUtil.updateJWT(jwt));
-
-    }
-
-    @GetMapping("/get_avatar")
-    public ResponseEntity<Resource> getAvatar(HttpServletRequest request) {
+    @GetMapping("/intend_teammates/{project_id}")
+    public ResponseResult<List<String>> getIntendTeammates(HttpServletRequest request, @PathVariable Long project_id){
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getAvatar(userId);
-        System.err.println(rec.getFilename());
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
-            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
-            .body(rec);
+        return ResponseResult.ok(projectService.getIntendedTeammates(project_id, userId), "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/add_intend_teammates")
+    public ResponseResult<Object> addIntendTeammates(
+        HttpServletRequest request,
+        @RequestBody KeyValueWrapper<Long, String> kvw){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        projectService.addIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/delete_intend_teammates")
+    public ResponseResult<Object> deleteIntendTeammates(
+        HttpServletRequest request,
+        @RequestBody KeyValueWrapper<Long, String> kvw){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        projectService.deleteIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/join_group")

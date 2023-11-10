@@ -1,5 +1,6 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
@@ -39,8 +40,13 @@ public class UserService {
 
     public User getPersonInfo(Long userId){
         User user = usersMapper.findUserById(userId);
-        user.setAvatarPath(null);
-        user.setPassword(null);
+        System.err.println(user);
+        if(user != null){
+            user.setAvatarPath(null);
+            user.setPassword(null);
+        }
+        else
+            throw new InvalidFormException("找不到用户");
         return user;
     }
 

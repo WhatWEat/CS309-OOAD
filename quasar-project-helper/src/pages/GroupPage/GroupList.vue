@@ -144,9 +144,12 @@
 
   <!--  这里是Edit表单部分-->
   <div>
-    <q-dialog v-model="show">
+    <el-dialog v-model="show"  center="true">
+      <template v-slot:header>
+        <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
+      </template>
       <group-form></group-form>
-    </q-dialog>
+    </el-dialog>
   </div>
 
 
@@ -293,7 +296,7 @@ export default {
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
-    GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupForm.vue')),
+    GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
   },
 }
 

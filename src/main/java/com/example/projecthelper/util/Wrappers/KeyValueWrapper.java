@@ -9,4 +9,11 @@ import lombok.Setter;
 public class KeyValueWrapper<K, V> {
     K key;
     V value;
+    public KeyValueWrapper() {
+
+    }
+    public KeyValueWrapper(K key, V value) {
+        this.key = key;
+        this.value = value;
+    }
 }

@@ -14,11 +14,18 @@ public interface UsersMapper extends BaseMapper<User> {
         @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
     User findUserById(Long userId);
+
+    @Select("select * from users where identity = #{identity} limit #{limit} offset #{offset};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findUsersById(Integer identity, int limit, int offset);
+
     @Select({
         "<script>",
         "SELECT * FROM users",
         "WHERE userId IN",
-        "<foreach item='id' index='index' collection='list' open='(' separator=',' close=')'>",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
         "#{id}",
         "</foreach>",
         "</script>"
@@ -64,5 +71,38 @@ public interface UsersMapper extends BaseMapper<User> {
 
     @Update("update users set password = #{password} where userId = #{userId};")
     void changePass(Long userId, String password);
+
+    @Update({
+        "<script>",
+        "update users set password = #{encodePassword} ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void resetPass(List<Long> userIds, String encodePassword);
+
+    @Update({
+        "<script>",
+        "update users set isFrozen = true ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void freezeUsers(List<Long> userIds);
+
+    @Update({
+        "<script>",
+        "update users set isFrozen = false ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void unfreezeUsers(List<Long> userIds);
 
 }

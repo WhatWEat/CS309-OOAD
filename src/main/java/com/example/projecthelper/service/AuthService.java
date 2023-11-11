@@ -3,6 +3,7 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AuthService {
@@ -48,6 +50,10 @@ public class AuthService {
         if(!strongPass || !validIdentity || !validUserId)
             throw new InvalidFormException("密码太弱或身份不合法或id不合法");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        boolean validName = user.getName() != null;
+        boolean validGender = FormatUtil.match(user.getGender(), FormatUtil.genderPredicate());
+        if(!validName || !validGender)
+            throw new InvalidFormException("名字不合法或性别不合法");
         try {
 
             usersMapper.registerUser(user);
@@ -60,8 +66,72 @@ public class AuthService {
     }
 
     //NOTE: 这个方法只给adm使用
-    public void registerUser(ObjectCountWrapper<User> multiUsers){
+    public void registerUserByAdm(ObjectCountWrapper<User> multiUsers, KeyValueWrapper<String, String> userPass){
+        //FUNC:该功能需要密码验证
+        authenticate(userPass);
+
         User user = multiUsers.getObj();
+        if(user == null || user.getIdentity() < 1 || user.getIdentity() > 3){
+            throw new InvalidFormException("提供的用户不合法");
+        }
+        long userId = user.getUserId();
+        boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
+        boolean validUserId = FormatUtil.match(String.valueOf(user.getUserId()), FormatUtil.userIdPredicate());
+        boolean validIdentity = FormatUtil.match(user.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList())) && user.getIdentity() > 0 && user.getIdentity() < 4;
+        if(!strongPass || !validIdentity || !validUserId)
+            throw new InvalidFormException("密码太弱或身份不合法或id不合法");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        boolean validName = user.getName() != null;
+        boolean validGender = FormatUtil.match(user.getGender(), FormatUtil.genderPredicate());
+        if(!validName || !validGender)
+            throw new InvalidFormException("名字不合法或性别不合法");
+
+        try {
+            List<User> users = Stream.generate(() -> multiUsers.getObj().clone()).limit(multiUsers.getCount()).toList();
+            for(User usr: users){
+                usr.setUserId(userId++);
+//                System.err.println(usr);
+            }
+            usersMapper.registerUsers(users);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            throw new InvalidFormException("信息不完整或id已经存在");
+        }
+    }
+
+    public void createMultipleUsersWithFile(MultipartFile file, KeyValueWrapper<String, String> userPass){
+        authenticate(userPass);
+
+        List<User> users = FileUtil.tableToUsersList(file);
+
+        users = users
+            .stream()
+            .filter(u -> FormatUtil.match(u.getPassword(), FormatUtil.strongPasswordPredicate()))
+            .filter(u -> FormatUtil.match(String.valueOf(u.getUserId()), FormatUtil.userIdPredicate()))
+            .filter(u -> FormatUtil.match(u.getIdentity(), FormatUtil.inCollection(IdentityCode.codeList())) && u.getIdentity() > 0 && u.getIdentity() < 4)
+            .filter(u -> u.getName() != null)
+            .filter(u -> FormatUtil.match(u.getGender(), FormatUtil.genderPredicate()))
+            .toList();
+        users.forEach(
+            u -> u.setPassword(passwordEncoder.encode(u.getPassword()))
+        );
+        try{
+            usersMapper.registerUsers(users);
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+            throw new InvalidFormException("信息不完整或id已经存在");
+        }
+
+    }
+
+    public void registerUserByTea(ObjectCountWrapper<User> multiUsers, KeyValueWrapper<String, String> userPass){
+        //FUNC:该功能需要密码验证
+        authenticate(userPass);
+
+        User user = multiUsers.getObj();
+        if(user == null || user.getIdentity() < 2 || user.getIdentity() > 3){
+            throw new InvalidFormException("提供的用户不合法");
+        }
         long userId = user.getUserId();
         boolean strongPass = FormatUtil.match(user.getPassword(), FormatUtil.strongPasswordPredicate());
         boolean validUserId = FormatUtil.match(String.valueOf(user.getUserId()), FormatUtil.userIdPredicate());
@@ -96,6 +166,11 @@ public class AuthService {
 
     }
 
+    public void authenticate(KeyValueWrapper<String, String> userPass){
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(userPass.getKey(), userPass.getValue());
+        authenticationManager.authenticate(authenticationToken);
+    }
     /**
      * 登录
      * @param userPass 用户密码
@@ -103,9 +178,7 @@ public class AuthService {
      */
     public String login(KeyValueWrapper<String, String> userPass){
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(userPass.getKey(), userPass.getValue());
-        authenticationManager.authenticate(authenticationToken);
+        authenticate(userPass);
 
         //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
         //NOTE: 拉出黑名单
@@ -123,15 +196,6 @@ public class AuthService {
 
     }
 
-//    public User getPersonalInfo(Long userId){
-//        User user = usersMapper.findUserById(userId);
-//        if(user != null){
-//            user.setPassword(null);
-//            return user;
-//        }
-//        return null;
-//    }
-
     /**
      * 登出
      * @return JWT
@@ -143,6 +207,25 @@ public class AuthService {
         return null;
     }
 
+    public void resetPassForMultiUsers(KeyValueWrapper<String, List<Long>> newPassAndIds, KeyValueWrapper<String, String> userPass){
+        authenticate(userPass);
+        boolean strongPass = FormatUtil.match(newPassAndIds.getKey(), FormatUtil.strongPasswordPredicate());
+        if(!strongPass){
+            throw new InvalidFormException("密码太弱");
+        }
+        usersMapper.resetPass(newPassAndIds.getValue(), passwordEncoder.encode(newPassAndIds.getKey()));
+    }
+
+    public void freezeMultiUsers(List<Long> ids, KeyValueWrapper<String, String> userPass){
+        authenticate(userPass);
+        usersMapper.freezeUsers(ids);
+
+    }
+
+    public void unfreezeMultiUsers(List<Long> ids, KeyValueWrapper<String, String> userPass){
+        authenticate(userPass);
+        usersMapper.unfreezeUsers(ids);
+    }
 
 
 }

@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.JWTUtil;
+import java.util.List;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,11 @@ public class UserService {
         else
             throw new InvalidFormException("找不到用户");
         return user;
+    }
+
+    public List<User> getUsersByIdentity(int identity, int page, int page_size){
+        return usersMapper.findUsersById(identity, page_size, page * page_size);
+
     }
 
 

@@ -69,10 +69,20 @@ public class FileService {
 
     }
 
-    public Resource getFilesOfAssByTea(Long userId, Long assId, String fileName){
+    public Resource getFilesOfAssByTeaOrTa(Long userId, Long assId, String fileName, Integer identity){
         Assignment ass = assignmentMapper.findAssById(assId);
-        if(ass == null || !Objects.equals(ass.getCreatorId(), userId))
-            throw new AccessDeniedException("无权查看别人发布的作业");
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
         Path fp = Paths.get(FileUtil.generateAssPath(ass)).resolve(fileName).normalize();
         System.err.println(fp.toString());
         try{
@@ -107,10 +117,20 @@ public class FileService {
         }
     }
 
-    public Resource getFilesOfSubmittedAssByTea(Long teaId, Long stuId, Long assId, String fileName){
+    public Resource getFilesOfSubmittedAssByTeaOrTa(Long userId, Long stuId, Long assId, String fileName, Integer identity){
         Assignment ass = assignmentMapper.findAssById(assId);
-        if(ass == null || !Objects.equals(ass.getCreatorId(), teaId))
-            throw new AccessDeniedException("无权查看别人发布的作业");
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
         Long submitterId = null;
         if(ass.getType().equals("i")){
             submitterId = stuId;

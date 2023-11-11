@@ -61,6 +61,16 @@ public class NoticeService {
         return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
     }
 
+    public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize){
+        if(projId == -1)
+            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize);
+        Long teaOfProj = projectMapper.findTeacherByProject(projId);
+        if(!Objects.equals(teaOfProj, userId)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+    }
+
 
     public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize){
         Long checker = projectMapper.checkStuInProj(userId, projId);

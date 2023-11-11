@@ -28,19 +28,24 @@ public class User implements Cloneable{
     private String gender;
 
     private Date birthday;
+
     private List<String> programmingSkills;
+
     private String avatarPath;
+
+    private boolean isFrozen;
     @TableField(exist = false)
     private MultipartFile avatar;
     @TableField(exist = false)
     private List<String> intendedTeammates;
 
 
-    public User( int identity, String password, String name, String gender) {
+    public User( Integer identity, String password, String name, String gender, Long userId) {
         this.identity = identity;
         this.password = password;
         this.name = name;
         this.gender = gender;
+        this.userId = userId;
     }
 
     public User() {

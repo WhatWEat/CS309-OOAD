@@ -21,6 +21,12 @@ public class FormatUtil {
         return str -> pattern.matcher(str).matches();
     }
 
+    public static Predicate<String> genderPredicate(){
+        return str ->
+            str != null &&
+                (str.equals("male") || str.equals("female") || str.equals("non-binary") || str.equals("unknown"));
+    }
+
     /**
      * 左闭右开
      * @param lb 下界

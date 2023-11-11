@@ -1,5 +1,6 @@
 package com.example.projecthelper.Exceptions.handlers;
 
+import com.example.projecthelper.Exceptions.AccountFrozenException;
 import com.example.projecthelper.Exceptions.FileProcessingException;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.Exceptions.OverdueException;
@@ -28,6 +29,12 @@ public class CustomExceptionHandler {
     @ExceptionHandler(OverdueException.class)
     public ResponseEntity<ResponseResult<Object>> handleOverdueException(OverdueException ex) {
         ResponseResult<Object> response = ResponseResult.invalidContent(null, ex.toString());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccountFrozenException.class)
+    public ResponseEntity<ResponseResult<Object>> handleAccountFrozenException(AccountFrozenException ex) {
+        ResponseResult<Object> response = ResponseResult.invalidContent(null, ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

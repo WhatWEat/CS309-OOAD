@@ -55,6 +55,18 @@ public class AssignmentService {
         return results;
     }
 
+    public List<Assignment> getAssignmentsByTa(Long userId, Long projId, Long page, Long pageSize){
+        Long taOfProj = projectMapper.checkTaInProj(projId, userId);
+        if(!Objects.equals(taOfProj, userId)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        results.forEach(a ->
+            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        );
+        return results;
+    }
+
     public List<Assignment> getAssignmentsByStu(Long userId, Long projId, Long page, Long pageSize){
         Long checker = projectMapper.checkStuInProj(userId, projId);
         if(!Objects.equals(checker, null)){
@@ -99,12 +111,20 @@ public class AssignmentService {
         }
     }
 
-    public void deleteAss(Long assignmentId, Long userId){
-        Assignment assignment = assignmentMapper.findAssById(assignmentId);
-        if(assignment == null)
-            throw new InvalidFormException("assignmentId无效");
-        if(!Objects.equals(assignment.getCreatorId(), userId))
-            throw new InvalidFormException("无权限删除");
+    public void deleteAss(Long assignmentId, Long userId, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
         assignmentMapper.deleteAss(assignmentId);
         submittedAssMapper.deleteSubmittedAssByAssId(assignmentId);
     }
@@ -229,13 +249,19 @@ public class AssignmentService {
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public List<SubmittedAssignment> viewAllSub(long assignmentId, long teaId, long page, long pageSize){
-        Assignment assignment = assignmentMapper.findAssById(assignmentId);
-        if (assignment == null){
-            throw new InvalidFormException("作业不存在");
+    public List<SubmittedAssignment> viewAllSub(long assignmentId, long userId, long page, long pageSize, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
-        if (projectMapper.findTeacherByProject(assignment.getProjectId()) != teaId){
-            throw new AccessDeniedException("无权查看别人发布的作业");
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
         List<SubmittedAssignment> sas = submittedAssMapper.findAllSub(assignmentId, pageSize, page * pageSize);
         if(sas != null)
@@ -245,15 +271,24 @@ public class AssignmentService {
         return sas;
     }
 
-    public void gradeAss(SubmittedAssignment submittedAssignment, Long teaId){
+    public void gradeAss(SubmittedAssignment submittedAssignment, Long userId, Integer identity){
         SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getAssignmentId(),
             submittedAssignment.getSubmitterId());
         if(sub == null){
             throw new InvalidFormException("作业不存在");
         }
-        Assignment assignment = assignmentMapper.findAssById(sub.getAssignmentId());
-        if (assignment == null || !Objects.equals(projectMapper.findTeacherByProject(assignment.getProjectId()), teaId)){
-            throw new AccessDeniedException("无权批改别人发布的作业");
+        Assignment ass = assignmentMapper.findAssById(sub.getAssignmentId());
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
         try{
             submittedAssMapper.gradeAss(submittedAssignment);
@@ -266,13 +301,22 @@ public class AssignmentService {
 
 
     //这个方法是读取文件批量更新成绩
-    public void gradeAssWithFile (MultipartFile file,long assignmentId, Long teaId){
-        Assignment assignment = assignmentMapper.findAssById(assignmentId);
-        if(assignment == null || !Objects.equals(teaId, assignment.getCreatorId())){
-            throw new AccessDeniedException("无权批改别人发布的作业");
+    public void gradeAssWithFile (MultipartFile file,long assignmentId, Long userId, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
 
-        List<SubmittedAssignment> result = FileUtil.manageTableFile(file);
+        List<SubmittedAssignment> result = FileUtil.tableToSubmittedAssList(file);
         result.forEach(System.err::println);
         submittedAssMapper.updateGrades(result,assignmentId);
     }

@@ -55,6 +55,10 @@ public class ProjectService {
         return projectMapper.findTeacherByProject(projectId);
     }
 
+    public Long checkTaInProj(Long projectId, Long taId){
+        return projectMapper.checkTaInProj(projectId, taId);
+    }
+
     public void stuInProject(long projectId, long stuId){
         usersMapper.stuInProject(projectId,stuId);
     }
@@ -89,5 +93,22 @@ public class ProjectService {
         }
         projectMapper.setIntendedTeammates(projectId, stuId, intendedTeammates);
 
+    }
+
+    public void designateTaToProj(long projId, long taId, long userId){
+        Long teaId = projectMapper.findTeacherByProject(projId);
+        User ta = usersMapper.findUserById(taId);
+        if(teaId != userId)
+            throw new AccessDeniedException("无权修改别人的proj");
+        if(ta == null)
+            throw new InvalidFormException("无效id");
+        projectMapper.designateTaToProj(projId, taId);
+    }
+
+    public void removeTaFromProj(long projId, long taId, long userId){
+        Long teaId = projectMapper.findTeacherByProject(projId);
+        if(teaId != userId)
+            throw new AccessDeniedException("无权修改别人的proj");
+        projectMapper.removeTaFromProj(projId, taId);
     }
 }

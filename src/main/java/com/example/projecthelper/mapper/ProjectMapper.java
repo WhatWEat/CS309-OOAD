@@ -26,6 +26,9 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("select teacherId from project where projectId = #{projectId}")
     Long findTeacherByProject(Long projectId) ;
 
+    @Select(("select taId from taOfProject where projectId = #{projectId} and taId = #{taId}"))
+    Long checkTaInProj(Long projectId, Long taId);
+
     @Select("select stuId from stuInProject where projectId = #{projectId}")
     List<Long> findStuIdsByProject(Long projectId);
 
@@ -50,4 +53,11 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     @Update("update stuInProject set intendedTeammates = #{intendedTeammates, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where projectId = #{projectId} and stuId = #{stuId}; ")
     void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates);
+
+    @Insert("insert into taOfProject(projectId, taId) values (#{projId}, #{taId});")
+    void designateTaToProj(long projId, long taId);
+
+    @Insert("delete from taOfProject where projectId = #{projId} and taId #{taId});")
+    void removeTaFromProj(long projId, long taId);
+
 }

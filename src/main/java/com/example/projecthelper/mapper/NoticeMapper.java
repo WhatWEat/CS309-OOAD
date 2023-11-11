@@ -47,6 +47,13 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         " where p.teacherId = #{teaId} limit #{limit} offset #{offset};")
     List<Notice> findNoticeOfTea(Long teaId, Long limit, Long offset);
 
+    @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
+        "    join project p on p.projectid= n.projectid" +
+        "    join users u on u.userid = n.creatorid" +
+        "    join taOfProject t on t.projectid = n.projectid" +
+        " where t.taId = #{taId} limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset);
+
     @Insert("insert into notice ( title, content, creatorId, projectId, createTime)\n" +
             "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime});")
     @Options(useGeneratedKeys = true, keyProperty = "noticeId", keyColumn = "noticeid")

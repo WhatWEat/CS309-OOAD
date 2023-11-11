@@ -4,6 +4,7 @@ import com.example.projecthelper.Exceptions.FileProcessingException;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.SubmittedAssignment;
+import com.example.projecthelper.entity.User;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,7 +73,7 @@ public class FileUtil {
     1.从指定位置获取一个xls文件，并且读取第一张工作表,xlsx可能有问题，还在调试
     2.暂时要求第一行表头必须有id和grade
      */
-    public static List<SubmittedAssignment> manageTableFile(MultipartFile file) {
+    public static List<SubmittedAssignment> tableToSubmittedAssList(MultipartFile file) {
         try {
             Workbook workbook;
             if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".xls")) {
@@ -136,6 +137,73 @@ public class FileUtil {
             throw new FileProcessingException("文件处理异常");
         }
     }
+
+    public static List<User> tableToUsersList(MultipartFile file) {
+        try {
+            Workbook workbook;
+            if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".xls")) {
+                workbook = new HSSFWorkbook(file.getInputStream());
+            } else if (file.getOriginalFilename().endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(file.getInputStream());
+            }else {
+                throw new InvalidFormException("非法文件格式；仅支持.xls和.xlsx");
+            }
+            Sheet sheet = workbook.getSheetAt(0);
+            int userIdColumn = -1;
+            int passColumn = -1;
+            int genderColumn = -1;
+            int nameColumn = -1;
+            int identityColumn = -1;
+
+            // 遍历第一行，查找“id”和“grade”列头所在的位置
+            Row headerRow = sheet.getRow(0);
+            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                Cell cell = headerRow.getCell(i);
+                if (cell == null)
+                    continue;
+                String cellValue = cell.getStringCellValue();
+                if(cellValue != null)
+                    cellValue = cellValue.trim();
+                else
+                    continue;
+                if (cellValue.equalsIgnoreCase("userId")) {
+                    userIdColumn = i;
+                } else if (cellValue.equalsIgnoreCase("password")) {
+                    passColumn = i;
+                } else if (cellValue.equalsIgnoreCase("gender")) {
+                    genderColumn = i;
+                } else if (cellValue.equalsIgnoreCase("name")) {
+                    nameColumn = i;
+                } else if (cellValue.equalsIgnoreCase("identity")) {
+                    identityColumn = i;
+                }
+            }
+
+            if (userIdColumn == -1 || passColumn == -1 || genderColumn == -1 || nameColumn == -1 || identityColumn == -1) {
+                throw new InvalidFormException("id, 密码，性别或名字列缺失");
+            }
+            // 遍历所有行（除第一行外），将每一行的name和grade值存入相应的数组
+            List<User> users = new ArrayList<>();
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row dataRow = sheet.getRow(i);
+                long userId = (long) dataRow.getCell(userIdColumn).getNumericCellValue();
+                String password =(String) dataRow.getCell(passColumn).getStringCellValue();
+                String gender = (String) dataRow.getCell(genderColumn).getStringCellValue();
+                String name = (String) dataRow.getCell(genderColumn).getStringCellValue();
+                Integer identity = (int) dataRow.getCell(identityColumn).getNumericCellValue();
+                users.add(new User(identity, password, name, gender, userId));
+            }
+//            System.out.println(Arrays.toString(names));
+//            System.out.println(Arrays.toString(grades));
+
+            workbook.close();
+            return users;
+        } catch (IOException e) {
+            throw new FileProcessingException("文件处理异常");
+        }
+    }
+
+
 
     //这个方法用于检测文件的拓展名是否为指定的拓展名
     public static boolean hasExtension(File file, String extension) {

@@ -20,6 +20,7 @@ public class CustomUserDetails implements UserDetails {
     private final Long userId;
     private final String password;
     private final int identity;
+    private final boolean isFrozen;
 
     // 根据您的需求添加其他字段
 
@@ -27,6 +28,7 @@ public class CustomUserDetails implements UserDetails {
         this.userId = user.getUserId();
         this.password = user.getPassword();
         this.identity = user.getIdentity();
+        this.isFrozen = user.isFrozen();
     }
 
 
@@ -56,7 +58,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isFrozen;
     }
 
     @Override

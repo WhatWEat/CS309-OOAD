@@ -113,13 +113,46 @@
   <!--  这里是小组详情弹窗部分-->
   <div>
     <q-dialog v-model="show_button_2" transition-duration="500">
-      <directory-card :avatar=card_data.avatar :group-id="card_data.groupId" :group-size="card_data.groupSize"
-                      :members="card_data.members" :deadline="card_data.deadline" :detail="card_data.detail"
-                      :style="{width: '50%' ,height: '45%'}"
-      >
+      <directory-card :avatar=card_data.avatar :deadline="card_data.deadline" :detail="card_data.detail"
+                      :group-id="card_data.groupId" :group-size="card_data.groupSize" :members="card_data.members"
+                      :style="{width: '50%' ,height: '45%' , 'border-radius': '20px'}">
+        >
       </directory-card>
     </q-dialog>
   </div>
+  <!--  这里是报错弹窗部分-->
+  <div>
+    <q-dialog v-model="show_warning" name="confirm_for_">
+      <confirm-dialog :icon_color="warning_date.icon_color" :icon_name="warning_date.icon_name"
+                      :icon_text_color="warning_date.icon_text_color" :style="{borderRadius: '20px'}"
+                      :text="warning_date.text"
+                      :title="warning_date.title"
+      >
+        <template v-slot:button1>
+          <!--           这个是取消按钮，颜色好好选一下-->
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"
+                 @click="confirm_1 = false"/>
+        </template>
+        <template v-slot:button2>
+          <!--            这个是确认按钮-->
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK" @click="confirm_1 = false"/>
+        </template>
+      </confirm-dialog>
+    </q-dialog>
+  </div>
+
+
+  <!--  这里是Edit表单部分-->
+  <div>
+    <el-dialog v-model="show"  center="true">
+      <template v-slot:header>
+        <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
+      </template>
+      <group-form></group-form>
+    </el-dialog>
+  </div>
+
+
 </template>
 
 <script>
@@ -190,7 +223,7 @@ export default {
         'index': '',
       },
 
-      show: false,
+      show_warning: false,
 
       card_data:
         {
@@ -201,7 +234,15 @@ export default {
           instructor: 'Dr. Smith',
           deadline: '2021/10/01',
           detail: 'https://www.google.com'
-        }
+        },
+
+      warning_date: {
+        icon_name: 'warning',
+        icon_color: 'red-5',
+        icon_text_color: 'white',
+        text: 'The deadline is approaching'
+      },
+      show: true,
     }
   },
   methods: {
@@ -253,7 +294,9 @@ export default {
     },
   },
   components: {
-    DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue'))
+    DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
+    ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
+    GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
   },
 }
 

@@ -59,6 +59,8 @@
         <span style="font-weight: normal;">
           {{ deadline }}
         </span>
+      </div>
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
         <span style="font-weight: bold;">
           More Info :
         </span>
@@ -68,17 +70,17 @@
       </div>
     </q-card-section>
 
-<!--    <pre>-->
+    <!--    <pre>-->
 
-<!--    </pre>-->
-<!--    <q-separator></q-separator>-->
-<!--    &lt;!&ndash;   最终的按钮部分 &ndash;&gt;-->
-<!--      <q-card-actions align="around">-->
-<!--        <q-btn-group spread :style="{'width':'100%'}">-->
-<!--          <q-btn color="purple" label="First" icon="" />-->
-<!--          <q-btn color="purple" label="Second" icon="visibility" />-->
-<!--        </q-btn-group>-->
-<!--      </q-card-actions>-->
+    <!--    </pre>-->
+    <!--    <q-separator></q-separator>-->
+    <!--    &lt;!&ndash;   最终的按钮部分 &ndash;&gt;-->
+    <!--      <q-card-actions align="around">-->
+    <!--        <q-btn-group spread :style="{'width':'100%'}">-->
+    <!--          <q-btn color="purple" label="First" icon="" />-->
+    <!--          <q-btn color="purple" label="Second" icon="visibility" />-->
+    <!--        </q-btn-group>-->
+    <!--      </q-card-actions>-->
 
   </q-card>
 </template>

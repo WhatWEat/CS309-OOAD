@@ -17,15 +17,15 @@ import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -330,6 +330,17 @@ public class TeacherController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         projectService.designateTaToProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+
+    }
+    @PostMapping("/update_group_leader")
+    public ResponseResult<Object> updateGroupLeader(HttpServletRequest request,
+                                                    @RequestBody KeyValueWrapper<Long, Long> leader_group ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateLeader(leader_group.getKey(),leader_group.getValue(),gpId -> Objects.equals(
+                groupService.findCreatorByGroup(gpId),
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        ));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @DeleteMapping("/remove_ta_from_proj")
@@ -340,10 +351,35 @@ public class TeacherController {
         projectService.removeTaFromProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+    @PostMapping("/update_visibility")
+    public ResponseResult<Object> updateVisibility(HttpServletRequest request,
+                                                     @RequestBody KeyValueWrapper<Long, Boolean[]> group_visibility ) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateVisibility(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                group_visibility.getKey(),group_visibility.getValue());
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+//    @GetMapping("/getIfStuSub")
+//    public ResponseResult<Object> getIfStuSub(HttpServletRequest request, @RequestBody KeyValueWrapper assignment){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        boolean sub = assignmentService.ifStuSub()
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
 
 
+    /**
+     * 数据库功能测试
+     */
+
+    //test用
+    @GetMapping(value ="/get_name_by_id/{user_id}")
+    public ResponseResult<String> getNameById(@PathVariable("user_id")Long userId, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        String name = userService.getPersonName(userId);
+        return ResponseResult.ok(name, "success", JWTUtil.updateJWT(jwt));
+    }
 
 
 }

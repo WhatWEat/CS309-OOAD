@@ -17,6 +17,8 @@ import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Arrays;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -238,6 +240,14 @@ public class StudentController {
             .body(rec);
     }
 
+    @PostMapping("/update_visibility")
+    public ResponseResult<Object> updateVisibility(HttpServletRequest request,
+                                                   @RequestBody KeyValueWrapper<Long, Boolean[]> group_visibility ) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateVisibility(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                group_visibility.getKey(),group_visibility.getValue());
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 
 

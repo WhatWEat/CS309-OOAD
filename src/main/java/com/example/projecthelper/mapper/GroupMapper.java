@@ -86,4 +86,11 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Select("select count(*) from stuingroup where groupId = #{groupId};")
     int findMemberOfGroup(long groupId);
+
+    @Update("update groups set leaderid = #{leaderId} where groupid = #{groupId};")
+    void updateLeader(long leaderId, long groupId) throws PSQLException;
+
+    @Update("UPDATE groups SET visibility = #{visibility} WHERE groupid = 1;\n")
+    void updateVisibility(long userId, long groupId, Boolean[] visibility) throws PSQLException;
+
 }

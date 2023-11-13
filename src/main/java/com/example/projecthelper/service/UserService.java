@@ -56,6 +56,17 @@ public class UserService {
 
     }
 
+    //test
+    public String getPersonName(Long userId){
+        User user = usersMapper.findUserById(userId);
+        System.err.println(user);
+        if (user != null){
+            return user.getName();
+        }else {
+            throw new InvalidFormException("找不到用户");
+        }
+    }
+
 
     
     // 数据库功能测试

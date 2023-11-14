@@ -1,25 +1,6 @@
 <template>
   <div id="q-app" style="min-height: 100vh;">
 
-    <!--        这里是顶栏部分,先将顶栏部分屏蔽掉-->
-    <!--        <q-toolbar class="bg-primary text-white shadow-2">-->
-    <!--          <q-btn flat label="GroupAdminister"></q-btn>-->
-    <!--          <q-toolbar-title></q-toolbar-title>-->
-
-    <!--          <q-space></q-space>-->
-
-    <!--          &lt;!&ndash;-->
-    <!--            notice shrink property since we are placing it-->
-    <!--            as child of QToolbar-->
-    <!--          &ndash;&gt;-->
-    <!--          <q-tabs v-model="separator" shrink>-->
-    <!--            <q-tab label="Cell" name="cell"></q-tab>-->
-    <!--            <q-tab label="Herizontal" name="horizontal"></q-tab>-->
-    <!--            <q-tab label="Vertical" name="vertical"></q-tab>-->
-    <!--            <q-tab label="None" name="none"></q-tab>-->
-    <!--          </q-tabs>-->
-    <!--        </q-toolbar>-->
-
     <!--这里是表格部分-->
     <div class="q-pa-md ">
       <q-table
@@ -104,10 +85,16 @@
   </q-dialog>
   <!--  这里是删除修改按钮的弹窗部分-->
   <div>
-    <q-btn-group v-if="show_button_1"
+    <q-btn-group v-if="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
       <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+    </q-btn-group>
+  </div>
+  <div>
+    <q-btn-group v-if="show_button_student"
+                 :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
+      <q-btn color="grey-3"  icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
@@ -144,7 +131,7 @@
 
   <!--  这里是Edit表单部分-->
   <div>
-    <el-dialog v-model="show"  center="true">
+    <el-dialog v-model="show" center="true">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
@@ -158,11 +145,16 @@
 <script>
 import {api} from 'boot/axios';
 import {defineAsyncComponent, ref} from 'vue';
+import {useUserStore} from 'src/composables/useUserStore';
+
 
 export default {
   name: 'GroupTeacherPage',
+  userStore: useUserStore(),
   data() {
     return {
+      userData: useUserStore(),
+
       columns: [
         {
           name: 'GroupId',
@@ -210,7 +202,9 @@ export default {
 
       fileLoader: false,
 
-      show_button_1: ref(false),
+      show_button_teacher: ref(false),
+
+      show_button_student: ref(false),
 
       show_button_2: ref(false),
 
@@ -242,6 +236,7 @@ export default {
         icon_text_color: 'white',
         text: 'The deadline is approaching'
       },
+
       show: true,
     }
   },
@@ -257,14 +252,25 @@ export default {
       this.p_x = evt.clientY + 'px';
       this.p_y = evt.clientX + 'px';
       // 更新弹窗显示
-      this.show_button_1 = true;
-
+      if (this.userData.identity > 1){
+        this.show_button_student = true;
+      }
+      else{
+        this.show_button_teacher = true;
+      }
       // 更新被选中的行的内容
       this.selected_row.row = row;
       this.selected_row.index = index;
       document.addEventListener('click', () => {
-        this.show_button_1 = false;
-      })
+        this.show_button_teacher = false;
+        this.show_button_student = false;
+      });
+      console.log("\n\n\nhandleRowContextmenu:\n");
+      console.log("Userdate: " + this.userData.identity + "\n");
+      console.log("row: " + row + "\n");
+      console.log("index: " + index + "\n");
+      console.log("show_button_teacher: " + this.show_button_teacher + "\n");
+      console.log("show_button_student: " + this.show_button_student + "\n");
     },
     handleEditClick() {
       // 更新弹窗显示, 隐藏弹窗
@@ -290,7 +296,7 @@ export default {
       }).catch((error) => {
         console.log("errorHere");
         console.log(error);
-      })
+      });
     },
   },
   components: {

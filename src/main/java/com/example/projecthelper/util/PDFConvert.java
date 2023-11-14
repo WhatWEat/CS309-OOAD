@@ -1,9 +1,19 @@
-package org.example;
+package com.example.projecthelper.util;
 
-import com.aspose.words.*;
-import com.aspose.slides.*;
+import com.aspose.slides.Presentation;
+import com.aspose.words.Document;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 public class PDFConvert {
     private static com.aspose.words.License wordLicense = new com.aspose.words.License();
@@ -33,6 +43,39 @@ public class PDFConvert {
             doc.save(outputPath, com.aspose.words.SaveFormat.PDF);
         } catch (Exception e) {
             System.out.printf("Problem about convert word %s to pdf %s \n", inputPath, outputPath);
+        }
+    }
+
+    public static void markdownConvert(String markdownFilePath, String pdfFilePath) throws
+        IOException {
+        // Read Markdown file
+        String markdown = new String(Files.readAllBytes(Paths.get(markdownFilePath)));
+
+        // Convert Markdown to HTML
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(markdown);
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        String html = renderer.render(document);
+
+        // Convert HTML to PDF
+        try (OutputStream os = new FileOutputStream(pdfFilePath)) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, null);
+            builder.toStream(os);
+            builder.run();
+        }
+    }
+
+    public static void htmlConvert(String inputPath, String outputPath) throws IOException {
+        // 读取HTML文件
+        String html = Files.readString(Paths.get(inputPath));
+
+        // 将HTML转换为PDF
+        try (OutputStream os = new FileOutputStream(outputPath)) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.withHtmlContent(html, null);
+            builder.toStream(os);
+            builder.run();
         }
     }
 }

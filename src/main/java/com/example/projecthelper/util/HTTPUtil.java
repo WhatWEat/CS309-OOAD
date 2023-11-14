@@ -1,6 +1,8 @@
 package com.example.projecthelper.util;
 
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class HTTPUtil {
     public static final String TOKEN_HEADER = "Token";
@@ -15,6 +17,15 @@ public class HTTPUtil {
 
     public static String declareAttachment(String filename){
         return "attachment; filename=\"" + filename + "\"";
+    }
+
+    public static void respondException(HttpServletResponse response, ResponseResult <?> rr)
+        throws IOException {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setStatus(rr.getStatusCode());
+        response.getWriter().write(JsonUtil.serialize(rr));
+        response.getWriter().flush();
     }
 }
 

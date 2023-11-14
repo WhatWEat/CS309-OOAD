@@ -6,6 +6,7 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.LogUtil;
+import com.example.projecthelper.util.ResponseResult;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +42,11 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws
         ServletException, IOException {
+        if (HTTPUtil.requestSpecifiedPattern(HTTPUtil.IGNORE_PATTERN, request)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+        System.err.println("hereeeee");
         // get token from header:  Authorization: Bearer <token>
         String token = request.getHeader(AUTH_HEADER);
         if (Objects.isNull(token)){
@@ -59,8 +65,12 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
         final String userId =  JWTUtil.getUserIdByToken(token);
         Long id = Long.parseLong(userId);
         User user = usersMapper.findUserById(id);
-        if(user.isFrozen())
-            throw new AccountFrozenException("用户被冻结!");
+        if(user.isFrozen()){
+            HTTPUtil.respondException(
+                response,
+                ResponseResult.unAuthorize(null, "用户被冻结")
+            );
+        }
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         userDetails.getAuthorities().forEach(e -> System.err.println(e.getAuthority()));
         // 注意，这里使用的是3个参数的构造方法，此构造方法将认证状态设置为true

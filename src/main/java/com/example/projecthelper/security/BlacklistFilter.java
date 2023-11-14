@@ -1,8 +1,10 @@
 package com.example.projecthelper.security;
 
 import com.example.projecthelper.service.LogoutBLKService;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.LogUtil;
+import com.example.projecthelper.util.ResponseResult;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +23,11 @@ public class BlacklistFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws IOException, ServletException {
         // 获取请求的信息，例如IP地址或用户名
-
+        if (HTTPUtil.requestSpecifiedPattern(HTTPUtil.IGNORE_PATTERN, request)){
+            filterChain.doFilter(request, response);
+            return;
+        }
+        System.err.println("blk");
         // 如果token无效，直接进行下一环
         String token = request.getHeader(CustomJwtAuthenticationTokenFilter.AUTH_HEADER);
         if (Objects.isNull(token)){
@@ -36,7 +42,10 @@ public class BlacklistFilter extends OncePerRequestFilter {
         // 检查是否在黑名单中
         if (isBlacklisted(JWTUtil.getUserIdByToken(token))) {
 
-            throw new AuthenticationServiceException("Blocked: You are on the blacklist");
+            HTTPUtil.respondException(
+                response,
+                ResponseResult.unAuthorize(null, "您已登出请重新登录")
+            );
         }
         // 不在黑名单，继续
         filterChain.doFilter(request, response);

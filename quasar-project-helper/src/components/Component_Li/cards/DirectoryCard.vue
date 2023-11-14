@@ -54,12 +54,49 @@
     <q-card-section>
       <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
         <span style="font-weight: bold;">
+          Creation Time :
+        </span>
+        <span style="font-weight: normal;">
+          {{ creationTime }}
+        </span>
+      </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+        <span style="font-weight: bold;">
           Deadline :
         </span>
         <span style="font-weight: normal;">
           {{ deadline }}
         </span>
       </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+        <span style="font-weight: bold;">
+          Preatation Time :
+        </span>
+        <span style="font-weight: normal;">
+          {{ preatationTime }}
+        </span>
+      </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+        <span style="font-weight: bold;">
+          Leader :
+        </span>
+        <span style="font-weight: normal;">
+          {{ leader }}
+        </span>
+      </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+        <span style="font-weight: bold;">
+          Max Size :
+        </span>
+        <span style="font-weight: normal;">
+          {{ maxSize }}
+        </span>
+      </div>
+
       <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
         <span style="font-weight: bold;">
           More Info :
@@ -96,7 +133,7 @@ export default defineComponent({
       return descriptionProps
     }
   },
-  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail']
+  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail' , 'leader', "maxSize", "creationTime", "preatationTime"]
 })
 </script>
 

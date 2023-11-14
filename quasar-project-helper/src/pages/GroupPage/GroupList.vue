@@ -12,7 +12,8 @@
         card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
-        selected="none"
+        selection="multiple"
+        :selected="selected"
         title="Groups List"
         @row-dblclick="handleRowDbclick"
         @row-contextmenu="handleRowContextmenu"
@@ -23,25 +24,21 @@
           <b style=" font-size: 22px;">Group List</b>
         </template>
         <!--        右上方按钮插槽-->
-        <template v-slot:top-right>
-          <q-toolbar class="bg-grey-5 text-white rounded-borders ">
+        <template v-slot:top-right >
+          <q-toolbar class="bg-grey-4 text-white rounded-borders ">
             <!--            这里是下拉框-->
-            <q-btn-dropdown color="grey-5" icon="menu">
+            <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
               <q-list>
-                <q-item v-close-popup clickable @click="onItemClick">
-                  <q-item-label style="font-weight: bolder">Delete selected group</q-item-label>
-                </q-item>
-
-                <q-item v-close-popup clickable @click="onItemClick">
-                  <q-item-label style="font-weight: bolder">Modefy selected group</q-item-label>
+                <q-item v-close-popup clickable @click="show_insert_form = true">
+                  <q-item-label  style="font-weight: bolder">Create A Group</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="fileLoader = true">
-                  <q-item-label style="font-weight: bolder">Upload Groups Info</q-item-label>
+                  <q-item-label style="font-weight: bolder">Upload Group Info</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="exportTable">
-                  <q-item-label style="font-weight: bolder">Export group info to csv</q-item-label>
+                  <q-item-label style="font-weight: bolder">Export  Group Info</q-item-label>
                 </q-item>
               </q-list>
             </q-btn-dropdown>
@@ -68,7 +65,7 @@
 
   <!--  这里是弹窗部分-->
   <!--  文件上传弹窗-->
-  <q-dialog v-model="fileLoader" :position="position">
+  <q-dialog v-model="fileLoader" :position="'standard'">
     <q-card-section class="card">
       <q-uploader
         accept=".xlsx"
@@ -85,31 +82,31 @@
   </q-dialog>
   <!--  这里是删除修改按钮的弹窗部分-->
   <div>
-    <q-btn-group v-if="show_button_teacher"
+    <q-btn-group v-show="show_button_teacher "
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
       <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
     </q-btn-group>
   </div>
   <div>
-    <q-btn-group v-if="show_button_student"
+    <q-btn-group v-show="show_button_student"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3"  icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
   <div>
-    <q-dialog v-model="show_button_2" transition-duration="500">
+    <q-dialog v-model="show_detail" transition-duration="500">
       <directory-card :avatar=card_data.avatar :deadline="card_data.deadline" :detail="card_data.detail"
                       :group-id="card_data.groupId" :group-size="card_data.groupSize" :members="card_data.members"
-                      :style="{width: '50%' ,height: '45%' , 'border-radius': '20px'}">
+                      :style="{width: '50%' , 'border-radius': '20px'}">
         >
       </directory-card>
     </q-dialog>
   </div>
-  <!--  这里是报错弹窗部分-->
+  <!--  这里是确认删除弹窗部分-->
   <div>
-    <q-dialog v-model="show_warning" name="confirm_for_">
+    <q-dialog v-model="show_warning" name="confirmWarning">
       <confirm-dialog :icon_color="warning_date.icon_color" :icon_name="warning_date.icon_name"
                       :icon_text_color="warning_date.icon_text_color" :style="{borderRadius: '20px'}"
                       :text="warning_date.text"
@@ -127,17 +124,25 @@
       </confirm-dialog>
     </q-dialog>
   </div>
-
-
   <!--  这里是Edit表单部分-->
   <div>
-    <el-dialog v-model="show" center="true">
+    <el-dialog v-model="show_edit_form" center="true">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
       <group-form></group-form>
     </el-dialog>
   </div>
+  <!--  这里是创建表单部分-->
+  <div>
+    <el-dialog v-if="show_insert_form" center="true">
+      <template v-slot:header>
+        <div style="font-size: 20px; font-weight: bolder">Create Group</div>
+      </template>
+      <group-form></group-form>
+    </el-dialog>
+  </div>
+
 
 
 </template>
@@ -206,7 +211,13 @@ export default {
 
       show_button_student: ref(false),
 
-      show_button_2: ref(false),
+      show_warning: ref(false),
+
+      show_edit_form: ref(false),
+
+      show_insert_form: ref(false),
+
+      show_detail: ref(false),
 
       p_x: ref('200'),
 
@@ -216,8 +227,6 @@ export default {
         'row': '',
         'index': '',
       },
-
-      show_warning: false,
 
       card_data:
         {
@@ -237,15 +246,20 @@ export default {
         text: 'The deadline is approaching'
       },
 
-      show: true,
+
     }
   },
   methods: {
-    onItemClick() {
-      this.$router.push('group-list/1');
+    // 导出GroupList表格
+    exportTable() {
+      this.$refs.table.exportCsv({
+        filename: 'table.csv',
+        columns: this.columns,
+        data: this.rows
+      })
     },
     handleRowDbclick(evt, row, index) {
-      this.show_button_2 = true;
+      this.show_detail= true;
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
@@ -261,26 +275,23 @@ export default {
       // 更新被选中的行的内容
       this.selected_row.row = row;
       this.selected_row.index = index;
+      this.$forceUpdate();
       document.addEventListener('click', () => {
         this.show_button_teacher = false;
         this.show_button_student = false;
       });
-      console.log("\n\n\nhandleRowContextmenu:\n");
-      console.log("Userdate: " + this.userData.identity + "\n");
-      console.log("row: " + row + "\n");
-      console.log("index: " + index + "\n");
-      console.log("show_button_teacher: " + this.show_button_teacher + "\n");
-      console.log("show_button_student: " + this.show_button_student + "\n");
     },
     handleEditClick() {
-      // 更新弹窗显示, 隐藏弹窗
-      // this.show_button_1 = false;
-      // 跳转到编辑页面
+      this.show_edit_form = true;
     },
     handleDeleClick() {
+      this.show_warning = true;
+    },
+    // 用来学生申请加入小组
+    handleAddClick() {
       // 更新弹窗显示, 隐藏弹窗
-      this.show_button_1 = false;
-      // 删除被选中的行
+      this.show_button_student = false;
+      // 跳转到编辑页面
     },
     testConnection() {
       console.log("test");

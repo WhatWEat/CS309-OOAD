@@ -31,7 +31,7 @@ import {noticeProps} from 'src/composables/comInterface';
 import {api} from "boot/axios";
 const messages = ref<noticeProps[]>([]);
 onMounted(() => {
-  let id = useProjectId()
+  // let id = useProjectId()
   api.get(`/stu/notice-list/-1/0/10`).then((res) => {
     messages.value = res.data.body;
   }).catch((err) => {

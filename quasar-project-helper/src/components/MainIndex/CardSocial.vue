@@ -33,8 +33,7 @@
 </template>
 
 <script setup>
-import {computed} from 'vue-demi';
-import {onMounted, watch, ref} from 'vue';
+import {defineProps, watch, ref} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 

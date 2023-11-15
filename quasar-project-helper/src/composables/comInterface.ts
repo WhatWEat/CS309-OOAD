@@ -44,3 +44,27 @@ export interface GroupMember{
   id: number,
   skills: string[],
 }
+
+export interface personProps {
+  // 用于记录Person的各类属性
+  userid: number,
+  identity: number,
+  password: string | null,
+  phone: string,
+  email: string,
+  name: string,
+  gender: string,
+  birthday: string,
+  programmingSkills: string[]
+}
+export const defaultPerson: personProps = {
+  userid: 0,
+  identity: 3,
+  password: null,
+  phone: '',
+  email: '',
+  name: '',
+  gender: '',
+  birthday: '',
+  programmingSkills: ['']
+}

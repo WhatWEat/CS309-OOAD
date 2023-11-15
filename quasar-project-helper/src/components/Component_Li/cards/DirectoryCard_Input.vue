@@ -19,14 +19,14 @@
           </span>
         </q-item-label>
 
-        <q-item-label class="text-grey-8">
-          <span style="font-weight: bold;">
-            Members :
-          </span>
-          <span style="font-weight: normal;">
-            {{ members }}
-          </span>
-        </q-item-label>
+<!--        <q-item-label class="text-grey-8">-->
+<!--          <span style="font-weight: bold;">-->
+<!--            Members :-->
+<!--          </span>-->
+<!--          <span style="font-weight: normal;">-->
+<!--            {{ members }}-->
+<!--          </span>-->
+<!--        </q-item-label>-->
 
         <q-item-label class="text-grey-8">
           <span style="font-weight: bold;">
@@ -52,6 +52,16 @@
     <q-separator></q-separator>
     <!--    下方详细信息部分-->
     <q-card-section>
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row">
+        <span style="font-weight: bold;">
+          Members :
+        </span>
+        <span style="font-weight: normal;">
+        <q-input v-model="ph" label="Label" placeholder="Placeholder" hint="With placeholder" :dense="dense" />
+        </span>
+      </div>
+
+
       <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
         <span style="font-weight: bold;">
           Creation Time :

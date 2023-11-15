@@ -1,5 +1,5 @@
 <template>
-  <div id="q-app" style="min-height: 100vh;">
+  <div id="q-app" style="min-height: 0vh;">
 
     <!--这里是表格部分-->
     <div class="q-pa-md ">
@@ -40,6 +40,11 @@
                 <q-item v-close-popup clickable @click="exportTable">
                   <q-item-label style="font-weight: bolder">Export  Group Info</q-item-label>
                 </q-item>
+
+                <q-item v-if="selected.length!=0" v-close-popup clickable @click="deleteSelected">
+                  <q-item-label style="font-weight: bolder">Delete Seleted group</q-item-label>
+                </q-item>
+
               </q-list>
             </q-btn-dropdown>
             <!--这里是搜索框-->
@@ -61,6 +66,15 @@
       Selected {{ JSON.stringify(selected) }}
     </div>
   </div>
+
+  <!--  这里是本组信息部分-->
+
+  <DirectoryCard_Input :avatar=card_data.avatar :deadline="card_data.deadline" :detail="card_data.detail"
+                  :group-id="card_data.groupId" :group-size="card_data.groupSize" :members="card_data.members"
+                  :style="{width: '100%' , 'border-radius': '20px'}">
+  </DirectoryCard_Input>
+
+
 
 
   <!--  这里是弹窗部分-->
@@ -135,7 +149,7 @@
   </div>
   <!--  这里是创建表单部分-->
   <div>
-    <el-dialog v-if="show_insert_form" center="true">
+    <el-dialog v-model="show_insert_form" center="true">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -151,6 +165,7 @@
 import {api} from 'boot/axios';
 import {defineAsyncComponent, ref} from 'vue';
 import {useUserStore} from 'src/composables/useUserStore';
+
 
 
 export default {
@@ -258,6 +273,10 @@ export default {
         data: this.rows
       })
     },
+    // 删除选中的表格行
+    deleteSelected() {
+      console.log(this.selected_row.row)
+    },
     handleRowDbclick(evt, row, index) {
       this.show_detail= true;
     },
@@ -314,6 +333,7 @@ export default {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
+    DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
   },
 }
 

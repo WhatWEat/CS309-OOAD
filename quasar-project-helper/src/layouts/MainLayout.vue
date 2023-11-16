@@ -103,6 +103,11 @@ onMounted(() => {
           icon: 'logout',
           link: `/logout/${userid.value}`
         },
+        {
+          title: 'Admin',
+          icon: 'airplay',
+          link: `/admin`
+        },
       ]
   })
 

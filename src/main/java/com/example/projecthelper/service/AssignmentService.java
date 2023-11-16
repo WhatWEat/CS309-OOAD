@@ -1,42 +1,83 @@
 package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
+import com.example.projecthelper.Exceptions.OverdueException;
 import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.mapper.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import com.example.projecthelper.util.FileUtil;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.provisioning.GroupManager;
 import org.springframework.stereotype.Service;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
 
 import java.util.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import static com.example.projecthelper.util.FileUtil.manageTableFile;
+import  com.example.projecthelper.util.FileUtil;
 
 @Service
 public class AssignmentService {
+    private final ProjectMapper projectMapper;
+    private final AssignmentMapper assignmentMapper;
+    private final SubmittedAssMapper submittedAssMapper;
+    private final UsersMapper usersMapper;
+    private final GroupMapper groupMapper;
+    private final FileService fileService;
+
     @Autowired
-    private ProjectMapper projectMapper;
-    @Autowired
-    private AssignmentMapper assignmentMapper;
-    @Autowired
-    private SubmittedAssMapper submittedAssMapper;
-    @Autowired
-    private UsersMapper usersMapper;
-    @Autowired
-    private GroupMapper groupMapper;
+    public AssignmentService(ProjectMapper projectMapper, AssignmentMapper assignmentMapper,
+                             SubmittedAssMapper submittedAssMapper, UsersMapper usersMapper,
+                             GroupMapper groupMapper, FileService fileService) {
+        this.projectMapper = projectMapper;
+        this.assignmentMapper = assignmentMapper;
+        this.submittedAssMapper = submittedAssMapper;
+        this.usersMapper = usersMapper;
+        this.groupMapper = groupMapper;
+        this.fileService = fileService;
+    }
+
+
+    public List<Assignment> getAssignmentsByTea(Long userId, Long projId, Long page, Long pageSize){
+        Long teaOfProj = projectMapper.findTeacherByProject(projId);
+        if(!Objects.equals(teaOfProj, userId)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        results.forEach(a ->
+            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        );
+        return results;
+    }
+
+    public List<Assignment> getAssignmentsByTa(Long userId, Long projId, Long page, Long pageSize){
+        Long taOfProj = projectMapper.checkTaInProj(projId, userId);
+        if(!Objects.equals(taOfProj, userId)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        results.forEach(a ->
+            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        );
+        return results;
+    }
+
+    public List<Assignment> getAssignmentsByStu(Long userId, Long projId, Long page, Long pageSize){
+        Long checker = projectMapper.checkStuInProj(userId, projId);
+        if(!Objects.equals(checker, null)){
+            throw new AccessDeniedException("无权访问该project");
+        }
+        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        results.forEach(a ->
+            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        );
+        return results;
+    }
 
     public void createAss(Assignment assignment, Long creatorId, Predicate<Long> accessProject){
         //创建作业，assignment中其实包含了creatorId的属性,这个creatorId由控制器获取token中的Id传进来
@@ -46,14 +87,50 @@ public class AssignmentService {
         }
         if(!"i".equals(assignment.getType()) && !"g".equals(assignment.getType()))
             throw new InvalidFormException("发布作业类型无效");
+        if(!assignment.getDeadline().isAfter(LocalDateTime.now()))
+            throw new InvalidFormException("ddl必须晚于现在的时间");
         try {
-
+            assignment.setReleaseTime(LocalDateTime.now());
             assignment.setCreatorId(creatorId);
             assignmentMapper.createAss(assignment);
+            System.err.println(assignment.getAssignmentId());
+            // FUNC: 创建文件目录
+            if(assignment.getFiles() != null && !assignment.getFiles().isEmpty()){
+                assignment.setFilePaths(new ArrayList<>());
+                for(MultipartFile file: assignment.getFiles()){
+
+                    String pth = FileUtil.generateAssPath(assignment);
+                    String fp = FileUtil.saveFile(pth, file.getOriginalFilename(), file);
+                    assignment.getFilePaths().add(fp);
+                }
+                assignmentMapper.updateFilePathOfAss(assignment.getFilePaths(), assignment.getAssignmentId());
+            }
         } catch (PSQLException e) {
             System.err.println(e.getMessage());
             throw new InvalidFormException("title, description不能为空");
         }
+    }
+
+    public void deleteAss(Long assignmentId, Long userId, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        assignmentMapper.deleteAss(assignmentId);
+        submittedAssMapper.deleteSubmittedAssByAssId(assignmentId);
+    }
+
+    public void updateAss(Assignment assignment, Long userId){
+        Assignment originAss = assignmentMapper.findAssById(assignment.getAssignmentId());
     }
 
     public void submitAss(SubmittedAssignment submittedAss, Long userId){
@@ -64,14 +141,36 @@ public class AssignmentService {
         }
         //PROC: 先判断这个是group assignment还是individual assignment
         //NOTE: submittedAss的assignmentId是对应的作业ID
+        if(LocalDateTime.now().isAfter(originAss.getDeadline())){
+            throw new OverdueException("超时未完成", originAss.getDeadline(), LocalDateTime.now());
+        }
         if(originAss.getType().equals("i")){
             // 个人提交
             submittedAss.setSubmitterId(userId);
-            submittedAss.setSubmitTime(LocalDateTime.now());
+            submittedAss.setSubmittedTime(LocalDateTime.now());
             try{
                 // FUNC: 对原本的作业进行一个覆盖
+                fileService.removeFilesOfSubmittedAss(originAss, submittedAss.getSubmitterId());
                 submittedAssMapper.deleteOriginalSubmit(submittedAss);
+                if(submittedAss.getFiles() != null && !submittedAss.getFiles().isEmpty()){
+                    //FUNC: 先检查拓展名
+                    for(MultipartFile file: submittedAss.getFiles()){
+                        if(!FileUtil.hasExtension(file, originAss.getRequireExtension())){
+                            throw new InvalidFormException("请按作业要求提交文件");
+                        }
+                    }
+                    String path = FileUtil.generateSubmittedAssPath(originAss, submittedAss.getSubmitterId());
+                    List<String> fps = new ArrayList<>();
+                    for(MultipartFile file: submittedAss.getFiles()){
+                        String fp = FileUtil.saveFile(path, file.getOriginalFilename(), file);
+                        fps.add(fp);
+                    }
+                    submittedAss.setFilepaths(fps);
+                }
                 submittedAssMapper.submitAss(submittedAss);
+            }
+            catch (InvalidFormException ife){
+                throw new InvalidFormException(ife.getMessage());
             }
             catch (Exception e){
                 System.err.println(e.getMessage());
@@ -85,8 +184,27 @@ public class AssignmentService {
             submittedAss.setSubmitterId(gpId);
             try{
                 // FUNC: 对原本的作业进行一个覆盖
+                fileService.removeFilesOfSubmittedAss(originAss, submittedAss.getSubmitterId());
                 submittedAssMapper.deleteOriginalSubmit(submittedAss);
+                if(submittedAss.getFiles() != null && !submittedAss.getFiles().isEmpty()){
+                    //FUNC: 先检查拓展名
+                    for(MultipartFile file: submittedAss.getFiles()){
+                        if(!FileUtil.hasExtension(file, originAss.getRequireExtension())){
+                            throw new InvalidFormException("请按作业要求提交文件");
+                        }
+                    }
+                    String path = FileUtil.generateSubmittedAssPath(originAss, submittedAss.getSubmitterId());
+                    List<String> fps = new ArrayList<>();
+                    for(MultipartFile file: submittedAss.getFiles()){
+                        String fp = FileUtil.saveFile(path, file.getOriginalFilename(), file);
+                        fps.add(fp);
+                    }
+                    submittedAss.setFilepaths(fps);
+                }
                 submittedAssMapper.submitAss(submittedAss);
+            }
+            catch (InvalidFormException ife){
+                throw new InvalidFormException(ife.getMessage());
             }
             catch (Exception e){
                 System.err.println(e.getMessage());
@@ -94,57 +212,83 @@ public class AssignmentService {
         }
     }
 
-    public void removeAss(Long submitId, Long userId){
-        SubmittedAssignment submittedAssignment = submittedAssMapper.findSubmittedAssignmentById(submitId);
-        if(submittedAssignment == null)
-            throw new AccessDeniedException("无权删除作业");
-        Assignment assignment = assignmentMapper.findAssById(submittedAssignment.getAssignmentId());
-        if(assignment.getType().equals("i") &&
-            Objects.equals(submittedAssignment.getSubmitId(), userId))
-            submittedAssMapper.removeAss(submitId);
-        else if (assignment.getType().equals("g") &&
-            Objects.equals(groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId()),
-                submittedAssignment.getSubmitterId()))
-            submittedAssMapper.removeAss(submitId);
-        throw new AccessDeniedException("无权删除作业");
+    public void removeSubmittedAss(Long assignmentId, Long userId){
+        Assignment assignment = assignmentMapper.findAssById(assignmentId);
+        if(assignment.getType().equals("i")){
+            fileService.removeFilesOfSubmittedAss(assignment, userId);
+            submittedAssMapper.removeAss(assignmentId, userId);
+        }
+        else if (assignment.getType().equals("g")){
+            Long gpId = groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId());
+            if(gpId != null){
+                fileService.removeFilesOfSubmittedAss(assignment, gpId);
+                submittedAssMapper.removeAss(assignmentId, gpId);
+            }
+            throw new AccessDeniedException("你不在小组中");
+        }
     }
 
-    public SubmittedAssignment viewSubByStu(long submitId, long stuId){
-//        System.err.println(submitId);
-        SubmittedAssignment submittedAssignment = submittedAssMapper.findSubmittedAssignmentById(submitId);
-//        System.err.println(submittedAssignment);
-        if(submittedAssignment == null)
-            throw new AccessDeniedException("无权查看作业");
-        Assignment assignment = assignmentMapper.findAssById(submittedAssignment.getAssignmentId());
-        if(assignment.getType().equals("i") &&
-            Objects.equals(submittedAssignment.getSubmitId(), stuId))
-            return submittedAssMapper.viewSub(submitId);
-        else if (assignment.getType().equals("g") &&
-            Objects.equals(groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId()),
-                submittedAssignment.getSubmitterId()))
-            return submittedAssMapper.viewSub(submitId);
+    public SubmittedAssignment viewSubByStu(long assignmentId, long stuId){
+        Assignment assignment = assignmentMapper.findAssById(assignmentId);
+        if(assignment.getType().equals("i")){
+            SubmittedAssignment sa = submittedAssMapper.viewSub(assignmentId, stuId);
+            if(sa != null)
+                sa.setFilepaths(sa.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList());
+            return sa;
+        }
+        else if (assignment.getType().equals("g")){
+            Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
+            if(gpId != null){
+                SubmittedAssignment sa = submittedAssMapper.viewSub(assignmentId, gpId);
+                if(sa != null)
+                    sa.setFilepaths(sa.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList());
+                return sa;
+            }
+            throw new AccessDeniedException("你不在小组中");
+        }
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public List<SubmittedAssignment> viewAllSub(long assignmentId, long teaId){
-        Assignment assignment = assignmentMapper.findAssById(assignmentId);
-        if (assignment == null){
-            throw new InvalidFormException("作业不存在");
+    public List<SubmittedAssignment> viewAllSub(long assignmentId, long userId, long page, long pageSize, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
-        if (projectMapper.findTeacherByProject(assignment.getProjectId()) != teaId){
-            throw new AccessDeniedException("无权查看别人发布的作业");
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
-        return submittedAssMapper.findAllSub(assignmentId);
+        List<SubmittedAssignment> sas = submittedAssMapper.findAllSub(assignmentId, pageSize, page * pageSize);
+        if(sas != null)
+            sas.forEach(
+                sa -> sa.setFilepaths(sa.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList())
+            );
+        return sas;
     }
 
-    public void gradeAss(SubmittedAssignment submittedAssignment, Long teaId){
-        SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getSubmitId());
+    public void gradeAss(SubmittedAssignment submittedAssignment, Long userId, Integer identity){
+        SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getAssignmentId(),
+            submittedAssignment.getSubmitterId());
         if(sub == null){
             throw new InvalidFormException("作业不存在");
         }
-        Assignment assignment = assignmentMapper.findAssById(sub.getAssignmentId());
-        if (!Objects.equals(projectMapper.findTeacherByProject(assignment.getProjectId()), teaId)){
-            throw new AccessDeniedException("无权批改别人发布的作业");
+        Assignment ass = assignmentMapper.findAssById(sub.getAssignmentId());
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
         }
         try{
             submittedAssMapper.gradeAss(submittedAssignment);
@@ -153,6 +297,28 @@ public class AssignmentService {
             System.err.println(e.getMessage());
         }
 
+    }
+
+
+    //这个方法是读取文件批量更新成绩
+    public void gradeAssWithFile (MultipartFile file,long assignmentId, Long userId, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assignmentId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        if(identity == 1){
+            Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+            if(!Objects.equals(teaId, userId))
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        else {
+            Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+            if(taId == null)
+                throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+
+        List<SubmittedAssignment> result = FileUtil.tableToSubmittedAssList(file);
+        result.forEach(System.err::println);
+        submittedAssMapper.updateGrades(result,assignmentId);
     }
 
 
@@ -255,14 +421,6 @@ public class AssignmentService {
         }
     }
 
-
-    //这个方法是读取文件批量更新成绩
-    public void updateGrades (String filepath,long assignmentId){
-        List<Long> submitterList = new ArrayList<>();
-        List<Float> gradeList = new ArrayList<>();
-        manageTableFile(filepath,submitterList,gradeList);
-        submittedAssMapper.updateGrades(submitterList,gradeList,assignmentId);
-    }
 
 
 

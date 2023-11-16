@@ -117,6 +117,39 @@ public class GroupService {
         groupMapper.stuLeaveGroup(stuId);
     }
 
+    public void updateLeader(Long leaderId, Long groupId, Predicate<Long> accessProject){
+        Group group = groupMapper.findGroupById(groupId);
+        if (group == null){
+            throw new InvalidFormException("小组不存在");
+        }
+        if(!accessProject.test(group.getProjectId())){
+            throw new AccessDeniedException("无权修改小组信息");
+        }
+        if(projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null){
+            throw new AccessDeniedException("所选成员不在project中");
+        }
+        if(groupMapper.findGroupIdOfUserInAProj(leaderId, group.getProjectId()) == null ||
+                !groupMapper.findGroupIdOfUserInAProj(leaderId, group.getProjectId()).equals(group.getGroupId())){
+            throw new AccessDeniedException("所选成员不在小组中");
+        }
+        try {
+            groupMapper.updateLeader(leaderId,group.getGroupId());
+        } catch (PSQLException e) {
+            throw new InvalidFormException("leaderId需要为long");
+        }
+    }
+
+    public void updateVisibility(long userId, long groupId,Boolean[] visibility){
+        Group group = groupMapper.findGroupById(groupId);
+        if (userId != group.getInstructorId() && userId != group.getLeaderId()){
+            throw new AccessDeniedException("无权修改小组信息");
+        }
+        try {
+            groupMapper.updateVisibility(userId, groupId, visibility);
+        } catch (PSQLException e) {
+            throw new InvalidFormException("leaderId需要为long");
+        }
+    }
 
 
     public void updateGroupForLeader(Group group, long user_id) {

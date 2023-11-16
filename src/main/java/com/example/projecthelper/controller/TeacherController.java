@@ -5,7 +5,10 @@ import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
 import com.example.projecthelper.entity.SubmittedAssignment;
+import com.example.projecthelper.entity.User;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
+import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 
 import com.example.projecthelper.service.*;
@@ -13,13 +16,20 @@ import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -29,6 +39,7 @@ public class TeacherController {
     private final NoticeService noticeService;
     private final GroupService groupService;
     private final AssignmentService assignmentService;
+    private final FileService fileService;
 
     @Autowired
     private UserService userService;
@@ -38,13 +49,21 @@ public class TeacherController {
 
     @Autowired
     public TeacherController(AuthService authService, NoticeService noticeService,
-                             GroupService groupService, AssignmentService assignmentService) {
+                             GroupService groupService, AssignmentService assignmentService,
+                             FileService fileService) {
         this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
+        this.fileService = fileService;
     }
 
+    @PostMapping("/create_multiple_users")
+    public ResponseResult<Object> createMultipleUsers(@RequestBody KeyValueWrapper<ObjectCountWrapper<User>, String> multiUsersAndPass, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        authService.registerUserByTea(multiUsersAndPass.getKey(), new KeyValueWrapper<>(JWTUtil.getUserIdByToken(jwt), multiUsersAndPass.getValue()));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 
     @PostMapping("/create_project")
@@ -160,8 +179,55 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
+                                                   @PathVariable("page") long page,
+                                                   @PathVariable("page_size") long pageSize,
+                                                   HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Assignment> result = assignmentService.getAssignmentsByTea(userId, projectId, page, pageSize);
+        System.err.println(result.get(0).getFilePaths());
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/get_ass_file/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssFile(@PathVariable("assignment_id") Long assignmentId,
+                                                     @PathVariable("filename") String filename,
+                                                     HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
     @PostMapping("/post_assignment")
-    public ResponseResult<Object> postAssignment(HttpServletRequest request, @RequestBody Assignment assignment){
+    public ResponseResult<Object> postAssignment(HttpServletRequest request,
+        @RequestParam("title") String title,
+        @RequestParam("description") String description,
+        @RequestParam("projectId") Long projectId,
+        @RequestParam("fullMark") Integer fullMark,
+        @RequestParam("type") String type,
+        @RequestParam("deadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        LocalDateTime deadline,
+        @RequestParam("requireExtension") String requireExtension,
+        @RequestParam("files") List<MultipartFile> files) {
+        Assignment assignment = new Assignment();
+        assignment.setTitle(title);
+        assignment.setDescription(description);
+        assignment.setProjectId(projectId);
+        assignment.setFullMark(fullMark);
+        assignment.setType(type);
+        assignment.setDeadline(deadline);
+        assignment.setFiles(files);
+        assignment.setRequireExtension(requireExtension);
+
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.createAss(
             assignment,
@@ -171,17 +237,53 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
+        System.err.println("assId"+assignment.getAssignmentId());
+
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+
+    }
+
+    @DeleteMapping("delete_ass")
+    public ResponseResult<Object> deleteAss(@RequestBody Long assId, HttpServletRequest request){
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), assId);
+        assignmentService.deleteAss(assId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/view_all_submitted_ass")
-    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(HttpServletRequest request, @RequestBody Long assignmentId){
+    @GetMapping("/view_all_submitted_ass/{assignment_id}/{page}/{page_size}")
+    public ResponseResult<List<SubmittedAssignment>> viewAllSubmittedAss(
+        HttpServletRequest request,
+        @PathVariable("assignment_id") Long assignmentId,
+        @PathVariable("page") Long page,
+        @PathVariable("page_size") Long page_size){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<SubmittedAssignment> submittedAssignments = assignmentService.viewAllSub(
             assignmentId,
-            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            page,
+            page_size,
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{stu_id}/{filename}")
+    public ResponseEntity<Resource> getSubmittedAssFile(
+        @PathVariable("assignment_id") Long assignmentId,
+        @PathVariable("stu_id") Long stuId,
+        @PathVariable("filename") String filename,
+        HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfSubmittedAssByTeaOrTa(userId, stuId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
     }
 
     @PostMapping("/grade_ass")
@@ -189,12 +291,74 @@ public class TeacherController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.gradeAss(
             submittedAssignment,
-            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/grade_ass_with_file")
+    public ResponseResult<Object> gradeAssWithFile(
+        HttpServletRequest request,
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("assignmentId") Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.gradeAssWithFile(
+            file, assignmentId,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
 
+    }
+
+    //PART IV: select ta
+    @GetMapping("/ta_list/{page}/{page_size}")
+    public ResponseResult<List<User>> getTaList(
+        @PathVariable("page") int page,
+        @PathVariable("page_size") int page_size,
+        HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/designate_ta_to_proj")
+    public ResponseResult<Object> designateTaToProj(
+        KeyValueWrapper<Long, Long> pjTaId,
+        HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        projectService.designateTaToProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+
+    }
+    @PostMapping("/update_group_leader")
+    public ResponseResult<Object> updateGroupLeader(HttpServletRequest request,
+                                                    @RequestBody KeyValueWrapper<Long, Long> leader_group ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateLeader(leader_group.getKey(),leader_group.getValue(),gpId -> Objects.equals(
+                groupService.findCreatorByGroup(gpId),
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        ));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/remove_ta_from_proj")
+    public ResponseResult<Object> removeTaFromProj(
+        KeyValueWrapper<Long, Long> pjTaId,
+        HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        projectService.removeTaFromProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/update_visibility")
+    public ResponseResult<Object> updateVisibility(HttpServletRequest request,
+                                                     @RequestBody KeyValueWrapper<Long, Boolean[]> group_visibility ) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateVisibility(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                group_visibility.getKey(),group_visibility.getValue());
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 //    @GetMapping("/getIfStuSub")
 //    public ResponseResult<Object> getIfStuSub(HttpServletRequest request, @RequestBody KeyValueWrapper assignment){
 //        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -205,79 +369,17 @@ public class TeacherController {
 
 
 
-    /** 数据库功能测试
-     *
+    /**
+     * 数据库功能测试
      */
-//    @PostMapping("/registerTea/{password}/{name}/{gender}")
-//    //注册教师,返回教师的user_id
-//    public long registerTea(@PathVariable String password,
-//                            @PathVariable String name,
-//                            @PathVariable String gender) {
-//        return userService.registerUser(1, password, name, gender);
-//    }
 
+    //test用
+    @GetMapping(value ="/get_name_by_id/{user_id}")
+    public ResponseResult<String> getNameById(@PathVariable("user_id")Long userId, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        String name = userService.getPersonName(userId);
+        return ResponseResult.ok(name, "success", JWTUtil.updateJWT(jwt));
+    }
 
-//    @PostMapping("/createProject/{name}")
-//    //创建新的project
-//    public void createProject(@PathVariable String name) {
-//        projectService.createProject(name);
-//    }
-
-//    @PostMapping("/createNotice/{title}/{content}/{creator_id}")
-//    //创建新的notice
-//    public void createNotice(@PathVariable String title,
-//                             @PathVariable String content,
-//                             @PathVariable Integer creator_id) {
-//        noticeService.createNotice(title, content, creator_id);
-//    }
-
-//    @PostMapping("/createPluralGroup/{max_size}/{project_id}/{team_time}/{deadline}/{number}")
-//    //创建复数个新的小组,其中number代表创建小组的数量，team_time表示组队截止时间，instructor_id表示指导老师的id
-//    public long[] createPluralGroup(@PathVariable long max_size,
-//                                    @PathVariable long project_id,
-//                                    @PathVariable Timestamp team_time,
-//                                    @PathVariable Timestamp deadline,
-//                                    @PathVariable int number) {
-//        return groupService.createPluralGroup( max_size, project_id, team_time, deadline, number);
-//    }
-
-//    @PostMapping("/createOneGroup/{max_size}/{project_id}/{team_time}/{deadline}/{group_name}")
-//    //创建单个小组，team_time表示组队截止时间，instructor_id表示指导老师的id
-//    public long createOneGroup(@PathVariable long max_size,
-//                               @PathVariable long project_id,
-//                               @PathVariable Timestamp team_time,
-//                               @PathVariable Timestamp deadline,
-//                               @PathVariable String group_name) {
-//        return groupService.createOneGroup( max_size, project_id, team_time, deadline, group_name);
-//    }
-
-//    @PostMapping("/updateGroupSize/{max_size}/{group_id}")
-//    //修改某一小组的最大人数
-//    public void updateGroupSize(@PathVariable long max_size,
-//                                @PathVariable long group_id) {
-//        groupService.updateGroupSize(max_size, group_id);
-//    }
-
-//    @PostMapping("/updateGroupInstructor/{instructor_id}/{group_id}")
-//    //修改某一小组的指导老师
-//    public void updateGroupInstructor(@PathVariable long instructor_id,
-//                                      @PathVariable long group_id) {
-//        groupService.updateGroupInstructor(instructor_id, group_id);
-//    }
-
-
-//    @PostMapping("/updateGroupTime/{team_time}/{group_id}")
-//    //修改某一小组的组队截止时间
-//    public void updateGroupTime(@PathVariable Timestamp team_time,
-//                                @PathVariable long group_id) {
-//        groupService.updateGroupTime(team_time, group_id);
-//    }
-
-//    @PostMapping("/updateGroupDeadline/{deadline}/{group_id}")
-//    //修改某一小组的答辩时间
-//    public void updateGroupDeadline(@PathVariable Timestamp deadline,
-//                                    @PathVariable long group_id) {
-//        groupService.updateGroupDeadline(deadline, group_id);
-//    }
 
 }

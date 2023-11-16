@@ -2,6 +2,7 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.util.StringListArrayTypeHandler;
 import java.util.List;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
@@ -9,15 +10,28 @@ import org.postgresql.util.PSQLException;
 @Mapper
 public interface UsersMapper extends BaseMapper<User> {
     @Select("select * from users where userId = #{userId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
     User findUserById(Long userId);
+
+    @Select("select * from users where identity = #{identity} limit #{limit} offset #{offset};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findUsersById(Integer identity, int limit, int offset);
+
     @Select({
         "<script>",
         "SELECT * FROM users",
         "WHERE userId IN",
-        "<foreach item='id' index='index' collection='list' open='(' separator=',' close=')'>",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
         "#{id}",
         "</foreach>",
         "</script>"
+    })
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
     List<User> findUsersById(List<Long> userIds);
 
@@ -43,20 +57,52 @@ public interface UsersMapper extends BaseMapper<User> {
     void registerUsers(List<User> users) throws PSQLException;
 
 
-    void createUser(User user);
-
     @Update("UPDATE users SET " +
             "phone = #{phone},"+
-            "mail = #{mail},"+
+            "email = #{email},"+
             "name = #{name},"+
             "gender = #{gender},"+
             "birthday = #{birthday},"+
-            "technologyStack = #{technologyStack}," +
-            "programmingSkills = #{programmingSkills}, " +
-            "intendedTeammates = #{intendedTeammates} " +
+            "programmingSkills = #{programmingSkills, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, " +
+            "avatarPath = #{avatarPath} "+
             "WHERE userId = #{userId};")
     //identity, password, name, gender均不为空，identity为整数
     void updateStuInformation(User user)throws PSQLException;
 
+    @Update("update users set password = #{password} where userId = #{userId};")
+    void changePass(Long userId, String password);
+
+    @Update({
+        "<script>",
+        "update users set password = #{encodePassword} ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void resetPass(List<Long> userIds, String encodePassword);
+
+    @Update({
+        "<script>",
+        "update users set isFrozen = true ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void freezeUsers(List<Long> userIds);
+
+    @Update({
+        "<script>",
+        "update users set isFrozen = false ",
+        "WHERE identity > 1 and userId IN ",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    void unfreezeUsers(List<Long> userIds);
 
 }

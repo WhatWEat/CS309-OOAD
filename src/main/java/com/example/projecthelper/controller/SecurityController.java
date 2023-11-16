@@ -1,38 +1,50 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.service.AuthService;
-import com.example.projecthelper.util.FormatUtil;
+import com.example.projecthelper.service.FileService;
+import com.example.projecthelper.service.UserService;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
-import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
+import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
 public class SecurityController {
     private final AuthService authService;
+    private final UserService userService;
+    private final FileService fileService;
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
-    public SecurityController(AuthService authService) {
+    public SecurityController(AuthService authService, UserService userService,
+                              FileService fileService) {
         this.authService = authService;
+        this.userService = userService;
+        this.fileService = fileService;
     }
 
 
@@ -63,13 +75,61 @@ public class SecurityController {
     }
 
 
-    //TODO:
-    @GetMapping("/get_personal_info")
-    public ResponseResult<User> getPersonalInfo(HttpServletRequest request){
-        System.err.println("here");
+    @PostMapping("/edit_personal_info")
+    public ResponseResult<Object> editPersonalInfo(
+        HttpServletRequest request,
+        @RequestParam("phone") String phone,
+        @RequestParam("email") String email,
+        @RequestParam("name") String name,
+        @RequestParam("gender") String gender,
+        @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
+        @RequestParam("programmingSkills") List<String> programmingSkills,
+        @RequestParam("avatar") MultipartFile avatar){
+        User user = new User();
+        user.setPhone(phone);
+        user.setEmail(email);
+        user.setName(name);
+        user.setGender(gender);
+        user.setBirthday(birthday);
+        user.setProgrammingSkills(programmingSkills);
+        user.setAvatar(avatar);
+
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        User user = authService.getPersonalInfo(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        userService.editPersonInfo(user, jwt);
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping({"/get_personal_info/{search_id}", "/get_personal_info"})
+    public ResponseResult<User> getPersonalInfo(
+        HttpServletRequest request,
+        @PathVariable(required = false) Long search_id){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Long searchId = search_id == null ? userId: search_id;
+        User user = userService.getPersonInfo(searchId);
         return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping({"/get_avatar/{search_id}", "/get_avatar"})
+    public ResponseEntity<Resource> getAvatar(HttpServletRequest request,
+                                              @PathVariable(required = false) Long search_id) {
+        System.err.println("search_id"+search_id);
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Long searchId = search_id == null ? userId: search_id;
+        Resource rec = fileService.getAvatar(searchId);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
+    @PostMapping("/change_password")
+    public ResponseResult<Object> changePassword(HttpServletRequest request, @RequestBody KeyValueWrapper<String, KeyValueWrapper<String, String>> kvw){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        authService.changePass(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), kvw.getKey(), kvw.getValue().getKey(), kvw.getValue().getValue());
+        return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/signup")
     public ResponseResult<Long> signup(@RequestBody User user){

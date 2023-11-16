@@ -40,6 +40,10 @@ public class ResponseResult<T>{
         return new ResponseResult<>(StatusCode.INVALID_CONTENT.getValue(), bd, msg, null);
     }
 
+    public static <T> ResponseResult<T> internalError(T bd, String msg){
+        return new ResponseResult<>(StatusCode.INTERNAL_SERVER_ERROR.getValue(), bd, msg, null);
+    }
+
 
 
 }

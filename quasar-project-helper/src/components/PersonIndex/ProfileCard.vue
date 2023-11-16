@@ -19,13 +19,13 @@
                 <q-card>
                   <q-card-section>
                     <q-uploader
-                      label="Upload Image"
-                      :url="uploadUrl"
-                      ref="uploader"
-                      accept=".jpg, image/*"
+                        label="Upload Image"
+                        :url="uploadUrl"
+                        ref="uploader"
+                        accept=".jpg, image/*"
 
-                      @rejected="onRejectUploader"
-                      max-files="1"
+                        @rejected="onRejectUploader"
+                        max-files="1"
                     ></q-uploader>
                   </q-card-section>
                   <q-card-actions class="q-px-md">
@@ -85,24 +85,24 @@
 
               </q-option-group>
               <q-slider
-                class="lt-sm"
-                v-model="gender"
-                snap
-                :min="0"
-                :max="5"
-                :inner-min="1"
-                :inner-max="4"
-                selection-color="transparent"
-                markers
-                marker-labels
-                switch-marker-labels-side
-                v-if="isEditing"
+                  class="lt-sm"
+                  v-model="gender"
+                  snap
+                  :min="0"
+                  :max="5"
+                  :inner-min="1"
+                  :inner-max="4"
+                  selection-color="transparent"
+                  markers
+                  marker-labels
+                  switch-marker-labels-side
+                  v-if="isEditing"
               >
                 <template v-slot:marker-label-group="{ markerMap }">
                   <div
-                    class="row items-center no-wrap"
-                    :class="markerMap[gender].classes"
-                    :style="markerMap[gender].style"
+                      class="row items-center no-wrap"
+                      :class="markerMap[gender].classes"
+                      :style="markerMap[gender].style"
                   >
                     <div v-if="gender=== 1"> Male</div>
                     <div v-if="gender=== 2"> Female</div>
@@ -111,7 +111,24 @@
                   </div>
                 </template>
               </q-slider>
-              <q-item-label v-else>{{ genderList[gender-1].label }}</q-item-label>
+              <q-item-label v-else>{{ genderList[gender - 1].label }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item class="col-12" v-if="identity === 3">
+            <q-item-section class="col-sm-3 col-xs-5">
+              <q-item-label>
+                <q-avatar icon="school"/>
+                Skills
+              </q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-input outlined dense
+                       v-model="phone"
+                       type="tel"
+                       color="white"
+                       v-if="isEditing">
+              </q-input>
+              <q-item-label v-else>{{ phone }}</q-item-label>
             </q-item-section>
           </q-item>
           <q-item class="col-12">
@@ -123,13 +140,13 @@
             </q-item-section>
             <q-item-section>
               <q-input
-                dense
-                outlined
-                v-model="email"
-                type="email"
-                v-if="isEditing"
-                color="white"
-                :suffix="selectedEmailDomain">
+                  dense
+                  outlined
+                  v-model="email"
+                  type="email"
+                  v-if="isEditing"
+                  color="white"
+                  :suffix="selectedEmailDomain">
                 <template v-slot:append>
                   <q-btn-dropdown dense flat :disable="!isEditing">
                     <q-list>
@@ -170,25 +187,25 @@
       <q-card-section class="row justify-center" v-if="person_id===userid">
         <div>
           <q-btn
-            label="Edit"
-            class="text-capitalize"
-            v-if="!isEditing"
-            @click="isEditing = true"
-            color="primary"
+              label="Edit"
+              class="text-capitalize"
+              v-if="!isEditing"
+              @click="isEditing = true"
+              color="primary"
           />
           <q-btn
-            label="Save"
-            class="q-mx-lg text-capitalize"
-            v-else
-            color="green"
-            @click="saveProfile"
+              label="Save"
+              class="q-mx-lg text-capitalize"
+              v-else
+              color="green"
+              @click="saveProfile"
           />
           <q-btn
-            class="text-capitalize"
-            label="Cancel"
-            v-if="isEditing"
-            color="red"
-            @click="cancelEdit"/>
+              class="text-capitalize"
+              label="Cancel"
+              v-if="isEditing"
+              color="red"
+              @click="cancelEdit"/>
         </div>
 
       </q-card-section>
@@ -198,10 +215,14 @@
 
 <script setup>
 import {useUserStore} from 'src/composables/useUserStore';
-import {ref, defineProps} from 'vue';
+import {ref, defineProps, watch, onMounted} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
 import {storeToRefs} from 'pinia';
+import {api} from 'boot/axios';
+import async from "async";
+import {watchEffect} from "vue-demi";
+import {defaultPerson, personProps} from "src/composables/comInterface";
 
 const props = defineProps({
   bg_color: {
@@ -213,10 +234,11 @@ const props = defineProps({
 const usePerson = useCurrentPageUser()
 
 const $q = useQuasar()
-const {username, userid} = useUserStore()
+const {username, userid, identity} = useUserStore()
 
 const {person_id} = storeToRefs(usePerson)
-const email = ref('123123123'), gender = ref(1), phone = ref('1331313')
+const email = ref('123123123'), gender = ref(1), phone = ref('1331313'),
+    skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
 const avatarUrl = ref('https://cdn.quasar.dev/img/boy-avatar.png'), uploadUrl = ref('')
 
 const isEditing = ref(false), isShowDialog = ref(false)
@@ -228,7 +250,25 @@ const genderList = ref([{label: 'Male', value: 1}, {label: 'Female', value: 2},
   {label: 'Non-binary', value: 3}, {label: 'Unknown', value: 4}])
 const firstModel = ref(2)
 
-personIdentity.value = 'Student'
+
+//axios to initial
+const personInfo = ref<personProps>(defaultPerson)
+onMounted(() => {
+  watchEffect(() => {
+    personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
+    let type = (identity.value === 1) ? 'tea' : 'stu'
+    if(identity.value !== -1){
+      api.get(`/${type}/get_person_info`).then((res)=>{
+        console.log(res.data)
+        personInfo.value = res.data.body
+        console.log(personInfo.value)
+      })
+    }
+  })
+})
+
+
+// skill
 
 function saveProfile() {
   isEditing.value = false

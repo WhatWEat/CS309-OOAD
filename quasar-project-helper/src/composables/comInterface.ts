@@ -30,9 +30,41 @@ export const defaultNotice: noticeProps = {
 }
 
 export interface projectProps {
+  // 用于记录Project的各类属性
   projectId: number,
   projectName: string,
   projectDescription: string,
   teacherId: number,
   teacherName: string,
+}
+
+export interface GroupMember{
+  // 用于记录Group中Member的各类属性
+  name: string,
+  id: number,
+  skills: string[],
+}
+
+export interface personProps {
+  // 用于记录Person的各类属性
+  userid: number,
+  identity: number,
+  password: string | null,
+  phone: string,
+  email: string,
+  name: string,
+  gender: string,
+  birthday: string,
+  programmingSkills: string[]
+}
+export const defaultPerson: personProps = {
+  userid: 0,
+  identity: 3,
+  password: null,
+  phone: '',
+  email: '',
+  name: '',
+  gender: '',
+  birthday: '',
+  programmingSkills: ['']
 }

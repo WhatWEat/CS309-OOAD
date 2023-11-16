@@ -1,11 +1,13 @@
 package com.example.projecthelper.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
+import java.util.List;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
 import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -19,7 +21,7 @@ public class User implements Cloneable{
 
     private String phone;
 
-    private String mail;
+    private String email;
 
     private String name;
 
@@ -27,16 +29,23 @@ public class User implements Cloneable{
 
     private Date birthday;
 
-    private String technologyStack;
-    private String programmingSkills;
-    private String intendedTeammates;
+    private List<String> programmingSkills;
+
+    private String avatarPath;
+
+    private boolean isFrozen;
+    @TableField(exist = false)
+    private MultipartFile avatar;
+    @TableField(exist = false)
+    private List<String> intendedTeammates;
 
 
-    public User( int identity, String password, String name, String gender) {
+    public User( Integer identity, String password, String name, String gender, Long userId) {
         this.identity = identity;
         this.password = password;
         this.name = name;
         this.gender = gender;
+        this.userId = userId;
     }
 
     public User() {

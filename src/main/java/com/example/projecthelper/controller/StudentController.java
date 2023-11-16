@@ -147,6 +147,13 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
+
+//    @PostMapping("/recruit_mem")
+//    public ResponseResult<Object> recruitMem(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, List<Long>> gpId_stuIds){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        groupService.joinGroup(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
     @PostMapping("/join_group")
     public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

@@ -135,6 +135,24 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("/get_ta_list_of_proj/{proj_id}")
+    public ResponseResult<List<User>> getTaListOfProj(HttpServletRequest request, @PathVariable("proj_id") Long projId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<User> users = groupService.getTaListOfProj(projId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(users, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_stu_list_of_proj/{proj_id}/{page}/{page_size}")
+    public ResponseResult<List<User>> getStuListOfProj(
+        HttpServletRequest request,
+        @PathVariable("proj_id") Long projId,
+        @PathVariable("page") int page,
+        @PathVariable("page_size") int page_size){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<User> users = groupService.getStuListOfProj(projId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), page, page_size);
+        return ResponseResult.ok(users, "Success", JWTUtil.updateJWT(jwt));
+    }
+
 
     @PostMapping("/create_group")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){

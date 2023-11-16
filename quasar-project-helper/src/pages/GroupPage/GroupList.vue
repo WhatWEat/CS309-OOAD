@@ -69,11 +69,12 @@
 
   <!--  这里是本组信息部分-->
 
-  <DirectoryCard_Input :avatar=card_data.avatar :deadline="card_data.deadline" :detail="card_data.detail"
-                  :group-id="card_data.groupId" :group-size="card_data.groupSize" :members="card_data.members"
+  <DirectoryCard_Input :members="card_data.members" :group="card_data.group"   :group-id="card_data.groupId" :creation-time="card_data.deadline" :dead-line="card_data.deadline"
+                       :group-size="card_data.groupSize" :leader="card_data.instructor" :max-size="card_data.groupSize"  v-model:more-information="card_data.detail" :presentation-time="card_data.deadline"
                   :style="{width: '100%' , 'border-radius': '20px'}">
   </DirectoryCard_Input>
 
+  <div>{{this.card_data.detail}}</div>
 
 
 

@@ -254,7 +254,7 @@ const {username, userid, identity} = useUserStore()
 const {person_id} = storeToRefs(usePerson)
 const email = ref(''), gender = ref(1), phone = ref(''),
   skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
-const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref('https://cdn.quasar.dev/img/boy-avatar.png'), avatar_clone = ref()
+const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref(''), avatar_clone = ref()
 const newSkill = ref(), colorList = ref(['warning', 'teal', 'glossy', 'primary'])
 const isEditing = ref(false), isShowDialog = ref(false), isFresh = ref(true)
 const selectedEmailDomain = ref('gmail.com')
@@ -278,6 +278,11 @@ onMounted(() => {
 
         console.log('init',personInfo.value)
       })
+      api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {
+        const blob = new Blob([res.data], { type: 'image/jpeg' });
+        avatar_preview.value = URL.createObjectURL(blob);
+        avatar_clone.value = avatar_preview.value;
+      })
     }
   })
 })
@@ -289,6 +294,7 @@ function copyPersonInfo(){
   if(personInfo.value.avatar){
     avatarUrl.value = personInfo.value.avatar
   }
+  avatar_preview.value = avatar_clone.value
   isFresh.value = false
   if (personInfo.value.email) {
     const emails = personInfo.value.email.split('@')
@@ -312,12 +318,14 @@ function saveProfile() {
   formData.append('email', personSubmit.email)
   formData.append('name', personSubmit.name)
   formData.append('gender', personSubmit.gender)
-  formData.append('avatar', personSubmit.avatar)
+  formData.append('birthday','2023-11-12')
+  if (personSubmit.avatar)
+    formData.append('avatar', personSubmit.avatar)
   for (const i of personSubmit.programmingSkills){
     formData.append('programmingSkills', i)
   }
   console.log('submit',personInfo.value)
-  api.post(`/${type}/edit_personal_info`,formData).then((res) => {
+  api.post(`/edit_personal_info`,formData).then((res) => {
     console.log(res.data)
     $q.notify({
       type: 'positive',
@@ -396,6 +404,7 @@ function onFileChange(){
 function cancelUploadAvatar() {
   isShowDialog.value = false;
   avatar_file.value = null;
+  avatar_preview.value = avatar_clone.value;
 }
 function saveUploadAvatar() {
   isShowDialog.value = false;

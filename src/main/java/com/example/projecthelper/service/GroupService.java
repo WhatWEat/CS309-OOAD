@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
 
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -35,8 +36,35 @@ public class GroupService {
     private GroupMapper groupMapper;
     @Autowired
     private ProjectMapper projectMapper;
+    @Autowired
+    private NoticeService noticeService;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
+    public List<User> getTaListOfProj(Long projId, Long userId){
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(projId))){
+            throw new AccessDeniedException("无权查看小组");
+        }
+        List<User> users = groupMapper.getTaListOfProj(projId);
+        users.forEach(e -> {
+            e.setPassword(null);
+            e.setAvatarPath(null);
+        });
+        return users;
+    }
+
+    public List<User> getStuListOfProj(Long projId, Long userId, int page, int page_size){
+
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(projId))){
+            throw new AccessDeniedException("无权查看小组");
+        }
+        List<User> users = groupMapper.getStuListOfProj(projId, page_size, page * page_size);
+        users.forEach(e -> {
+            e.setPassword(null);
+            e.setAvatarPath(null);
+        });
+        return users;
+    }
 
     //TODO:创建group
 
@@ -87,6 +115,11 @@ public class GroupService {
     public void updateGroupForTea(Group group, Predicate<Long> accessGroup) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
         if (accessGroup.test(group.getGroupId())) {
+            Long pjId = groupMapper.findPjIdOfGroup(group.getGroupId());
+            if(group.getInstructorId() != null && projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
+                throw new InvalidFormException("无效的instructorId");
+            if(group.getLeaderId() != null &&  projectMapper.checkStuInProj(group.getLeaderId(), pjId) == null)
+                throw new InvalidFormException("无效的leaderId");
             try {
                 groupMapper.updateGroupForTea(group);
             } catch (PSQLException e) {
@@ -97,7 +130,18 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
     }
 
+    public void recruitMem(KeyValueWrapper<Long, List<Long>> gpId_stuIds, Long userId){
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_stuIds.getKey());
+        if(group == null || Objects.equals(
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
+        }
+        //PROC: 筛选stuIds
+        List<Long> stuIds = gpId_stuIds.getValue().stream().filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null).toList();
 
+    }
     public void joinGroup(Long groupId, Long stuId){
         //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
         Group gp = groupMapper.findGroupById(groupId);
@@ -111,7 +155,21 @@ public class GroupService {
             // 在这个proj中学生加入了其他小组
             throw new AccessDeniedException("您已经在其他小组中");
         }
-        groupMapper.stuJoinGroup(stuId, groupId);
+        synchronized (this){
+            int cnt = groupMapper.findCntOfStuInGroup(groupId);
+            if(cnt == 0){
+                groupMapper.stuJoinGroup(stuId, groupId);
+                try{
+                    groupMapper.updateLeader(stuId, groupId);
+                }catch (Exception e){
+                    System.err.println(e.getMessage());
+                }
+            }else if(gp.getMaxsize() == cnt) {
+                throw new AccessDeniedException("小组已满");
+            }else {
+                noticeService.createApplicationNotice(noticeService.appNotice(stuId, gp.getProjectId()), stuId, gp.getLeaderId());
+            }
+        }
     }
     public void leaveGroup(Long stuId){
         groupMapper.stuLeaveGroup(stuId);

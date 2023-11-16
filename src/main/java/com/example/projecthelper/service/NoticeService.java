@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.aspectj.weaver.ast.Not;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,6 +100,45 @@ public class NoticeService {
         }
         else {
             throw new AccessDeniedException("您没有权限发布该公告");
+        }
+    }
+
+    public Notice recruitNotice(Long fromId, Long pjId, Long gpId){
+        Notice ntc = new Notice();
+        ntc.setProjectId(pjId);
+        ntc.setTitle("Invitation to Join Group");
+        User user = usersMapper.findUserById(fromId);
+        ntc.setContent("I'm "+user.getName()+" and my Id is "+fromId+" and I want you to join my group. My group id is "+gpId);
+        return ntc;
+    }
+    public void createRecruitmentNotice(Notice notice, Long fromId, List<Long> toIds){
+        try {
+            notice.setCreatorId(fromId);
+            notice.setCreateTime(LocalDateTime.now());
+            noticeMapper.createNotice(notice);
+            System.err.println(notice.getNoticeId());
+            noticeMapper.insertStuView(new HashSet<>(toIds), notice.getNoticeId());
+        } catch (Exception e) {
+            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+        }
+    }
+    public Notice appNotice(Long fromId, Long pjId){
+        Notice ntc = new Notice();
+        ntc.setProjectId(pjId);
+        ntc.setTitle("Application to Join Group");
+        User user = usersMapper.findUserById(fromId);
+        ntc.setContent("I'm "+user.getName()+" and my Id is "+fromId+" and I want to join your group. ");
+        return ntc;
+    }
+    public void createApplicationNotice(Notice notice, Long fromId, Long toId){
+        try {
+            notice.setCreatorId(fromId);
+            notice.setCreateTime(LocalDateTime.now());
+            noticeMapper.createNotice(notice);
+            System.err.println(notice.getNoticeId());
+            noticeMapper.stuViewNotice(notice.getNoticeId(), toId);
+        } catch (Exception e) {
+            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
     }
 

@@ -70,12 +70,47 @@ const routes: RouteRecordRaw[] = [
     path: '/forgotpassword',
     component: () => import('pages/ForgotPassword.vue')
   },
-  //#####################测试使用，后期删除#######################
+
   {
-    path: '/temp',
-    component: () => import('pages/AssignmentPages/AssignmentFramework.vue')
+    path: '/announcement',
+    component: () => import('pages/CheckAnnouncement.vue')
   },
-  //#####################测试使用，后期删除#######################
+
+  {
+    path: '/admin',
+    component: () => import('pages/AdminUsers.vue')
+  },
+
+  {
+    path: '/student/Assignment',
+    component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
+    children: [
+      {
+        path: '/personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),
+        children: [
+          {
+            path: '/mengbi1/:assignmentId',
+            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
+          }
+        ]
+      },
+
+      {
+        path: '/group', component: () => import('pages/AssignmentPage/AssignmentsStudent_Group.vue'),
+        children: [
+          {
+            path: '/mengbi2/:assignmentId',
+            component: () => import('pages/AssignmentPage/AssignmentDetail.vue')
+          }
+        ]
+      },
+    ]
+  },
+  {
+    path: '/teacherAssignment',
+    component: () => import('pages/AssignmentPage/AssignmentTeacher.vue')
+  },
+
 
   // Always leave this as last one,
   // but you can also remove it

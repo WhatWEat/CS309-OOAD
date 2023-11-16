@@ -2,6 +2,7 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.User;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
 
@@ -10,6 +11,12 @@ import java.util.List;
 
 @Mapper
 public interface GroupMapper extends BaseMapper<Group> {
+
+
+    @Select("select u.* from users u join stuinproject s on u.userid = s.projectid where s.projectid = #{projId} limit #{limit} offset #{offset};")
+    List<User> getStuListOfProj(Long projId, int limit, int offset);
+    @Select("select u.* from users u join taofproject tp on u.userid = tp.projectid where tp.projectid = #{projId};")
+    List<User> getTaListOfProj(Long projId);
     //TODO:修改部分传参过多的方法
 
     @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime,instructorId, creatorId, description)" +
@@ -32,6 +39,9 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select creatorId from groups where groupId = #{groupId}")
     Long findCreatorByGroup(long groupId);
 
+    @Select("select projectid from groups where groupid = #{groupId};")
+    Long findPjIdOfGroup(Long groupId);
+
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
@@ -43,6 +53,8 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert("insert into stuInGroup values (#{groupId}, #{stuId})")
     void stuJoinGroup(Long stuId, Long groupId);
+    @Select("select count(*) from stuInGroup where groupId = #{groupId}")
+    int findCntOfStuInGroup(long groupId);
     @Delete("delete from stuingroup where stuId = #{stuId};")
     void stuLeaveGroup(long stuId);
 

@@ -11,26 +11,28 @@
             <div class=" q-pb-md">
               <q-btn round @click="clickAvatar">
                 <q-avatar size="50px">
-                  <img v-if="avatarUrl" :src="avatarUrl">
+                  <img v-if="avatar_preview" :src="avatar_preview">
                   <q-icon v-else name="person"></q-icon>
                 </q-avatar>
               </q-btn>
               <q-dialog v-model="isShowDialog">
                 <q-card>
                   <q-card-section>
-                    <q-uploader
-                        label="Upload Image"
-                        :url="uploadUrl"
-                        ref="uploader"
-                        accept=".jpg, image/*"
-
-                        @rejected="onRejectUploader"
-                        max-files="1"
-                    ></q-uploader>
+                    <q-file
+                      v-model="avatar_file"
+                      label="Choose Avatar"
+                      borderless
+                      accept=".jpg, image/*"
+                      @rejected="onRejected"
+                      @update:model-value="onFileChange"
+                    ></q-file>
+                    <div v-if="avatar_preview" class="q-mt-md">
+                      <q-img :src="avatar_preview" contain alt="Avatar Preview" class="avatar-preview"/>
+                    </div>
                   </q-card-section>
                   <q-card-actions class="q-px-md">
-                    <q-btn label="Upload" color='green' @click="uploadAvatar"/>
-                    <q-btn label="Cancel" color="red" @click="isShowDialog = false"/>
+                    <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
+                    <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
                   </q-card-actions>
                 </q-card>
               </q-dialog>
@@ -85,24 +87,24 @@
 
               </q-option-group>
               <q-slider
-                  class="lt-sm"
-                  v-model="gender"
-                  snap
-                  :min="0"
-                  :max="5"
-                  :inner-min="1"
-                  :inner-max="4"
-                  selection-color="transparent"
-                  markers
-                  marker-labels
-                  switch-marker-labels-side
-                  v-if="isEditing"
+                class="lt-sm"
+                v-model="gender"
+                snap
+                :min="0"
+                :max="5"
+                :inner-min="1"
+                :inner-max="4"
+                selection-color="transparent"
+                markers
+                marker-labels
+                switch-marker-labels-side
+                v-if="isEditing"
               >
                 <template v-slot:marker-label-group="{ markerMap }">
                   <div
-                      class="row items-center no-wrap"
-                      :class="markerMap[gender].classes"
-                      :style="markerMap[gender].style"
+                    class="row items-center no-wrap"
+                    :class="markerMap[gender].classes"
+                    :style="markerMap[gender].style"
                   >
                     <div v-if="gender=== 1"> Male</div>
                     <div v-if="gender=== 2"> Female</div>
@@ -121,14 +123,27 @@
                 Skills
               </q-item-label>
             </q-item-section>
-            <q-item-section>
-              <q-input outlined dense
-                       v-model="phone"
-                       type="tel"
-                       color="white"
-                       v-if="isEditing">
-              </q-input>
-              <q-item-label v-else>{{ phone }}</q-item-label>
+            <q-item-section class="col">
+              <div>
+                <q-chip
+                  v-for="(skill, index) in skills"
+                  :key="index"
+                  :color="colorList[index % colorList.length]"
+                  square
+                  :disable="!isEditing"
+                  :removable="isEditing"
+                  @remove="removeSkill(index)"
+                >
+                  {{ skill }}
+                </q-chip>
+                <q-input
+                  v-if="isEditing"
+                  v-model="newSkill"
+                  dense
+                  placeholder="Add new tag"
+                  @keyup.enter="addSkill"
+                />
+              </div>
             </q-item-section>
           </q-item>
           <q-item class="col-12">
@@ -140,13 +155,13 @@
             </q-item-section>
             <q-item-section>
               <q-input
-                  dense
-                  outlined
-                  v-model="email"
-                  type="email"
-                  v-if="isEditing"
-                  color="white"
-                  :suffix="selectedEmailDomain">
+                dense
+                outlined
+                v-model="email"
+                type="email"
+                v-if="isEditing"
+                color="white"
+                :suffix="selectedEmailDomain">
                 <template v-slot:append>
                   <q-btn-dropdown dense flat :disable="!isEditing">
                     <q-list>
@@ -187,25 +202,26 @@
       <q-card-section class="row justify-center" v-if="person_id===userid">
         <div>
           <q-btn
-              label="Edit"
-              class="text-capitalize"
-              v-if="!isEditing"
-              @click="isEditing = true"
-              color="primary"
+            label="Edit"
+            class="text-capitalize"
+            v-if="!isEditing"
+            @click="isEditing = true"
+            color="primary"
           />
           <q-btn
-              label="Save"
-              class="q-mx-lg text-capitalize"
-              v-else
-              color="green"
-              @click="saveProfile"
+            label="Save"
+            class="q-mx-lg text-capitalize"
+            v-else
+            color="green"
+            type="submit"
+            @click="saveProfile"
           />
           <q-btn
-              class="text-capitalize"
-              label="Cancel"
-              v-if="isEditing"
-              color="red"
-              @click="cancelEdit"/>
+            class="text-capitalize"
+            label="Cancel"
+            v-if="isEditing"
+            color="red"
+            @click="cancelEdit"/>
         </div>
 
       </q-card-section>
@@ -213,14 +229,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useUserStore} from 'src/composables/useUserStore';
-import {ref, defineProps, watch, onMounted} from 'vue';
+import {ref, defineProps, onMounted, watch} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
 import {storeToRefs} from 'pinia';
 import {api} from 'boot/axios';
-import async from "async";
 import {watchEffect} from "vue-demi";
 import {defaultPerson, personProps} from "src/composables/comInterface";
 
@@ -237,48 +252,133 @@ const $q = useQuasar()
 const {username, userid, identity} = useUserStore()
 
 const {person_id} = storeToRefs(usePerson)
-const email = ref('123123123'), gender = ref(1), phone = ref('1331313'),
-    skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
-const avatarUrl = ref('https://cdn.quasar.dev/img/boy-avatar.png'), uploadUrl = ref('')
-
-const isEditing = ref(false), isShowDialog = ref(false)
+const email = ref(''), gender = ref(1), phone = ref(''),
+  skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
+const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref(''), avatar_clone = ref()
+const newSkill = ref(), colorList = ref(['warning', 'teal', 'glossy', 'primary'])
+const isEditing = ref(false), isShowDialog = ref(false), isFresh = ref(true)
 const selectedEmailDomain = ref('gmail.com')
 const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn',
   '@mail.sustech.edu.cn'])
 const personIdentity = ref('')
 const genderList = ref([{label: 'Male', value: 1}, {label: 'Female', value: 2},
   {label: 'Non-binary', value: 3}, {label: 'Unknown', value: 4}])
-const firstModel = ref(2)
-
 
 //axios to initial
 const personInfo = ref<personProps>(defaultPerson)
 onMounted(() => {
   watchEffect(() => {
     personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
-    let type = (identity.value === 1) ? 'tea' : 'stu'
-    if(identity.value !== -1){
-      api.get(`/${type}/get_person_info`).then((res)=>{
+    if (identity.value !== -1 && isFresh.value) {
+      console.log("isfresh", isFresh.value)
+      api.get(`/get_personal_info/${person_id.value}`).then((res) => {
         console.log(res.data)
         personInfo.value = res.data.body
-        console.log(personInfo.value)
+        copyPersonInfo()
+
+        console.log('init',personInfo.value)
+      })
+      api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {
+        const blob = new Blob([res.data], { type: 'image/jpeg' });
+        avatar_preview.value = URL.createObjectURL(blob);
+        avatar_clone.value = avatar_preview.value;
       })
     }
   })
 })
 
-
-// skill
-
+function copyPersonInfo(){
+  gender.value = Number(genderConvert(personInfo.value.gender))
+  phone.value = personInfo.value.phone
+  skills.value = personInfo.value.programmingSkills.slice()
+  if(personInfo.value.avatar){
+    avatarUrl.value = personInfo.value.avatar
+  }
+  avatar_preview.value = avatar_clone.value
+  isFresh.value = false
+  if (personInfo.value.email) {
+    const emails = personInfo.value.email.split('@')
+    email.value = emails[0]
+    selectedEmailDomain.value = emails[1]
+  } else {
+    email.value = person_id.value.toString()
+    selectedEmailDomain.value = 'sustech.edu.cn'
+  }
+}
 function saveProfile() {
   isEditing.value = false
+  const formData = new FormData();
+  const type = personIdentity.value === 'Student' ? 'stu' : 'tea'
+  const personSubmit = personInfo.value;
+  personSubmit.gender = String(genderConvert(gender.value));
+  personSubmit.phone = phone.value;
+  personSubmit.programmingSkills = skills.value.slice();
+  personSubmit.email = email.value + '@' + selectedEmailDomain.value;
+  formData.append('phone', personSubmit.phone)
+  formData.append('email', personSubmit.email)
+  formData.append('name', personSubmit.name)
+  formData.append('gender', personSubmit.gender)
+  formData.append('birthday','2023-11-12')
+  if (personSubmit.avatar)
+    formData.append('avatar', personSubmit.avatar)
+  for (const i of personSubmit.programmingSkills){
+    formData.append('programmingSkills', i)
+  }
+  console.log('submit',personInfo.value)
+  api.post(`/edit_personal_info`,formData).then((res) => {
+    console.log(res.data)
+    $q.notify({
+      type: 'positive',
+      message: 'Profile saved'
+    })
+  }).catch((err) => {
+    console.log(err)
+    $q.notify({
+      type: 'negative',
+      message: 'Profile save failed'
+    })
+  })
+  // isFresh.value = true
 }
 
 function cancelEdit() {
   isEditing.value = false
+  copyPersonInfo()
 }
 
-function selectEmailDomain(index) {
+function removeSkill(index: number) {
+  skills.value.splice(index, 1)
+}
+
+function addSkill() {
+  if(newSkill.value.trim()){
+    skills.value.push(newSkill.value.trim())
+    newSkill.value = '';
+  }
+}
+
+function genderConvert(gender: number | string) {
+  switch (gender) {
+    case 1:
+      return "Male";
+    case 2:
+      return "Female";
+    case 3:
+      return "Non-binary";
+    case 4:
+      return "Unknown";
+    case "Male":
+      return 1;
+    case "Female":
+      return 2;
+    case "Non-binary":
+      return 3;
+    case "Unknown":
+      return 4;
+  }
+}
+
+function selectEmailDomain(index: number) {
   selectedEmailDomain.value = emailDomains.value[index]
 }
 
@@ -288,15 +388,37 @@ function clickAvatar() {
   }
 }
 
-function uploadAvatar() {
-  isShowDialog.value = false;
+function onFileChange(){
+  const file = avatar_file.value
+  if(file){
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      avatar_preview.value = reader.result as string
+    }
+    reader.onerror = (error) => {
+      console.log(error)
+    }
+  }
 }
-
-function onRejectUploader() {
+function cancelUploadAvatar() {
+  isShowDialog.value = false;
+  avatar_file.value = null;
+  avatar_preview.value = avatar_clone.value;
+}
+function saveUploadAvatar() {
+  isShowDialog.value = false;
+  if(avatar_file.value){
+    personInfo.value.avatar = avatar_file.value;
+    avatar_file.value = null;
+  }
+}
+function onRejected (rejectedEntries: string | any[]) {
+  // Notify plugin needs to be installed
+  // https://quasar.dev/quasar-plugins/notify#Installation
   $q.notify({
-    type: 'warning',
-    position: 'center',
-    message: 'You can only upload 1 image'
+    type: 'negative',
+    message: `${rejectedEntries.length} file(s) isn't image`
   })
 }
 </script>

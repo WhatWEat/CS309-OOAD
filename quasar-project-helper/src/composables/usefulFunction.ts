@@ -14,3 +14,8 @@ export function useProjectId() {
   const projectId = route.params.projectID as string;
   return Number(projectId);
 }
+export function usePersonId(){
+  const route = useRoute();
+  const personId = route.params.personID as string;
+  return Number(personId);
+}

@@ -55,6 +55,7 @@ export interface personProps {
   name: string,
   gender: string,
   birthday: string,
+  avatar: File,
   programmingSkills: string[]
 }
 export const defaultPerson: personProps = {
@@ -66,5 +67,6 @@ export const defaultPerson: personProps = {
   name: '',
   gender: '',
   birthday: '',
+  avatar: new File([], ''),
   programmingSkills: ['']
 }

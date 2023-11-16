@@ -118,7 +118,6 @@
     <!--          <q-btn color="purple" label="Second" icon="visibility" />-->
     <!--        </q-btn-group>-->
     <!--      </q-card-actions>-->
-
   </q-card>
 </template>
 

@@ -27,7 +27,7 @@
       <pre>-</pre>
       <el-col :span="11">
         <el-form-item prop="data2_presentation">
-          <el-time-picker v-model="formData.data2_presentetion" placeholder="选择时间" style="width: 100%;"></el-time-picker>
+          <el-time-picker v-model="formData.data2_presentation" placeholder="选择时间" style="width: 100%;"></el-time-picker>
         </el-form-item>
       </el-col>
     </el-form-item>
@@ -90,7 +90,7 @@ export default defineComponent({
         date1_deadline: '',
         date2_deadline: '',
         data1_presentation:'',
-        data2_presentetion:'',
+        data2_presentation:'',
         instructor:'',
         leader:'',
         members: [],

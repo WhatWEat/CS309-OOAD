@@ -26,12 +26,14 @@ public class UserService {
         //此处mapper中传参已经改为user，可以更改名字、身份、id、性别外的所有信息
         try {
             user.setUserId(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
-            fileService.removeOriAvatar(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
             if(user.getAvatar() != null){
-
+                fileService.removeOriAvatar(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
                 String path = FileUtil.generateAvatarPath(user.getUserId());
                 String avP = FileUtil.saveFile(path, user.getAvatar().getOriginalFilename(), user.getAvatar());
                 user.setAvatarPath(avP);
+            }
+            else {
+                user.setAvatarPath(usersMapper.findUserById(Long.parseLong(JWTUtil.getUserIdByToken(jwt))).getAvatarPath());
             }
             usersMapper.updateStuInformation(user);
         } catch (PSQLException e) {

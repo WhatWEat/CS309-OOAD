@@ -26,7 +26,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("select teacherId from project where projectId = #{projectId}")
     Long findTeacherByProject(Long projectId) ;
 
-    @Select(("select taId from taOfProject where projectId = #{projectId} and taId = #{taId}"))
+    @Select("select taId from taOfProject where projectId = #{projectId} and taId = #{taId}")
     Long checkTaInProj(Long projectId, Long taId);
 
     @Select("select stuId from stuInProject where projectId = #{projectId}")

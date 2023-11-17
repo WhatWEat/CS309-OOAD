@@ -231,7 +231,7 @@
 
 <script setup lang="ts">
 import {useUserStore} from 'src/composables/useUserStore';
-import {ref, defineProps, onMounted, watch} from 'vue';
+import {ref, defineProps, onMounted} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
 import {storeToRefs} from 'pinia';
@@ -290,7 +290,10 @@ onMounted(() => {
 function copyPersonInfo(){
   gender.value = Number(genderConvert(personInfo.value.gender))
   phone.value = personInfo.value.phone
-  skills.value = personInfo.value.programmingSkills.slice()
+  if (personInfo.value.programmingSkills)
+    skills.value = personInfo.value.programmingSkills.slice()
+  else
+    skills.value = []
   if(personInfo.value.avatar){
     avatarUrl.value = personInfo.value.avatar
   }
@@ -331,6 +334,7 @@ function saveProfile() {
       type: 'positive',
       message: 'Profile saved'
     })
+    avatar_clone.value = avatar_preview.value
   }).catch((err) => {
     console.log(err)
     $q.notify({

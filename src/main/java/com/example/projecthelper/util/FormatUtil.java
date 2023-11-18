@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 //这是一个进行格式检查的类
 public class FormatUtil {
 
+
     public static Predicate<String> userIdPredicate(){
         Pattern pattern = Pattern.compile("^[0-9]{8}$");
         return str -> pattern.matcher(str).matches();

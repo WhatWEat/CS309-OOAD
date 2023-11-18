@@ -28,7 +28,11 @@
           <q-toolbar class="bg-grey-4 text-white rounded-borders ">
             <!--            这里是下拉框-->
             <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
-              <q-list>
+              <q-list class="bg-grey-4 text-black rounded-borders">
+                <q-item v-close-popup clickable @click="show_set_form = true">
+                  <q-item-label  style="font-weight: bolder">Set global variables</q-item-label>
+                </q-item>
+
                 <q-item v-close-popup clickable @click="show_insert_form = true">
                   <q-item-label  style="font-weight: bolder">Create A Group</q-item-label>
                 </q-item>
@@ -69,16 +73,13 @@
 
   <!--  这里是本组信息部分-->
 
-  <DirectoryCard_Input :members="card_data.members" :group="card_data.group"   :group-id="card_data.groupId" :creation-time="card_data.deadline" :dead-line="card_data.deadline"
-                       :group-size="card_data.groupSize" :leader="card_data.instructor" :max-size="card_data.groupSize"  v-model:more-information="card_data.detail" :presentation-time="card_data.deadline"
-                  :style="{width: '100%' , 'border-radius': '20px'}">
-  </DirectoryCard_Input>
 
   <div>{{this.card_data.detail}}</div>
 
 
 
   <!--  这里是弹窗部分-->
+
   <!--  文件上传弹窗-->
   <q-dialog v-model="fileLoader" :position="'standard'">
     <q-card-section class="card">
@@ -139,7 +140,7 @@
       </confirm-dialog>
     </q-dialog>
   </div>
-  <!--  这里是Edit表单部分-->
+  <!--  这里是Edit表单弹窗部分-->
   <div>
     <el-dialog v-model="show_edit_form" center="true">
       <template v-slot:header>
@@ -148,7 +149,7 @@
       <group-form></group-form>
     </el-dialog>
   </div>
-  <!--  这里是创建表单部分-->
+  <!--  这里是创建表单弹窗改部分-->
   <div>
     <el-dialog v-model="show_insert_form" center="true">
       <template v-slot:header>
@@ -157,7 +158,25 @@
       <group-form></group-form>
     </el-dialog>
   </div>
+  <!--  这里是设置小组变量表单弹窗部分-->
+  <div>
+    <el-dialog v-model="show_set_form" center="true" :style="{width: '60%' , 'border-radius': '15px'}">
+      <template v-slot:header>
+        <div style="font-size: 20px; font-weight: bolder">Set group variables</div>
+      </template>
+      <set-variable-form ></set-variable-form>
+    </el-dialog>
+  </div>
 
+  <!--  这里是本小组信息部分-->
+  <div class="row wrap justify-center items-start">
+    <div class="col-11 justify-between">
+    <DirectoryCard_Input  :members="card_data.members" :group="card_data.group"   :group-id="card_data.groupId" :creation-time="card_data.deadline" :dead-line="card_data.deadline"
+                         :group-size="card_data.groupSize" :leader="card_data.instructor" :max-size="card_data.groupSize"  v-model:more-information="card_data.detail" :presentation-time="card_data.deadline"
+                         :style="{width: '100%' , 'border-radius': '20px'}">
+    </DirectoryCard_Input>
+    </div>
+  </div>
 
 
 </template>
@@ -166,7 +185,6 @@
 import {api} from 'boot/axios';
 import {defineAsyncComponent, ref} from 'vue';
 import {useUserStore} from 'src/composables/useUserStore';
-
 
 
 export default {
@@ -226,6 +244,8 @@ export default {
       show_button_teacher: ref(false),
 
       show_button_student: ref(false),
+
+      show_set_form: ref(false),
 
       show_warning: ref(false),
 
@@ -335,6 +355,7 @@ export default {
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
+    SetVariableForm: defineAsyncComponent(() => import('src/components/Component_Li/form/SetVariablesForm.vue')),
   },
 }
 
@@ -342,5 +363,7 @@ export default {
 </script>
 
 <style scoped>
-
+.rounded {
+  border-radius: 10px
+}
 </style>

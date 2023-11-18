@@ -193,10 +193,11 @@
 
 <script>
 import {defineComponent} from 'vue'
+import {useUserStore} from 'src/composables/useUserStore';
 
 export default defineComponent({
   name: "DirectoryCard",
-  props: ['groupId', "groupSize", 'members', "creationTime", "deadLine", "presentationTime", "leader", "maxSize", "moreInformation"],
+  props: [,'groupId', "groupSize", 'members', "creationTime", "deadLine", "presentationTime", "leader", "maxSize", "moreInformation"],
   emits: ['update:groupId', 'update:groupSize', 'update:members', 'update:creationTime', 'update:deadLine', 'update:presentationTime', 'update:leader', 'update:maxSize', 'update:moreInformation'],
   methods: {
     reset() {
@@ -221,7 +222,8 @@ export default defineComponent({
       presentationTime_temp: this.presentationTime,
       leader_temp: this.leader,
       maxSize_temp: this.maxSize,
-      moreInformation_temp: this.moreInformation
+      moreInformation_temp: this.moreInformation,
+      userData: useUserStore()
     }
   }
 })

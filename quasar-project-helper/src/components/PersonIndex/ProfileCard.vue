@@ -231,6 +231,7 @@
 
 <script setup lang="ts">
 import {useUserStore} from 'src/composables/useUserStore';
+import {getAvatarUrl} from 'src/composables/usefulFunction';
 import {ref, defineProps, onMounted} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
@@ -334,6 +335,7 @@ function saveProfile() {
       type: 'positive',
       message: 'Profile saved'
     })
+    getAvatarUrl()
     avatar_clone.value = avatar_preview.value
   }).catch((err) => {
     console.log(err)

@@ -130,6 +130,8 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
     }
 
+
+
     public void recruitMem(KeyValueWrapper<Long, List<Long>> gpId_stuIds, Long userId){
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_stuIds.getKey());
@@ -140,6 +142,7 @@ public class GroupService {
         }
         //PROC: 筛选stuIds
         List<Long> stuIds = gpId_stuIds.getValue().stream().filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null).toList();
+        noticeService.createRecruitmentNotice(userId, stuIds, group.getProjectId(), group.getGroupId());
 
     }
     public void joinGroup(Long groupId, Long stuId){
@@ -167,7 +170,8 @@ public class GroupService {
             }else if(gp.getMaxsize() == cnt) {
                 throw new AccessDeniedException("小组已满");
             }else {
-                noticeService.createApplicationNotice(noticeService.appNotice(stuId, gp.getProjectId()), stuId, gp.getLeaderId());
+                noticeService.createApplicationNotice(stuId, gp.getLeaderId(), gp.getProjectId(),
+                    gp.getGroupId());
             }
         }
     }

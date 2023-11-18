@@ -103,16 +103,37 @@ public class NoticeService {
         }
     }
 
+    public static final int APPLICATION = 0;
+    public static final int INVITATION = 1;
+
+    public String noticeSubject(Long fromId, Long gpId, int type){
+        StringBuilder sb = new StringBuilder();
+        User user = usersMapper.findUserById(fromId);
+        switch (type){
+            case 0:
+                sb.append("From: <").append(fromId).append(">\n")
+                    .append("Group: <").append(gpId).append(">\n")
+                    .append("I'm ").append(user.getName()).append(" and I want to join your group. ");
+                break;
+            case 1:
+                sb.append("From: <").append(fromId).append(">\n")
+                    .append("Group: <").append(gpId).append(">\n")
+                    .append("I'm ").append(user.getName()).append(" and I want you to join my group. \n");
+                break;
+        }
+        return null;
+    }
+
     public Notice recruitNotice(Long fromId, Long pjId, Long gpId){
         Notice ntc = new Notice();
         ntc.setProjectId(pjId);
         ntc.setTitle("Invitation to Join Group");
-        User user = usersMapper.findUserById(fromId);
-        ntc.setContent("I'm "+user.getName()+" and my Id is "+fromId+" and I want you to join my group. My group id is "+gpId);
+        ntc.setContent(noticeSubject(fromId, gpId, INVITATION));
         return ntc;
     }
-    public void createRecruitmentNotice(Notice notice, Long fromId, List<Long> toIds){
+    public void createRecruitmentNotice(Long fromId, List<Long> toIds, Long pjId, Long gpId){
         try {
+            Notice notice = recruitNotice(fromId, pjId, gpId);
             notice.setCreatorId(fromId);
             notice.setCreateTime(LocalDateTime.now());
             noticeMapper.createNotice(notice);
@@ -122,16 +143,16 @@ public class NoticeService {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
     }
-    public Notice appNotice(Long fromId, Long pjId){
+    public Notice appNotice(Long fromId, Long pjId, Long gpId){
         Notice ntc = new Notice();
         ntc.setProjectId(pjId);
         ntc.setTitle("Application to Join Group");
-        User user = usersMapper.findUserById(fromId);
-        ntc.setContent("I'm "+user.getName()+" and my Id is "+fromId+" and I want to join your group. ");
+        ntc.setContent(noticeSubject(fromId, gpId, APPLICATION));
         return ntc;
     }
-    public void createApplicationNotice(Notice notice, Long fromId, Long toId){
+    public void createApplicationNotice(Long fromId, Long toId, Long pjId, Long gpId){
         try {
+            Notice notice = appNotice(fromId, pjId, gpId);
             notice.setCreatorId(fromId);
             notice.setCreateTime(LocalDateTime.now());
             noticeMapper.createNotice(notice);

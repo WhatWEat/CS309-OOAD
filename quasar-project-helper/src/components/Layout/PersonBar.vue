@@ -33,7 +33,8 @@ import Messages from 'components/Layout/CardMessages.vue';
 import {useUserStore} from 'src/composables/useUserStore';
 import {useRouter} from 'vue-router';
 import {useQuasar} from 'quasar';
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
+import {getAvatarUrl} from 'src/composables/usefulFunction'
 const router = useRouter()
 const {username, userid} = useUserStore()
 const $q = useQuasar()
@@ -41,6 +42,14 @@ function handleClickPerson() {
   router.push(`/person/${userid.value}`)
 }
 const avatarSrc = ref('https://cdn.quasar.dev/img/boy-avatar.png')
+onMounted(async () => {
+  const cachedAvatar = localStorage.getItem('avatar')
+  if (cachedAvatar) {
+    avatarSrc.value = cachedAvatar
+  } else {
+    avatarSrc.value = await getAvatarUrl()
+  }
+})
 </script>
 
 <style scoped>

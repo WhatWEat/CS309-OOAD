@@ -30,13 +30,7 @@
       </q-item-section>
 
       <q-item-section side>
-        <q-item-label>
-          <q-btn class="bg-indigo-7 text-white" flat icon="fab fa-facebook" round size="sm"/>
-        </q-item-label>
-        <q-item-label>
-          <q-btn class="bg-info text-white" flat icon="fab fa-twitter" round size="sm"/>
-        </q-item-label>
-
+        <slot name="right_btn"></slot>
       </q-item-section>
     </q-item>
     <!--    间隔线部分-->
@@ -51,9 +45,18 @@
         </q-item-section>
         <q-item-section avatar>
           <q-item-label lines="1">Members</q-item-label>
-          <q-item-label caption lines="2">
-            <q-input :model-value="members" dense disable/>
-          </q-item-label>
+          <div class="row">
+            <q-item-label caption lines="2">
+              <q-input :disable="disableList.members" :model-value="Object.keys(members_temp).toString()" dense>
+                <template v-slot:after>
+                  <slot name="members_btn"></slot>
+                </template>
+              </q-input>
+            </q-item-label>
+            <q-item-label>
+              <slot name="invite_detail_input"></slot>
+            </q-item-label>
+          </div>
         </q-item-section>
       </q-item>
 
@@ -66,7 +69,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">Creation Time</q-item-label>
           <q-item-label caption lines="2">
-            <q-input v-model="creationTime_temp" filled mask="date" dense >
+            <q-input v-model="creationTime_temp" :disable="disableList.creationTime" dense filled mask="date">
               <template v-slot:append>
                 <q-icon class="cursor-pointer" name="event">
                   <q-popup-proxy ref="qDateProxy" cover transition-hide="scale" transition-show="scale">
@@ -92,7 +95,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">DeadLine</q-item-label>
           <q-item-label caption lines="2">
-            <q-input v-model="deadLine_temp" filled mask="date" dense >
+            <q-input v-model="deadLine_temp" :disable="disableList.deadLine" dense filled mask="date">
               <template v-slot:append>
                 <q-icon class="cursor-pointer" name="event">
                   <q-popup-proxy ref="qDateProxy" cover transition-hide="scale" transition-show="scale">
@@ -118,7 +121,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">Presentation Time</q-item-label>
           <q-item-label caption lines="2">
-            <q-input v-model="presentationTime_temp" filled mask="date" dense >
+            <q-input v-model="presentationTime_temp" :disable="disableList.presentationTime" dense filled mask="date">
               <template v-slot:append>
                 <q-icon class="cursor-pointer" name="event">
                   <q-popup-proxy ref="qDateProxy" cover transition-hide="scale" transition-show="scale">
@@ -142,9 +145,26 @@
           </q-item-label>
         </q-item-section>
         <q-item-section avatar>
+          <q-item-label lines="1">Instructor</q-item-label>
+          <q-item-label caption lines="2">
+            <q-input :disable="disableList.instructor" :model-value='Object.keys(instructor_temp).toString()'
+                     dense></q-input>
+
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+
+
+      <q-item clickable>
+        <q-item-section avatar>
+          <q-item-label lines="1">
+            <q-avatar icon="person"></q-avatar>
+          </q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
           <q-item-label lines="1">Leader</q-item-label>
           <q-item-label caption lines="2">
-            <q-input dense v-model="leader_temp"></q-input>
+            <q-input :disable="disableList.leader" :model-value="Object.keys(leader).toString()" dense></q-input>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -158,7 +178,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">Max Size</q-item-label>
           <q-item-label caption lines="2">
-            <q-input disable :model-value="maxSize_temp" dense></q-input>
+            <q-input :disable="disableList.maxSize" :model-value="maxSize_temp" dense></q-input>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -172,7 +192,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">More Information</q-item-label>
           <q-item-label caption lines="2">
-            <q-input v-model="moreInformation_temp" dense/>
+            <q-input v-model="moreInformation_temp" :disable="disableList.moreInformation" dense></q-input>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -181,6 +201,7 @@
 
     <q-separator></q-separator>
     <!--   最终的按钮部分 -->
+    <!--    <slot name="button"></slot>-->
     <q-card-actions align="around">
       <q-btn-group :style="{'width':'100%'}" spread>
         <!--   点击后使该组件刷新回最初的状态-->
@@ -188,6 +209,7 @@
         <q-btn color="red" label="Submit Change" rounded/>
       </q-btn-group>
     </q-card-actions>
+
   </q-card>
 </template>
 
@@ -197,7 +219,7 @@ import {useUserStore} from 'src/composables/useUserStore';
 
 export default defineComponent({
   name: "DirectoryCard",
-  props: [,'groupId', "groupSize", 'members', "creationTime", "deadLine", "presentationTime", "leader", "maxSize", "moreInformation"],
+  props: ['groupId', "groupSize", 'members', "creationTime", "deadLine", "presentationTime", "leader", 'instructor', "maxSize", "moreInformation"],
   emits: ['update:groupId', 'update:groupSize', 'update:members', 'update:creationTime', 'update:deadLine', 'update:presentationTime', 'update:leader', 'update:maxSize', 'update:moreInformation'],
   methods: {
     reset() {
@@ -207,6 +229,7 @@ export default defineComponent({
       this.creationTime_temp = this.creationTime
       this.deadLine_temp = this.deadLine
       this.presentationTime_temp = this.presentationTime
+      this.instructor_temp = this.instructor
       this.leader_temp = this.leader
       this.maxSize_temp = this.maxSize
       this.moreInformation_temp = this.moreInformation
@@ -214,6 +237,17 @@ export default defineComponent({
   },
   data() {
     return {
+      userData: useUserStore(),
+      disableList: {
+        members: true,
+        creationTime: true,
+        deadLine: true,
+        presentationTime: false,
+        instructor: true,
+        leader: true,
+        maxSize: true,
+        moreInformation: false,
+      },
       groupId_temp: this.groupId.value,
       groupSize_temp: this.groupSize,
       members_temp: this.members,
@@ -221,9 +255,9 @@ export default defineComponent({
       deadLine_temp: this.deadLine,
       presentationTime_temp: this.presentationTime,
       leader_temp: this.leader,
+      instructor_temp: this.instructor,
       maxSize_temp: this.maxSize,
       moreInformation_temp: this.moreInformation,
-      userData: useUserStore()
     }
   }
 })

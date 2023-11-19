@@ -8,12 +8,12 @@
         :columns="columns"
         :filter="search"
         :rows="rows"
+        :selected="selected"
         :separator="separator"
         card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
         selection="multiple"
-        :selected="selected"
         title="Groups List"
         @row-dblclick="handleRowDbclick"
         @row-contextmenu="handleRowContextmenu"
@@ -24,13 +24,17 @@
           <b style=" font-size: 22px;">Group List</b>
         </template>
         <!--        右上方按钮插槽-->
-        <template v-slot:top-right >
+        <template v-slot:top-right>
           <q-toolbar class="bg-grey-4 text-white rounded-borders ">
             <!--            这里是下拉框-->
             <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
-              <q-list>
+              <q-list class="bg-grey-4 text-black rounded-borders">
+                <q-item v-close-popup clickable @click="show_set_form = true">
+                  <q-item-label style="font-weight: bolder">Set global variables</q-item-label>
+                </q-item>
+
                 <q-item v-close-popup clickable @click="show_insert_form = true">
-                  <q-item-label  style="font-weight: bolder">Create A Group</q-item-label>
+                  <q-item-label style="font-weight: bolder">Create A Group</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="fileLoader = true">
@@ -38,7 +42,7 @@
                 </q-item>
 
                 <q-item v-close-popup clickable @click="exportTable">
-                  <q-item-label style="font-weight: bolder">Export  Group Info</q-item-label>
+                  <q-item-label style="font-weight: bolder">Export Group Info</q-item-label>
                 </q-item>
 
                 <q-item v-if="selected.length!=0" v-close-popup clickable @click="deleteSelected">
@@ -69,16 +73,12 @@
 
   <!--  这里是本组信息部分-->
 
-  <DirectoryCard_Input :members="card_data.members" :group="card_data.group"   :group-id="card_data.groupId" :creation-time="card_data.deadline" :dead-line="card_data.deadline"
-                       :group-size="card_data.groupSize" :leader="card_data.instructor" :max-size="card_data.groupSize"  v-model:more-information="card_data.detail" :presentation-time="card_data.deadline"
-                  :style="{width: '100%' , 'border-radius': '20px'}">
-  </DirectoryCard_Input>
 
-  <div>{{this.card_data.detail}}</div>
-
+  <div>{{ this.card_data.moreInfo }}</div>
 
 
   <!--  这里是弹窗部分-->
+
   <!--  文件上传弹窗-->
   <q-dialog v-model="fileLoader" :position="'standard'">
     <q-card-section class="card">
@@ -95,7 +95,7 @@
       ></q-uploader>
     </q-card-section>
   </q-dialog>
-  <!--  这里是删除修改按钮的弹窗部分-->
+  <!--  这里是右键删除修改按钮的弹窗部分-->
   <div>
     <q-btn-group v-show="show_button_teacher "
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
@@ -106,14 +106,18 @@
   <div>
     <q-btn-group v-show="show_button_student"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3"  icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
+      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
   <div>
     <q-dialog v-model="show_detail" transition-duration="500">
-      <directory-card :avatar=card_data.avatar :deadline="card_data.deadline" :detail="card_data.detail"
-                      :group-id="card_data.groupId" :group-size="card_data.groupSize" :members="card_data.members"
+      <directory-card :avatar=card_data.avatar :creation-time="card_data.creationTime" :deadline="card_data.deadline"
+                      :detail="card_data.moreInfo"
+                      :group-id="card_data.groupId" :group-size="card_data.groupSize"
+                      :instructor="card_data.instructor"
+                      :leader="card_data.leader" :max-size="card_data.groupMaxSize" :members="card_data.members"
+                      :presentation-time="card_data.presentationTime"
                       :style="{width: '50%' , 'border-radius': '20px'}">
         >
       </directory-card>
@@ -139,7 +143,7 @@
       </confirm-dialog>
     </q-dialog>
   </div>
-  <!--  这里是Edit表单部分-->
+  <!--  这里是Edit表单弹窗部分-->
   <div>
     <el-dialog v-model="show_edit_form" center="true">
       <template v-slot:header>
@@ -148,7 +152,7 @@
       <group-form></group-form>
     </el-dialog>
   </div>
-  <!--  这里是创建表单部分-->
+  <!--  这里是创建表单弹窗改部分-->
   <div>
     <el-dialog v-model="show_insert_form" center="true">
       <template v-slot:header>
@@ -157,7 +161,59 @@
       <group-form></group-form>
     </el-dialog>
   </div>
+  <!--  这里是设置小组变量表单弹窗部分-->
+  <div>
+    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" center="true">
+      <template v-slot:header>
+        <div style="font-size: 20px; font-weight: bolder">Set group variables</div>
+      </template>
+      <set-variable-form></set-variable-form>
+    </el-dialog>
+  </div>
 
+  <!--  这里是本小组信息部分-->
+  <div class="row wrap justify-center items-start">
+    <div class="col-11 justify-between">
+      <DirectoryCard_Input v-model:presentation-time="card_data.presentationTime"
+                           :creation-time="card_data.creationTime" :dead-line="card_data.deadline"
+                           :deadline="card_data.deadline" :detail="card_data.moreInfo"
+                           :group-id="card_data.groupId"
+                           :group-size="card_data.groupSize" :instructor="card_data.instructor"
+                           :leader="card_data.leader"
+                           :max-size="card_data.groupMaxSize" :members="card_data.members"
+                           :more-information="card_data.moreInfo"
+                           :style="{width: '100%' , 'border-radius': '20px'}">
+        <template v-slot:members_btn>
+
+        </template>
+        <template v-slot:invite_detail_input>
+          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"
+                   outlined>
+            <template v-slot:append>
+              <q-icon v-if="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
+            </template>
+            <template v-slot:hint>
+              Length hint
+            </template>
+            <template v-slot:after>
+              <q-btn dense flat icon="send" round @click="handleSendInvite"/>
+            </template>
+          </q-input>
+        </template>
+        <template v-slot:right_btn>
+          <q-item-label >
+            <q-btn  class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"  @click="show_invite_member=true"/>
+          </q-item-label>
+          <q-item-label v-if="isGroupLeader">
+            <q-btn class="bg-indigo-7 text-white" flat icon="exit_to_app" round size="sm"/>
+          </q-item-label>
+          <q-item-label v-else>
+            <q-btn class="bg-indigo-7 text-white" flat icon="manage_accounts" round size="sm"/>
+          </q-item-label>
+        </template>
+      </DirectoryCard_Input>
+    </div>
+  </div>
 
 
 </template>
@@ -168,12 +224,15 @@ import {defineAsyncComponent, ref} from 'vue';
 import {useUserStore} from 'src/composables/useUserStore';
 
 
-
 export default {
   name: 'GroupTeacherPage',
   userStore: useUserStore(),
   data() {
     return {
+      projectId: '',
+
+      isGroupLeader: ref(),
+
       userData: useUserStore(),
 
       columns: [
@@ -227,6 +286,8 @@ export default {
 
       show_button_student: ref(false),
 
+      show_set_form: ref(false),
+
       show_warning: ref(false),
 
       show_edit_form: ref(false),
@@ -234,6 +295,8 @@ export default {
       show_insert_form: ref(false),
 
       show_detail: ref(false),
+
+      show_invite_member: ref(false),
 
       p_x: ref('200'),
 
@@ -249,10 +312,22 @@ export default {
           avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
           groupId: 12345,
           groupSize: 4,
-          members: 'liweihao,ceshi1,ceshi2',
-          instructor: 'Dr. Smith',
+          groupMaxSize: 4,
+          members: {
+            'liweihao': 12110415,
+            '小明': 12110355,
+            '小王': 13454322,
+          },
+          creationTime: '2021/10/1',
           deadline: '2021/10/01',
-          detail: 'https://www.google.com'
+          presentationTime: '2021/11/11',
+          instructor: {
+            'Mr.Simth': 12001111
+          },
+          leader: {
+            '小明': 12110355
+          },
+          moreInfo: 'https://www.google.com'
         },
 
       warning_date: {
@@ -262,10 +337,22 @@ export default {
         text: 'The deadline is approaching'
       },
 
-
+      invite_member_id: '',
     }
   },
   methods: {
+    // 获取该页面的ProjectId
+    getProjectId() {
+      console.log("尝试获取ProjectId...\n")
+      this.projectId = this.$route.params.projectID;
+      console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
+    },
+    // 获取该用户是否为组长
+    getIfGroupLeader() {
+      console.log("尝试获取用户是否为组长...\n")
+      this.isGroupLeader = true;
+      console.log("在Monted中获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+    },
     // 导出GroupList表格
     exportTable() {
       this.$refs.table.exportCsv({
@@ -279,17 +366,16 @@ export default {
       console.log(this.selected_row.row)
     },
     handleRowDbclick(evt, row, index) {
-      this.show_detail= true;
+      this.show_detail = true;
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
       this.p_x = evt.clientY + 'px';
       this.p_y = evt.clientX + 'px';
       // 更新弹窗显示
-      if (this.userData.identity > 1){
+      if (this.userData.identity > 1) {
         this.show_button_student = true;
-      }
-      else{
+      } else {
         this.show_button_teacher = true;
       }
       // 更新被选中的行的内容
@@ -329,12 +415,23 @@ export default {
         console.log(error);
       });
     },
+    // 向服务器发送邀请新同学指令
+    handleSendInvite() {
+      // 更新弹窗显示, 隐藏弹窗
+      this.show_invite_member = false;
+    },
+
   },
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
+    SetVariableForm: defineAsyncComponent(() => import('src/components/Component_Li/form/SetVariablesForm.vue')),
+  },
+  mounted() {
+    this.getProjectId();
+    this.getIfGroupLeader();
   },
 }
 
@@ -342,5 +439,7 @@ export default {
 </script>
 
 <style scoped>
-
+.rounded {
+  border-radius: 10px
+}
 </style>

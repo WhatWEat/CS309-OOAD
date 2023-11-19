@@ -13,14 +13,6 @@
 
 
     <q-page-container>
-      <div>
-        <label for="start-number">From:</label>
-        <input id="start-number" type="number" v-model="startNumber" />
-      </div>
-      <div>
-        <label for="end-number">TO:</label>
-        <input id="end-number" type="number" v-model="endNumber" />
-      </div>
       <q-table
         title="Create"
         :rows="rows"
@@ -39,7 +31,29 @@
             @click="exportTable"
           />
         </template>
+        <template v-slot:top-left>
+          <q-btn
+            color="primary"
+            label="Create"
+            @click="showDialog = true"
+          />
+        </template>
       </q-table>
+      <q-btn label="Export to Excel" @click="exportToExcel" />
+      <q-dialog v-model="showDialog">
+        <div>
+          <label for="start-number">From:</label>
+          <input id="start-number" type="number" v-model="startNumber" />
+        </div>
+        <div>
+          <label for="end-number">To:</label>
+          <input id="end-number" type="number" v-model="endNumber" />
+        </div>
+
+        <q-card-actions align="right">
+          <q-btn label="Save" color="primary" @click="showDialog = false" />
+        </q-card-actions>
+      </q-dialog>
       <div class="q-pa-md">
         <div class="q-gutter-md row items-start">
           <span style="font-size: 20px;">Please upload CSV files to batch create users</span>
@@ -56,14 +70,6 @@
         </div>
       </div>
 
-      <div>
-        <label for="start-number">From:</label>
-        <input id="start-number" type="number" v-model="startNumber2" />
-      </div>
-      <div>
-        <label for="end-number">TO:</label>
-        <input id="end-number" type="number" v-model="endNumber2" />
-      </div>
       <q-table
         title="Create"
         :rows="rows"
@@ -82,7 +88,29 @@
             @click="exportTable"
           />
         </template>
+        <template v-slot:top-left>
+          <q-btn
+            color="primary"
+            label="Create"
+            @click="showDialog = true"
+          />
+        </template>
       </q-table>
+
+      <q-dialog v-model="showDialog">
+        <div>
+          <label for="start-number">From:</label>
+          <input id="start-number" type="number" v-model="startNumber2" />
+        </div>
+        <div>
+          <label for="end-number">To:</label>
+          <input id="end-number" type="number" v-model="endNumber2" />
+        </div>
+
+        <q-card-actions align="right">
+          <q-btn label="Save" color="primary" @click="showDialog = false" />
+        </q-card-actions>
+      </q-dialog>
       <div class="q-pa-md">
         <div class="q-gutter-md row items-start">
           <span style="font-size: 20px;">Please upload CSV files to batch reset users</span>
@@ -98,15 +126,68 @@
           />
         </div>
       </div>
+
+      <div>
+        <q-table
+          title="Predefined Emails"
+          :rows="predefinedEmails"
+          :columns="column"
+          row-key="id"
+          selection="multiple"
+          v-model:selected="selectedEmails"
+        >
+          <template v-slot:top-right>
+            <q-btn
+              color="primary"
+              label="Add"
+              @click="showDialogs = true"
+            />
+          </template>
+          <template v-slot:top-left>
+            <q-btn
+              color="primary"
+              label="Delete"
+              @click="deleteSelectedEmails"
+              :disable="selectedEmails.length === 0"
+            />
+          </template>
+        </q-table>
+
+        <q-dialog v-model="showDialogs">
+          <q-card>
+            <q-card-section>
+              <q-input
+                outlined
+                v-model="newEmail"
+                label="Email"
+              />
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                color="primary"
+                label="Cancel"
+                @click="cancelAddEmail"
+              />
+              <q-btn
+                color="primary"
+                label="Add"
+                @click="addEmail"
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import { ref } from 'vue'
 import { exportFile,useQuasar } from 'quasar';
 import {useRouter} from 'vue-router';
 import PersonBar from 'components/Layout/PersonBar.vue';
+// import XLSX from 'xlsx';
+// import { saveAs } from 'file-saver';
 
 function wrapCsvValue (val, formatFn, row) {
   let formatted = formatFn !== void 0
@@ -135,10 +216,24 @@ export default {
       endNumber2: 0,
       filesPng: null,
       rows: [],
+      showDialog: false,
       columns: [
         { name: 'id', required: true, label: 'id', align: 'left', field: 'id', sortable: true },
         { name: 'password', required: true, label: 'password', align: 'left', field: 'password', sortable: false },
-      ]
+        { name: 'email', required: true, label: 'email', align: 'left', field: 'email', sortable: false },
+        { name: 'phone number', required: true, label: 'phone', align: 'left', field: 'phone', sortable: false },
+      ],
+      predefinedEmails: [
+        { id: 1, email: 'email1@example.com' },
+        { id: 2, email: 'email2@example.com' },
+        { id: 3, email: 'email3@example.com' }
+      ],
+      column: [
+        { name: 'email', required: true, label: 'Email', align: 'left', field: 'email', sortable: true }
+      ],
+      selectedEmails: [],
+      showDialogs: false,
+      newEmail: ''
     };
   },
   watch: {
@@ -168,6 +263,53 @@ export default {
     },
   },
   methods: {
+    // handleDownloadCSV() {
+    //   axios.get('/api/endpoint', {
+    //     responseType: 'blob' // 设置响应类型为 blob
+    //   })
+    //     .then(response => {
+    //       this.handleCSVResponse(response.data);
+    //     })
+    //     .catch(error => {
+    //       error.message.data
+    //     });
+    // },
+    //
+    // handleCSVResponse(csvFile) {
+    //   const reader = new FileReader();
+    //   reader.onload = () => {
+    //     const csvData = reader.result;
+    //     this.rows = this.parseCSVData(csvData);
+    //   };
+    //   reader.readAsText(csvFile);
+    // },
+    //
+    // parseCSVData(csvData) {
+    //   const parsedData = Papa.parse(csvData, { header: true }).data;
+    //   const transformedData = parsedData.map(row => {
+    //     return {
+    //       id: row.ID || '', // 从解析数据的 'ID' 列获取值，如果不存在则为空字符串
+    //       password: '', // 这里使用空字符串，因为密码列在 CSV 中不存在
+    //       email: row.email || '', // 从解析数据的 'email' 列获取值，如果不存在则为空字符串
+    //       phone: row['phone number'] || '' // 从解析数据的 'phone number' 列获取值，如果不存在则为空字符串
+    //     };
+    //   });
+    //   return transformedData;
+    // },
+
+    // exportToExcel() {
+    //   const worksheet = XLSX.utils.json_to_sheet(this.rows);
+    //   const workbook = XLSX.utils.book_new();
+    //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    //   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    //   this.saveExcelFile(excelBuffer, 'tableData.xlsx');
+    // },
+    //
+    // saveExcelFile(buffer, fileName) {
+    //   const data = new Blob([buffer], { type: 'application/octet-stream' });
+    //   saveAs(data, fileName);
+    // },
+
     batchLoadData() {
       const password = '123456';
 
@@ -210,11 +352,26 @@ export default {
       })
     },
 
-    exportTable() {
-      // Filter selected rows
-      const selectedRows = this.rows.filter(row => this.selected.includes(row))
+    addEmail() {
+      const newId = this.predefinedEmails.length + 1;
+      this.predefinedEmails.push({ id: newId, email: this.newEmail });
+      this.newEmail = '';
+      this.showDialogs = false;
+    },
 
-      // Naive encoding to csv format
+    cancelAddEmail() {
+      this.newEmail = '';
+      this.showDialogs = false;
+    },
+
+    deleteSelectedEmails() {
+      this.predefinedEmails = this.predefinedEmails.filter(email => !this.selectedEmails.includes(email));
+      this.selectedEmails = [];
+    },
+
+    exportTable() {
+
+      const selectedRows = this.rows.filter(row => this.selected.includes(row))
       const content = [this.columns.map(col => wrapCsvValue(col.label))].concat(
         selectedRows.map(row => this.columns.map(col => wrapCsvValue(
           typeof col.field === 'function'
@@ -242,3 +399,4 @@ export default {
   },
 };
 </script>
+

@@ -161,11 +161,30 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @DeleteMapping("/leave_group")
-    public ResponseResult<Object> leaveGroup(HttpServletRequest request){
+    public ResponseResult<Object> leaveGroup(HttpServletRequest request, @RequestBody Long projId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.leaveGroup(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.leaveGroup(projId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+    @PostMapping("/ack_invitation")
+    public ResponseResult<Object> ackInvitation(HttpServletRequest request, @RequestBody Long noticeId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.ackInvitation(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/ack_application")
+    public ResponseResult<Object> ackApplication(HttpServletRequest request, @RequestBody Long noticeId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.ackApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/nak_invitation_or_application")
+    public ResponseResult<Object> nakInvitationOrApplication(HttpServletRequest request, @RequestBody Long noticeId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.nakInvitationOrApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
 
     @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
     public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
@@ -259,10 +278,7 @@ public class StudentController {
 
 
 
-    @GetMapping("/hello123")
-    public String hello(){
-        return "hello";
-    }
+
 
 
 

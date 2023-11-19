@@ -2,8 +2,10 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.User;
 
+import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
@@ -11,8 +13,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import com.example.projecthelper.mapper.GroupMapper;
@@ -36,6 +40,8 @@ public class GroupService {
     private GroupMapper groupMapper;
     @Autowired
     private ProjectMapper projectMapper;
+    @Autowired
+    private NoticeMapper noticeMapper;
     @Autowired
     private NoticeService noticeService;
 
@@ -130,8 +136,103 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
     }
 
+    public void ackInvitation(Long noticeId, Long stuId){
+        Notice notice = noticeService.findNoticeById(noticeId);
+        Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
+        if(!views.contains(stuId))
+            throw new AccessDeniedException("无权访问该notice");
+        if(notice == null)
+            throw new InvalidFormException("无效的noticeid");
+        try{
+            String [] content = notice.getContent().split("[<>]");
+            stuJoinGpSync(Long.parseLong(content[3]), stuId, false);
+            StringBuilder sb = new StringBuilder();
+            content[5] = "Accept";
+            for(int i = 0; i < content.length; i++){
+                if(i % 2 == 0)
+                    sb.append(content[i]).append("<");
+                else
+                    sb.append(content[i]).append(">");
+            }
+            noticeMapper.updateNotice(notice);
+
+        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
+            throw new InvalidFormException("无效的noticeid");
+        }
+    }
+
+    public void nakInvitationOrApplication(Long noticeId, Long stuId){
+        Notice notice = noticeService.findNoticeById(noticeId);
+        Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
+        if(!views.contains(stuId))
+            throw new AccessDeniedException("无权访问该notice");
+        if(notice == null)
+            throw new InvalidFormException("无效的noticeid");
+        try{
+            String [] content = notice.getContent().split("[<>]");
+            StringBuilder sb = new StringBuilder();
+            content[5] = "Reject";
+            for(int i = 0; i < content.length; i++){
+                if(i % 2 == 0)
+                    sb.append(content[i]).append("<");
+                else
+                    sb.append(content[i]).append(">");
+            }
+            noticeMapper.updateNotice(notice);
+
+        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
+            throw new InvalidFormException("无效的noticeid");
+        }
+    }
+
+    public void ackApplication(Long noticeId, Long stuId){
+        Notice notice = noticeService.findNoticeById(noticeId);
+        Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
+        if(!views.contains(stuId))
+            throw new AccessDeniedException("无权访问该notice");
+        if(notice == null)
+            throw new InvalidFormException("无效的noticeid");
+        try{
+            String [] content = notice.getContent().split("[<>]");
+            Group gp = groupMapper.findGroupById(Long.parseLong(content[3]));
+            if(gp == null || gp.getLeaderId() != stuId)
+                throw new AccessDeniedException("无权访问该小组");
+            stuJoinGpSync(Long.parseLong(content[3]), Long.parseLong(content[1]), false);
+            StringBuilder sb = new StringBuilder();
+            content[5] = "Accept";
+            for(int i = 0; i < content.length; i++){
+                if(i % 2 == 0)
+                    sb.append(content[i]).append("<");
+                else
+                    sb.append(content[i]).append(">");
+            }
+            noticeMapper.updateNotice(notice);
+
+        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
+            throw new InvalidFormException("无效的noticeid");
+        }
+    }
 
 
+    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
+        Group gp = groupMapper.findGroupById(gpId);
+        int cnt = groupMapper.findCntOfStuInGroup(gpId);
+        if(cnt == 0){
+            groupMapper.stuJoinGroup(stuId, gpId);
+            try{
+                groupMapper.updateLeader(stuId, gpId);
+            }catch (Exception e){
+                System.err.println(e.getMessage());
+            }
+        }else if(gp.getMaxsize() == cnt) {
+            throw new AccessDeniedException("小组已满");
+        }else if(needApp){
+            noticeService.createApplicationNotice(stuId, gp.getLeaderId(), gp.getProjectId(),
+                gp.getGroupId());
+        }else {
+            groupMapper.stuJoinGroup(stuId, gpId);
+        }
+    }
     public void recruitMem(KeyValueWrapper<Long, List<Long>> gpId_stuIds, Long userId){
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_stuIds.getKey());
@@ -158,25 +259,16 @@ public class GroupService {
             // 在这个proj中学生加入了其他小组
             throw new AccessDeniedException("您已经在其他小组中");
         }
-        synchronized (this){
-            int cnt = groupMapper.findCntOfStuInGroup(groupId);
-            if(cnt == 0){
-                groupMapper.stuJoinGroup(stuId, groupId);
-                try{
-                    groupMapper.updateLeader(stuId, groupId);
-                }catch (Exception e){
-                    System.err.println(e.getMessage());
-                }
-            }else if(gp.getMaxsize() == cnt) {
-                throw new AccessDeniedException("小组已满");
-            }else {
-                noticeService.createApplicationNotice(stuId, gp.getLeaderId(), gp.getProjectId(),
-                    gp.getGroupId());
-            }
-        }
+        stuJoinGpSync(gp.getGroupId(), stuId, true);
     }
-    public void leaveGroup(Long stuId){
-        groupMapper.stuLeaveGroup(stuId);
+    public void leaveGroup(Long pjId, Long stuId){
+        Long groupId = groupMapper.findGroupIdOfUserInAProj(stuId, pjId);
+        if(groupId == null)
+            throw new InvalidFormException("您不在小组中");
+        Group gp = groupMapper.findGroupById(groupId);
+        if(Objects.equals(gp.getLeaderId(), stuId))
+            throw new InvalidFormException("组长不能退出小组");
+        groupMapper.stuLeaveGroup(stuId, groupId);
     }
 
     public void updateLeader(Long leaderId, Long groupId, Predicate<Long> accessProject){

@@ -55,8 +55,8 @@ public interface GroupMapper extends BaseMapper<Group> {
     void stuJoinGroup(Long stuId, Long groupId);
     @Select("select count(*) from stuInGroup where groupId = #{groupId}")
     int findCntOfStuInGroup(long groupId);
-    @Delete("delete from stuingroup where stuId = #{stuId};")
-    void stuLeaveGroup(long stuId);
+    @Delete("delete from stuingroup where stuId = #{stuId} and groupId = #{gpId};")
+    void stuLeaveGroup(long stuId, long gpId);
 
     @Update("update groups set " +
             "groupName =#{groupName}, " +

@@ -271,9 +271,9 @@ onMounted(() => {
   watchEffect(() => {
     personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
     if (identity.value !== -1 && isFresh.value) {
-      console.log("isfresh", isFresh.value)
+      // console.log("isfresh", isFresh.value)
       api.get(`/get_personal_info/${person_id.value}`).then((res) => {
-        console.log(res.data)
+        // console.log(res.data)
         personInfo.value = res.data.body
         copyPersonInfo()
 

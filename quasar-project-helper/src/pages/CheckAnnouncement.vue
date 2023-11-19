@@ -1,18 +1,17 @@
 <template>
   <q-layout view="hHh lpR fFf" class="bg-grey-1">
-    <q-header class="bg-white text-grey-8">
+    <q-header >
       <q-toolbar class="GNL__toolbar">
 
-        <q-toolbar-title v-if="$q.screen.gt.xs" shrink class="row items-center no-wrap">
-          <q-btn dense @click="router.push('/')">
-            <q-icon name="home"></q-icon>
+        <q-toolbar-title>
+          Project Helper
+          <q-btn dense flat icon="home" @click="router.push('/')">
           </q-btn>
-          Announcement
         </q-toolbar-title>
 
         <q-space/>
 
-        <q-input class="GNL__toolbar-input" outlined dense v-model="search" color="bg-grey-7 shadow-1"
+        <q-input class="GNL__toolbar-input" outlined dense v-model="search" color="primary"
                  placeholder="Search for title, publisher & time">
           <template v-slot:prepend>
             <q-icon v-if="search === ''" name="search"/>

@@ -1,8 +1,10 @@
 package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
+import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
@@ -29,6 +31,8 @@ public class NoticeService {
     private ProjectMapper projectMapper;
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private GroupMapper groupMapper;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
@@ -109,20 +113,27 @@ public class NoticeService {
     public String noticeSubject(Long fromId, Long gpId, int type){
         StringBuilder sb = new StringBuilder();
         User user = usersMapper.findUserById(fromId);
+        Group gp =  groupMapper.findGroupById(gpId);
         switch (type){
             case 0:
-                sb.append("From: <").append(fromId).append(">\n")
-                    .append("Group: <").append(gpId).append(">\n")
-                    .append("I'm ").append(user.getName()).append(" and I want to join your group. ");
+                sb.append("From: <").append(fromId).append(">")
+                    .append("Group: <").append(gpId).append(">")
+                    .append("Type: <APPLICATION>")
+                    .append("Status: <Undetermined>")
+                    .append("Description: <I'm ").append(user.getName()).append(" and I want to join your group. >");
                 break;
             case 1:
-                sb.append("From: <").append(fromId).append(">\n")
-                    .append("Group: <").append(gpId).append(">\n")
-                    .append("I'm ").append(user.getName()).append(" and I want you to join my group. \n");
+                sb.append("From: <").append(fromId).append(">")
+                    .append("Group: <").append(gpId).append(">")
+                    .append("Type: <INVITATION>")
+                    .append("Status: <Undetermined>")
+                    .append("Description: <I'm ").append(user.getName()).append(" and I want you to join group \"").append(gp.getGroupName()).append("\". >");
                 break;
         }
         return null;
     }
+
+
 
     public Notice recruitNotice(Long fromId, Long pjId, Long gpId){
         Notice ntc = new Notice();

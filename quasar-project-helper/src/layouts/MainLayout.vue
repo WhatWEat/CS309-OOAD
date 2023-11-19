@@ -70,7 +70,7 @@ import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
 import PersonBar from 'components/Layout/PersonBar.vue';
 
-const router = useRouter()
+// const router = useRouter()
 const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {

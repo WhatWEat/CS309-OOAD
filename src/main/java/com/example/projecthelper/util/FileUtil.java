@@ -189,7 +189,7 @@ public class FileUtil {
                 long userId = (long) dataRow.getCell(userIdColumn).getNumericCellValue();
                 String password =(String) dataRow.getCell(passColumn).getStringCellValue();
                 String gender = (String) dataRow.getCell(genderColumn).getStringCellValue();
-                String name = (String) dataRow.getCell(genderColumn).getStringCellValue();
+                String name = (String) dataRow.getCell(nameColumn).getStringCellValue();
                 Integer identity = (int) dataRow.getCell(identityColumn).getNumericCellValue();
                 users.add(new User(identity, password, name, gender, userId));
             }

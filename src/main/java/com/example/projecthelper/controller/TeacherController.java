@@ -337,7 +337,7 @@ public class TeacherController {
         @PathVariable("page_size") int page_size,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
+        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

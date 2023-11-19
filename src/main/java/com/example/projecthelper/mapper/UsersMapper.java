@@ -19,7 +19,7 @@ public interface UsersMapper extends BaseMapper<User> {
     @Results({
         @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<User> findUsersById(Integer identity, int limit, int offset);
+    List<User> findUsersByIdentity(Integer identity, int limit, int offset);
 
     @Select({
         "<script>",

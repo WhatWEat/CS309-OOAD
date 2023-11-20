@@ -42,7 +42,7 @@ export interface GroupMember{
   // 用于记录Group中Member的各类属性
   name: string,
   id: number,
-  skills: string[],
+  skills?: string[],
 }
 
 export interface personProps {

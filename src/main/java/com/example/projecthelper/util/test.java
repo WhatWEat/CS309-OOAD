@@ -1,9 +1,14 @@
 package com.example.projecthelper.util;
 
+import com.example.projecthelper.mapper.GroupMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
+
+
 public class test {
     public static void main(String[] args) {
         System.out.println(generateValidJWT("30002000", "1"));
-
     }
 
     public static String generateValidJWT(String userId, String identityCode){

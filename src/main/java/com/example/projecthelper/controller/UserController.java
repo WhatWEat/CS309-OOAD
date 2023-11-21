@@ -53,7 +53,7 @@ public class UserController {
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/get_group_by_id/{group_id}")
+    @GetMapping("/getGroupInfo/{group_id}")
     public ResponseResult<Group> getGroupById(
         HttpServletRequest request,
         @PathVariable("group_id") Long groupId
@@ -61,6 +61,16 @@ public class UserController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Group group = groupService.getGroupById(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(group, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_brief_groups_from_proj/{project_id}")
+    public ResponseResult<List<Group>> getBriefGroupsFromProj(
+        HttpServletRequest request,
+        @PathVariable("project_id") Long projectId)
+    {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<Group> groups = groupService.getBriefGroupsFromProj(projectId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
 

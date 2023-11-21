@@ -154,4 +154,6 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Update("UPDATE groups SET visibility = #{visibility} WHERE groupid = 1;\n")
     void updateVisibility(long userId, long groupId, Boolean[] visibility) throws PSQLException;
 
+    @Delete("delete from stuingroup where (groupid,stuid) = (#{groupid},#{stuid});\n")
+    void removeMember(long groupid, long stuid);
 }

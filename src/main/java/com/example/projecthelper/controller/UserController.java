@@ -1,8 +1,10 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Project;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
+import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.ProjectService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
@@ -23,15 +25,17 @@ public class UserController {
     private final AuthService authService;
     private final UserService userService;
     private final FileService fileService;
+    private final GroupService groupService;
     private final ProjectService projectService;
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
     public UserController(AuthService authService, UserService userService,
-                          FileService fileService, ProjectService projectService) {
+                          FileService fileService, GroupService groupService, ProjectService projectService) {
         this.authService = authService;
         this.userService = userService;
         this.fileService = fileService;
+        this.groupService = groupService;
         this.projectService = projectService;
     }
 
@@ -47,6 +51,16 @@ public class UserController {
             page, page_size
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_group_by_id/{group_id}")
+    public ResponseResult<Group> getGroupById(
+        HttpServletRequest request,
+        @PathVariable("group_id") Long groupId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Group group = groupService.getGroupById(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(group, "Success", JWTUtil.updateJWT(jwt));
     }
 
 

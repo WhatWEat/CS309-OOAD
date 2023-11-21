@@ -100,13 +100,39 @@
         </q-tab-panel>
 
         <q-tab-panel name="ta">
-          <div class="row">
-
-          </div>
+          <q-list class="row">
+            <q-item
+              class="col-4"
+              :href="`/person/${ta.id}`"
+              v-for="ta in ta_list"
+              :key="ta.id"
+              clickable
+            >
+              <q-item-section class="row"
+                              >
+                <span>
+                  <q-chip square dense class="col-3 text-white" color="primary"> {{ta.id}}</q-chip>
+                  <span class="col">
+                    {{ ta.name }}
+                  </span>
+                </span>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </q-tab-panel>
         <q-tab-panel name="group">
           <div class="row">
-
+            <q-chip square v-for="group in group_list" :key="group.groupId" @click="clickGroup">
+              {{group.groupName}}
+              <q-badge color="green" floating transparent rounded>
+                {{group.members.length}}
+              </q-badge>
+              <q-tooltip class="bg-indigo">
+                Instructor: {{group.instructorName}}<br>
+                GroupLeader: {{group.leaderName}}<br>
+                GroupMember: {{group.members.join(', ')}}
+              </q-tooltip>
+            </q-chip>
           </div>
         </q-tab-panel>
       </q-tab-panels>
@@ -130,8 +156,9 @@
 
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from "vue";
-import {GroupMember, projectProps} from "src/composables/comInterface";
+import {defaultGroup, GroupMember, GroupProps, projectProps} from "src/composables/comInterface";
 import {computed} from "vue-demi";
+import {api} from "boot/axios";
 
 const tab = ref<string>('des');
 const props = defineProps<{
@@ -142,6 +169,7 @@ const project_show = ref<projectProps>(props.project);
 // TAs
 // all people is all the TAs, ta_list is the TAs in this project
 const allPeople = ref<GroupMember[]>([]), ta_list = ref<GroupMember[]>([]);
+const group_list = ref<GroupProps[]>([defaultGroup]);
 onMounted(()=>{
   // TODO
   // use api to get all people
@@ -155,8 +183,19 @@ onMounted(()=>{
     id: 2,
     name: 'person 3'
   }];
-
+  ta_list.value = [{
+    id: 0,
+    name: 'person 1'
+  }];
+  // api.get(`/get_brief_groups_from_proj/${props.project.projectId}`).then(res => {
+  //   console.log('group', res.data)
+  //   group_list.value = res.data;
+  // }).catch(err => {
+  //   console.log(err)
+  // })
 })
+// edit group instruct
+const isAssignTA = ref<boolean>(false);
 // edit part
 const isEdit = ref<boolean>(false), project_edit = ref<projectProps>(props.project);
 const filter = ref<string>(''), selectedPeople = ref<GroupMember[]>([]);
@@ -198,6 +237,18 @@ function clickEdit() {
   project_show.value = JSON.parse(JSON.stringify(project_edit.value));
   selectedPeople.value = JSON.parse(JSON.stringify(ta_list.value));
   console.log('click edit')
+}
+function clickGroup() {
+  isAssignTA.value = true
+}
+function saveGroup() {
+  console.log('save info')
+  project_show.value = JSON.parse(JSON.stringify(project_edit.value));
+  ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
+
+  // TODO
+  // use api to submit
+  console.log(project_edit.value)
 }
 </script>
 

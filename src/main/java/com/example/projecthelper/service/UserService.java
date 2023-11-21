@@ -54,7 +54,7 @@ public class UserService {
     }
 
     public List<User> getUsersByIdentity(int identity, int page, int page_size){
-        return usersMapper.findUsersById(identity, page_size, page * page_size);
+        return usersMapper.findUsersByIdentity(identity, page_size, page * page_size);
 
     }
 

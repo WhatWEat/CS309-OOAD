@@ -3,6 +3,10 @@ package com.example.projecthelper.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.util.BooleanListArrayTypeHandler;
+import com.example.projecthelper.util.StringListArrayTypeHandler;
+import com.example.projecthelper.util.Wrappers.ObjectWrapper;
+import java.util.Set;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
 
@@ -17,19 +21,39 @@ public interface GroupMapper extends BaseMapper<Group> {
     List<User> getStuListOfProj(Long projId, int limit, int offset);
     @Select("select u.* from users u join taofproject tp on u.userid = tp.projectid where tp.projectid = #{projId};")
     List<User> getTaListOfProj(Long projId);
-    //TODO:修改部分传参过多的方法
 
-    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime,instructorId, creatorId, description)" +
-            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime},#{instructorId}, #{creatorId}, #{description});")
+    @Select("select g.*, u.name instructorName, u2.name leaderName " +
+        "from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where projectid = #{projId};")
+    @Results({
+        @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
+        @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)
+    })
+    List<Group> getBriefGroupsFromProj(Long projId);
+
+    @Select("select stuid " +
+        "from stuingroup where groupid = #{groupId} and stuid = #{stuId}; ")
+    Long checkStuInGroup(Long groupId, Long stuId);
+
+    @Select("select u.userId, u.name  " +
+        "from stuingroup s join users u on s.stuid = u.userid where s.groupid = #{gpId};")
+    List<User> getMembersFromGp(Long gpId);
+
+    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime," +
+        "instructorId, creatorId, description, leaderId, technicalStack)" +
+            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime}," +
+        "#{instructorId}, #{creatorId}, #{description}, #{leaderId}, " +
+        "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler});")
     @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "groupid")
     //maxsize、groupName、projectId。instructorId不能为空
     void createGroup (Group group) throws PSQLException;
 
     @Insert({
         "<script>",
-        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId, description) VALUES",
+        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId, description, technicalStack) VALUES",
         "<foreach item='group' index='index' collection='groupList' separator=','>",
-        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, #{group.reportTime}, #{group.instructorId}, #{group.creatorId}, #{description})",
+        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, " +
+            "#{group.reportTime}, #{group.instructorId}, #{group.creatorId}, #{description}, " +
+            "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler})",
         "</foreach>",
         "</script>"
     })
@@ -45,11 +69,25 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
-    @Select("select * from groups where groupid = #{groupId}")
+    @Select("select g.*, u.name instructorName, u2.name leaderName from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where groupid = #{groupId}")
+    @Results({
+        @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
+        @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)
+    })
     Group findGroupById(long groupId);
 
     @Select("select g.groupId from groups g join stuInGroup sIG on g.groupId = sIG.groupId where g.projectId = #{projectId} and sIG.stuId = #{userId}; ")
     Long findGroupIdOfUserInAProj(long userId, long projectId);
+
+    @Insert({
+        "<script>",
+        "INSERT INTO stuInGroup (groupId, stuId) VALUES",
+        "<foreach item='stuId' index='index' collection='memberIds' separator=','>",
+        "(#{gpId}, #{stuId})",
+        "</foreach>",
+        "</script>"
+    })
+    void insertStuIntoGps(@Param("memberIds") Set<Long> memberIds, Long gpId);
 
     @Insert("insert into stuInGroup values (#{groupId}, #{stuId})")
     void stuJoinGroup(Long stuId, Long groupId);
@@ -63,12 +101,23 @@ public interface GroupMapper extends BaseMapper<Group> {
             "leaderId =#{leaderId}, " +
             "maxsize =#{maxsize}, " +
             "description =#{description}, " +
-            "teamTime =#{teamTime}, " +
             "reportTime =#{reportTime}, " +
             "instructorId =#{instructorId} " +
             "where groupId = #{groupId};")
     //max_size、group_name、instructor_id, groupId不能为空
     void updateGroupForTea(Group group) throws PSQLException;
+
+    @Update("update groups set " +
+        "maxsize =#{maxsize} " +
+        "where projectId = #{projectId};")
+        //max_size、group_name、instructor_id, groupId不能为空
+    void updateMaxsizeForAllGroups(Group group) throws PSQLException;
+
+    @Update("update groups set " +
+        "reportTime =#{reportTime} " +
+        "where projectId = #{projectId};")
+        //max_size、group_name、instructor_id, groupId不能为空
+    void updateReportTimeForAllGroups(Group group) throws PSQLException;
 
     @Update("update groups set " +
             "groupName =#{groupName}, " +

@@ -11,6 +11,8 @@ public class Project {
     private String description;
     private String name;
     private Long teacherId;
+    @TableField(exist = false)
+    private String teacherName;
 
     public Project(Long projectId, String name, Long teacherId) {
         this.teacherId = teacherId;

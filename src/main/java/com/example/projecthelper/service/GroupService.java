@@ -76,9 +76,6 @@ public class GroupService {
 
     public List<Group> getBriefGroupsFromProj(Long projId, Long userId){
 
-        if(!Objects.equals(userId, projectMapper.findTeacherByProject(projId))){
-            throw new AccessDeniedException("无权查看小组");
-        }
         List<Group> groups = groupMapper.getBriefGroupsFromProj(projId);
         groups.forEach(g -> {
             g.setMemCnt(groupMapper.findCntOfStuInGroup(g.getGroupId()));
@@ -86,7 +83,11 @@ public class GroupService {
             g.setMemberIds(
                 groupMapper.getMembersFromGp(g.getGroupId()).stream().map(User::getUserId).toList()
             );
-            g.mask();
+            if(groupMapper.checkStuInGroup(g.getGroupId(), userId) == null &&
+                !Objects.equals(projectMapper.findTeacherByProject(g.getProjectId()), userId) &&
+                projectMapper.checkTaInProj(g.getProjectId(), userId) == null
+            )
+                g.mask();
         });
         return groups;
     }

@@ -19,6 +19,26 @@ import org.postgresql.util.PSQLException;
 
 @Mapper
 public interface ProjectMapper extends BaseMapper<Project> {
+    @Select("select p.*, u.name teacherName " +
+        "from project p join users u on p.teacherid = u.userid limit #{limit} offset #{offset};")
+    List<Project> getProjByAdm(int limit, int offset);
+
+    @Select("select p.*, u.name teacherName " +
+        "from project p join users u on p.teacherid = u.userid where p.teacherid = #{userId} limit #{limit} offset #{offset};")
+    List<Project> getProjByTea(Long userId, int limit, int offset);
+
+    @Select("select p.*, u.name teacherName " +
+        "from project p " +
+        "    join users u on p.teacherid = u.userid " +
+        "join taofproject t on p.projectid = t.projectid where t.taid = #{userId} limit #{limit} offset #{offset};")
+    List<Project> getProjByTa(Long userId, int limit, int offset);
+
+    @Select("select p.*, u.name teacherName " +
+        "from project p " +
+        "    join users u on p.teacherid = u.userid " +
+        "join stuinproject s on p.projectid = s.projectid where s.stuId = #{userId} limit #{limit} offset #{offset};")
+    List<Project> getProjByStu(Long userId, int limit, int offset);
+
     @Insert("insert into project (name, description, teacherId) values (#{name}, #{description}, #{teacherId});")
     //name , teacher_id均不为空
     void createProject(Project pj) throws PSQLException;

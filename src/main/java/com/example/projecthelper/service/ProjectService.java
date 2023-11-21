@@ -6,6 +6,7 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,20 @@ public class ProjectService {
 
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
+    public List<Project> getProjectList(KeyValueWrapper<Long, Integer> idIdentityWrapper, int page, int page_size){
+        return switch (idIdentityWrapper.getValue()) {
+            case 0 ->
+                projectMapper.getProjByAdm(page_size, page * page_size);
+            case 1 ->
+                projectMapper.getProjByTea(idIdentityWrapper.getKey(), page_size, page * page_size);
+            case 2 ->
+                projectMapper.getProjByTa(idIdentityWrapper.getKey(), page_size, page * page_size);
+            case 3 ->
+                projectMapper.getProjByStu(idIdentityWrapper.getKey(), page_size, page * page_size);
+            default -> null;
+        };
+    }
 
     public void createProject(Project project){
         try {

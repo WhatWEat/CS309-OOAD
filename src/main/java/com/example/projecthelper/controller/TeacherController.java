@@ -27,6 +27,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -154,6 +155,26 @@ public class TeacherController {
     }
 
 
+    @GetMapping("/get_brief_groups_from_proj/{project_id}")
+    public ResponseResult<List<Group>> getBriefGroupsFromProj(
+        HttpServletRequest request,
+        @PathVariable("project_id") Long projectId)
+    {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<Group> groups = groupService.getBriefGroupsFromProj(projectId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_group_by_id/{group_id}")
+    public ResponseResult<Group> getGroupById(
+        HttpServletRequest request,
+        @PathVariable("group_id") Long groupId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Group group = groupService.getGroupById(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(group, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @PostMapping("/create_group")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -184,7 +205,7 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PutMapping("/modify_group_info")
+    @PostMapping("/modify_group_info")
     public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.updateGroupForTea(
@@ -193,6 +214,16 @@ public class TeacherController {
                 groupService.findCreatorByGroup(gpId),
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/set_group")
+    public ResponseResult<Object> setGroup(HttpServletRequest request, @RequestBody Group group){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateAllGroupForTea(
+            group,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -337,7 +368,7 @@ public class TeacherController {
         @PathVariable("page_size") int page_size,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
+        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

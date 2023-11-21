@@ -12,6 +12,7 @@ import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -72,22 +74,73 @@ public class GroupService {
         return users;
     }
 
-    //TODO:创建group
+    public List<Group> getBriefGroupsFromProj(Long projId, Long userId){
+
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(projId))){
+            throw new AccessDeniedException("无权查看小组");
+        }
+        List<Group> groups = groupMapper.getBriefGroupsFromProj(projId);
+        groups.forEach(g -> {
+            g.setMemCnt(groupMapper.findCntOfStuInGroup(g.getGroupId()));
+            g.setMembers(groupMapper.getMembersFromGp(g.getGroupId()).stream().map(User::getName).toList());
+            g.setMemberIds(
+                groupMapper.getMembersFromGp(g.getGroupId()).stream().map(User::getUserId).toList()
+            );
+            g.mask();
+        });
+        return groups;
+    }
+
+    public Group getGroupById(Long groupId, Long userId){
+        Group gp = groupMapper.findGroupById(groupId);
+        if(gp == null){
+            throw new InvalidFormException("不合法的groupId");
+        }
+        gp.setMemCnt(groupMapper.findCntOfStuInGroup(gp.getGroupId()));
+        gp.setMembers(groupMapper.getMembersFromGp(gp.getGroupId()).stream().map(User::getName).toList());
+        gp.setMemberIds(
+            groupMapper.getMembersFromGp(gp.getGroupId()).stream().map(User::getUserId).toList()
+        );
+        if(groupMapper.checkStuInGroup(groupId, userId) != null ||
+            Objects.equals(projectMapper.findTeacherByProject(gp.getProjectId()), userId) ||
+            projectMapper.checkTaInProj(gp.getProjectId(), userId) != null
+        ){
+            return gp;
+        }
+        else
+            return gp.mask();
+    }
 
     public void createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
         // FUNC: 给行projectId，调用者是否有权限使用
         if(!accessProject.test(group.getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
-        if(!group.getReportTime().isAfter(LocalDateTime.now()))
+        if(group.getReportTime() != null && !group.getReportTime().isAfter(LocalDateTime.now()))
             throw new InvalidFormException("报告时间不能早于当前时间");
         User usr = usersMapper.findUserById(group.getInstructorId());
         if(usr == null || usr.getIdentity() > 2)
             throw new InvalidFormException("instructorId不存在或不合法");
+        Long leaderId = group.getLeaderId();
+        if(leaderId == null ||
+            projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null ||
+            groupMapper.findGroupOfStuInProject(leaderId, group.getProjectId()) != null)
+            throw new InvalidFormException("leaderId不合法或已经加入小组");
         try{
             group.setCreatorId(creatorId);
             group.setTeamTime(LocalDateTime.now());
+            System.err.println(group.getMemberIds());
+
+            // 插入学生进组
+            Set<Long> validIds = group.getMemberIds().stream()
+                .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
+                .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
+                    .collect(Collectors.toSet());
+            validIds.add(leaderId);
+            group.setMemberIds(new ArrayList<>(validIds));
             groupMapper.createGroup(group);
+            groupMapper.insertStuIntoGps(validIds, group.getGroupId());
+            System.err.println(validIds);
             System.err.println(group.getGroupId()); // 这个是对的
         }catch (Exception e){
             System.err.println(e.getMessage());
@@ -117,12 +170,28 @@ public class GroupService {
         groupMapper.createGroups(groups);
     }
 
+    public void updateAllGroupForTea(Group group, Long userId) {
+        if (!Objects.equals(projectMapper.findTeacherByProject(group.getProjectId()), userId))
+            throw new InvalidFormException("projectId 错误");
 
+        try {
+            if(group.getMaxsize() != null)
+                groupMapper.updateMaxsizeForAllGroups(group);
+            if(group.getReportTime() != null)
+                if(group.getReportTime().isBefore(LocalDateTime.now()))
+                    throw new InvalidFormException("报告时间不能早于当前时间");
+                else
+                    groupMapper.updateReportTimeForAllGroups(group);
+        } catch (PSQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
     public void updateGroupForTea(Group group, Predicate<Long> accessGroup) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
         if (accessGroup.test(group.getGroupId())) {
             Long pjId = groupMapper.findPjIdOfGroup(group.getGroupId());
-            if(group.getInstructorId() != null && projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
+            if(group.getInstructorId() == null || projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
                 throw new InvalidFormException("无效的instructorId");
             if(group.getLeaderId() != null &&  projectMapper.checkStuInProj(group.getLeaderId(), pjId) == null)
                 throw new InvalidFormException("无效的leaderId");

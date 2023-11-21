@@ -50,7 +50,6 @@ const items = ref([])
 const loading = ref(false)
 const {userid, identity} = useUserStore()
 watch(identity, async (newIdentity) =>{
-  console.log(newIdentity)
   await handleItemList(newIdentity)
 })
 if (identity.value !== -1) {
@@ -59,7 +58,6 @@ if (identity.value !== -1) {
 async function handleItemList(newIdentity){
   if (newIdentity === -1) return
   let type = newIdentity === 3 ? 'stu' : 'tea';
-  console.log(identity.value)
   if (props.icon_position === 'left') {
     const noticeResponse = await api.get(`/${type}/notice-list/${useProjectId()}/0/1000`)
     items.value = [

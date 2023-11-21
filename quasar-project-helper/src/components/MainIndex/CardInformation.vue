@@ -7,7 +7,10 @@
         </q-card-section>
         <q-card-section class="bg-white q-mx-sm q-mb-sm">
           <q-scroll-area style="height: 200px">
-            <q-list class="rounded-borders" separator>
+            <div v-if="projects.length === 0" class="justify-center">
+              You don't have any project yet.
+            </div>
+            <q-list class="rounded-borders" separator v-else>
               <q-item v-for="project in projects" :key="project.id" clickable v-ripple>
                 <q-item-section avatar>
                   <q-avatar>
@@ -94,7 +97,8 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import {api} from 'boot/axios'
 import {
   QCalendarMonth,
   addToDate,
@@ -116,33 +120,16 @@ function getCurrentDay(day) {
   const tm = parseDate(newDay)
   return tm.date
 }
-
+// project list
 const projects = ref([
-  {
-    id: 1,
-    teacher: 'Teacher 1',
-    project: 'Project 1',
-    avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4'
-  },
-  {
-    id: 2,
-    teacher: 'Teacher 2',
-    project: 'Project 2',
-    avatar: 'https://cdn.quasar.dev/team/razvan_stoenescu.jpeg'
-  },
-  {
-    id: 3,
-    teacher: 'Teacher 2',
-    project: 'Project 3',
-    avatar: 'https://cdn.quasar.dev/team/razvan_stoenescu.jpeg'
-  },
-  {
-    id: 4,
-    teacher: 'Teacher 1',
-    project: 'Project 4',
-    avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4'
-  }
 ])
+onMounted(()=>{
+  api.get('/project-list/1/9999').then(res => {
+    projects.value = res.data.body;
+  }).catch(err => {
+    console.log(err)
+  })
+})
 const events = ref([
   {
     id: 2,

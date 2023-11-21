@@ -165,15 +165,7 @@ public class TeacherController {
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/get_group_by_id/{group_id}")
-    public ResponseResult<Group> getGroupById(
-        HttpServletRequest request,
-        @PathVariable("group_id") Long groupId
-    ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Group group = groupService.getGroupById(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
-        return ResponseResult.ok(group, "Success", JWTUtil.updateJWT(jwt));
-    }
+
 
     @PostMapping("/create_group")
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){

@@ -59,5 +59,11 @@ public class User implements Cloneable{
             throw new AssertionError();
         }
     }
+
+    public User mask(){
+        password = null;
+        avatarPath = null;
+        return this;
+    }
 }
 

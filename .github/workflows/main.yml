@@ -13,13 +13,13 @@ jobs:
     steps:      
       - name: Print global variable
         run: |
-          echo "Global Variable is $env.TEST"
-          echo "Global Variable1 is $env.TEST1"
+          echo "Global Variable is $TEST"
+          echo "Global Variable1 is $TEST1"
           
       - name: Print job specific variable
         run: |
-          echo "Job Specific Variable is ${{ env.TEST }}"
-          echo "Job Specific Variable1 is ${{ env.TEST }}"
+          echo "Job Specific Variable is ${{ TEST1 }}"
+          echo "Job Specific Variable1 is ${{ env.TEST1 }}"
       - name: Print job secret
         run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"
         

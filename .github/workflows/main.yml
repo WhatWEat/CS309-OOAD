@@ -9,18 +9,19 @@ env:
 jobs:
   print_variables:
     runs-on: ubuntu-latest
-    env:
-      JOB_VAR: "Job Specific Value"
+    environment: Actions
     steps:      
       - name: Print global variable
         run: |
           echo "Global Variable is $vars.TEST"
           echo "Job Specific Variable1 is ${{ vars.TEST }}"
+          echo "Job Specific Variable1 is ${{ env.TEST }}"
           echo "Job Specific Variable1 is $env_var"
+          echo "Job Specific Variable1 is $env.TEST"
           
       - name: Print job specific variable
         run: |
-          echo "Job Specific Variable1 is $vars.TEST1"
+          echo "Job Specific Variable1 is $env.TEST1"
           echo "Job Specific Variable1 is ${{ vars.TEST1 }}"
           echo "Job Specific Variable1 is $env_var1"
           

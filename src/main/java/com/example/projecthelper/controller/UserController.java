@@ -1,10 +1,15 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.Exceptions.InvalidFormException;
+import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
+import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
 import com.example.projecthelper.service.GroupService;
+import com.example.projecthelper.service.NoticeService;
 import com.example.projecthelper.service.ProjectService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
@@ -27,16 +32,23 @@ public class UserController {
     private final FileService fileService;
     private final GroupService groupService;
     private final ProjectService projectService;
+
+    private final AssignmentService assignmentService;
+
+    private final NoticeService noticeService;
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
     public UserController(AuthService authService, UserService userService,
-                          FileService fileService, GroupService groupService, ProjectService projectService) {
+                          FileService fileService, GroupService groupService, ProjectService projectService,
+                          AssignmentService assignmentService, NoticeService noticeService) {
         this.authService = authService;
         this.userService = userService;
         this.fileService = fileService;
         this.groupService = groupService;
         this.projectService = projectService;
+        this.assignmentService = assignmentService;
+        this.noticeService = noticeService;
     }
 
     @GetMapping("/project-list/{page}/{page_size}")
@@ -71,6 +83,41 @@ public class UserController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<Group> groups = groupService.getBriefGroupsFromProj(projectId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
+                                                           @PathVariable("page") long page,
+                                                           @PathVariable("page_size") long pageSize,
+                                                           HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Assignment> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))) {
+            case 1 -> assignmentService.getAssignmentsByTea(userId, projectId, page, pageSize);
+            case 2 -> assignmentService.getAssignmentsByTa(userId, projectId, page, pageSize);
+            case 3 -> assignmentService.getAssignmentsByStu(userId, projectId, page, pageSize);
+            default -> throw new InvalidFormException("不合法的身份");
+        };
+
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
+                                                   @PathVariable("page") long page,
+                                                   @PathVariable("page_size") long pageSize,
+                                                   HttpServletRequest request) {
+        // Use the projectId, page, and pageSize in your method
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        List<Notice> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))){
+            case 1 -> noticeService.getNoticesByTeacher(userId, projectId, page, pageSize);
+            case 2 -> noticeService.getNoticesByTa(userId, projectId, page, pageSize);
+            case 3 -> noticeService.getNoticesByStudent(userId, projectId, page, pageSize);
+            default -> throw new InvalidFormException("不合法的身份");
+        };
+        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
 

@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.JWTUtil;
+import java.util.ArrayList;
 import java.util.List;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -26,6 +27,9 @@ public class UserService {
         //此处mapper中传参已经改为user，可以更改名字、身份、id、性别外的所有信息
         try {
             user.setUserId(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+            user.setProgrammingSkills(
+                user.getProgrammingSkills() == null ? new ArrayList<>() : user.getProgrammingSkills()
+            );
             if(user.getAvatar() != null){
                 fileService.removeOriAvatar(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
                 String path = FileUtil.generateAvatarPath(user.getUserId());

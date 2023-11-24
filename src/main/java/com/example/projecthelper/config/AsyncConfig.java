@@ -17,8 +17,8 @@ public class AsyncConfig implements AsyncConfigurer {
     @Bean(name = "taskExecutor")  // This name is important to be recognized by @Async, 要用这个名称的async
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
+        executor.setCorePoolSize(16);
+        executor.setMaxPoolSize(300);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("Async-");
         executor.initialize();

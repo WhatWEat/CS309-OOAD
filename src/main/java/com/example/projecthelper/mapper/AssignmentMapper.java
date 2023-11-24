@@ -26,6 +26,37 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     })
     List<Assignment> getAssByProj(Long projectId, Long limit, Long offset);
 
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join stuInProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where s.stuId = #{stuId};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByStu(Long stuId);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join taOfProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where s.taId = #{taId};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByTa(Long taId);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join stuInProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByTea(Long teaId);
+
+
     @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId, deadline, releaseTime, requireExtension)\n" +
             "VALUES (#{title}, #{fullMark}, #{projectId}, #{description}, #{type}, #{creatorId}, #{deadline}, #{releaseTime}, #{requireExtension})")
     /*此处所有变量均不为空，其中title长度200，description为2000

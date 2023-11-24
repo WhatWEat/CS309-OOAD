@@ -57,9 +57,10 @@ if (identity.value !== -1) {
 }
 async function handleItemList(newIdentity){
   if (newIdentity === -1) return
-  let type = newIdentity === 3 ? 'stu' : 'tea';
+  // let type = newIdentity === 3 ? 'stu' : 'tea';
   if (props.icon_position === 'left') {
-    const noticeResponse = await api.get(`/${type}/notice-list/${useProjectId()}/0/1000`)
+    const noticeResponse = await api.get(`/notice-list/${useProjectId()}/0/1000`)
+    // const groupSize = await api.get(`/group-member/${useProjectId()}/0/1000`)
     items.value = [
       {
         title: 'Profile',
@@ -91,7 +92,7 @@ async function handleItemList(newIdentity){
       }
     ]
   } else {
-    const noticeResponse = await api.get(`/${type}/notice-list/-1/0/1000`)
+    const noticeResponse = await api.get(`/notice-list/-1/0/1000`)
     items.value = [
       {
         title: 'Profile',

@@ -34,7 +34,7 @@ export const defaultNotice: noticeProps = {
 export interface projectProps {
   // 用于记录Project的各类属性
   projectId: number,
-  projectName: string,
+  name: string,
   projectDescription: string,
   teacherId: number,
   teacherName: string,
@@ -42,7 +42,7 @@ export interface projectProps {
 }
 export const defaultProject: projectProps = {
   projectId: 0,
-  projectName: 'project1',
+  name: 'project1',
   projectDescription: 'asdfasf',
   teacherId: 0,
   teacherName: 'tsert1',

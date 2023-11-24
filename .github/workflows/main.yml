@@ -12,11 +12,14 @@ jobs:
       JOB_VAR: "Job Specific Value"
     steps:      
       - name: Print global variable
-        run: echo "Global Variable is $env.DOCKER_USERNAME"
-      
+        run: |
+          echo "Global Variable is $env.TEST"
+          echo "Global Variable1 is $env.TEST1"
+          
       - name: Print job specific variable
-        run: echo "Job Specific Variable is ${{ env.DOCKER_USERNAME }}"
-        
+        run: |
+          echo "Job Specific Variable is ${{ env.TEST }}"
+          echo "Job Specific Variable1 is ${{ env.TEST }}"
       - name: Print job secret
         run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"
         

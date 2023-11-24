@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JOB_VAR: "Job Specific Value"
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-      
+    steps:      
       - name: Print global variable
-        run: echo "Global Variable is $GLOBAL_VAR"
+        run: echo "Global Variable is $env.DOCKER_USERNAME"
       
       - name: Print job specific variable
-        run: echo "Job Specific Variable is $JOB_VAR"
+        run: echo "Job Specific Variable is ${{ env.DOCKER_USERNAME }}"
         
       - name: Print job secret
         run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"

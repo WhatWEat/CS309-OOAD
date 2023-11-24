@@ -93,9 +93,13 @@ public class AssignmentService {
             }
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
-        results.forEach(a ->
-            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
-        );
+        try{
+            results.forEach(a ->
+                a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+            );
+        }catch (NullPointerException e){
+
+        }
         return results;
     }
 

@@ -20,7 +20,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
-        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} limit #{limit} offset #{offset};")
+        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} limit #{limit} offset #{offset} order by a.releaseTime desc;")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
@@ -30,7 +30,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where s.stuId = #{stuId};")
+        "join users u on a.creatorid = u.userid where s.stuId = #{stuId}; order by a.releaseTime desc")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
@@ -40,7 +40,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join taOfProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where s.taId = #{taId};")
+        "join users u on a.creatorid = u.userid where s.taId = #{taId} order by a.releaseTime desc;")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
@@ -50,7 +50,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId};")
+        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId} order by a.releaseTime desc;")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })

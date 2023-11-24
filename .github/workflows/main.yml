@@ -9,7 +9,6 @@ env:
 jobs:
   print_variables:
     runs-on: ubuntu-latest
-    environment: Actions
     steps:      
       - name: Print global variable
         run: |

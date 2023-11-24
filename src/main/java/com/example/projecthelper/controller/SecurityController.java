@@ -83,7 +83,7 @@ public class SecurityController {
         @RequestParam("name") String name,
         @RequestParam("gender") String gender,
         @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
-        @RequestParam("programmingSkills") List<String> programmingSkills,
+        @RequestParam(value = "programmingSkills", required = false) List<String> programmingSkills,
         @RequestParam(value = "avatar", required = false) MultipartFile avatar){
         User user = new User();
         user.setPhone(phone);

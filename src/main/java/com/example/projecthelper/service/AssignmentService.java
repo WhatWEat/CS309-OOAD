@@ -44,11 +44,17 @@ public class AssignmentService {
 
 
     public List<Assignment> getAssignmentsByTea(Long userId, Long projId, Long page, Long pageSize){
-        Long teaOfProj = projectMapper.findTeacherByProject(projId);
-        if(!Objects.equals(teaOfProj, userId)){
-            throw new AccessDeniedException("无权访问该project");
+        List<Assignment> results;
+        if(projId == -1){
+            results = assignmentMapper.getAssByTea(userId);
         }
-        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        else{
+            Long teaOfProj = projectMapper.findTeacherByProject(projId);
+            if(!Objects.equals(teaOfProj, userId)){
+                throw new AccessDeniedException("无权访问该project");
+            }
+            results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        }
         results.forEach(a ->
             a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
         );
@@ -56,11 +62,18 @@ public class AssignmentService {
     }
 
     public List<Assignment> getAssignmentsByTa(Long userId, Long projId, Long page, Long pageSize){
-        Long taOfProj = projectMapper.checkTaInProj(projId, userId);
-        if(!Objects.equals(taOfProj, userId)){
-            throw new AccessDeniedException("无权访问该project");
+        List<Assignment> results;
+        if(projId == -1){
+            results = assignmentMapper.getAssByTa(userId);
         }
-        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        else {
+            Long taOfProj = projectMapper.checkTaInProj(projId, userId);
+            if (!Objects.equals(taOfProj, userId)) {
+                throw new AccessDeniedException("无权访问该project");
+            }
+            results =
+                assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        }
         results.forEach(a ->
             a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
         );
@@ -68,11 +81,18 @@ public class AssignmentService {
     }
 
     public List<Assignment> getAssignmentsByStu(Long userId, Long projId, Long page, Long pageSize){
-        Long checker = projectMapper.checkStuInProj(userId, projId);
-        if(!Objects.equals(checker, null)){
-            throw new AccessDeniedException("无权访问该project");
+        List<Assignment> results;
+        if(projId == -1){
+            results = assignmentMapper.getAssByStu(userId);
         }
-        List<Assignment> results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        else {
+
+            Long checker = projectMapper.checkStuInProj(userId, projId);
+            if(!Objects.equals(checker, null)){
+                throw new AccessDeniedException("无权访问该project");
+            }
+            results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+        }
         results.forEach(a ->
             a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
         );

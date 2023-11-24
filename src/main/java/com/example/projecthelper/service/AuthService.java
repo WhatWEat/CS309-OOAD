@@ -3,12 +3,16 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.AsyncTask;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.FormatUtil;
 import com.example.projecthelper.util.IdentityCode;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -34,6 +38,9 @@ public class AuthService {
 
     @Autowired
     private LogoutBLKService logoutBLKService;
+
+    @Autowired
+    private AsyncService asyncService;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
@@ -101,9 +108,11 @@ public class AuthService {
 
     public void createMultipleUsersWithFile(MultipartFile file, KeyValueWrapper<String, String> userPass){
         authenticate(userPass);
-
+        LocalDateTime p0 = LocalDateTime.now();
+        System.err.println("p1: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);;
         List<User> users = FileUtil.tableToUsersList(file);
 
+        System.err.println("p2: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);;
         users = users
             .stream()
             .filter(u -> FormatUtil.match(u.getPassword(), FormatUtil.strongPasswordPredicate()))
@@ -112,11 +121,37 @@ public class AuthService {
             .filter(u -> u.getName() != null)
             .filter(u -> FormatUtil.match(u.getGender(), FormatUtil.genderPredicate()))
             .toList();
-        users.forEach(
-            u -> u.setPassword(passwordEncoder.encode(u.getPassword()))
-        );
+
+        System.err.println("p3: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);;
+        System.err.println("p4: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);
         try{
-            usersMapper.registerUsers(users);
+            if (users.size() < 500){
+                usersMapper.registerUsers(users);
+            }
+            else {
+                System.err.println(users.size());
+                List<AsyncTask> ats = new ArrayList<>();
+                int listSize = users.size() / 20;
+                for (int i = 0; i < 20; i++) {
+                    final List<User> users1 = users.subList(i * listSize, Math.min((i+1)* listSize, users.size()));
+                    ats.add(
+                        () -> {
+                            try{
+                                System.err.println("hello1");
+                                users1.forEach(
+                                    u -> u.setPassword(passwordEncoder.encode(u.getPassword()))
+                                );
+                                usersMapper.registerUsers(users1);
+                            }catch (Exception e){
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                    );
+                }
+                System.err.println("hello2");
+                asyncService.executeTasks(ats, 20);
+            }
+            System.err.println("p4");;
         }catch (Exception e){
             System.err.println(e.getMessage());
             throw new InvalidFormException("信息不完整或id已经存在");

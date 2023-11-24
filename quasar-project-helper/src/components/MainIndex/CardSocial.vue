@@ -35,6 +35,7 @@
 <script setup>
 import {defineProps, watch, ref} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
+import {useProjectId} from "src/composables/usefulFunction";
 import {api} from "boot/axios";
 
 const props = defineProps({
@@ -49,7 +50,6 @@ const items = ref([])
 const loading = ref(false)
 const {userid, identity} = useUserStore()
 watch(identity, async (newIdentity) =>{
-  console.log(newIdentity)
   await handleItemList(newIdentity)
 })
 if (identity.value !== -1) {
@@ -58,9 +58,8 @@ if (identity.value !== -1) {
 async function handleItemList(newIdentity){
   if (newIdentity === -1) return
   let type = newIdentity === 3 ? 'stu' : 'tea';
-  console.log(identity.value)
   if (props.icon_position === 'left') {
-    const noticeResponse = await api.get(`/${type}/notice-list/-1/0/1000`)
+    const noticeResponse = await api.get(`/${type}/notice-list/${useProjectId()}/0/1000`)
     items.value = [
       {
         title: 'Profile',
@@ -84,9 +83,9 @@ async function handleItemList(newIdentity){
         color2: '#ea4b64'
       },
       {
-        title: 'Messages',
+        title: 'Announcements',
         icon: 'fa-solid fa-comments',
-        value: `999`,
+        value: `${noticeResponse.data.body.length}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }

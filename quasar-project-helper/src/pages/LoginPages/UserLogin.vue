@@ -137,7 +137,6 @@ export default defineComponent({
         if (res.data.statusCode === 200) {
           localStorage.setItem('Token', res.data.jwt_token);
           router.push('/');
-
         }
       //   不要改动以下代码
       }).catch((err) => {

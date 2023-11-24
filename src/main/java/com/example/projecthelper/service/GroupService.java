@@ -357,22 +357,66 @@ public class GroupService {
             throw new AccessDeniedException("所选成员不在小组中");
         }
         try {
-            groupMapper.updateLeader(leaderId,group.getGroupId());
-        } catch (PSQLException e) {
+            groupMapper.updateLeader(leaderId,groupId);
+        } catch (Exception e) {
             throw new InvalidFormException("leaderId需要为long");
         }
     }
 
     public void updateVisibility(long userId, long groupId,Boolean[] visibility){
         Group group = groupMapper.findGroupById(groupId);
+        if (group == null){
+            throw new InvalidFormException("小组不存在");
+        }
         if (userId != group.getInstructorId() && userId != group.getLeaderId()){
             throw new AccessDeniedException("无权修改小组信息");
         }
         try {
             groupMapper.updateVisibility(userId, groupId, visibility);
-        } catch (PSQLException e) {
+        } catch (Exception e) {
             throw new InvalidFormException("leaderId需要为long");
         }
+    }
+
+    public void removeMember(long leaderId,long groupId, long memberId){
+        Group group = groupMapper.findGroupById(groupId);
+        if (group == null){
+            throw new InvalidFormException("小组不存在");
+        }
+        if (leaderId != group.getLeaderId()){
+            throw new AccessDeniedException("无权修改小组信息");
+        }
+        if(groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()) == null ||
+                !groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()).equals(group.getGroupId())){
+            throw new AccessDeniedException("所选成员不在小组中");
+        }
+        try {
+            groupMapper.removeMember(groupId,memberId);
+        } catch (Exception e) {
+            throw new InvalidFormException("leaderId需要为long");
+        }
+        noticeService.createRemoveNotice(leaderId,memberId,group.getProjectId(),groupId);
+    }
+
+    public void groupLeaderTransfer(long leaderId,long groupId, long memberId){
+        Group group = groupMapper.findGroupById(groupId);
+        if (group == null){
+            throw new InvalidFormException("小组不存在");
+        }
+        if (leaderId != group.getLeaderId()){
+            throw new AccessDeniedException("无权修改小组信息");
+        }
+         if(groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()) == null ||
+                !groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()).equals(group.getGroupId())){
+            throw new AccessDeniedException("所选成员不在小组中");
+        }
+        try {
+            groupMapper.updateLeader(memberId,groupId);
+
+        } catch (Exception e) {
+            throw new InvalidFormException("leaderId需要为long");
+        }
+        noticeService.createTransferNotice(leaderId,memberId,group.getProjectId(),groupId);
     }
 
 

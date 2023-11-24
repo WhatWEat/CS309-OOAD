@@ -70,7 +70,7 @@ import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
 import PersonBar from 'components/Layout/PersonBar.vue';
 
-const router = useRouter()
+// const router = useRouter()
 const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([]);
 onMounted(() => {
@@ -80,7 +80,7 @@ onMounted(() => {
         {
           title: 'Announcements',
           icon: 'record_voice_over',
-          link: 'https://chat.quasar.dev'
+          link: '/announcement'
         },
         {
           title: 'Projects',
@@ -102,6 +102,11 @@ onMounted(() => {
           title: 'Logout',
           icon: 'logout',
           link: `/logout/${userid.value}`
+        },
+        {
+          title: 'Admin',
+          icon: 'airplay',
+          link: `/admin`
         },
       ]
   })

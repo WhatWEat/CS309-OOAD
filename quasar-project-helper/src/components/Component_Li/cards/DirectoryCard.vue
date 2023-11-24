@@ -24,8 +24,9 @@
             Members :
           </span>
           <span style="font-weight: normal;">
-            {{ members }}
+            {{ Object.keys(this.members).join(', ') }}
           </span>
+
         </q-item-label>
 
         <q-item-label class="text-grey-8">
@@ -72,10 +73,19 @@
 
       <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
         <span style="font-weight: bold;">
-          Preatation Time :
+          Presentation Time :
         </span>
         <span style="font-weight: normal;">
-          {{ preatationTime }}
+          {{ presentationTime }}
+        </span>
+      </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+        <span style="font-weight: bold;">
+          Instructor :
+        </span>
+        <span style="font-weight: normal;">
+          {{ Object.keys(instructor).toString() }}
         </span>
       </div>
 
@@ -84,7 +94,7 @@
           Leader :
         </span>
         <span style="font-weight: normal;">
-          {{ leader }}
+          {{ Object.keys(this.leader).toString() }}
         </span>
       </div>
 
@@ -107,18 +117,17 @@
       </div>
     </q-card-section>
 
-    <!--    <pre>-->
+<!--        <pre>-->
 
-    <!--    </pre>-->
-    <!--    <q-separator></q-separator>-->
-    <!--    &lt;!&ndash;   最终的按钮部分 &ndash;&gt;-->
-    <!--      <q-card-actions align="around">-->
-    <!--        <q-btn-group spread :style="{'width':'100%'}">-->
-    <!--          <q-btn color="purple" label="First" icon="" />-->
-    <!--          <q-btn color="purple" label="Second" icon="visibility" />-->
-    <!--        </q-btn-group>-->
-    <!--      </q-card-actions>-->
-
+<!--        </pre>-->
+<!--        <q-separator></q-separator>-->
+<!--        &lt;!&ndash;   最终的按钮部分 &ndash;&gt;-->
+<!--          <q-card-actions align="around">-->
+<!--            <q-btn-group spread :style="{'width':'100%'}">-->
+<!--              <q-btn color="purple" label="First" icon="" />-->
+<!--              <q-btn color="purple" label="Second" icon="visibility" />-->
+<!--            </q-btn-group>-->
+<!--          </q-card-actions>-->
   </q-card>
 </template>
 
@@ -133,7 +142,7 @@ export default defineComponent({
       return descriptionProps
     }
   },
-  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail' , 'leader', "maxSize", "creationTime", "preatationTime"]
+  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail' , 'instructor','leader', "maxSize", "creationTime", "presentationTime"]
 })
 </script>
 

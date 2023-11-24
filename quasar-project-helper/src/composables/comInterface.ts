@@ -42,9 +42,34 @@ export interface GroupMember{
   // 用于记录Group中Member的各类属性
   name: string,
   id: number,
-  skills: string[],
+  skills?: string[],
 }
-
+export interface GroupProps{
+  groupId: number,
+  groupName: string,
+  instructorId: number,
+  instructorName: string,
+  leaderName: string,
+  leaderId: number,
+  maxsize: number,
+  reportTime: string,
+  teamTime: string,
+  description: string|null,
+  members: string[],
+}
+export const defaultGroup: GroupProps = {
+  groupId: 0,
+  groupName: 'gropup1',
+  instructorId: 0,
+  instructorName: 'tsert1',
+  leaderName: '123',
+  leaderId: 0,
+  maxsize: 10,
+  reportTime: '',
+  teamTime: '',
+  description: null,
+  members: ['123','111','2323'],
+}
 export interface personProps {
   // 用于记录Person的各类属性
   userid: number,
@@ -55,6 +80,7 @@ export interface personProps {
   name: string,
   gender: string,
   birthday: string,
+  avatar: File,
   programmingSkills: string[]
 }
 export const defaultPerson: personProps = {
@@ -66,5 +92,6 @@ export const defaultPerson: personProps = {
   name: '',
   gender: '',
   birthday: '',
+  avatar: new File([], ''),
   programmingSkills: ['']
 }

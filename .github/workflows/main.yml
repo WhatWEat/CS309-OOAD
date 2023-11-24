@@ -3,8 +3,9 @@ name: Environment Variable Test
 on: [push]
 
 env:
-  GLOBAL_VAR: "Global Value"
-
+  env_var: ${{ vars.TEST }}
+  env_var1: ${{ vars.TEST1 }}
+  
 jobs:
   print_variables:
     runs-on: ubuntu-latest
@@ -13,12 +14,16 @@ jobs:
     steps:      
       - name: Print global variable
         run: |
-          echo "Global Variable is $var.TEST"
+          echo "Global Variable is $vars.TEST"
           echo "Job Specific Variable1 is ${{ vars.TEST }}"
+          echo "Job Specific Variable1 is $env_var"
           
       - name: Print job specific variable
         run: |
+          echo "Job Specific Variable1 is $vars.TEST1"
           echo "Job Specific Variable1 is ${{ vars.TEST1 }}"
+          echo "Job Specific Variable1 is $env_var1"
+          
       - name: Print job secret
         run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"
         

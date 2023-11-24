@@ -6,7 +6,7 @@
     <template v-slot:header>
       <q-item-section>
 
-        <q-item-label class="text-h6">{{ project.projectName }}</q-item-label>
+        <q-item-label class="text-h6">{{ project.name }}</q-item-label>
         <q-item-label caption>
           <q-badge rounded floating :color="isGroup ? 'green' : 'red'"/>
           {{ project.teacherName }}

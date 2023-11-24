@@ -10,8 +10,22 @@ export function truncate(str: string, num = 15, endSymbol = '...'): string {
   return str;
 }
 
+export function formatDateString(isoString: string) {
+  const date = new Date(isoString);
+
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+
+  return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+}
+
 export function useProjectId() {
   const route = useRoute();
+  console.log("route",route)
+
   const projectId = route.params.projectID as string;
   return Number(projectId);
 }
@@ -22,19 +36,37 @@ export function usePersonId() {
   return Number(personId);
 }
 
-export async function getAvatarUrl(){
+export async function getAvatarUrl() {
   try {
-    const res = await api.get(`/get_avatar`, { responseType: 'arraybuffer' });
-    const blob = new Blob([res.data], { type: 'image/jpeg' });
+    const res = await api.get(`/get_avatar`, {responseType: 'arraybuffer'});
+    const blob = new Blob([res.data], {type: 'image/jpeg'});
     const reader = new FileReader();
     reader.readAsDataURL(blob);
-    reader.onloadend = function() {
+    reader.onloadend = function () {
       const base64data = reader.result;
       if (typeof base64data === "string") {
         localStorage.setItem('avatar', base64data);
       }
     }
     return localStorage.getItem('avatar');
+  } catch (error) {
+    console.error("Failed to get avatar URL", error);
+    return null;
+  }
+}
+export async function getAvatarUrlById(id: number) {
+  try {
+    const res = await api.get(`/get_avatar/${id}`, {responseType: 'arraybuffer'});
+    const blob = new Blob([res.data], {type: 'image/jpeg'});
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = function () {
+      const base64data = reader.result;
+      if (typeof base64data === "string") {
+        localStorage.setItem(`avatar_${id}`, base64data);
+      }
+    }
+    return localStorage.getItem(`avatar_${id}`);
   } catch (error) {
     console.error("Failed to get avatar URL", error);
     return null;

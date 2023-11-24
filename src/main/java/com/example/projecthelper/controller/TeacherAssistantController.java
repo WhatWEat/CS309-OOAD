@@ -61,17 +61,17 @@ public class TeacherAssistantController {
         this.projectService = projectService;
     }
 
-    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
-    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
-                                                   @PathVariable("page") long page,
-                                                   @PathVariable("page_size") long pageSize,
-                                                   HttpServletRequest request) {
-        // Use the projectId, page, and pageSize in your method
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        List<Notice> result = noticeService.getNoticesByTa(userId, projectId, page, pageSize);
-        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
-    }
+//    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+//    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
+//                                                   @PathVariable("page") long page,
+//                                                   @PathVariable("page_size") long pageSize,
+//                                                   HttpServletRequest request) {
+//        // Use the projectId, page, and pageSize in your method
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+//        List<Notice> result = noticeService.getNoticesByTa(userId, projectId, page, pageSize);
+//        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+//    }
 
     @PostMapping("/post_notice")
     public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){

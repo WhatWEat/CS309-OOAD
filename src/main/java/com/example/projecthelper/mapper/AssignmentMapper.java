@@ -30,7 +30,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where s.stuId = #{stuId}; order by a.releaseTime desc")
+        "join users u on a.creatorid = u.userid where s.stuId = #{stuId} order by a.releaseTime desc;")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })

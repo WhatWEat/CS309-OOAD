@@ -7,6 +7,7 @@ export interface noticeProps {
   title: string;
   content: string;
   creatorId: number;
+  createTime?: string;
   stuView: null | string;
   toAll: boolean;
 }
@@ -17,6 +18,7 @@ withDefaults(defineProps<noticeProps>(), {
   content: "asdfasf",
   creatorId: 0,
   stuView: null,
+  createTime: "2021-06-01 00:00:00",
   toAll: false,
 })
 export const defaultNotice: noticeProps = {
@@ -36,8 +38,15 @@ export interface projectProps {
   projectDescription: string,
   teacherId: number,
   teacherName: string,
+  avatar?: File,
 }
-
+export const defaultProject: projectProps = {
+  projectId: 0,
+  projectName: 'project1',
+  projectDescription: 'asdfasf',
+  teacherId: 0,
+  teacherName: 'tsert1',
+}
 export interface GroupMember{
   // 用于记录Group中Member的各类属性
   name: string,
@@ -54,7 +63,7 @@ export interface GroupProps{
   maxsize: number,
   reportTime: string,
   teamTime: string,
-  description: string|null,
+  description?: string|null,
   members: string[],
 }
 export const defaultGroup: GroupProps = {
@@ -94,4 +103,21 @@ export const defaultPerson: personProps = {
   birthday: '',
   avatar: new File([], ''),
   programmingSkills: ['']
+}
+
+export interface assProps {
+  assignmentId: number,
+  projectId: number,
+  title: string,
+  fullMark: number,
+  description: string,
+  type: string,
+  creatorId: number,
+  deadline: string,
+  releaseTime?: string,
+  filePaths?: string[],
+  requireExtension?: string,
+  projectName?: string,
+  creatorName?: string,
+  files?: File[] | null,
 }

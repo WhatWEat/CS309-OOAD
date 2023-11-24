@@ -32,7 +32,7 @@ jobs:
       # 验证 Docker 用户名
       - name: Verify Docker Username
         run: |
-          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+          if [ -z "${{ env.DOCKER_USERNAME }}" ]; then
             echo "DOCKER_USERNAME is not set."
             exit 1
           else

@@ -21,7 +21,7 @@ jobs:
         run: echo "Job Specific Variable is $JOB_VAR"
         
       - name: Print job secret
-        run: echo "Job Specific Variable is $secrets.TOKEN"
+        run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"
         
       - name: Set and print step specific variable
         run: |

@@ -1,0 +1,29 @@
+name: Environment Variable Test
+
+on: [push]
+
+env:
+  GLOBAL_VAR: "Global Value"
+
+jobs:
+  print_variables:
+    runs-on: ubuntu-latest
+    env:
+      JOB_VAR: "Job Specific Value"
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      
+      - name: Print global variable
+        run: echo "Global Variable is $GLOBAL_VAR"
+      
+      - name: Print job specific variable
+        run: echo "Job Specific Variable is $JOB_VAR"
+        
+      - name: Print job secret
+        run: echo "Job Specific Variable is $secrets.TOKEN"
+        
+      - name: Set and print step specific variable
+        run: |
+          STEP_VAR="Step Specific Value"
+          echo "Step Specific Variable is $STEP_VAR"

@@ -341,12 +341,6 @@ export default {
     }
   },
   methods: {
-    // 获取该页面的ProjectId
-    getProjectId() {
-      console.log("尝试获取ProjectId...\n")
-      this.projectId = this.$route.params.projectID;
-      console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
-    },
     // 获取该用户是否为组长
     getIfGroupLeader() {
       console.log("尝试获取用户是否为组长...\n")
@@ -366,6 +360,9 @@ export default {
       console.log(this.selected_row.row)
     },
     handleRowDbclick(evt, row, index) {
+      //更新小组详情卡片的内容
+      this.getGroupDetail(row.groupId)
+      // 显示小组详情卡片
       this.show_detail = true;
     },
     handleRowContextmenu(evt, row, index) {
@@ -399,18 +396,29 @@ export default {
       this.show_button_student = false;
       // 跳转到编辑页面
     },
+    // 测试连接指令
     testConnection() {
       console.log("test");
-      api.post('/tea/create_group', {
-          "maxsize": 5,
-          "groupName": "gp1",
-          "projectId": 1,
-          "instructorId": 1
+      // api.post('/tea/create_group', {
+      //     "maxsize": 5,
+      //     "groupName": "gp1",
+      //     "projectId": 1,
+      //     "instructorId": 1
+      //   }
+      // ).then((response) => {
+      //   console.log("responseHere");
+      //   console.log(response.data);
+      // }).catch((error) => {
+      //   console.log("errorHere");
+      //   console.log(error);
+      // });
+
+      api.get('/getGroupInfo/1').then(
+        (response) => {
+          console.log("responseHere:\n");
+          console.log(response.data);
         }
-      ).then((response) => {
-        console.log("responseHere");
-        console.log(response.data);
-      }).catch((error) => {
+      ).catch((error) => {
         console.log("errorHere");
         console.log(error);
       });
@@ -420,6 +428,73 @@ export default {
       // 更新弹窗显示, 隐藏弹窗
       this.show_invite_member = false;
     },
+
+
+    //**********************************获取界面必要信息的代码部分**********************************//
+    // 获取该页面的ProjectId
+    getProjectId() {
+      console.log("尝试获取ProjectId...\n")
+      this.projectId = this.$route.params.projectID;
+      console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
+    },
+    // 获取界面的GroupList的相关信息.即为概括性group信息部分
+    getGroupList(){
+      api.get('/get_brief_groups_from_proj/' + this.projectId).then(
+        (response) => {
+          this.rows = [];
+          for (let i = 0; i < response.data.body.length; i++) {
+            // 将data解析为自己需要的格式
+            let temp = {
+              groupId: response.data.body[i].groupId,
+              groupSize: response.data.body[i].members.length,
+              groupMember: response.data.body[i].members.toString(),
+              instructor: response.data.body[i].instructorName,
+              projectName: 'Dev Name',
+              deadLine: "2021/10/01 Dev",
+              moreInfo: response.data.body[i].description
+            }
+            // 将解析好的数据添加到rows中
+            this.rows.push(temp);
+          }
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
+    },
+    // 获取指定小组的详细信息
+    getGroupDetail( groupId ){
+      api.get('/getGroupInfo/' + groupId).then(
+        (response) => {
+            let tmp = {
+              avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+              groupId: response.data.body.groupId,
+              groupSize: response.data.body.members.length,
+              groupMaxSize: response.data.body.maxsize,
+              members: {
+                'liweihao': 12110415,
+                '小明': 12110355,
+                '小王': 13454322,
+                'Dev': 12345678,
+              },
+              creationTime: response.data.body.teamTime,
+              deadline: '2021/10/01 Dev',
+              presentationTime: response.data.body.reportTime,
+              instructor: {
+                'Mr.Simth Dev': 12001111
+              },
+              leader: {
+                '小明 Dev': 12110355
+              },
+              moreInfo: response.data.body.description
+            }
+            this.card_data = tmp;
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
+    }
 
   },
   components: {
@@ -431,7 +506,9 @@ export default {
   },
   mounted() {
     this.getProjectId();
-    this.getIfGroupLeader();
+    this.getGroupList();
+    // this.getIfGroupLeader();
+    // this.testConnection();
   },
 }
 

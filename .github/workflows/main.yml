@@ -1,7 +1,7 @@
 name: Environment Variable Test
 
 on: 
-  pull_request:
+  push:
     branches: [ "deploy" ]
 
 

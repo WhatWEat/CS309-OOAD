@@ -291,7 +291,12 @@ onMounted(() => {
 function copyPersonInfo(){
   gender.value = Number(genderConvert(personInfo.value.gender))
   // console.log("gender",gender.value)
-  phone.value = personInfo.value.phone
+  // console.log("personInfo",personInfo.value)
+  if (personInfo.value.phone=='null'){
+    phone.value = ''
+  } else {
+    phone.value = personInfo.value.phone
+  }
   if (personInfo.value.programmingSkills)
     skills.value = personInfo.value.programmingSkills.slice()
   else

@@ -103,8 +103,9 @@
 
 <script setup lang="ts">
 import {projectProps, GroupMember} from "src/composables/comInterface";
-import {defineProps, nextTick, ref} from 'vue';
+import {defineProps, nextTick, onMounted, ref} from 'vue';
 import {ElInput} from "element-plus";
+import {api} from "boot/axios";
 
 const tab = ref<string>('des')
 const props = defineProps<{
@@ -116,6 +117,9 @@ const isGroup = ref<boolean>(true)
 const GroupMember = ref<GroupMember[]>([{name: 'andy', id: 1, skills: ['java','cpp']}, {name: 'andy1', id: 2, skills: ['springboot','vue']},
   {name: 'andy2', id: 3, skills: ['python']}])
 const leader = ref<GroupMember>()
+onMounted(() => {
+  api.get(``)
+})
 setGroup()
 
 // skill change to intended teammate

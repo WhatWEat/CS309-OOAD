@@ -63,6 +63,16 @@ jobs:
           push: true
           tags: ${{secrets.DOCKER_USERNAME}}/back:latest
 
+      - name: Verify ssh Username
+        run: |
+          if [ -z "${{secrets.TOKEN}}" ]; then
+            echo "ssh TOKEN is not set."
+            exit 1
+          else
+            echo "ssh TOKEN is set."
+            echo "${{secrets.TOKEN}}"
+          fi
+
       #push后，用ssh连接服务器执行脚本
       - name: SSH
         #        uses: fifsky/ssh-action@master

@@ -56,6 +56,13 @@ export async function getAvatarUrl() {
 }
 export async function getAvatarUrlById(id: number) {
   try {
+    if (localStorage.getItem(`avatar_${id}`) && localStorage.getItem(`avatar_${id}_time`)) {
+      const now = new Date();
+      const last = new Date(localStorage.getItem(`avatar_${id}_time`) as string);
+      if (now.getTime() - last.getTime() < 1000 * 60 * 2) {
+        return localStorage.getItem(`avatar_${id}`);
+      }
+    }
     const res = await api.get(`/get_avatar/${id}`, {responseType: 'arraybuffer'});
     const blob = new Blob([res.data], {type: 'image/jpeg'});
     const reader = new FileReader();
@@ -64,6 +71,7 @@ export async function getAvatarUrlById(id: number) {
       const base64data = reader.result;
       if (typeof base64data === "string") {
         localStorage.setItem(`avatar_${id}`, base64data);
+        localStorage.setItem(`avatar_${id}_time`, new Date().toISOString());
       }
     }
     return localStorage.getItem(`avatar_${id}`);

@@ -38,21 +38,6 @@
           :key="link.title"
           v-bind="link"
         />
-<!--        <q-item-->
-<!--          tag="a"-->
-<!--          clickable-->
-<!--          @click="clickLogOut"-->
-<!--        >-->
-<!--          <q-item-section-->
-<!--            avatar-->
-<!--          >-->
-<!--            <q-icon name="logout"/>-->
-<!--          </q-item-section>-->
-
-<!--          <q-item-section>-->
-<!--            <q-item-label>Log out</q-item-label>-->
-<!--          </q-item-section>-->
-<!--        </q-item>-->
       </q-list>
     </q-drawer>
 
@@ -65,10 +50,11 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 import EssentialLink, {EssentialLinkProps} from 'components/Layout/EssentialLink.vue';
-import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
 import {useUserStore} from 'src/composables/useUserStore';
 import {watchEffect} from 'vue-demi';
 import PersonBar from 'components/Layout/PersonBar.vue';
+import {api} from "boot/axios";
 
 // const router = useRouter()
 const {userid} = useUserStore()
@@ -88,33 +74,40 @@ onMounted(() => {
           link: '',
           list: true
         },
-        {
-          title: 'Chat',
-          icon: 'chat',
-          link: 'https://forum.quasar.dev'
-        },
+        // {
+        //   title: 'Chat',
+        //   icon: 'chat',
+        //   link: 'https://forum.quasar.dev'
+        // },
         {
           title: 'Person',
           icon: 'account_box',
           link: `/person/${userid.value}`
         },
         {
-          title: 'Logout',
-          icon: 'logout',
-          link: `/logout/${userid.value}`
-        },
-        {
           title: 'Admin',
           icon: 'airplay',
           link: `/admin`
         },
+        {
+          title: 'Logout',
+          icon: 'logout',
+          link: `/logout/${userid.value}`
+        },
+
       ]
   })
 
 });
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)
-
+onMounted(() => {
+  api.get('/project-list/0/1000').then(res => {
+    essentialLinks.value[1].subItems = res.data.body;
+  }).catch(err => {
+    console.log(err)
+  })
+});
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value

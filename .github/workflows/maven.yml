@@ -2,10 +2,7 @@ name: Deploy with docker
 
 on:
   push:
-    # 分支
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "deploy" ]
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}

@@ -4,7 +4,9 @@
       <SearchBars @update:tags="handleTagsUpdate"
       ></SearchBars>
       <q-separator></q-separator>
-      <q-card-section>
+      <q-skeleton type="text" v-if="!isLoading">
+      </q-skeleton>
+      <q-card-section v-else>
         <q-list v-if="identity===3" >
           <project-exten v-for="project in project_list" :key="project.projectId"
                          :project="project"></project-exten>
@@ -24,30 +26,43 @@
 import {onMounted, ref} from "vue";
 import {projectProps} from "src/composables/comInterface";
 import ProjectExten from "components/PersonIndex/ProjectExten.vue";
-import {watchEffect} from "vue-demi";
-import {useUserStore} from "src/composables/useUserStore";
 import SearchBars from "components/PersonIndex/SearchBars.vue";
 import ProjectExtenTea from "components/PersonIndex/ProjectExtenTea.vue";
+import {watchEffect} from "vue-demi";
+import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
 
 const origin_project_list = ref<projectProps[]>();
 const project_list = ref<projectProps[]>();
 origin_project_list.value = [{
   projectId: 0,
   name: "Project 1",
-  projectDescription: "11",
+  description: "11",
   teacherId: 0,
   teacherName: "teacher 1"
 }, {
   projectId: 1,
   name: "Project 2",
-  projectDescription: "teacher1 2",
+  description: "teacher1 2",
   teacherId: 2,
   teacherName: "teacher 2"
 },
 ]
-// const {identity} = useUserStore();
-const identity = ref(1)
-project_list.value = origin_project_list.value
+const {identity} = useUserStore(), isLoading = ref(false);
+onMounted(()=>{
+  watchEffect(()=>{
+    if(identity.value !== -1 && !isLoading.value){
+      isLoading.value = true
+      api.get('/project-list/0/10').then(res => {
+        origin_project_list.value = res.data.body;
+        project_list.value = origin_project_list.value
+        isLoading.value = true
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+  })
+})
 
 function handleTagsUpdate(tags: Set<string>) {
   if (origin_project_list.value) {
@@ -57,11 +72,11 @@ function handleTagsUpdate(tags: Set<string>) {
     }
     project_list.value = []
     for (const project of origin_project_list.value) {
-      if (tags.has(project.name) || tags.has(project.teacherName) || tags.has(project.projectDescription)) {
+      if (tags.has(project.name) || tags.has(project.teacherName) || tags.has(project.description)) {
         project_list.value?.push(project)
       } else {
         for (const tag of tags) {
-          if (project.name.includes(tag) || project.teacherName.includes(tag) || project.projectDescription.includes(tag)) {
+          if (project.name.includes(tag) || project.teacherName.includes(tag) || project.description.includes(tag)) {
             project_list.value?.push(project)
             break
           }

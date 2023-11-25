@@ -331,6 +331,19 @@ public class GroupService {
         }
         stuJoinGpSync(gp.getGroupId(), stuId, true);
     }
+
+    public List<User> getGpMem(Long userId, Long pjId){
+        Group gp =  groupMapper.findGroupOfStuInProject(userId, pjId);
+        if(gp == null){
+            System.err.println("here");
+            return null;
+        }
+        else {
+            List<User> result = groupMapper.getGpMem(gp.getGroupId());
+            return result.stream().map(User::mask).toList();
+        }
+    }
+
     public void leaveGroup(Long pjId, Long stuId){
         Long groupId = groupMapper.findGroupIdOfUserInAProj(stuId, pjId);
         if(groupId == null)

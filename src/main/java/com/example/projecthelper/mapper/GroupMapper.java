@@ -91,6 +91,12 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert("insert into stuInGroup values (#{groupId}, #{stuId})")
     void stuJoinGroup(Long stuId, Long groupId);
+
+    @Select("select * from stuingroup s join users u on u.userid = s.stuid where s.groupid = #{groupId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> getGpMem(long groupId);
     @Select("select count(*) from stuInGroup where groupId = #{groupId}")
     int findCntOfStuInGroup(long groupId);
     @Delete("delete from stuingroup where stuId = #{stuId} and groupId = #{gpId};")

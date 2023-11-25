@@ -70,11 +70,11 @@ async function handleItemList(newIdentity){
     // project_id.value = useProjectId();
     const noticeResponse = await api.get(`/notice-list/${project_id.value}/0/1000`)
     // const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
+    // TODO fix the assignment list
     // console.log('assi',assignmentResponse)
     const groupResponse = ref(0), groupDis = ref('Group Member');
     if(newIdentity === 3){
-      // groupResponse.value = (await api.get(`/stu/group_members/${project_id.value}`)).data.body.length;
-      groupResponse.value = 1;
+      groupResponse.value = (await api.get(`/stu/group_members/${project_id.value}`)).data.body.length;
     } else {
       groupDis.value = 'Group Number'
       groupResponse.value = (await api.get(`/get_brief_groups_from_proj/${project_id.value}`)).data.body.length;

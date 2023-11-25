@@ -6,12 +6,13 @@
           Project List
         </q-card-section>
         <q-card-section class="bg-white q-mx-sm q-mb-sm">
-          <q-scroll-area style="height: 200px">
+          <q-scroll-area style="height: 200px" v-if="loadingProject">
             <div v-if="projects.length === 0" class="justify-center">
               You don't have any project yet.
             </div>
             <q-list class="rounded-borders" separator v-else>
-              <q-item v-for="project in projects" :key="project.projectId" clickable v-ripple :to="`/projects/${project.projectId}`">
+              <q-item v-for="project in projects" :key="project.projectId" clickable v-ripple
+                      :to="`/projects/${project.projectId}`">
                 <q-item-section avatar>
                   <q-avatar>
                     <q-img :src="avatarMap[project.teacherName]?.toString()"></q-img>
@@ -25,8 +26,10 @@
                 </q-item-section>
               </q-item>
             </q-list>
-
           </q-scroll-area>
+          <q-skeleton style="height: 200px" type="text" v-else>
+
+          </q-skeleton>
         </q-card-section>
       </q-card>
     </div>
@@ -69,6 +72,7 @@
               </template>
             </q-calendar-month>
           </q-scroll-area>
+
         </q-card-section>
       </q-card>
     </div>
@@ -78,23 +82,27 @@
           Announcements
         </q-card-section>
         <q-card-section class="bg-white q-mb-sm q-mx-xs">
-          <q-scroll-area style="height: 200px" v-if="messages.length!==0">
-            <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
-              <q-item-section>
-                <q-item-label>{{ msg.title }}</q-item-label>
-                <q-item-label caption lines="1" class="ellipsis">{{
-                    truncate(msg.content)
-                  }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                {{ formatDateString(msg.createTime) }}
-              </q-item-section>
-            </q-item>
-          </q-scroll-area>
-          <div v-else class="justify-center" style="height: 200px">
-            No announcement yet.
+          <div v-if="loadingMessage">
+            <q-scroll-area style="height: 200px" v-if="messages.length!==0">
+              <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
+                <q-item-section>
+                  <q-item-label>{{ msg.title }}</q-item-label>
+                  <q-item-label caption lines="1" class="ellipsis">{{
+                      truncate(msg.content)
+                    }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  {{ formatDateString(msg.createTime) }}
+                </q-item-section>
+              </q-item>
+            </q-scroll-area>
+            <div v-else class="justify-center" style="height: 200px">
+              No announcement yet.
+            </div>
           </div>
+          <q-skeleton type="text" style="height: 200px" v-else>
+          </q-skeleton>
         </q-card-section>
       </q-card>
     </div>
@@ -133,13 +141,14 @@ function getCurrentDay(day: number) {
 
 // project list
 const projects = ref<projectProps[]>([]), avatarMap: { [key: string]: string | null } = {};
-
+const loadingProject = ref(false)
 onMounted(() => {
   api.get('/project-list/0/10').then(async res => {
     projects.value = res.data.body;
     for (const project of projects.value) {
       avatarMap[project.teacherName] = await getAvatarUrlById(project.teacherId)
     }
+    loadingProject.value = true
   }).catch(err => {
     console.log(err)
   })
@@ -157,30 +166,21 @@ const events = ref<assProps[]>([
     fullMark: 100,
     type: '0',
   },
-  {
-    assignmentId: 3,
-    title: 'Meeting',
-    creatorId: 1,
-    description: 'Time to pitch my idea to the company',
-    deadline: getCurrentDay(-10),
-    projectId: 0,
-    projectName: 'Project 1',
-    fullMark: 100,
-    type: '0',
-  }
 ])
 
 // announcements
 const messages = ref<noticeProps[]>([defaultNotice])
+const loadingMessage = ref(false)
 onMounted(() => {
   api.get(`/notice-list/-1/0/10`).then((res) => {
     messages.value = res.data.body;
+    loadingMessage.value = true
   }).catch((err) => {
     console.log('err', err)
   })
 })
 // calendar
-onMounted(()=>{
+onMounted(() => {
   api.get(`/ass-list/-1/0/10`).then((res) => {
     events.value = res.data.body;
   }).catch((err) => {
@@ -192,6 +192,7 @@ const eventsMap = computed(() => {
   interface EventMap {
     [key: string]: assProps[];
   }
+
   const map: EventMap = {};
 
   if (events.value.length > 0) {

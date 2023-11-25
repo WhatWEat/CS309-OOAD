@@ -35,7 +35,7 @@ export interface projectProps {
   // 用于记录Project的各类属性
   projectId: number,
   name: string,
-  projectDescription: string,
+  description: string,
   teacherId: number,
   teacherName: string,
   avatar?: File,
@@ -43,7 +43,7 @@ export interface projectProps {
 export const defaultProject: projectProps = {
   projectId: 0,
   name: 'project1',
-  projectDescription: 'asdfasf',
+  description: 'asdfasf',
   teacherId: 0,
   teacherName: 'tsert1',
 }

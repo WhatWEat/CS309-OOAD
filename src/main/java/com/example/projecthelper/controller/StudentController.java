@@ -168,6 +168,15 @@ public class StudentController {
         List<User> result = groupService.getGpMem(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
         return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/get_group_id/{project_id}")
+    public ResponseResult<Long> getGroupId(HttpServletRequest request, @PathVariable("project_id") Long pjId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Group gp = groupService.findGroupOfStuInProject(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
+        long result = gp == null ? -1 : gp.getGroupId();
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @DeleteMapping("/leave_group")
     public ResponseResult<Object> leaveGroup(HttpServletRequest request, @RequestBody Long projId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

@@ -26,7 +26,7 @@
       </q-card-section>
   </q-card>
   <div v-else>
-    <q-skeleton animation="pulse-x" height="60px">
+    <q-skeleton  height="60px">
 
     </q-skeleton>
   </div>
@@ -69,9 +69,7 @@ async function handleItemList(newIdentity){
   if (props.icon_position === 'left') {
     // project_id.value = useProjectId();
     const noticeResponse = await api.get(`/notice-list/${project_id.value}/0/1000`)
-    // const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
-    // TODO fix the assignment list
-    // console.log('assi',assignmentResponse)
+    const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
     const groupResponse = ref(0), groupDis = ref('Group Member');
     if(newIdentity === 3){
       groupResponse.value = (await api.get(`/stu/group_members/${project_id.value}`)).data.body.length;
@@ -98,8 +96,8 @@ async function handleItemList(newIdentity){
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        // value: `${assignmentResponse.data.body.length}`,
-        value: `1`,
+        value: `${assignmentResponse.data.body.length}`,
+        // value: `1`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
       },

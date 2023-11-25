@@ -4,7 +4,9 @@
       <SearchBars @update:tags="handleTagsUpdate"
       ></SearchBars>
       <q-separator></q-separator>
-      <q-card-section>
+      <q-skeleton type="text" v-if="!isLoading">
+      </q-skeleton>
+      <q-card-section v-else>
         <q-list v-if="identity===3" >
           <project-exten v-for="project in project_list" :key="project.projectId"
                          :project="project"></project-exten>
@@ -24,10 +26,11 @@
 import {onMounted, ref} from "vue";
 import {projectProps} from "src/composables/comInterface";
 import ProjectExten from "components/PersonIndex/ProjectExten.vue";
-import {watchEffect} from "vue-demi";
-import {useUserStore} from "src/composables/useUserStore";
 import SearchBars from "components/PersonIndex/SearchBars.vue";
 import ProjectExtenTea from "components/PersonIndex/ProjectExtenTea.vue";
+import {watchEffect} from "vue-demi";
+import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
 
 const origin_project_list = ref<projectProps[]>();
 const project_list = ref<projectProps[]>();
@@ -45,9 +48,21 @@ origin_project_list.value = [{
   teacherName: "teacher 2"
 },
 ]
-// const {identity} = useUserStore();
-const identity = ref(1)
-project_list.value = origin_project_list.value
+const {identity} = useUserStore(), isLoading = ref(false);
+onMounted(()=>{
+  watchEffect(()=>{
+    if(identity.value !== -1 && !isLoading.value){
+      isLoading.value = true
+      api.get('/project-list/0/10').then(res => {
+        origin_project_list.value = res.data.body;
+        project_list.value = origin_project_list.value
+        isLoading.value = true
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+  })
+})
 
 function handleTagsUpdate(tags: Set<string>) {
   if (origin_project_list.value) {

@@ -12,20 +12,24 @@ env:
 jobs:
   print_variables:
     runs-on: ubuntu-latest
+    environment: Actions
     steps:      
       - name: Print global variable
         run: |
-          echo "Global Variable is $vars.TEST"
-          echo "Job Specific Variable1 is ${{ vars.TEST }}"
-          echo "Job Specific Variable1 is ${{ env.TEST }}"
-          echo "Job Specific Variable1 is $env_var"
-          echo "Job Specific Variable1 is $env.TEST"
+          echo "Global Variable is $vars.DOCKER_USERNAME"
+          echo "Job Specific Variable1 is ${{ vars.DOCKER_USERNAME }}"
+          echo "Global Variable is $vars.DOCKER_TOKEN"
+          echo "Job Specific Variable1 is ${{ vars.DOCKER_TOKEN }}"
           
-      - name: Print job specific variable
-        run: |
-          echo "Job Specific Variable1 is $env.TEST1"
-          echo "Job Specific Variable1 is ${{ vars.TEST1 }}"
-          echo "Job Specific Variable1 is $env_var1"
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ vars.DOCKER_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
           
       - name: Print job secret
         run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"

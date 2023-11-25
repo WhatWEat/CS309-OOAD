@@ -34,13 +34,13 @@ const project_list = ref<projectProps[]>();
 origin_project_list.value = [{
   projectId: 0,
   name: "Project 1",
-  projectDescription: "11",
+  description: "11",
   teacherId: 0,
   teacherName: "teacher 1"
 }, {
   projectId: 1,
   name: "Project 2",
-  projectDescription: "teacher1 2",
+  description: "teacher1 2",
   teacherId: 2,
   teacherName: "teacher 2"
 },
@@ -57,11 +57,11 @@ function handleTagsUpdate(tags: Set<string>) {
     }
     project_list.value = []
     for (const project of origin_project_list.value) {
-      if (tags.has(project.name) || tags.has(project.teacherName) || tags.has(project.projectDescription)) {
+      if (tags.has(project.name) || tags.has(project.teacherName) || tags.has(project.description)) {
         project_list.value?.push(project)
       } else {
         for (const tag of tags) {
-          if (project.name.includes(tag) || project.teacherName.includes(tag) || project.projectDescription.includes(tag)) {
+          if (project.name.includes(tag) || project.teacherName.includes(tag) || project.description.includes(tag)) {
             project_list.value?.push(project)
             break
           }

@@ -26,7 +26,7 @@
                 <q-card>
                   <q-card-section>
                     <q-input v-model="project_edit.name" label="Project Name"/>
-                    <q-input v-model="project_edit.projectDescription" label="Project Description"/>
+                    <q-input v-model="project_edit.description" label="Project Description"/>
                   </q-card-section>
                 </q-card>
               </q-expansion-item>
@@ -96,7 +96,7 @@
     <q-card>
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="des">
-          {{ project_show.projectDescription }}
+          {{ project_show.description }}
         </q-tab-panel>
 
         <q-tab-panel name="ta">

@@ -18,7 +18,7 @@
     <q-card>
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="des">
-          {{ project.projectDescription }}
+          {{ project.description }}
         </q-tab-panel>
 
         <q-tab-panel name="group">

@@ -68,7 +68,7 @@ public class AssignmentService {
         }
         else {
             Long taOfProj = projectMapper.checkTaInProj(projId, userId);
-            if (!Objects.equals(taOfProj, userId)) {
+            if (Objects.equals(taOfProj, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
             results =
@@ -86,9 +86,9 @@ public class AssignmentService {
             results = assignmentMapper.getAssByStu(userId);
         }
         else {
-
+            System.err.println(userId+" "+projId);
             Long checker = projectMapper.checkStuInProj(userId, projId);
-            if(!Objects.equals(checker, null)){
+            if(Objects.equals(checker, null)){
                 throw new AccessDeniedException("无权访问该project");
             }
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);

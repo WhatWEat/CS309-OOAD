@@ -21,3 +21,4 @@ EXPOSE 8088
 
 #启动命令
 ENTRYPOINT ["java","-jar","/usr/local/back-0.0.1-SNAPSHOT.jar"]
+

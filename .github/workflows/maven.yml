@@ -6,9 +6,9 @@ on:
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-  SERVER_HOST: ${{secrets.SERVER_HOST}}
-  SERVER_PORT: ${{secrets.SERVER_PORT }}
-  SERVER_PASSWORD: ${{secrets.SERVER_PASSWORD}}
+  SERVER_HOST: ${{secrets.HOSTNAME}}
+  SERVER_PORT: ${{secrets.PORT }}
+  SERVER_PASSWORD: ${{secrets.TOKEN}}
 
 jobs:
   compile:
@@ -71,11 +71,11 @@ jobs:
           #          command: |
           #            cd /develop/work/education-back-server
           #            sh start.sh
-          host: ${{secrets.SERVER_HOST}}
+          host: ${{secrets.HOSTNAME}}
           username: root
-          port: ${{secrets.SERVER_PORT }}
+          port: ${{secrets.PORT }}
           #          key: ${{secrets.SERVER_PRIVATE_KEY}}
-          password: ${{secrets.SERVER_PASSWORD}}
+          password: ${{secrets.TOKEN}}
           script:
             sh /usr/local/sbin/scripts/start.sh
 #            sh start.sh

@@ -1,9 +1,6 @@
 name: Deploy with docker
 
 on:
-  push:
-    # 分支
-    branches: [ "deploy" ]
   pull_request:
     branches: [ "deploy" ]
 env:

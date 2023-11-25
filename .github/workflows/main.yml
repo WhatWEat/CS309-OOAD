@@ -1,6 +1,9 @@
 name: Environment Variable Test
 
-on: [push]
+on: 
+  pull_request:
+    branches: [ "deploy" ]
+
 
 env:
   env_var: ${{ vars.TEST }}

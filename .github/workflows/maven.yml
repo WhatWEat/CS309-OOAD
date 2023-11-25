@@ -8,7 +8,7 @@ env:
   DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
   SERVER_HOST: ${{secrets.HOSTNAME}}
   SERVER_PORT: ${{secrets.PORT }}
-  SERVER_PASSWORD: ${{secrets.TOKEN}}
+  SERVER_PASSWORD: ${{secrets.PASSWORD}}
 
 jobs:
   compile:
@@ -65,12 +65,12 @@ jobs:
 
       - name: Verify ssh Username
         run: |
-          if [ -z "${{secrets.TOKEN}}" ]; then
-            echo "ssh TOKEN is not set."
+          if [ -z "${{secrets.PASSWORD}}" ]; then
+            echo "ssh PASSWORD is not set."
             exit 1
           else
-            echo "ssh TOKEN is set."
-            echo "${{secrets.TOKEN}}"
+            echo "ssh PASSWORD is set."
+            echo "${{secrets.PASSWORD}}"
           fi
 
       #push后，用ssh连接服务器执行脚本
@@ -85,7 +85,7 @@ jobs:
           username: root
           port: ${{secrets.PORT }}
           #          key: ${{secrets.SERVER_PRIVATE_KEY}}
-          password: ${{secrets.TOKEN}}
+          password: ${{secrets.PASSWORD}}
           script:
             sh /usr/local/sbin/scripts/start.sh
 #            sh start.sh

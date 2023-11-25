@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import {defineProps, watch, ref} from 'vue';
+import {defineProps, watch, ref, onMounted} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 import {useProjectId} from "src/composables/usefulFunction";
 import {api} from "boot/axios";
@@ -49,18 +49,37 @@ const props = defineProps({
 const items = ref([])
 const loading = ref(false)
 const {userid, identity} = useUserStore()
-watch(identity, async (newIdentity) =>{
-  await handleItemList(newIdentity)
+const project_id = ref(1);
+onMounted(() => {
+  if (props.icon_position === 'left'){
+    project_id.value = useProjectId();
+  }
+  watch(identity, async (newIdentity) =>{
+    await handleItemList(newIdentity)
+  })
+  if (identity.value !== -1) {
+    handleItemList(identity.value)
+  }
 })
-if (identity.value !== -1) {
-  handleItemList(identity.value)
-}
+
 async function handleItemList(newIdentity){
   if (newIdentity === -1) return
-  // let type = newIdentity === 3 ? 'stu' : 'tea';
+  let type = newIdentity === 3 ? 'stu' : 'tea';
+
   if (props.icon_position === 'left') {
-    const noticeResponse = await api.get(`/notice-list/${useProjectId()}/0/1000`)
-    // const groupSize = await api.get(`/group-member/${useProjectId()}/0/1000`)
+    // project_id.value = useProjectId();
+    const noticeResponse = await api.get(`/notice-list/${project_id.value}/0/1000`)
+    // const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
+    // console.log('assi',assignmentResponse)
+    const groupResponse = ref(0), groupDis = ref('Group Member');
+    if(newIdentity === 3){
+      // groupResponse.value = (await api.get(`/stu/group_members/${project_id.value}`)).data.body.length;
+      groupResponse.value = 1;
+    } else {
+      groupDis.value = 'Group Number'
+      groupResponse.value = (await api.get(`/get_brief_groups_from_proj/${project_id.value}`)).data.body.length;
+    }
+
     items.value = [
       {
         title: 'Profile',
@@ -70,16 +89,17 @@ async function handleItemList(newIdentity){
         color2: '#3e51b5'
       },
       {
-        title: 'Group Member',
+        title: `${groupDis.value}`,
         icon: 'fa-solid fa-user-group',
-        value: '500',
+        value: `${groupResponse.value}`,
         color1: '#f37169',
         color2: '#f34636'
       },
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        value: '50',
+        // value: `${assignmentResponse.data.body.length}`,
+        value: `1`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
       },
@@ -93,6 +113,8 @@ async function handleItemList(newIdentity){
     ]
   } else {
     const noticeResponse = await api.get(`/notice-list/-1/0/1000`)
+    const assignmentResponse = await api.get(`/ass-list/-1/0/1000`)
+    const projectResponse = await api.get(`/project-list/0/1000`)
     items.value = [
       {
         title: 'Profile',
@@ -104,7 +126,7 @@ async function handleItemList(newIdentity){
       {
         title: 'Projects',
         icon: 'fa-solid fa-person-digging',
-        value: '0',
+        value: `${projectResponse.data.body.length}`,
         color1: '#f37169',
         color2: '#f34636'
       },
@@ -116,9 +138,9 @@ async function handleItemList(newIdentity){
         color2: '#ea4b64'
       },
       {
-        title: 'Messages',
-        icon: 'fa-solid fa-comments',
-        value: '100',
+        title: 'Assignment',
+        icon: 'fa-solid fa-file',
+        value: `${assignmentResponse.data.body.length}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }

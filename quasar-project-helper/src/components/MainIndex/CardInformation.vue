@@ -196,6 +196,7 @@ const eventsMap = computed(() => {
 
   if (events.value.length > 0) {
     events.value.forEach(event => {
+      event.deadline = formatDateString(event.deadline).slice(0, 10);
       (map[event.deadline] = (map[event.deadline] || [])).push(event)
     })
   }

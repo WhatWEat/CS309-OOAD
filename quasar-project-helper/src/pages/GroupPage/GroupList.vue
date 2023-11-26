@@ -201,8 +201,9 @@
           </q-input>
         </template>
         <template v-slot:right_btn>
-          <q-item-label >
-            <q-btn  class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"  @click="show_invite_member=true"/>
+          <q-item-label>
+            <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
+                   @click="show_invite_member=true"/>
           </q-item-label>
           <q-item-label v-if="isGroupLeader">
             <q-btn class="bg-indigo-7 text-white" flat icon="exit_to_app" round size="sm"/>
@@ -222,7 +223,7 @@
 import {api} from 'boot/axios';
 import {defineAsyncComponent, ref} from 'vue';
 import {useUserStore} from 'src/composables/useUserStore';
-
+import {formatDateString, merger} from "src/composables/usefulFunction";
 
 export default {
   name: 'GroupTeacherPage',
@@ -230,6 +231,8 @@ export default {
   data() {
     return {
       projectId: '',
+
+      groupId: '-1',
 
       isGroupLeader: ref(),
 
@@ -360,10 +363,7 @@ export default {
       console.log(this.selected_row.row)
     },
     handleRowDbclick(evt, row, index) {
-      //更新小组详情卡片的内容
       this.getGroupDetail(row.groupId)
-      // 显示小组详情卡片
-      this.show_detail = true;
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
@@ -438,7 +438,7 @@ export default {
       console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
     },
     // 获取界面的GroupList的相关信息.即为概括性group信息部分
-    getGroupList(){
+    getGroupList() {
       api.get('/get_brief_groups_from_proj/' + this.projectId).then(
         (response) => {
           this.rows = [];
@@ -450,7 +450,7 @@ export default {
               groupMember: response.data.body[i].members.toString(),
               instructor: response.data.body[i].instructorName,
               projectName: 'Dev Name',
-              deadLine: "2021/10/01 Dev",
+              deadLine: formatDateString(response.data.body[i].deadline),
               moreInfo: response.data.body[i].description
             }
             // 将解析好的数据添加到rows中
@@ -463,39 +463,47 @@ export default {
       });
     },
     // 获取指定小组的详细信息
-    getGroupDetail( groupId ){
+    getGroupDetail(groupId) {
       api.get('/getGroupInfo/' + groupId).then(
         (response) => {
-            let tmp = {
-              avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
-              groupId: response.data.body.groupId,
-              groupSize: response.data.body.members.length,
-              groupMaxSize: response.data.body.maxsize,
-              members: {
-                'liweihao': 12110415,
-                '小明': 12110355,
-                '小王': 13454322,
-                'Dev': 12345678,
-              },
-              creationTime: response.data.body.teamTime,
-              deadline: '2021/10/01 Dev',
-              presentationTime: response.data.body.reportTime,
-              instructor: {
-                'Mr.Simth Dev': 12001111
-              },
-              leader: {
-                '小明 Dev': 12110355
-              },
-              moreInfo: response.data.body.description
-            }
-            this.card_data = tmp;
+          let tmp = {
+            avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+            groupId: response.data.body.groupId,
+            groupSize: response.data.body.members.length,
+            groupMaxSize: response.data.body.maxsize,
+            members: merger(response.data.body.members, response.data.body.memberIds),
+            creationTime: formatDateString(response.data.body.teamTime),
+            deadline: formatDateString(response.data.body.deadline),
+            presentationTime: formatDateString(response.data.body.reportTime),
+            instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
+            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
+            moreInfo: response.data.body.description
+          }
+          this.card_data = tmp
+          this.show_detail = true;
+          console.log(response);
+          console.log(this.card_data);
         }
       ).catch((error) => {
         console.log("errorHere");
         console.log(error);
       });
-    }
-
+    },
+    // 获取该学生的所在小组的ID
+    getGroupId() {
+      api.get('/get_group_id/' + this.projectId).then(
+        (response) => {
+          if (response.data.body != null){
+            this.groupId = response.data.body;
+            console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+            console.log(useUserStore());
+          }
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
+     }
   },
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
@@ -504,11 +512,21 @@ export default {
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
     SetVariableForm: defineAsyncComponent(() => import('src/components/Component_Li/form/SetVariablesForm.vue')),
   },
-  mounted() {
+  mounted(){
     this.getProjectId();
     this.getGroupList();
-    // this.getIfGroupLeader();
-    // this.testConnection();
+    this.getGroupId();
+  },
+  filters: {
+    // 将时间戳转化为日期
+    formatDate(time) {
+      if (time) {
+        let date = new Date(time);
+        return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      } else {
+        return '1970-01-01';
+      }
+    }
   },
 }
 

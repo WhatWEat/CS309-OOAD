@@ -38,9 +38,9 @@ public interface GroupMapper extends BaseMapper<Group> {
         "from stuingroup s join users u on s.stuid = u.userid where s.groupid = #{gpId};")
     List<User> getMembersFromGp(Long gpId);
 
-    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime," +
+    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, deadline, reportTime," +
         "instructorId, creatorId, description, leaderId, technicalStack)" +
-            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime}," +
+            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime}, #{deadline}, #{reportTime}," +
         "#{instructorId}, #{creatorId}, #{description}, #{leaderId}, " +
         "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler});")
     @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "groupid")

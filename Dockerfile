@@ -17,7 +17,7 @@ RUN rm -f /etc/localtime \
 && echo "Asia/Shanghai" > /etc/timezone
 
 #开放端口
-EXPOSE 8088
+EXPOSE 8443
 
 #启动命令
 ENTRYPOINT ["java","-jar","/usr/local/back-0.0.1-SNAPSHOT.jar"]

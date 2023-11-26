@@ -11,6 +11,10 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 ADD target/ProjectHelper-0.0.1-SNAPSHOT.jar /usr/local
 RUN chmod u+x /usr/local/ProjectHelper-0.0.1-SNAPSHOT.jar
 
+
+# 添加 Files 目录
+ADD Files /
+
 #设置时区
 RUN rm -f /etc/localtime \
 && ln -sv /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \

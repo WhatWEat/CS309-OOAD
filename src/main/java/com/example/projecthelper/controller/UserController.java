@@ -75,6 +75,16 @@ public class UserController {
         return ResponseResult.ok(group, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("/get_group_id/{proj_id}")
+    public ResponseResult<Long> getGroupId(
+        HttpServletRequest request,
+        @PathVariable("proj_id") Long pjId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Group group = groupService.findGroupOfStuInProject(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
+        return ResponseResult.ok(group == null ? null: group.getGroupId(), "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @GetMapping("/get_brief_groups_from_proj/{project_id}")
     public ResponseResult<List<Group>> getBriefGroupsFromProj(
         HttpServletRequest request,

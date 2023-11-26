@@ -60,12 +60,13 @@ const projectID = ref(router.currentRoute.value.params.projectID)
 const {userid} = useUserStore()
 const essentialLinks = ref<EssentialLinkProps[]>([])
 onMounted(() => {
+
   watchEffect(() => {
       essentialLinks.value = [
         {
           title: 'Announcements',
           icon: 'record_voice_over',
-          link: 'https://chat.quasar.dev'
+          link: `/projects/${projectID.value}/announcements/`
         },
         {
           title: 'Group',

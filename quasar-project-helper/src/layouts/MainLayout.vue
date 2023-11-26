@@ -66,7 +66,7 @@ onMounted(() => {
         {
           title: 'Announcements',
           icon: 'record_voice_over',
-          link: '/announcement'
+          link: '/announcements'
         },
         {
           title: 'Projects',

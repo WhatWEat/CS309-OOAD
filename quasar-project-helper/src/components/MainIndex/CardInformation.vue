@@ -6,27 +6,30 @@
           Project List
         </q-card-section>
         <q-card-section class="bg-white q-mx-sm q-mb-sm">
-          <q-scroll-area style="height: 200px">
+          <q-scroll-area style="height: 200px" v-if="loadingProject">
             <div v-if="projects.length === 0" class="justify-center">
               You don't have any project yet.
             </div>
             <q-list class="rounded-borders" separator v-else>
-              <q-item v-for="project in projects" :key="project.id" clickable v-ripple>
+              <q-item v-for="project in projects" :key="project.projectId" clickable v-ripple
+                      :to="`/projects/${project.projectId}`">
                 <q-item-section avatar>
                   <q-avatar>
-                    <q-img :src="project.avatar"></q-img>
+                    <q-img :src="avatarMap[project.teacherName]?.toString()"></q-img>
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label lines="1">{{ project.project }}</q-item-label>
+                  <q-item-label lines="1">{{ project.name }}</q-item-label>
                   <q-item-label caption lines="2">
-                    <span class="text-weight-bold">{{ project.teacher }}</span>
+                    <span class="text-weight-bold">{{ project.teacherName }}</span>
                   </q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
-
           </q-scroll-area>
+          <q-skeleton style="height: 200px" type="text" v-else>
+
+          </q-skeleton>
         </q-card-section>
       </q-card>
     </div>
@@ -49,7 +52,7 @@
               <template #day="{ scope: { timestamp } }">
                 <template
                   v-for="event in eventsMap[timestamp.date]"
-                  :key="event.id"
+                  :key="event.assignmentId"
                 >
                   <div
                     :class="badgeClasses(event, 'day')"
@@ -57,7 +60,7 @@
                     class="my-event"
                   >
                     <abbr
-                      :title="event.details"
+                      :title="event.title"
                       class="tooltip"
                     >
                 <span class="title q-calendar__ellipsis">{{
@@ -69,26 +72,37 @@
               </template>
             </q-calendar-month>
           </q-scroll-area>
+
         </q-card-section>
       </q-card>
     </div>
     <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
       <q-card class="q-ma-xs no-shadow" bordered style="background-color: #1e88e5">
         <q-card-section class="text-h6 text-white">
-          Latest Announcements
+          Announcements
         </q-card-section>
         <q-card-section class="bg-white q-mb-sm q-mx-xs">
-          <q-scroll-area style="height: 200px">
-            <q-item v-for="msg in messages" :key="msg.id" clickable v-ripple>
-              <q-item-section>
-                <q-item-label>{{ msg.name }}</q-item-label>
-                <q-item-label caption lines="1" class="ellipsis">{{ truncate(msg.msg) }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                {{ msg.time }}
-              </q-item-section>
-            </q-item>
-          </q-scroll-area>
+          <div v-if="loadingMessage">
+            <q-scroll-area style="height: 200px" v-if="messages.length!==0">
+              <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
+                <q-item-section>
+                  <q-item-label>{{ msg.title }}</q-item-label>
+                  <q-item-label caption lines="1" class="ellipsis">{{
+                      truncate(msg.content)
+                    }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  {{ formatDateString(msg.createTime) }}
+                </q-item-section>
+              </q-item>
+            </q-scroll-area>
+            <div v-else class="justify-center" style="height: 200px">
+              No announcement yet.
+            </div>
+          </div>
+          <q-skeleton type="text" style="height: 200px" v-else>
+          </q-skeleton>
         </q-card-section>
       </q-card>
     </div>
@@ -96,160 +110,95 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import {api} from 'boot/axios'
 import {
-  QCalendarMonth,
   addToDate,
   parseDate,
   parseTimestamp,
+  QCalendarMonth,
   today
 } from '@quasar/quasar-ui-qcalendar'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
-import {truncate} from 'src/composables/usefulFunction';
+import {formatDateString, getAvatarUrlById, truncate} from 'src/composables/usefulFunction';
 import {computed} from 'vue-demi';
-const selectedDate = ref(today())
-const CURRENT_DAY = new Date()
+import {assProps, defaultNotice, noticeProps, projectProps} from "src/composables/comInterface";
 
-function getCurrentDay(day) {
-  const newDay = new Date(CURRENT_DAY)
-  newDay.setDate(day)
+const selectedDate = ref(today())
+
+function getCurrentDay(day: number) {
+  const newDay = new Date()
+  newDay.setDate(newDay.getDate() + day)
   const tm = parseDate(newDay)
+  if (!tm) {
+    throw new Error('Invalid date')
+  }
   return tm.date
 }
+
 // project list
-const projects = ref([
-])
-onMounted(()=>{
-  api.get('/project-list/1/9999').then(res => {
+const projects = ref<projectProps[]>([]), avatarMap: { [key: string]: string | null } = {};
+const loadingProject = ref(false)
+onMounted(() => {
+  api.get('/project-list/0/10').then(async res => {
     projects.value = res.data.body;
+    for (const project of projects.value) {
+      avatarMap[project.teacherName] = await getAvatarUrlById(project.teacherId)
+    }
+    loadingProject.value = true
   }).catch(err => {
     console.log(err)
   })
 })
-const events = ref([
+const events = ref<assProps[]>([
   {
-    id: 2,
+    assignmentId: 2,
     title: 'ASS1',
-    details: 'Buy a nice present',
-    date: getCurrentDay(4),
-    bgcolor: 'green',
-    icon: 'fas fa-birthday-cake'
+    creatorId: 1,
+    creatorName: 'teacher 1',
+    description: 'Buy a nice present',
+    deadline: getCurrentDay(1),
+    projectId: 0,
+    projectName: 'Project 1',
+    fullMark: 100,
+    type: '0',
   },
-  {
-    id: 3,
-    title: 'Meeting',
-    details: 'Time to pitch my idea to the company',
-    date: getCurrentDay(10),
-    duration: 120,
-    bgcolor: 'red',
-    icon: 'fas fa-handshake'
-  },
-  {
-    id: 5,
-    title: 'Visit mom',
-    details: 'Always a nice chat with mom',
-    date: getCurrentDay(20),
-    duration: 90,
-    bgcolor: 'grey',
-    icon: 'fas fa-car'
-  },
-  {
-    id: 6,
-    title: 'Conference',
-    details: 'Teaching Javascript 101',
-    date: getCurrentDay(22),
-    duration: 540,
-    bgcolor: 'blue',
-    icon: 'fas fa-chalkboard-teacher'
-  },
-  {
-    id: 8,
-    title: 'Rowing',
-    details: 'Stay in shape!',
-    date: getCurrentDay(27),
-    bgcolor: 'purple',
-    icon: 'rowing',
-    days: 2
-  },
-  {
-    id: 9,
-    title: 'Fishing',
-    details: 'Time for some weekend R&R',
-    date: getCurrentDay(27),
-    bgcolor: 'purple',
-    icon: 'fas fa-fish',
-    days: 2
-  },
-  {
-    id: 10,
-    title: 'Vacation',
-    details: 'Trails and hikes, going camping! Don\'t forget to bring bear spray!',
-    date: getCurrentDay(29),
-    bgcolor: 'purple',
-    icon: 'fas fa-plane',
-    days: 5
-  }
 ])
-const messages = ref([
-  {
-    id: 5,
-    name: 'Projects 1',
-    msg: ' -- You \'ll be in your neighborhood doing errands this\n' +
-      '            weekend. Do you want to grab brunch?',
-    avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4',
-    time: '10:42 PM'
-  }, {
-    id: 6,
-    name: 'Projects 2',
-    msg: ' -- You\'ll be in your neighborhood doing errands this\n' +
-      '            weekend. Do you want to grab brunch?',
-    avatar: 'https://cdn.quasar.dev/img/avatar6.jpg',
-    time: '11:17 AM'
-  }, {
-    id: 1,
-    name: 'Projects 3',
-    msg: ' -- You\'ll be in your neighborhood ',
-    avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-    time: '5:17 AM'
-  }, {
-    id: 2,
-    name: 'Projects 2',
-    msg: ' -- You\'ll be in your neighborhood doing errands this\n' +
-      '            weekend. Do you want to grab brunch?',
-    avatar: 'https://cdn.quasar.dev/team/jeff_galbraith.jpg',
-    time: '5:17 AM'
-  }, {
-    id: 3,
-    name: 'Projects 3',
-    msg: ' -- You\'ll be in your neighborhood doing errands this\n' +
-      '            weekend. Do you want to grab brunch?',
-    avatar: 'https://cdn.quasar.dev/team/razvan_stoenescu.jpeg',
-    time: '5:17 AM'
+
+// announcements
+const messages = ref<noticeProps[]>([defaultNotice])
+const loadingMessage = ref(false)
+onMounted(() => {
+  api.get(`/notice-list/-1/0/10`).then((res) => {
+    messages.value = res.data.body;
+    loadingMessage.value = true
+  }).catch((err) => {
+    console.log('err', err)
+  })
+})
+// calendar
+onMounted(() => {
+  api.get(`/ass-list/-1/0/10`).then((res) => {
+    events.value = res.data.body;
+  }).catch((err) => {
+    console.log('后端没写接口所有报错')
+    console.log('err', err)
+  })
+})
+const eventsMap = computed(() => {
+  interface EventMap {
+    [key: string]: assProps[];
   }
-])
-const eventsMap = computed(() =>{
-  const map = {}
+
+  const map: EventMap = {};
+
   if (events.value.length > 0) {
     events.value.forEach(event => {
-      (map[event.date] = (map[event.date] || [])).push(event)
-      if (event.days !== undefined) {
-        let timestamp = parseTimestamp(event.date)
-        let days = event.days
-        // add a new event for each day
-        // skip 1st one which would have been done above
-        do {
-          timestamp = addToDate(timestamp, {day: 1})
-          if (!map[timestamp.date]) {
-            map[timestamp.date] = []
-          }
-          map[timestamp.date].push(event)
-          // already accounted for 1st day
-        } while (--days > 1)
-      }
+      event.deadline = formatDateString(event.deadline).slice(0, 10);
+      (map[event.deadline] = (map[event.deadline] || [])).push(event)
     })
   }
   return map
@@ -260,14 +209,22 @@ computed(() => {
   console.log(map)
   return map
 })
-function badgeClasses(event) {
+
+function badgeClasses(event: assProps, type: string) {
+  // let event_time = parseTimestamp(event.deadline);
+  let colorClass = 'bg-green';
+  if (event.deadline < today()) {
+    colorClass = 'bg-teal';
+  } else if (today() <= event.deadline && event.deadline <= getCurrentDay(5)) {
+    colorClass = 'bg-orange';
+  }
   return {
-    [`text-white bg-${event.bgcolor}`]: true,
+    [`text-white ${colorClass}`]: true,
     'rounded-border': true
   }
 }
 
-function badgeStyles() {
+function badgeStyles(event: any, day: string) {
   const s = {}
   return s
 }

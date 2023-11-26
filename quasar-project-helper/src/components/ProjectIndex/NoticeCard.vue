@@ -15,7 +15,7 @@
               <q-item-label caption lines="1" class="ellipsis">{{ truncate(msg.content) }}</q-item-label>
             </q-item-section>
             <q-item-section side>
-              {{ msg.creatorId }}
+              {{ formatDateString(msg.createTime) }}
             </q-item-section>
           </q-item>
         </q-scroll-area>
@@ -26,13 +26,13 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
-import {truncate, useProjectId} from 'src/composables/usefulFunction';
+import {truncate, formatDateString} from 'src/composables/usefulFunction';
 import {noticeProps} from 'src/composables/comInterface';
 import {api} from "boot/axios";
 const messages = ref<noticeProps[]>([]);
 onMounted(() => {
   // let id = useProjectId()
-  api.get(`/stu/notice-list/-1/0/10`).then((res) => {
+  api.get(`/notice-list/-1/0/10`).then((res) => {
     messages.value = res.data.body;
   }).catch((err) => {
     console.log('err',err)

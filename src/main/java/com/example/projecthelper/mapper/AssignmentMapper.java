@@ -20,11 +20,42 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
-        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} limit #{limit} offset #{offset};")
+        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     List<Assignment> getAssByProj(Long projectId, Long limit, Long offset);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join stuInProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where s.stuId = #{stuId} order by a.releaseTime desc;")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByStu(Long stuId);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join taOfProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where s.taId = #{taId} order by a.releaseTime desc;")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByTa(Long taId);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join stuInProject s on p.projectid = s.projectid " +
+        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId} order by a.releaseTime desc;")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByTea(Long teaId);
+
 
     @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId, deadline, releaseTime, requireExtension)\n" +
             "VALUES (#{title}, #{fullMark}, #{projectId}, #{description}, #{type}, #{creatorId}, #{deadline}, #{releaseTime}, #{requireExtension})")

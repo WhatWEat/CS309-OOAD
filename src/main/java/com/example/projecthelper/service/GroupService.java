@@ -119,6 +119,11 @@ public class GroupService {
         }
         if(group.getReportTime() != null && !group.getReportTime().isAfter(LocalDateTime.now()))
             throw new InvalidFormException("报告时间不能早于当前时间");
+        if(group.getDeadline() == null || !group.getDeadline().isAfter(LocalDateTime.now())){
+            throw new InvalidFormException("组队截止时间应该晚于当前时间");
+        }
+        if(group.getMaxsize() == null || group.getMaxsize() <= 0)
+            throw new InvalidFormException("maxsize无意义");
         User usr = usersMapper.findUserById(group.getInstructorId());
         if(usr == null || usr.getIdentity() > 2)
             throw new InvalidFormException("instructorId不存在或不合法");
@@ -138,6 +143,7 @@ public class GroupService {
                 .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
                     .collect(Collectors.toSet());
             validIds.add(leaderId);
+            validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
             group.setMemberIds(new ArrayList<>(validIds));
             groupMapper.createGroup(group);
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
@@ -154,7 +160,7 @@ public class GroupService {
             throw new AccessDeniedException("无权创建小组");
         }
         if(ocw.getObj().getGroupName() == null || ocw.getObj().getMaxsize() == null || ocw.getObj().getInstructorId() == null)
-            throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
+            throw new InvalidFormException("maxsize、groupName、projectId, instructorId不能为空");
         if(!ocw.getObj().getReportTime().isAfter(LocalDateTime.now()))
             throw new InvalidFormException("报告时间不能早于当前时间");
 
@@ -196,6 +202,8 @@ public class GroupService {
                 throw new InvalidFormException("无效的instructorId");
             if(group.getLeaderId() != null &&  projectMapper.checkStuInProj(group.getLeaderId(), pjId) == null)
                 throw new InvalidFormException("无效的leaderId");
+            if(group.getDeadline() == null || group.getDeadline().isBefore(LocalDateTime.now()))
+                throw new InvalidFormException("无效的ddl");
             try {
                 groupMapper.updateGroupForTea(group);
             } catch (PSQLException e) {
@@ -331,6 +339,19 @@ public class GroupService {
         }
         stuJoinGpSync(gp.getGroupId(), stuId, true);
     }
+
+    public List<User> getGpMem(Long userId, Long pjId){
+        Group gp =  groupMapper.findGroupOfStuInProject(userId, pjId);
+        if(gp == null){
+            System.err.println("here");
+            return null;
+        }
+        else {
+            List<User> result = groupMapper.getGpMem(gp.getGroupId());
+            return result.stream().map(User::mask).toList();
+        }
+    }
+
     public void leaveGroup(Long pjId, Long stuId){
         Long groupId = groupMapper.findGroupIdOfUserInAProj(stuId, pjId);
         if(groupId == null)

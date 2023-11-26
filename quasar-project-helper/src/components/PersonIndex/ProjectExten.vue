@@ -6,7 +6,7 @@
     <template v-slot:header>
       <q-item-section>
 
-        <q-item-label class="text-h6">{{ project.projectName }}</q-item-label>
+        <q-item-label class="text-h6">{{ project.name }}</q-item-label>
         <q-item-label caption>
           <q-badge rounded floating :color="isGroup ? 'green' : 'red'"/>
           {{ project.teacherName }}
@@ -18,7 +18,7 @@
     <q-card>
       <q-tab-panels v-model="tab" animated>
         <q-tab-panel name="des">
-          {{ project.projectDescription }}
+          {{ project.description }}
         </q-tab-panel>
 
         <q-tab-panel name="group">
@@ -103,8 +103,9 @@
 
 <script setup lang="ts">
 import {projectProps, GroupMember} from "src/composables/comInterface";
-import {defineProps, nextTick, ref} from 'vue';
+import {defineProps, nextTick, onMounted, ref} from 'vue';
 import {ElInput} from "element-plus";
+import {api} from "boot/axios";
 
 const tab = ref<string>('des')
 const props = defineProps<{
@@ -116,6 +117,9 @@ const isGroup = ref<boolean>(true)
 const GroupMember = ref<GroupMember[]>([{name: 'andy', id: 1, skills: ['java','cpp']}, {name: 'andy1', id: 2, skills: ['springboot','vue']},
   {name: 'andy2', id: 3, skills: ['python']}])
 const leader = ref<GroupMember>()
+onMounted(() => {
+  api.get(``)
+})
 setGroup()
 
 // skill change to intended teammate

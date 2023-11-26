@@ -62,17 +62,17 @@ public class StudentController {
         throw new AccessDeniedException("test");
     }
 
-    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
-    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
-                                                @PathVariable("page") long page,
-                                                @PathVariable("page_size") long pageSize,
-                                                   HttpServletRequest request) {
-        // Use the projectId, page, and pageSize in your method
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        List<Notice> result = noticeService.getNoticesByStudent(userId, projectId, page, pageSize);
-        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
-    }
+//    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+//    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
+//                                                @PathVariable("page") long page,
+//                                                @PathVariable("page_size") long pageSize,
+//                                                   HttpServletRequest request) {
+//        // Use the projectId, page, and pageSize in your method
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+//        List<Notice> result = noticeService.getNoticesByStudent(userId, projectId, page, pageSize);
+//        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+//    }
 
 //    @PostMapping("/edit_person_info")
 //    public ResponseResult<Object> editPersonInfo(
@@ -162,6 +162,21 @@ public class StudentController {
         groupService.joinGroup(groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+    @GetMapping("/group_members/{project_id}")
+    public ResponseResult<List<User>> getGpMem(HttpServletRequest request, @PathVariable("project_id") Long pjId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<User> result = groupService.getGpMem(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/get_group_id/{project_id}")
+    public ResponseResult<Long> getGroupId(HttpServletRequest request, @PathVariable("project_id") Long pjId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Group gp = groupService.findGroupOfStuInProject(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
+        long result = gp == null ? -1 : gp.getGroupId();
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @DeleteMapping("/leave_group")
     public ResponseResult<Object> leaveGroup(HttpServletRequest request, @RequestBody Long projId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -188,17 +203,17 @@ public class StudentController {
     }
 
 
-    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
-    public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
-                                                           @PathVariable("page") long page,
-                                                           @PathVariable("page_size") long pageSize,
-                                                           HttpServletRequest request) {
-        // Use the projectId, page, and pageSize in your method
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        List<Assignment> result = assignmentService.getAssignmentsByStu(userId, projectId, page, pageSize);
-        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
-    }
+//    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
+//    public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
+//                                                           @PathVariable("page") long page,
+//                                                           @PathVariable("page_size") long pageSize,
+//                                                           HttpServletRequest request) {
+//        // Use the projectId, page, and pageSize in your method
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+//        List<Assignment> result = assignmentService.getAssignmentsByStu(userId, projectId, page, pageSize);
+//        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+//    }
 
     @GetMapping(value = "/get_ass_file/{assignment_id}/{filename}")
     public ResponseEntity<Resource> getAssFile(@PathVariable("assignment_id") Long assignmentId,

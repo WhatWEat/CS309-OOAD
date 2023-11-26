@@ -253,7 +253,7 @@ const $q = useQuasar()
 const {username, userid, identity} = useUserStore()
 
 const {person_id} = storeToRefs(usePerson)
-const email = ref(''), gender = ref(1), phone = ref(''),
+const email = ref(''), gender = ref(4), phone = ref(''),
   skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
 const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref(''), avatar_clone = ref()
 const newSkill = ref(), colorList = ref(['warning', 'teal', 'glossy', 'primary'])
@@ -262,8 +262,8 @@ const selectedEmailDomain = ref('gmail.com')
 const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn',
   '@mail.sustech.edu.cn'])
 const personIdentity = ref('')
-const genderList = ref([{label: 'Male', value: 1}, {label: 'Female', value: 2},
-  {label: 'Non-binary', value: 3}, {label: 'Unknown', value: 4}])
+const genderList = ref([{label: 'male', value: 1}, {label: 'female', value: 2},
+  {label: 'non-binary', value: 3}, {label: 'unknown', value: 4}])
 
 //axios to initial
 const personInfo = ref<personProps>(defaultPerson)
@@ -290,7 +290,13 @@ onMounted(() => {
 
 function copyPersonInfo(){
   gender.value = Number(genderConvert(personInfo.value.gender))
-  phone.value = personInfo.value.phone
+  // console.log("gender",gender.value)
+  // console.log("personInfo",personInfo.value)
+  if (personInfo.value.phone=='null'){
+    phone.value = ''
+  } else {
+    phone.value = personInfo.value.phone
+  }
   if (personInfo.value.programmingSkills)
     skills.value = personInfo.value.programmingSkills.slice()
   else
@@ -366,20 +372,20 @@ function addSkill() {
 function genderConvert(gender: number | string) {
   switch (gender) {
     case 1:
-      return "Male";
+      return "male";
     case 2:
-      return "Female";
+      return "female";
     case 3:
-      return "Non-binary";
+      return "non-binary";
     case 4:
-      return "Unknown";
-    case "Male":
+      return "unknown";
+    case "male":
       return 1;
-    case "Female":
+    case "female":
       return 2;
-    case "Non-binary":
+    case "non-binary":
       return 3;
-    case "Unknown":
+    case "unknown":
       return 4;
   }
 }

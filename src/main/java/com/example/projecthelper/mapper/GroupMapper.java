@@ -38,9 +38,9 @@ public interface GroupMapper extends BaseMapper<Group> {
         "from stuingroup s join users u on s.stuid = u.userid where s.groupid = #{gpId};")
     List<User> getMembersFromGp(Long gpId);
 
-    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, reportTime," +
+    @Insert("insert into groups (maxsize,groupName, projectId, teamTime, deadline, reportTime," +
         "instructorId, creatorId, description, leaderId, technicalStack)" +
-            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime},#{reportTime}," +
+            "VALUES (#{maxsize},#{groupName},#{projectId},#{teamTime}, #{deadline}, #{reportTime}," +
         "#{instructorId}, #{creatorId}, #{description}, #{leaderId}, " +
         "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler});")
     @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "groupid")
@@ -91,6 +91,12 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert("insert into stuInGroup values (#{groupId}, #{stuId})")
     void stuJoinGroup(Long stuId, Long groupId);
+
+    @Select("select * from stuingroup s join users u on u.userid = s.stuid where s.groupid = #{groupId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> getGpMem(long groupId);
     @Select("select count(*) from stuInGroup where groupId = #{groupId}")
     int findCntOfStuInGroup(long groupId);
     @Delete("delete from stuingroup where stuId = #{stuId} and groupId = #{gpId};")

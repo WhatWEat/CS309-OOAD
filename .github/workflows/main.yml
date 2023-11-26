@@ -1,0 +1,40 @@
+name: Environment Variable Test
+
+on: 
+  push:
+    branches: [ "deploy" ]
+
+
+env:
+  env_var: ${{ vars.TEST }}
+  env_var1: ${{ vars.TEST1 }}
+  
+jobs:
+  print_variables:
+    runs-on: ubuntu-latest
+    environment: Actions
+    steps:      
+      - name: Print global variable
+        run: |
+          echo "Global Variable is $vars.DOCKER_USERNAME"
+          echo "Job Specific Variable1 is ${{ vars.DOCKER_USERNAME }}"
+          echo "Global Variable is $vars.DOCKER_TOKEN"
+          echo "Job Specific Variable1 is ${{ vars.DOCKER_TOKEN }}"
+          
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+          
+      - name: Print job secret
+        run: echo "Job Specific Variable is ${{ secrets.TOKEN }}"
+        
+      - name: Set and print step specific variable
+        run: |
+          STEP_VAR="Step Specific Value"
+          echo "Step Specific Variable is $STEP_VAR"

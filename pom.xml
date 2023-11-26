@@ -214,6 +214,10 @@
                 </includes>
                 <filtering>false</filtering>
             </resource>
+            <resource>
+                <directory>Files</directory>
+                <targetPath>${project.build.directory}</targetPath>
+            </resource>
         </resources>
     </build>
 

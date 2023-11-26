@@ -39,7 +39,7 @@
           />
         </template>
       </q-table>
-      <q-btn label="Export to Excel" @click="exportToExcel" />
+<!--      <q-btn label="Export to Excel" @click="exportToExcel" />-->
       <q-dialog v-model="showDialog">
         <div>
           <label for="start-number">From:</label>

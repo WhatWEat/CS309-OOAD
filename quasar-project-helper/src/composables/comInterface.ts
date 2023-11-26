@@ -7,7 +7,7 @@ export interface noticeProps {
   title: string;
   content: string;
   creatorId: number;
-  createName?: string;
+  creatorName?: string;
   createTime?: string;
   stuView: null | string;
   toAll: boolean;
@@ -18,7 +18,7 @@ withDefaults(defineProps<noticeProps>(), {
   title: "project1",
   content: "asdfasf",
   creatorId: 0,
-  createName: "tsert1",
+  creatorName: "tsert1",
   stuView: null,
   createTime: "2021-06-01 00:00:00",
   toAll: false,

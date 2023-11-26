@@ -9,7 +9,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           freeLogin: true
         }
-      }],
+      },
+      {path: '/announcements', component: () => import('pages/CheckAnnouncement.vue')},],
   },
   {
     path: '/projects/:projectID',
@@ -35,6 +36,7 @@ const routes: RouteRecordRaw[] = [
             }
           ]
         },
+        {path: 'announcements', component: () => import('pages/CheckAnnouncement.vue')},
         {path: 'assignment-list/:assignmentId', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')},
       ],
   },
@@ -71,10 +73,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/ForgotPassword.vue')
   },
 
-  {
-    path: '/announcement',
-    component: () => import('pages/CheckAnnouncement.vue')
-  },
 
   {
     path: '/admin',

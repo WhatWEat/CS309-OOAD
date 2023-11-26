@@ -9,8 +9,7 @@
           dense
           input-class="text-left"
           color="teal"
-          class="col bg-primary text-white"
-          standout="bg-blue-6 text-white"
+          class="col text-white"
           v-model="currentInput"
           :readonly="tags.size>0"
           :placeholder="tags.size > 0 ? '' :'enter to search'"
@@ -106,7 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDateString} from "src/composables/usefulFunction"
+import {formatDateString, useProjectId} from "src/composables/usefulFunction"
 import {onMounted, ref, watch} from 'vue';
 import {defaultNotice, noticeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
@@ -196,14 +195,17 @@ function seqTypeFormat(value) {
     return value;
   }
 }
+const projectID = ref(-1);
 onMounted(()=>{
+  projectID.value = useProjectId();
   onRefresh()
 })
 async function onRefresh() {
   loading.value = true
   let search = ''
   if (tags.value.size > 0) search = tags.value[0];
-  api.get(`/notice-list/-1/${pagination.value.page-1}/${pagination.value.rowsPerPage}/${search} `).then((res) => {
+  let project_id = Number.isNaN(projectID.value) ? -1 : projectID.value;
+  api.get(`/notice-list/${project_id}/${pagination.value.page-1}/${pagination.value.rowsPerPage}/${search} `).then((res) => {
     data.value = res.data.body;
     loading.value = false
 

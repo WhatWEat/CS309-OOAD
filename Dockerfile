@@ -20,5 +20,5 @@ RUN rm -f /etc/localtime \
 EXPOSE 8443
 
 #启动命令
-ENTRYPOINT ["java","-jar","/usr/local/ProjectHelper-0.0.1-SNAPSHOT.jar"]
+#ENTRYPOINT ["java","-jar","/usr/local/ProjectHelper-0.0.1-SNAPSHOT.jar"]
 

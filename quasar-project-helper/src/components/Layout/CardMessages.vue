@@ -14,7 +14,7 @@
       </q-item-section>
 
       <q-item-section side>
-        {{ msg.createName }}
+        {{ msg.creatorName }}
       </q-item-section>
     </q-item>
   </div>

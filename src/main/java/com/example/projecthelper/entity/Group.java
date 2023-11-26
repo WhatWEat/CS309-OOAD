@@ -25,6 +25,7 @@ public class Group {
     private Long maxsize;
     private Long projectId;
     private LocalDateTime teamTime;
+    private LocalDateTime deadline;
     private LocalDateTime reportTime;
     private String description;
     private List<String> technicalStack;

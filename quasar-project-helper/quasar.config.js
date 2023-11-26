@@ -90,7 +90,7 @@ module.exports = configure(function (/* ctx */) {
       https: false,
       proxy: {
         '/api': {
-          target: 'https://localhost:8443',
+          target: 'https://8.134.200.127:8443',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, ''),

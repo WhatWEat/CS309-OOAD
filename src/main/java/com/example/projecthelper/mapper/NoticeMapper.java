@@ -22,37 +22,50 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "    join stuviewnotice s on n.noticeid = s.noticeid" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where s.stuid = #{stuId} and n.projectid = #{projId} limit #{limit} offset #{offset};")
-    List<Notice> findNoticeOfStuAndProj(Long stuId, Long projId, Long limit, Long offset);
+        " where s.stuid = #{stuId} and n.projectid = #{projId} and " +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset} ;")
+    List<Notice> findNoticeOfStuAndProj(Long stuId, Long projId, Long limit, Long offset, String key);
 
     //FUNC: 寻找一个学生的所有notice
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join stuviewnotice s on n.noticeid = s.noticeid" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where s.stuid = #{stuId} limit #{limit} offset #{offset};")
-    List<Notice> findNoticeOfStu(Long stuId, Long limit, Long offset);
+        " where s.stuid = #{stuId} and" +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc;")
+    List<Notice> findNoticeOfStu(Long stuId, Long limit, Long offset, String key);
 
     //FUNC: 寻找一个老师在proj中的所有notice
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where p.teacherId = #{teaId} and n.projectid = #{projId} limit #{limit} offset #{offset};")
-    List<Notice> findNoticeOfTeaAndProj(Long teaId, Long projId, Long limit, Long offset);
+        " where p.teacherId = #{teaId} and n.projectid = #{projId} and" +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfTeaAndProj(Long teaId, Long projId, Long limit, Long offset, String key);
 
     //FUNC: 寻找一个老师的所有notice
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where p.teacherId = #{teaId} limit #{limit} offset #{offset};")
-    List<Notice> findNoticeOfTea(Long teaId, Long limit, Long offset);
+        " where p.teacherId = #{teaId} and" +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc;")
+    List<Notice> findNoticeOfTea(Long teaId, Long limit, Long offset, String key);
 
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
         "    join taOfProject t on t.projectid = n.projectid" +
-        " where t.taId = #{taId} limit #{limit} offset #{offset};")
-    List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset);
+        " where t.taId = #{taId} and n.projectid = #{projId} and" +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};")
+    List<Notice> findNoticeOfTaAndProj(Long taId, Long projId, Long limit, Long offset, String key);
+
+    @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
+        "    join project p on p.projectid= n.projectid" +
+        "    join users u on u.userid = n.creatorid" +
+        "    join taOfProject t on t.projectid = n.projectid" +
+        " where t.taId = #{taId} and" +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc;")
+    List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset, String key);
 
     @Insert("insert into notice ( title, content, creatorId, projectId, createTime)\n" +
             "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime});")

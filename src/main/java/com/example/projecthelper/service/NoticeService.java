@@ -55,35 +55,39 @@ public class NoticeService {
     }
 
 
-    public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
         if (projId == -1)
-            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize);
-        Long teaOfProj = projectMapper.findTeacherByProject(projId);
-        if (!Objects.equals(teaOfProj, userId)) {
-            throw new AccessDeniedException("无权访问该project");
-        }
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
     }
 
-    public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
         if (projId == -1)
-            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize);
-        Long teaOfProj = projectMapper.findTeacherByProject(projId);
-        if (!Objects.equals(teaOfProj, userId)) {
-            throw new AccessDeniedException("无权访问该project");
-        }
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
     }
 
 
-    public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
         Long checker = projectMapper.checkStuInProj(userId, projId);
         if (checker == null && projId != -1) {
             throw new AccessDeniedException("无权访问该project");
         }
         if (projId == -1)
-            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize);
-        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize);
+            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
     }
 
     //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert

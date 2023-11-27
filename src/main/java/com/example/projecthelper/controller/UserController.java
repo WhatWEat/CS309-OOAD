@@ -113,22 +113,24 @@ public class UserController {
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
+    @GetMapping(value = {"/notice-list/{project_id}/{page}/{page_size}", "/notice-list/{project_id}/{page}/{page_size}/{search_key}"})
     public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
                                                    @PathVariable("page") long page,
                                                    @PathVariable("page_size") long pageSize,
+                                                   @PathVariable(value = "search_key", required = false) String searchKey,
                                                    HttpServletRequest request) {
         // Use the projectId, page, and pageSize in your method
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Notice> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))){
-            case 1 -> noticeService.getNoticesByTeacher(userId, projectId, page, pageSize);
-            case 2 -> noticeService.getNoticesByTa(userId, projectId, page, pageSize);
-            case 3 -> noticeService.getNoticesByStudent(userId, projectId, page, pageSize);
+            case 1 -> noticeService.getNoticesByTeacher(userId, projectId, page, pageSize, searchKey);
+            case 2 -> noticeService.getNoticesByTa(userId, projectId, page, pageSize, searchKey);
+            case 3 -> noticeService.getNoticesByStudent(userId, projectId, page, pageSize, searchKey);
             default -> throw new InvalidFormException("不合法的身份");
         };
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
+
 
 
 }

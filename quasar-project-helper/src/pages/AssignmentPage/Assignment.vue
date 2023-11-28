@@ -20,9 +20,7 @@
     <assignment-table  :columns="columns_group" :rows="rows_group" table-title="Group">
     </assignment-table>
   </div>
-  <div v-show="false">
-    <assignments-detail :AssignmentAttachment="AssignmentAttachment" :AssignmentDetail="AssignmentDetail"></assignments-detail>
-  </div>
+
    Dev   userData:
   {{ userData}}
 </template>
@@ -101,37 +99,6 @@ export default {
           moreInfo: 'View Details2'
         },
       ],
-      AssignmentDetail: {
-        AssignmentName: 'Assignment 1',
-        studentName: "Liwehao",
-        submitTime: '2020-10-7',
-        deadLine: '2020-10-10',
-        instructor: 'Qi-Kun Xue1',
-        grade: '100',
-        matGrade: '100',
-        isReturned: true,
-        moreInfo: 'Course Assignment 4:\n' +
-          '\n' +
-          'Chapter 4：Exercise 2，Exercise 8，and Exercise 22\n' +
-          '\n' +
-          'Deadline: Please submit your homework through the Sakai system before 10:20AM on April 11, 2023.  \n' +
-          '\n' +
-          'Please note that you have only one chance to submit your homework in the SAKAI system.\n' +
-          '\n' +
-          'No re-submission is allowed.\n' +
-          '\n' +
-          'No late submission is allowed.',
-      },
-      AssignmentAttachment: [
-        {
-          fileName: 'Assignment 1',
-          fileAddress: 'www.baidu.com',
-        },
-        {
-          fileName: 'Assignment 2',
-          fileAddress: 'www.Google.com',
-        }
-      ],
 
       isPersonal: ref(true),
       isGroup : ref(false),
@@ -170,7 +137,6 @@ export default {
   },
   components: {
     AssignmentTable: defineAsyncComponent(() => import('src/components/Component_Li/table/assignmentTable.vue')),
-    AssignmentsDetail: defineAsyncComponent(() => import('src/components/Component_Li/special/assignmentsDetail.vue')),
   },
 }
 </script>

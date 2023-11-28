@@ -57,9 +57,14 @@ public class UserService {
         return user;
     }
 
-    public List<User> getUsersByIdentity(int identity, int page, int page_size){
-        return usersMapper.findUsersByIdentity(identity, page_size, page * page_size);
-
+    public List<User> getUsersByIdentity(int identity, Long projId){
+        if(projId == -1)
+            return usersMapper.findUsersByIdentity(identity);
+        else {
+            if(identity == 2)
+                return usersMapper.findTaByProj(projId);
+        }
+        return null;
     }
 
     //test

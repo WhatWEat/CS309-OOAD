@@ -347,14 +347,13 @@ public class TeacherController {
     }
 
     //PART IV: select ta
-    @GetMapping("/ta_list/{page}/{page_size}")
+    @GetMapping("/ta_list/{project_id}")
     public ResponseResult<List<User>> getTaList(
-        @PathVariable("page") int page,
-        @PathVariable("page_size") int page_size,
+        @PathVariable("project_id") Long projId,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), projId);
+        return ResponseResult.ok(users, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/designate_ta_to_proj")

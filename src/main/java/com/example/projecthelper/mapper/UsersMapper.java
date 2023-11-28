@@ -15,11 +15,17 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     User findUserById(Long userId);
 
-    @Select("select * from users where identity = #{identity} limit #{limit} offset #{offset};")
+    @Select("select * from users where identity = #{identity};")
     @Results({
         @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<User> findUsersByIdentity(Integer identity, int limit, int offset);
+    List<User> findUsersByIdentity(Integer identity);
+
+    @Select("select * from users u join taOfProject t on u.userId = t.taId where t.projectId = #{projId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findTaByProj(Long projId);
 
     @Select({
         "<script>",

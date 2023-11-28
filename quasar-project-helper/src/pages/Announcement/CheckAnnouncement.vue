@@ -14,6 +14,7 @@
           :readonly="tags.size>0"
           :placeholder="tags.size > 0 ? '' :'enter to search'"
           @keyup.enter="addTag"
+          @row-dblclick="handleRowDbclick"
         >
           <template v-slot:prepend>
             <q-chip
@@ -36,18 +37,17 @@
         <template v-slot:action>
           <p class="q-px-sm"/>
           <q-btn
-            :disable="selected.length == 0"
             unelevated
-            @click="onDeleteClickAction()"
-            color="negative"
-            label="批量删除"
+            @click="removeRow()"
+            color="red"
+            label="Remove"
           />
           <p class="q-px-sm"/>
           <q-btn
             unelevated
             @click="onNewClickAction()"
-            color="primary"
-            label="添加"
+            color="black"
+            label="ADD"
           />
         </template>
 
@@ -55,46 +55,65 @@
       <q-table
         :rows="data"
         :columns="columns"
-        row-key="noticeId"
+        row-key="title"
         selection="multiple"
-        :selected="selected"
+        v-model:selected="selected"
         v-model:pagination="pagination"
+        :hide-selected-banner="hideSelectedBanner"
         :loading="loading"
         flat>
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th auto-width />
+            <q-th
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+            >
+              {{ col.label }}
+            </q-th>
+          </q-tr>
+        </template>
+
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td>
-              <q-checkbox v-model="props.selected"/>
-            </q-td>
-            <q-td key="dataClickAction" :props="props">
-              <q-btn
-                unelevated
-                @click="onDeleteClickAction(props.row.id)"
-                color="negative"
-                label="删除"
-                flat
-                dense
-              ></q-btn>
-              <q-btn
-                unelevated
-                @click="onEditClickAction(props.row.id)"
-                color="primary"
-                label="编辑"
-                flat
-                dense
-              ></q-btn>
+              <q-checkbox v-model="props.selected" />
             </q-td>
             <q-td key="title" :props="props">
               <span>{{ props.row.title }}</span>
+              <q-popup-edit v-model="props.row.title" title="Update title" buttons v-slot="scope">
+                <q-input type="text" v-model="scope.value" dense autofocus />
+              </q-popup-edit>
             </q-td>
             <q-td key="content" :props="props">
-              <span>{{ props.row.content }}</span>
+              <span>{{ props.row.content.substring(0, 10) }}</span>
+              <q-popup-edit
+                buttons
+                v-model="props.row.content"
+                v-slot="scope"
+              >
+                <q-editor
+                  v-model="scope.value"
+                  min-height="5rem"
+                  autofocus
+                  @keyup.enter.stop
+                />
+              </q-popup-edit>
             </q-td>
-            <q-td key="createName" :props="props">
+            <q-td key="creatorName" :props="props">
               <span>{{ props.row.creatorName }}</span>
             </q-td>
             <q-td key="createTime" :props="props">
               <span>{{ formatDateString(props.row.createTime) }}</span>
+            </q-td>
+            <q-td auto-width>
+              <q-btn size="sm" color="accent" round dense @click="props.expand = !props.expand" :icon="props.expand ? 'remove' : 'add'" />
+            </q-td>
+          </q-tr>
+          <q-tr v-show="props.expand" :props="props">
+            <q-td colspan="100%">
+              <div class="text-left" style="font-size: 20px;">This is the detailed content for row above: {{ props.row.content }}.</div>
             </q-td>
           </q-tr>
         </template>
@@ -110,16 +129,13 @@ import {onMounted, ref, watch} from 'vue';
 import {defaultNotice, noticeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
 import {useQuasar} from "quasar";
+import {useRouter} from "vue-router";
+
+const  router = useRouter()
 const data = ref<noticeProps[]>([defaultNotice]);
-const loading = ref(true), selected = ref([]), dataSource = ref(''), dataSourceUrl = ref(''), queryColumns = ref([])
+const loading = ref(true), selected = ref([]), dataSource = ref(''), dataSourceUrl = ref(''), queryColumns = ref([]),show_detail = ref(false)
+const hideSelectedBanner = ref(true)
 const columns = [
-  {
-    name: "dataClickAction",
-    align: "center",
-    label: "op",
-    field: "dataClickAction",
-    sortable: true
-  },
   {
     name: "title",
     required: true,
@@ -139,11 +155,11 @@ const columns = [
     sortable: true
   },
   {
-    name: "createName",
+    name: "creatorName",
     required: true,
     label: "creator",
-    align: "center",
-    field: row => row.createName,
+    align: "left",
+    field: row => row.creatorName,
     format: val => `${val}`,
     sortable: true
   },
@@ -168,33 +184,19 @@ watch(pagination, (newVal, oldVal)=>{
   }
 })
 async function created() {
-  await this.init()
   await this.onRefresh();
 }
 
-
+function handleRowDbclick(evt, row, index) {
+  this.show_detail = true;
+}
 async function beforeRouteUpdate(to, from, next) {
   console.info('beforeRouteUpdate');
-  await this.init(to.params.dataSource);
   await this.onRefresh();
   next();
 }
 
-function dateFormat(value) {
-  return date.dateTimeFormat(value);
-}
 
-function seqTypeFormat(value) {
-  if (value === "STRING") {
-    return "字符串";
-  } else if (value === "LONG") {
-    return "数字";
-  } else if (value === "GUID") {
-    return "GUID";
-  } else {
-    return value;
-  }
-}
 const projectID = ref(-1);
 onMounted(()=>{
   projectID.value = useProjectId();
@@ -213,7 +215,6 @@ async function onRefresh() {
     console.log('err', err)
   })
 
-  selected.value = [];
 }
 
 function onRequestAction(value) {
@@ -249,53 +250,26 @@ function onResetClickAction() {
 }
 
 function onNewClickAction() {
-  this.$router.push("/",);
+  const queryParams = {
+    title: '',
+    content: '',
+    projected: ''
+  };
+
+  router.push({ path: '/announcements/new', query: queryParams });
 }
 
-function onEditClickAction(id) {
-  this.$router.push("/");
-}
+function removeRow() {
+  const selectedRows = [...this.selected];
 
-
-async function onDeleteClickAction(id) {
-  let ids = [];
-  this.selected.forEach(function (val) {
-    ids.push(val.id);
+  selectedRows.forEach(index => {
+    this.rows.splice(index, 1);
   });
-  console.info(JSON.stringify(ids));
 
-  try {
-    this.$q
-      .dialog({
-        title: "删除",
-        message: "确认删除吗？",
-        ok: {
-          unelevated: true
-        },
-        cancel: {
-          color: "negative",
-          unelevated: true
-        },
-        persistent: false
-      })
-      .onOk(async () => {
-        // if (id) {
-        //   await metadataSequenceService.delete(this.dataSource, id);
-        // } else {
-        //   await metadataSequenceService.batchDelete(this.dataSource, ids);
-        // }
-
-        this.$q.notify("删除成功");
-        this.onRefresh();
-      })
-      // .onCancel(() => {})
-      .onDismiss(() => {
-        console.info("I am triggered on both OK and Cancel");
-      });
-  } catch (error) {
-    this.$q.notify("删除失败");
-  }
+  this.selected = [];
 }
+
+
 
 const tags = ref<Set<string>>(new Set());
 const currentInput = ref<string>('');
@@ -331,18 +305,4 @@ function removeTag(index: string) {
   onRefresh();
 }
 
-
-async function init(dataSource) {
-  console.info("init");
-  this.$store.commit(
-    "stores/mutation.js",
-    this.$route.meta.isAllowBack
-  );
-
-  this.selected = [];
-  this.search = "";
-  this.dataSource = dataSource || this.$route.params.dataSource;
-  this.dataSourceUrl = "/dataSource/" + this.dataSource;
-
-}
 </script>

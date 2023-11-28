@@ -393,7 +393,7 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
         }
         try {
-            groupMapper.updateVisibility(userId, groupId, visibility);
+            groupMapper.updateVisibility(groupId, visibility);
         } catch (Exception e) {
             throw new InvalidFormException("leaderId需要为long");
         }

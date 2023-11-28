@@ -1,5 +1,7 @@
 package com.example.projecthelper.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
+
+import java.sql.Timestamp;
 import java.util.List;
 import lombok.Data;
 import lombok.Getter;
@@ -34,6 +36,11 @@ public class User implements Cloneable{
     private String avatarPath;
 
     private boolean isFrozen;
+
+    private String code;
+
+    private Timestamp expire;
+
     @TableField(exist = false)
     private MultipartFile avatar;
     @TableField(exist = false)

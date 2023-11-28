@@ -190,7 +190,7 @@
           <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"
                    outlined>
             <template v-slot:append>
-              <q-icon v-if="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
+              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
             </template>
             <template v-slot:hint>
               Length hint
@@ -220,10 +220,6 @@
 </template>
 
 <script>
-import {api} from 'boot/axios';
-import {defineAsyncComponent, ref} from 'vue';
-import {useUserStore} from 'src/composables/useUserStore';
-import {formatDateString, merger} from "src/composables/usefulFunction";
 
 export default {
   name: 'GroupTeacherPage',
@@ -237,6 +233,8 @@ export default {
       isGroupLeader: ref(),
 
       userData: useUserStore(),
+
+      isLoading: ref(false),
 
       columns: [
         {
@@ -527,6 +525,10 @@ export default {
         return '1970-01-01';
       }
     }
+  },
+  created() {
+    console.log("created");
+    getUserData();
   },
 }
 

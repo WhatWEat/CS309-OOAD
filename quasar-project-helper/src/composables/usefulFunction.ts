@@ -84,8 +84,6 @@ export async function getAvatarUrlById(id: number) {
 }
 
 //******************Li weihao******************//
-
-
 export function merger(key: [], value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {
@@ -104,6 +102,34 @@ export function merger(key: any, value: any): object {
   }
 
   return obj;
+}
+export async function getUserData() {
+  const userDate = {
+    username: null,
+    userid: -1,
+    identity: -1,
+    jwt_token: null,
+  }
+  try {
+    const response = await api.get('/get_personal_info');
+    if (response.data.statusCode !== 200) {
+      throw new Error('error in fetchUser');
+    }
+    else {
+      userDate.userid = response.data.body.userId;
+      userDate.identity = response.data.body.identity
+      userDate.username = response.data.body.name;
+      userDate.jwt_token = response.data.jwt_token;
+    }
+    return userDate;
+  }
+  catch (error) {
+    userDate.userid = -1;
+    userDate.username = null;
+    userDate.identity = -1;
+    userDate.jwt_token = null;
+    return userDate;
+  }
 }
 
 

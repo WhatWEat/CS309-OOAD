@@ -97,7 +97,7 @@
   </q-dialog>
   <!--  这里是右键删除修改按钮的弹窗部分-->
   <div>
-    <q-btn-group v-show="show_button_teacher "
+    <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
       <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
@@ -190,7 +190,7 @@
           <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"
                    outlined>
             <template v-slot:append>
-              <q-icon v-if="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
+              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
             </template>
             <template v-slot:hint>
               Length hint
@@ -220,10 +220,15 @@
 </template>
 
 <script>
-import {api} from 'boot/axios';
-import {defineAsyncComponent, ref} from 'vue';
-import {useUserStore} from 'src/composables/useUserStore';
-import {formatDateString, merger} from "src/composables/usefulFunction";
+import {onMounted, ref} from "vue";
+import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
+import {defineAsyncComponent} from "vue";
+import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";
+//import {api} from 'boot/axios';
+//import {defineAsyncComponent, ref} from 'vue';
+//import {useUserStore} from 'src/composables/useUserStore';
+//import {formatDateString, merger} from "src/composables/usefulFunction";
 
 export default {
   name: 'GroupTeacherPage',
@@ -237,6 +242,8 @@ export default {
       isGroupLeader: ref(),
 
       userData: useUserStore(),
+
+      isLoading: ref(false),
 
       columns: [
         {
@@ -370,7 +377,7 @@ export default {
       this.p_x = evt.clientY + 'px';
       this.p_y = evt.clientX + 'px';
       // 更新弹窗显示
-      if (this.userData.identity > 1) {
+      if (this.userData.identity > 2) {
         this.show_button_student = true;
       } else {
         this.show_button_teacher = true;
@@ -528,9 +535,12 @@ export default {
       }
     }
   },
+  created() {
+    console.log("created");
+    getUserData();
+
+  },
 }
-
-
 </script>
 
 <style scoped>

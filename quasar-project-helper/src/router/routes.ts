@@ -26,7 +26,7 @@ const routes: RouteRecordRaw[] = [
         {path: 'group-list', component: () => import('pages/GroupPage/GroupList.vue')},
         {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
         {
-          path: 'assignment-list', component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
+          path: 'assignment-list', component: () => import('pages/AssignmentPage/Assignment.vue'),
           children: [
             {
               path: 'personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),
@@ -88,7 +88,7 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: '/student/Assignment',
-    component: () => import('pages/AssignmentPage/AssignmentStudent.vue'),
+    component: () => import('pages/AssignmentPage/Assignment.vue'),
     children: [
       {
         path: '/personal', component: () => import('pages/AssignmentPage/AssignmentStudent_Personal.vue'),

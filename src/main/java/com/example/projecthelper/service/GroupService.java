@@ -132,26 +132,34 @@ public class GroupService {
             projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null ||
             groupMapper.findGroupOfStuInProject(leaderId, group.getProjectId()) != null)
             throw new InvalidFormException("leaderId不合法或已经加入小组");
+        StringBuilder sb = new StringBuilder();
+        if(group.getMaxsize() == null)
+            sb.append("maxsize不能为空|");
+        if(group.getGroupName() == null)
+            sb.append("groupName不能为空|");
+        if(group.getProjectId() == null)
+            sb.append("projectId不能为空|");
+        if(!sb.isEmpty())
+            throw new InvalidFormException(sb.toString());
+        group.setCreatorId(creatorId);
+        group.setTeamTime(LocalDateTime.now());
+        System.err.println(group.getMemberIds());
+        // 插入学生进组
+        Set<Long> validIds = group.getMemberIds().stream()
+            .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
+            .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
+                .collect(Collectors.toSet());
+        validIds.add(leaderId);
+        validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
+        group.setMemberIds(new ArrayList<>(validIds));
+        group.setTechnicalStack(group.getTechnicalStack() == null ? new ArrayList<>(): group.getTechnicalStack());
         try{
-            group.setCreatorId(creatorId);
-            group.setTeamTime(LocalDateTime.now());
-            System.err.println(group.getMemberIds());
-
-            // 插入学生进组
-            Set<Long> validIds = group.getMemberIds().stream()
-                .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
-                .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
-                    .collect(Collectors.toSet());
-            validIds.add(leaderId);
-            validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
-            group.setMemberIds(new ArrayList<>(validIds));
             groupMapper.createGroup(group);
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             System.err.println(validIds);
             System.err.println(group.getGroupId()); // 这个是对的
         }catch (Exception e){
             System.err.println(e.getMessage());
-            throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
         }
     }
     public void createGroup(ObjectCountWrapper<Group> ocw, Long creatorId, Predicate<Long> accessProject){

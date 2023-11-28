@@ -225,6 +225,10 @@ import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import {defineAsyncComponent} from "vue";
 import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";
+//import {api} from 'boot/axios';
+//import {defineAsyncComponent, ref} from 'vue';
+//import {useUserStore} from 'src/composables/useUserStore';
+//import {formatDateString, merger} from "src/composables/usefulFunction";
 
 export default {
   name: 'GroupTeacherPage',
@@ -534,6 +538,7 @@ export default {
   created() {
     console.log("created");
     getUserData();
+
   },
 }
 </script>

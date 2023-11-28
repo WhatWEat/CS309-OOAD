@@ -84,6 +84,7 @@ export async function getAvatarUrlById(id: number) {
 }
 
 //******************Li weihao******************//
+
 export function merger(key: [], value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {
@@ -103,6 +104,7 @@ export function merger(key: any, value: any): object {
 
   return obj;
 }
+
 export async function getUserData() {
   const userDate = {
     username: null,
@@ -131,5 +133,6 @@ export async function getUserData() {
     return userDate;
   }
 }
+
 
 

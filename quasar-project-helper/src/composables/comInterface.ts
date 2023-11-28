@@ -67,6 +67,7 @@ export interface GroupProps{
   teamTime: string,
   description?: string|null,
   members: string[],
+  memberIds?: number[],
 }
 export const defaultGroup: GroupProps = {
   groupId: 0,
@@ -80,6 +81,7 @@ export const defaultGroup: GroupProps = {
   teamTime: '',
   description: null,
   members: ['123','111','2323'],
+  memberIds: [1,2,3],
 }
 export interface personProps {
   // 用于记录Person的各类属性

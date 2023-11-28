@@ -1,216 +1,348 @@
 <template>
-  <q-layout view="hHh lpR fFf" class="bg-grey-1">
-    <q-header >
-      <q-toolbar class="GNL__toolbar">
+  <div class="q-pa-md q-gutter-sm bg-page">
 
-        <q-toolbar-title>
-          Project Helper
-          <q-btn dense flat icon="home" @click="router.push('/')">
-          </q-btn>
-        </q-toolbar-title>
+    <q-separator/>
 
-        <q-space/>
-
-        <q-input class="GNL__toolbar-input" outlined dense v-model="search" color="primary"
-                 placeholder="Search for title, publisher & time">
+    <div class="bg-table-list">
+      <q-banner inline-actions class="text-black bg-listcolor">
+        <q-input
+          dense
+          input-class="text-left"
+          color="teal"
+          class="col text-white"
+          v-model="currentInput"
+          :readonly="tags.size>0"
+          :placeholder="tags.size > 0 ? '' :'enter to search'"
+          @keyup.enter="addTag"
+        >
           <template v-slot:prepend>
-            <q-icon v-if="search === ''" name="search"/>
-            <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''"/>
+            <q-chip
+              v-for="(tag, index) in tags"
+              :key="index"
+              removable
+              dense
+              square
+              class="bg-blue-8 text-white"
+              @remove="removeTag(tag)"
+            >
+              {{ tag }}
+            </q-chip>
           </template>
           <template v-slot:append>
-            <q-btn
-              flat
-              dense
-              round
-              aria-label="Menu"
-              icon="arrow_drop_down"
-            >
-            </q-btn>
+            <q-icon v-if="currentInput === ''" name="search"/>
+            <q-icon v-else name="clear" class="cursor-pointer" @click="currentInput = ''"/>
           </template>
         </q-input>
+        <template v-slot:action>
+          <p class="q-px-sm"/>
+          <q-btn
+            :disable="selected.length == 0"
+            unelevated
+            @click="onDeleteClickAction()"
+            color="negative"
+            label="批量删除"
+          />
+          <p class="q-px-sm"/>
+          <q-btn
+            unelevated
+            @click="onNewClickAction()"
+            color="primary"
+            label="添加"
+          />
+        </template>
 
-        <q-space/>
-        <person-bar></person-bar>
-      </q-toolbar>
-    </q-header>
-
-
-
-    <q-page-container>
-      <q-list class="q-ma-sm q-mt-md">
-        <q-expansion-item
-          v-for="(mail, index) in mail_data" :key="index"
-          style="border-radius: 10px"
-          popup
-          header-class="bg-white"
-        >
-          <template v-slot:header>
-            <q-item-section avatar>
-              <q-avatar>
-                <img :src="mail.avatar">
-              </q-avatar>
-            </q-item-section>
-
-            <q-item-section>
-              <q-item-label>{{ mail.title }}</q-item-label>
-              <q-item-label caption>{{ mail.date }}</q-item-label>
-            </q-item-section>
-          </template>
-
-          <q-separator/>
-          <q-card>
-            <q-card-section>
-              {{ mail.msg }}
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
-    </q-page-container>
-
-    <q-page-sticky v-if="$q.screen.lt.sm" position="bottom-right" :offset="[10,10]">
-      <q-btn round
-             icon="add"
-             direction="up"
-             color="accent"
-      >
-
-      </q-btn>
-    </q-page-sticky>
-  </q-layout>
+      </q-banner>
+      <q-table
+        :rows="data"
+        :columns="columns"
+        row-key="noticeId"
+        selection="multiple"
+        :selected="selected"
+        v-model:pagination="pagination"
+        :loading="loading"
+        flat>
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td>
+              <q-checkbox v-model="props.selected"/>
+            </q-td>
+            <q-td key="dataClickAction" :props="props">
+              <q-btn
+                unelevated
+                @click="onDeleteClickAction(props.row.id)"
+                color="negative"
+                label="删除"
+                flat
+                dense
+              ></q-btn>
+              <q-btn
+                unelevated
+                @click="onEditClickAction(props.row.id)"
+                color="primary"
+                label="编辑"
+                flat
+                dense
+              ></q-btn>
+            </q-td>
+            <q-td key="title" :props="props">
+              <span>{{ props.row.title }}</span>
+            </q-td>
+            <q-td key="content" :props="props">
+              <span>{{ props.row.content }}</span>
+            </q-td>
+            <q-td key="createName" :props="props">
+              <span>{{ props.row.creatorName }}</span>
+            </q-td>
+            <q-td key="createTime" :props="props">
+              <span>{{ formatDateString(props.row.createTime) }}</span>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+      <q-separator v-if="data.length > 0"/>
+    </div>
+  </div>
 </template>
 
-<script>
-
-import {defineComponent} from 'vue'
-import {ref} from 'vue'
-import { useRouter } from 'vue-router'
-import PersonBar from "components/Layout/PersonBar.vue";
-
-
-
-const links1 = [
-  {icon: 'move_to_inbox', text: 'Inbox'},
-  {icon: 'star', text: 'Stared'},
-  {icon: 'send', text: 'Sent'},
-  {icon: 'error', text: 'Spam'}
-];
-const links2 = [
-  {icon: 'flag', text: 'Updates', color: 'text-orange'},
-  {icon: 'group', text: 'Social', color: 'text-red'},
-  {icon: 'label', text: 'Promos', color: 'text-indigo-8'},
-  {icon: 'forum', text: 'Forums', color: 'text-teal'}
-];
-
-export default defineComponent({
-  name: 'eMail',
-  components: {PersonBar},
-  setup() {
-
-
-    const leftDrawerOpen = ref(false)
-    const miniState = ref(false)
-    const router = useRouter()
-
-    return {
-      leftDrawerOpen,
-      router,
-      miniState,
-      search: '',
-      showAdvanced: ref(false),
-      showDateOptions: ref(false),
-      exactPhrase: '',
-      hasWords: '',
-      excludeWords: '',
-      byWebsite: '',
-      byDate: 'Any time',
-      links1,
-      links2,
-      mail_data: [
-        {
-          title: 'Pratik Patel',
-          avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4',
-          date: 'March 12, 2019',
-        },
-        {
-          title: 'Pratik Patel',
-          avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4',
-          date: 'March 22, 2019',
-        },
-        {
-          title: 'Pratik Patel',
-          avatar: 'https://avatars2.githubusercontent.com/u/34883558?s=400&v=4',
-          date: 'March 12, 2019',
-        },
-        {
-          title: 'Winfield Stapforth',
-          avatar: 'https://cdn.quasar.dev/img/avatar6.jpg',
-          date: 'March 22, 2019',
-        },
-        {
-          title: 'Jeff Galbraith',
-          avatar: 'https://cdn.quasar.dev/team/jeff_galbraith.jpg',
-          date: 'March 12, 2019',
-        },
-        {
-          title: 'Jeff Galbraith',
-          avatar: 'https://cdn.quasar.dev/team/jeff_galbraith.jpg',
-          date: 'March 22, 2019',
-        },
-        {
-          title: 'Razvan Stoenescu',
-          avatar: 'https://cdn.quasar.dev/team/razvan_stoenescu.jpeg',
-          date: 'March 12, 2019',
-        },
-        {
-          title: 'Razvan Stoenescu',
-          avatar: 'https://cdn.quasar.dev/team/razvan_stoenescu.jpeg',
-          date: 'March 22, 2019',
-        },
-        {
-          title: 'John Doe',
-          avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-          date: 'March 12, 2019',
-        },
-        {
-          title: 'Pratik Patel',
-          avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-          date: 'March 22, 2019',
-        },
-      ]
-    }
+<script lang="ts" setup>
+import {formatDateString, useProjectId} from "src/composables/usefulFunction"
+import {onMounted, ref, watch} from 'vue';
+import {defaultNotice, noticeProps} from "src/composables/comInterface";
+import {api} from "boot/axios"
+import {useQuasar} from "quasar";
+const data = ref<noticeProps[]>([defaultNotice]);
+const loading = ref(true), selected = ref([]), dataSource = ref(''), dataSourceUrl = ref(''), queryColumns = ref([])
+const columns = [
+  {
+    name: "dataClickAction",
+    align: "center",
+    label: "op",
+    field: "dataClickAction",
+    sortable: true
   },
-
-  mounted() {
-    this.mail_data = this.mail_data.map(function (item) {
-      item['msg'] = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quidem, eius reprehenderit eos corrupti\n' +
-        '              commodi magni quaerat ex numquam, dolorum officiis modi facere maiores architecto suscipit iste\n' +
-        '              eveniet doloribus ullam aliquid.';
-      return item;
-    })
-  }
-
+  {
+    name: "title",
+    required: true,
+    label: "title",
+    align: "left",
+    field: row => row.title,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "content",
+    required: true,
+    label: "content",
+    align: "left",
+    field: row => row.content,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "createName",
+    required: true,
+    label: "creator",
+    align: "center",
+    field: row => row.createName,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "createTime",
+    required: true,
+    label: "create time",
+    align: "left",
+    field: row => row.createTime,
+    format: val => `${val}`,
+    sortable: true
+  },
+]
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
 })
+
+watch(pagination, (newVal, oldVal)=>{
+  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
+    onRefresh();
+  }
+})
+async function created() {
+  await this.init()
+  await this.onRefresh();
+}
+
+
+async function beforeRouteUpdate(to, from, next) {
+  console.info('beforeRouteUpdate');
+  await this.init(to.params.dataSource);
+  await this.onRefresh();
+  next();
+}
+
+function dateFormat(value) {
+  return date.dateTimeFormat(value);
+}
+
+function seqTypeFormat(value) {
+  if (value === "STRING") {
+    return "字符串";
+  } else if (value === "LONG") {
+    return "数字";
+  } else if (value === "GUID") {
+    return "GUID";
+  } else {
+    return value;
+  }
+}
+const projectID = ref(-1);
+onMounted(()=>{
+  projectID.value = useProjectId();
+  onRefresh()
+})
+async function onRefresh() {
+  loading.value = true
+  let search = ''
+  if (tags.value.size > 0) search = tags.value[0];
+  let project_id = Number.isNaN(projectID.value) ? -1 : projectID.value;
+  api.get(`/notice-list/${project_id}/${pagination.value.page-1}/${pagination.value.rowsPerPage}/${search} `).then((res) => {
+    data.value = res.data.body;
+    loading.value = false
+
+  }).catch((err) => {
+    console.log('err', err)
+  })
+
+  selected.value = [];
+}
+
+function onRequestAction(value) {
+  console.info("onRequestAction");
+  console.info(value);
+  this.tablePagination.rowsPerPage = value.rowsPerPage;
+  this.fetchFromServer();
+}
+
+function getQuery() {
+  let query = {};
+  for (let i = 0; i < this.queryColumns.length; i++) {
+    const queryColumn = this.queryColumns[i];
+    if (queryColumn.value && queryColumn.value.trim() !== "") {
+      query[queryColumn.name] = queryColumn.value
+    }
+  }
+  console.info(query);
+  return query;
+}
+
+function onQueryClickAction() {
+  this.onRefresh();
+}
+
+function onResetClickAction() {
+  console.info("onResetClickAction");
+  this.search = "";
+  for (let i = 0; i < this.queryColumns.length; i++) {
+    this.queryColumns[i].value = "";
+  }
+  this.onRefresh();
+}
+
+function onNewClickAction() {
+  this.$router.push("/",);
+}
+
+function onEditClickAction(id) {
+  this.$router.push("/");
+}
+
+
+async function onDeleteClickAction(id) {
+  let ids = [];
+  this.selected.forEach(function (val) {
+    ids.push(val.id);
+  });
+  console.info(JSON.stringify(ids));
+
+  try {
+    this.$q
+      .dialog({
+        title: "删除",
+        message: "确认删除吗？",
+        ok: {
+          unelevated: true
+        },
+        cancel: {
+          color: "negative",
+          unelevated: true
+        },
+        persistent: false
+      })
+      .onOk(async () => {
+        // if (id) {
+        //   await metadataSequenceService.delete(this.dataSource, id);
+        // } else {
+        //   await metadataSequenceService.batchDelete(this.dataSource, ids);
+        // }
+
+        this.$q.notify("删除成功");
+        this.onRefresh();
+      })
+      // .onCancel(() => {})
+      .onDismiss(() => {
+        console.info("I am triggered on both OK and Cancel");
+      });
+  } catch (error) {
+    this.$q.notify("删除失败");
+  }
+}
+
+const tags = ref<Set<string>>(new Set());
+const currentInput = ref<string>('');
+const $q = useQuasar();
+const emit = defineEmits(['update:tags'])
+
+function addTag() {
+  if (currentInput.value) {
+    if (tags.value.size > 3) {
+      $q.notify({
+          position: "top",
+          message: "you can only add 4 tags",
+          color: "warning"
+        }
+      )
+    } else if (tags.value.has(currentInput.value)) {
+      $q.notify({
+          position: "top",
+          message: "you have the same condition",
+          color: "positive"
+        }
+      )
+    } else {
+      tags.value.add(currentInput.value);
+      currentInput.value = '';
+      onRefresh();
+    }
+  }
+}
+
+function removeTag(index: string) {
+  tags.value.delete(index);
+  onRefresh();
+}
+
+
+async function init(dataSource) {
+  console.info("init");
+  this.$store.commit(
+    "stores/mutation.js",
+    this.$route.meta.isAllowBack
+  );
+
+  this.selected = [];
+  this.search = "";
+  this.dataSource = dataSource || this.$route.params.dataSource;
+  this.dataSourceUrl = "/dataSource/" + this.dataSource;
+
+}
 </script>
-
-<style>
-.GNL__toolbar {
-  height: 64px;
-}
-
-.GNL__toolbar-input {
-  width: 55%;
-}
-
-.GNL__drawer-item .q-item__section--avatar .q-icon {
-  color: #5f6368;
-}
-
-.GNL__drawer-item .q-item__label {
-  color: #3c4043;
-  letter-spacing: .01785714em;
-  font-size: .875rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-}
-
-</style>

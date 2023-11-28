@@ -55,8 +55,8 @@
                   :key="event.assignmentId"
                 >
                   <div
-                    :class="badgeClasses(event, 'day')"
-                    :style="badgeStyles(event, 'day')"
+                    :class="badgeClasses(event)"
+                    :style="badgeStyles"
                     class="my-event"
                   >
                     <abbr
@@ -114,9 +114,7 @@
 import {onMounted, ref} from 'vue'
 import {api} from 'boot/axios'
 import {
-  addToDate,
   parseDate,
-  parseTimestamp,
   QCalendarMonth,
   today
 } from '@quasar/quasar-ui-qcalendar'
@@ -210,7 +208,7 @@ computed(() => {
   return map
 })
 
-function badgeClasses(event: assProps, type: string) {
+function badgeClasses(event: assProps) {
   // let event_time = parseTimestamp(event.deadline);
   let colorClass = 'bg-green';
   if (event.deadline < today()) {
@@ -224,7 +222,7 @@ function badgeClasses(event: assProps, type: string) {
   }
 }
 
-function badgeStyles(event: any, day: string) {
+function badgeStyles() {
   const s = {}
   return s
 }

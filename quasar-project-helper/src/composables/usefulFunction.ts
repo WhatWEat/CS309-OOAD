@@ -1,5 +1,6 @@
 import {api} from "boot/axios";
 import {useRoute} from 'vue-router';
+import {isArray} from "util";
 
 export function truncate(str: string, num = 15, endSymbol = '...'): string {
   // 超过多少长度就截断字符串，截断和面加上什么符号
@@ -54,6 +55,7 @@ export async function getAvatarUrl() {
     return null;
   }
 }
+
 export async function getAvatarUrlById(id: number) {
   try {
     if (localStorage.getItem(`avatar_${id}`) && localStorage.getItem(`avatar_${id}_time`)) {
@@ -80,4 +82,28 @@ export async function getAvatarUrlById(id: number) {
     return null;
   }
 }
+
+//******************Li weihao******************//
+
+
+export function merger(key: [], value: []): object;
+export function merger(key: string, value: string): object;
+export function merger(key: any, value: any): object {
+  const obj: Record<string, any> = {};
+
+  if (Array.isArray(key)) {
+    // 处理 key 为数组的情况
+    for (let i = 0; i < key.length; i++) {
+      obj[key[i]] = value[i];
+    }
+  } else if (typeof key === 'string') {
+    // 处理 key 为字符串的情况
+    obj[key] = value;
+  } else {
+    throw new Error("Invalid argument types");
+  }
+
+  return obj;
+}
+
 

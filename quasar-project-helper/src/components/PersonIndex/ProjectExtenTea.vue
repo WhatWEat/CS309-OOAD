@@ -100,7 +100,7 @@
         </q-tab-panel>
 
         <q-tab-panel name="ta">
-          <q-list class="row">
+          <q-list class="row" v-if="ta_list.length!==0">
             <q-item
               class="col-4"
               :to="`/person/${ta.userId}`"
@@ -118,6 +118,9 @@
               </q-item-section>
             </q-item>
           </q-list>
+          <div v-else>
+            No TAs
+          </div>
         </q-tab-panel>
         <q-tab-panel name="group">
           <div class="row">
@@ -134,6 +137,7 @@
             </q-chip>
           </div>
         </q-tab-panel>
+
       </q-tab-panels>
 
       <q-separator/>
@@ -156,9 +160,11 @@
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from "vue";
 import {defaultGroup, personProps, GroupProps, projectProps} from "src/composables/comInterface";
-import {computed} from "vue-demi";
+import {computed, watchEffect} from "vue-demi";
 import {api} from "boot/axios";
 import {useQuasar} from "quasar";
+import _ from 'lodash';
+import GroupFrom from "components/Component_Li/form/GroupFrom.vue";
 const $q = useQuasar();
 const tab = ref<string>('des');
 const props = defineProps<{
@@ -172,15 +178,21 @@ const project_show = ref<projectProps>(props.project);
 const allPeople = ref<personProps[]>([]), ta_list = ref<personProps[]>([]);
 const group_list = ref<GroupProps[]>([]);
 onMounted(()=>{
-  // TODO
   // use api to get all people
-  api.get(`/ta-list/${props.project.projectId}`).then(res => {
-    console.log('ta list', res.data)
-    ta_list.value = res.data;
+  api.get(`/tea/ta_list/${props.project.projectId}`).then(res => {
+    ta_list.value = res.data.body;
+    // console.log('ta list', props.project.projectId,ta_list.value)
   }).catch(err => {
     console.log(err)
   })
-  allPeople.value = [];
+  watchEffect(() => {
+    if (props.ta_list_all) {
+      allPeople.value = props.ta_list_all;
+      console.log(123123)
+    } else {
+      allPeople.value = [];
+    }
+  })
   api.get(`/get_brief_groups_from_proj/${props.project.projectId}`).then(res => {
     group_list.value = res.data.body;
   }).catch(err => {
@@ -218,7 +230,6 @@ const moveToLeft = (userId: number) => {
 function saveInfo() {
   console.log('save info')
 
-  // TODO project basic info
   if (project_show.value.name === project_edit.value.name &&
     project_show.value.description === project_edit.value.description) {
     console.log('no change')
@@ -237,12 +248,15 @@ function saveInfo() {
   }
 
   // TODO TAs
-  if (ta_list.value.length === 0) {
+  if (selectedPeople.value.length === 0 && _.isEqual(ta_list.value, selectedPeople.value)) {
     console.log('no change')
   } else {
     ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
-    api.post(`/assign_ta/${props.project.projectId}`,{
-      ta_list: ta_list.value.map(ta => ta.userId)
+    let submit = ta_list.value.map(ta => ta.userId)
+    // console.log('submit', submit)
+    api.post(`/tea/designate_ta_to_proj`,{
+      key: props.project.projectId,
+      value: submit
     }).then(res => {
       notifySuccess()
     }).catch(err => {
@@ -252,7 +266,6 @@ function saveInfo() {
     console.log('change')
   }
   // use api to submit
-  console.log(project_edit.value)
 }
 function notifySuccess() {
   $q.notify({
@@ -272,7 +285,7 @@ function clickEdit() {
   isEdit.value = true
   project_show.value = JSON.parse(JSON.stringify(project_edit.value));
   selectedPeople.value = JSON.parse(JSON.stringify(ta_list.value));
-  console.log('click edit')
+  console.log('click edit', selectedPeople.value)
 }
 function clickGroup() {
   isAssignTA.value = true

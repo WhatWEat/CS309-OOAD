@@ -61,12 +61,15 @@ onMounted(() => {
       }).catch(err => {
         console.log(err)
       })
-      api.get('/ta-list/-1').then(res => {
-        ta_list.value = res.data.body;
-        isLoading.value = true
-      }).catch(err => {
-        console.log(err)
-      })
+      if (identity.value !== null && identity.value <= 1){
+        api.get('/tea/ta_list/-1').then(res => {
+          ta_list.value = res.data.body;
+          isLoading.value = true
+        }).catch(err => {
+          console.log(err)
+        })
+      }
+
     }
   })
 })

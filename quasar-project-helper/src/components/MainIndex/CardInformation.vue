@@ -10,22 +10,30 @@
             <div v-if="projects.length === 0" class="justify-center">
               You don't have any project yet.
             </div>
-            <q-list class="rounded-borders" separator v-else>
-              <q-item v-for="project in projects" :key="project.projectId" clickable v-ripple
-                      :to="`/projects/${project.projectId}`">
-                <q-item-section avatar>
-                  <q-avatar>
-                    <q-img :src="avatarMap[project.teacherName]?.toString()"></q-img>
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label lines="1">{{ project.name }}</q-item-label>
-                  <q-item-label caption lines="2">
-                    <span class="text-weight-bold">{{ project.teacherName }}</span>
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-infinite-scroll v-else @load="getProject" :offset="10">
+              <q-list class="rounded-borders" separator>
+                <q-item v-for="project in projects" :key="project.projectId" clickable v-ripple
+                        :to="`/projects/${project.projectId}`">
+                  <q-item-section avatar>
+                    <q-avatar>
+                      <q-img :src="avatarMap.get(project.teacherName)?.toString()"></q-img>
+                    </q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label lines="1">{{ project.name }}</q-item-label>
+                    <q-item-label caption lines="2">
+                      <span class="text-weight-bold">{{ project.teacherName }}</span>
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+              <template v-slot:loading>
+                <div class="row justify-center q-my-md" style="height: 10px">
+                  <q-spinner-dots color="primary" size="40px"/>
+                </div>
+              </template>
+            </q-infinite-scroll>
+
           </q-scroll-area>
           <q-skeleton style="height: 200px" type="text" v-else>
 
@@ -83,9 +91,10 @@
         </q-card-section>
         <q-card-section class="bg-white q-mb-sm q-mx-xs">
           <div v-if="loadingMessage">
-            <q-infinite-scroll :offset="20"  @load="getNotice"
-                               v-if="messages.length!==0">
-              <q-scroll-area style="height: 200px">
+            <q-scroll-area style="height: 200px" v-if="messages.length!==0">
+              <q-infinite-scroll :offset="10" @load="getNotice"
+                                 >
+
                 <q-list>
                   <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
                     <q-item-section>
@@ -102,13 +111,14 @@
 
                 </q-list>
                 <template v-slot:loading>
-                  <div class="row justify-center q-my-md">
+                  <div class="row justify-center q-my-md" style="height: 10px">
                     <q-spinner-dots color="primary" size="40px"/>
                   </div>
                 </template>
 
-              </q-scroll-area>
-            </q-infinite-scroll>
+
+              </q-infinite-scroll>
+            </q-scroll-area>
             <div v-else class="justify-center" style="height: 200px">
               No announcement yet.
             </div>
@@ -135,7 +145,7 @@ import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
 import {formatDateString, getAvatarUrlById, truncate} from 'src/composables/usefulFunction';
 import {computed} from 'vue-demi';
-import {assProps, defaultNotice, noticeProps, projectProps} from "src/composables/comInterface";
+import {assProps, noticeProps, projectProps} from "src/composables/comInterface";
 
 const selectedDate = ref(today())
 
@@ -150,19 +160,71 @@ function getCurrentDay(day: number) {
 }
 
 // project list
-const projects = ref<projectProps[]>([]), avatarMap: { [key: string]: string | null } = {};
-const loadingProject = ref(false)
+const projects = ref<projectProps[]>([]);
+const avatarMap = ref<Map<string, string|null>>(new Map<string, string|null>());
+const loadingProject = ref(false), project_page = ref(0)
 onMounted(() => {
-  api.get('/project-list/0/10').then(async res => {
-    projects.value = res.data.body;
-    for (const project of projects.value) {
-      avatarMap[project.teacherName] = await getAvatarUrlById(project.teacherId)
+  getProject(0,()=>void 0)
+})
+function getProject(index=0, done:()=>void){
+  if (index > project_page.value) {
+    done()
+    return
+  }
+  api.get(`/project-list/${index}/5`).then(async res => {
+    let page_projects: projectProps[] = res.data.body;
+    projects.value.push.apply(projects.value, page_projects);
+    for (const project of page_projects) {
+      if (avatarMap.value.has(project.teacherName)) {
+        continue
+      }
+      avatarMap.value.set(project.teacherName,await getAvatarUrlById(project.teacherId))
     }
     loadingProject.value = true
+    if (page_projects.length === 0) {
+      done()
+      return
+    }
+    project_page.value++;
+    done()
+
   }).catch(err => {
     console.log(err)
   })
+}
+
+// announcements
+const messages = ref<noticeProps[]>([])
+const loadingMessage = ref(false), notice_page = ref(0)
+onMounted(() => {
+  getNotice(0,()=>void 0)
 })
+
+function getNotice(index=0,done:()=>void) {
+  console.log(index)
+  console.log('start',messages.value)
+  if (index > notice_page.value) {
+    done()
+    return
+  }
+  api.get(`/notice-list/-1/${notice_page.value}/5`).then((res) => {
+    let page_messages: noticeProps[] = res.data.body;
+    console.log('res', page_messages)
+    messages.value.push.apply(messages.value, page_messages)
+    console.log('end',messages.value)
+    loadingMessage.value = true;
+    if (page_messages.length === 0) {
+      done()
+      return
+    }
+    notice_page.value++;
+    done()
+  }).catch((err) => {
+    console.log('err', err)
+  })
+}
+
+// calendar
 const events = ref<assProps[]>([
   {
     assignmentId: 2,
@@ -177,30 +239,6 @@ const events = ref<assProps[]>([
     type: '0',
   },
 ])
-
-// announcements
-const messages = ref<noticeProps[]>([])
-const loadingMessage = ref(false), notice_page = ref(0)
-onMounted(() => {
-  loadingMessage.value = true
-  // messages.value.push(defaultNotice)
-  // getNotice()
-})
-
-function getNotice(index: any, done: () => void) {
-  api.get(`/notice-list/-1/${notice_page.value}/3`).then((res) => {
-    let page_messages: noticeProps[] = res.data.body;
-    console.log('res', page_messages)
-    messages.value.push.apply(messages.value, page_messages)
-    loadingMessage.value = true;
-    notice_page.value++;
-    done()
-  }).catch((err) => {
-    console.log('err', err)
-  })
-}
-
-// calendar
 onMounted(() => {
   api.get(`/ass-list/-1/0/10`).then((res) => {
     events.value = res.data.body;

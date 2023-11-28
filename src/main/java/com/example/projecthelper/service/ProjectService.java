@@ -119,6 +119,8 @@ public class ProjectService {
         Long teaId = projectMapper.findTeacherByProject(projId);
         if(teaId != userId)
             throw new AccessDeniedException("无权修改别人的proj");
+        if(taId == null)
+            return;
         taId = taId.stream().filter(
             e -> {
                 User ta = usersMapper.findUserById(e);

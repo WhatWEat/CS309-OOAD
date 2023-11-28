@@ -7,14 +7,14 @@
       <q-skeleton type="text" v-if="!isLoading">
       </q-skeleton>
       <q-card-section v-else>
-        <q-list v-if="identity===3" >
+        <q-list v-if="identity===3">
           <project-exten v-for="project in project_list" :key="project.projectId"
                          :project="project"></project-exten>
         </q-list>
-        <q-list v-if="identity<=1 & 0<= identity"
+        <q-list v-if="identity<=1 && 0<= identity"
         >
           <project-exten-tea v-for="project in project_list" :key="project.projectId"
-                             :project="project" :identity="identity"></project-exten-tea>
+                             :project="project" :ta_list_all="ta_list" :identity="identity"></project-exten-tea>
         </q-list>
       </q-card-section>
     </q-card>
@@ -24,7 +24,7 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import {projectProps} from "src/composables/comInterface";
+import {personProps, projectProps} from "src/composables/comInterface";
 import ProjectExten from "components/PersonIndex/ProjectExten.vue";
 import SearchBars from "components/PersonIndex/SearchBars.vue";
 import ProjectExtenTea from "components/PersonIndex/ProjectExtenTea.vue";
@@ -34,6 +34,7 @@ import {api} from "boot/axios";
 
 const origin_project_list = ref<projectProps[]>();
 const project_list = ref<projectProps[]>();
+const ta_list = ref<personProps[]>();
 origin_project_list.value = [{
   projectId: 0,
   name: "Project 1",
@@ -49,9 +50,9 @@ origin_project_list.value = [{
 },
 ]
 const {identity} = useUserStore(), isLoading = ref(false);
-onMounted(()=>{
-  watchEffect(()=>{
-    if(identity.value !== -1 && !isLoading.value){
+onMounted(() => {
+  watchEffect(() => {
+    if (identity.value !== -1 && !isLoading.value) {
       isLoading.value = true
       api.get('/project-list/0/10').then(res => {
         origin_project_list.value = res.data.body;
@@ -60,6 +61,15 @@ onMounted(()=>{
       }).catch(err => {
         console.log(err)
       })
+      if (identity.value !== null && identity.value <= 1){
+        api.get('/tea/ta_list/-1').then(res => {
+          ta_list.value = res.data.body;
+          isLoading.value = true
+        }).catch(err => {
+          console.log(err)
+        })
+      }
+
     }
   })
 })

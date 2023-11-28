@@ -61,7 +61,7 @@ onMounted(async () => {
     messageNumber.value = res.data.body.length
     messages.value = res.data.body;
     messages.value = messages.value.slice(0, 5)
-    console.log(res.data.body)
+    // console.log(res.data.body)
   }).catch(err => {
     console.log(err)
   })

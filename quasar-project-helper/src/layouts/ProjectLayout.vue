@@ -87,7 +87,12 @@ onMounted(() => {
         {
           title: 'Grade',
           icon: 'school',
-          link: 'https://quasar.dev'
+          link: `/projects/${projectID.value}/sgrade`
+        },
+        {
+          title: 'TGrade',
+          icon: 'school',
+          link: `/projects/${projectID.value}/tgrade`
         },
         {
           title: 'Person',

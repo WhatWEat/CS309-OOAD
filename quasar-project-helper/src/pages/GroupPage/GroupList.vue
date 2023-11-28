@@ -97,7 +97,7 @@
   </q-dialog>
   <!--  这里是右键删除修改按钮的弹窗部分-->
   <div>
-    <q-btn-group v-show="show_button_teacher "
+    <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
       <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
@@ -373,7 +373,7 @@ export default {
       this.p_x = evt.clientY + 'px';
       this.p_y = evt.clientX + 'px';
       // 更新弹窗显示
-      if (this.userData.identity > 1) {
+      if (this.userData.identity > 2) {
         this.show_button_student = true;
       } else {
         this.show_button_teacher = true;
@@ -536,8 +536,6 @@ export default {
     getUserData();
   },
 }
-
-
 </script>
 
 <style scoped>

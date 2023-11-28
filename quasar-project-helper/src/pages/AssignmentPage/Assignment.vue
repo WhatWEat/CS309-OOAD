@@ -1,11 +1,9 @@
 <template>
-
   <q-toolbar class="bg-grey-4 text-black rounded-borders">
     <q-btn
       flat
       label="Assignments"
     ></q-btn>
-
     <q-toolbar-title></q-toolbar-title>
     <q-btn-group push>
       <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>
@@ -14,7 +12,6 @@
   </q-toolbar>
 <!--  <router-view></router-view>-->
 
-  个人表单/小组表单
   <div v-show="isPersonal">
     <assignment-table :columns="columns_personal" :rows="rows_personal" table-title="Personal">
     </assignment-table>
@@ -23,13 +20,18 @@
     <assignment-table  :columns="columns_group" :rows="rows_group" table-title="Group">
     </assignment-table>
   </div>
-<!--  <div v-show="true">-->
+  <div v-show="false">
     <assignments-detail :AssignmentAttachment="AssignmentAttachment" :AssignmentDetail="AssignmentDetail"></assignments-detail>
-<!--  </div>-->
+  </div>
+   Dev   userData:
+  {{ userData}}
 </template>
 
 <script>
 import {defineAsyncComponent, ref} from 'vue';
+import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
+import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";
 
 export default {
   name: "AssignmentStudent",
@@ -38,6 +40,8 @@ export default {
       path: '',
       color_personal: 'grey-5',
       color_group: 'grey-4',
+
+      userData:useUserStore(),
 
       columns_personal: [
         {
@@ -167,7 +171,7 @@ export default {
   components: {
     AssignmentTable: defineAsyncComponent(() => import('src/components/Component_Li/table/assignmentTable.vue')),
     AssignmentsDetail: defineAsyncComponent(() => import('src/components/Component_Li/special/assignmentsDetail.vue')),
-  }
+  },
 }
 </script>
 

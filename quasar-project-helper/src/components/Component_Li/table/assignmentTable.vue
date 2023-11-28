@@ -7,11 +7,11 @@
       :filter="search"
       :rows="rows"
       :separator="separator"
+      :title="tableTitle"
       card-class="bg-grey-2"
       class="my-sticky-header-column-table"
       row-key="AssignmentName"
       selection="multiple"
-      :title="tableTitle"
       @row-dblclick="handleRowDbclick"
       @row-contextmenu="handleRowContextmenu"
       @contextmenu.prevent
@@ -22,15 +22,9 @@
           <!--            这里是下拉框-->
           <q-btn-dropdown color="grey-5" icon="menu">
             <q-list>
-              <q-item v-close-popup clickable @click="viewDetails">
+              <q-item v-close-popup clickable @click="show_create_ass_table = true">
                 <q-item-section>
-                  <q-item-label>View Details</q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item v-close-popup clickable @click="cardDialog = selected != '' ? true : false">
-                <q-item-section>
-                  <q-item-label>Delete</q-item-label>
+                  <q-item-label>Create Assignment</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -48,9 +42,9 @@
     </q-table>
   </div>
 
-  <!--  弹窗-->
+  <!--  删除弹窗部分-->
   <div>
-    <q-dialog v-model="cardDialog">
+    <q-dialog v-model="show_deleteDialog_student">
       <q-chat-message
         :text="['What are you doing?']"
         avatar="../../../assets/iKun.jpg"
@@ -62,27 +56,33 @@
       ></q-chat-message>
     </q-dialog>
   </div>
+  <div v-show="show_button_teacher & true">
+    <q-dialog v-model="show_deleteDialog_teacher">
+      <confirm-dialog text="Are you sure to delete?" icon_name="warning" icon_color="red" icon_text_color="white"></confirm-dialog>
+    </q-dialog>
+  </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment" :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
+    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
+                       :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
   </div>
   <!--  右键弹窗部分-->
   <div>
     <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" />
-      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" />
+      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="show_edit_ass_table = true"/>
+      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="show_deleteDialog_teacher = true"/>
     </q-btn-group>
   </div>
   <div>
     <q-btn-group v-show="show_button_student"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" />
+      <q-btn color="grey-3" icon="delete" size="md" text-color="black" @click="show_deleteDialog_student = true"/>
     </q-btn-group>
   </div>
   <!--  创建作业表单部分-->
   <div>
-    <el-dialog v-model="show_create_ass_table" center="true">
+    <el-dialog v-model="show_create_ass_table" center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
@@ -91,7 +91,7 @@
   </div>
   <!--  修改作业表单部分-->
   <div>
-    <el-dialog v-model="show_edit_ass_table" center="true">
+    <el-dialog v-model="show_edit_ass_table" center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Assignment</div>
       </template>
@@ -103,11 +103,10 @@
 </template>
 
 <script>
-import {defineAsyncComponent, defineComponent,ref} from 'vue'
+import {defineAsyncComponent, defineComponent, ref} from 'vue'
 import {useUserStore} from "src/composables/useUserStore";
-import {api} from "boot/axios";
 
-export default defineComponent( {
+export default defineComponent({
   name: "AssignmentTable",
   props: {
     columns: {
@@ -161,7 +160,6 @@ export default defineComponent( {
     return {
       search: '',
       selected: [],
-      cardDialog: ref(false),    //是否显示弹窗
       p_x: ref(200),
       p_y: ref(200),
       selected_row: {
@@ -175,7 +173,9 @@ export default defineComponent( {
       show_button_teacher: ref(false),
       show_button_student: ref(false),
       show_create_ass_table: ref(false),
-      show_edit_ass_table: ref(true),
+      show_edit_ass_table: ref(false),
+      show_deleteDialog_student: ref(false),
+      show_deleteDialog_teacher: ref(false),
 
       AssignmentDetail: {
         AssignmentName: 'Assignment 1',
@@ -184,6 +184,7 @@ export default defineComponent( {
         deadLine: '2020-10-10',
         instructor: 'Qi-Kun Xue1',
         grade: '100',
+        state: 1,
         matGrade: '100',
         isReturned: true,
         moreInfo: 'Course Assignment 4:\n' +
@@ -210,17 +211,11 @@ export default defineComponent( {
       ],
     }
   },
-  methods:{
-    viewDetails() {
-      // 根据需要替换为您的路由链接
-      //这个跳转还需要进一步的完善
-      const newpath = this.$route.path + '/assignmentDetail'
-      this.$router.push(newpath)
-    },
+  methods: {
     handleRowDbclick(row) {
       this.show_assignment_detail = true
     },
-    handleRowContextmenu(evt, row, index){
+    handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
       this.p_x = evt.clientY + 'px';
       this.p_y = evt.clientX + 'px';
@@ -243,6 +238,7 @@ export default defineComponent( {
   components: {
     AssignmentsDetail: defineAsyncComponent(() => import('src/components/Component_Li/special/assignmentsDetail.vue')),
     AssignmentForm: defineAsyncComponent(() => import('src/components/Component_Li/form/AssignmentForm.vue')),
+    ConfirmDialog: defineAsyncComponent(() => import('src/components/Component_Li/dialog/ConfirmDialog.vue')),
   }
 })
 </script>

@@ -16,8 +16,10 @@
                 <q-item-label caption style="font-weight: bold;font-size: large">Instructure</q-item-label>
               </q-item-section>
               <q-item-section>
-                <span v-if="AssignmentDetail.isReturned" style="font-weight: 1000;color: #C10015;font-size: large">-- Returned</span>
-                <span v-else style="font-weight: 1000;color: #C10015;font-size: large">-- Not Return</span>
+                <span v-if="AssignmentDetail.state===2" style="font-weight: 1000;color: #3CA278;font-size: large">-- Returned</span>
+                <span v-else-if="AssignmentDetail.state===1" style="font-weight: 1000;color: #E4AE1B;font-size: large">-- Waiting check</span>
+                <span v-else-if="AssignmentDetail.state===0" style="font-weight: 1000;color: #C10015;font-size: large">-- Not Submitted</span>
+                <span v-else style="font-weight: 1000;color: #C10015;font-size: large">-- Dev</span>
               </q-item-section>
             </q-item>
 
@@ -41,6 +43,7 @@
               </q-item-section>
             </q-item>
           </q-card>
+
           <q-card class="my-card" style="min-width: 540px;left: 0px;min-height: 120px;">
             <q-item>
               <q-item-section>
@@ -63,9 +66,8 @@
               </q-item-section>
             </q-item>
 
-
             <q-banner></q-banner>
-            <q-banner></q-banner>
+            <!--      下半部分-->
             <q-item>
               <q-item-section>
                 <q-item-label style="font-weight: bolder;font-size: x-large">Here to Submit</q-item-label>
@@ -74,13 +76,21 @@
             <q-item>
               <q-item-section>
                 <q-uploader
+                  label="Max number of files (3)"
+                  max-files="3"
+                  multiple
                   style="width: 100%"
                   url="http://localhost:4444/upload"
-                  label="Max number of files (3)"
-                  multiple
-                  max-files="3"
                   @rejected="onRejected"
                 ></q-uploader>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <q-editor
+                  v-model="editorInput" placeholder="Type your description here..."
+                  :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}">
+                </q-editor>
               </q-item-section>
             </q-item>
           </q-card>
@@ -91,17 +101,19 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue'
-import {descriptionProps} from "element-plus";
+import {defineComponent} from 'vue';
+import {useUserStore} from "src/composables/useUserStore";
+
 
 export default defineComponent({
   name: "AssignmentDetail",
-  data(){
-    return{
+  data() {
+    return {
+      userData: useUserStore(),
+      editorInput:'',
     }
   },
-  methods: {
-  },
+  methods: {},
   props: {
     AssignmentDetail: {
       required: true,
@@ -115,6 +127,7 @@ export default defineComponent({
         matGrade: '100',
         isReturned: true,
         moreInfo: 'Dev',
+        state: 0,
       }
     },
     AssignmentAttachment: {

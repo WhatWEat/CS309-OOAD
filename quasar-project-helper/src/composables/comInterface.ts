@@ -16,23 +16,173 @@ withDefaults(defineProps<noticeProps>(), {
   noticeId: 0,
   projectId: 0,
   title: "project1",
-  content: "asdfasf",
+  content: "11111111111111111111一共20个1",
   creatorId: 0,
   creatorName: "tsert1",
   stuView: null,
   createTime: "2021-06-01 00:00:00",
   toAll: false,
 })
+
+export interface gradeProps {
+  homeworkId: number;
+  projectId: number;
+  name: string;
+  grade: number;
+  contribution: string;
+  comment: string;
+  reviewerId: number;
+  reviewerName?: string;
+  createTime?: string;
+}
+withDefaults(defineProps<gradeProps>(), {
+  homeworkId: 0,
+  projectId: 0,
+  name: "assignment1",
+  grade: 90,
+  contribution: "40%",
+  comment: "excellent",
+  reviewerId: 0,
+  reviewerName: "wang",
+  createTime: "2021-06-01 00:00:00",
+})
+
+export interface tgradeProps {
+  homeworkId: number;
+  projectId: number;
+  name: string;
+  studentID: string;
+  grade: number;
+  comment: string;
+  reviewerId: number;
+  reviewerName?: string;
+  createTime?: string;
+}
+withDefaults(defineProps<tgradeProps>(), {
+  homeworkId: 0,
+  projectId: 0,
+  name: "assignment1",
+  studentID: "12110000",
+  grade: 90,
+  comment: "excellent",
+  reviewerId: 0,
+  reviewerName: "wang",
+  createTime: "2021-06-01 00:00:00",
+})
+
+export interface createProps {
+  studentID: string;
+  password: string;
+  email: string;
+  phone: string;
+}
+withDefaults(defineProps<createProps>(), {
+  studentID: "12110001",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+})
+
+export interface resetProps {
+  studentID: string;
+  password: string;
+  email: string;
+  phone: string;
+}
+withDefaults(defineProps<resetProps>(), {
+  studentID: "12110002",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+})
+
+export interface freezeProps {
+  studentID: string;
+  password: string;
+  email: string;
+  phone: string;
+}
+withDefaults(defineProps<freezeProps>(), {
+  studentID: "12110003",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+})
+
+export interface unfreezeProps {
+  studentID: string;
+  password: string;
+  email: string;
+  phone: string;
+}
+withDefaults(defineProps<unfreezeProps>(), {
+  studentID: "12110004",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+})
 export const defaultNotice: noticeProps = {
   noticeId: 0,
   projectId: 0,
   title: 'project1',
-  content: 'asdfasf',
+  content: '11111111111111111111一共20个1',
   creatorId: 0,
+  creatorName: 'Andy',
   stuView: null,
   toAll: false,
 }
 
+export const defaultGrade: gradeProps = {
+  homeworkId: 0,
+  projectId: 0,
+  name: 'assignment1',
+  grade: 90,
+  contribution: '40%',
+  comment: 'excellent',
+  reviewerName: 'wang',
+  reviewerId: 0,
+}
+
+export const defaultTGrade: tgradeProps = {
+  homeworkId: 0,
+  projectId: 0,
+  name: 'assignment1',
+  studentID:'12110000',
+  grade: 90,
+  comment: 'excellent',
+  reviewerName: 'wang',
+  reviewerId: 0,
+}
+export const defaultCreate: createProps = {
+  studentID: "12110001",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+}
+
+
+export const defaultReset: resetProps = {
+  studentID: "12110002",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+}
+
+
+export const defaultFreeze: freezeProps = {
+  studentID: "12110003",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+}
+
+
+export const defaultUnfreeze: unfreezeProps = {
+  studentID: "12110004",
+  password: "Aa@123456",
+  email: "123456@qq.com",
+  phone: "12345678910",
+}
 export interface projectProps {
   // 用于记录Project的各类属性
   projectId: number,

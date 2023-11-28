@@ -10,13 +10,19 @@ const routes: RouteRecordRaw[] = [
           freeLogin: true
         }
       },
-      {path: '/announcements', component: () => import('pages/CheckAnnouncement.vue')},],
+      {path: '/announcements', component: () => import('pages/Announcement/CheckAnnouncement.vue')},
+  {
+    path:'/announcements/new', component: () => import('pages/Announcement/addAnnouncement.vue'),
+  }
+],
   },
   {
     path: '/projects/:projectID',
     component: () => import('layouts/ProjectLayout.vue'),
     children:
       [{path: '', component: () => import('pages/IndexPages/IndexProjectPage.vue')},
+        {path: 'sgrade', component: () => import('pages/Grades/StudentGrade.vue')},
+        {path: 'tgrade', component: () => import('pages/Grades/TeacherGrade.vue')},
         {path: 'group-list', component: () => import('pages/GroupPage/GroupList.vue')},
         {path: 'group-list/:groupId', component: () => import('pages/GroupPage/GroupInfo.vue')},
         {
@@ -36,7 +42,7 @@ const routes: RouteRecordRaw[] = [
             }
           ]
         },
-        {path: 'announcements', component: () => import('pages/CheckAnnouncement.vue')},
+        {path: 'announcements', component: () => import('pages/Announcement/CheckAnnouncement.vue')},
         {path: 'assignment-list/:assignmentId', component: () => import('pages/AssignmentPage/AssignmentDetail.vue')},
       ],
   },
@@ -54,6 +60,7 @@ const routes: RouteRecordRaw[] = [
     },
     component: () => import('pages/LoginPages/UserLogin.vue')
   },
+
   {
     path: '/logout/:userid',
     meta: {
@@ -76,7 +83,7 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: '/admin',
-    component: () => import('pages/AdminUsers.vue')
+    component: () => import('pages/LoginPages/AdminUsers.vue')
   },
 
   {

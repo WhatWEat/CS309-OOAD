@@ -49,11 +49,9 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert({
         "<script>",
-        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId, description, technicalStack) VALUES",
+        "INSERT INTO groups (maxsize) VALUES",
         "<foreach item='group' index='index' collection='groupList' separator=','>",
-        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, " +
-            "#{group.reportTime}, #{group.instructorId}, #{group.creatorId}, #{description}, " +
-            "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler})",
+        "(#{group.maxsize})" +
         "</foreach>",
         "</script>"
     })
@@ -79,6 +77,8 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select g.groupId from groups g join stuInGroup sIG on g.groupId = sIG.groupId where g.projectId = #{projectId} and sIG.stuId = #{userId}; ")
     Long findGroupIdOfUserInAProj(long userId, long projectId);
 
+    @Delete("delete from stuInGroup where groupId = #{groupId}")
+    void deleteStuInGroup(long groupId);
     @Insert({
         "<script>",
         "INSERT INTO stuInGroup (groupId, stuId) VALUES",
@@ -107,11 +107,20 @@ public interface GroupMapper extends BaseMapper<Group> {
             "leaderId =#{leaderId}, " +
             "maxsize =#{maxsize}, " +
             "description =#{description}, " +
+            "deadline =#{deadline}, " +
             "reportTime =#{reportTime}, " +
+            "technicalStack =#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, " +
             "instructorId =#{instructorId} " +
             "where groupId = #{groupId};")
     //max_size、group_name、instructor_id, groupId不能为空
     void updateGroupForTea(Group group) throws PSQLException;
+
+    @Delete("delete from groups where groupId = #{groupId};")
+    void deleteGroup(Long groupId);
+
+
+
+
 
     @Update("update groups set " +
         "maxsize =#{maxsize} " +

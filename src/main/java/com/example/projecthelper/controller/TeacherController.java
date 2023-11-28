@@ -183,10 +183,10 @@ public class TeacherController {
     }
 
     @PostMapping("/create_multiple_groups")
-    public ResponseResult<Object> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
+    public ResponseResult<List<Long>> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
-        groupService.createGroup(
+        List<Long> ids = groupService.createGroup(
             ocw,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
             pjId -> Objects.equals(
@@ -194,7 +194,7 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(ids, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/modify_group_info")
@@ -206,6 +206,15 @@ public class TeacherController {
                 groupService.findCreatorByGroup(gpId),
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/delete_group")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Long groupId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.deleteGroupForTea(
+            groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }

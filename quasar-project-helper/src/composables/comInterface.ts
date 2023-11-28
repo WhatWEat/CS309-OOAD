@@ -49,12 +49,12 @@ export const defaultProject: projectProps = {
   teacherId: 0,
   teacherName: 'tsert1',
 }
-export interface GroupMember{
-  // 用于记录Group中Member的各类属性
-  name: string,
-  id: number,
-  skills?: string[],
-}
+// export interface GroupMember{
+//   // 用于记录Group中Member的各类属性
+//   name: string,
+//   id: number,
+//   skills?: string[],
+// }
 export interface GroupProps{
   groupId: number,
   groupName: string,
@@ -67,6 +67,8 @@ export interface GroupProps{
   teamTime: string,
   description?: string|null,
   members: string[],
+  memberIds: number[],
+  technicalStack?: string[],
 }
 export const defaultGroup: GroupProps = {
   groupId: 0,
@@ -78,12 +80,13 @@ export const defaultGroup: GroupProps = {
   maxsize: 10,
   reportTime: '',
   teamTime: '',
+  memberIds: [0],
   description: null,
   members: ['123','111','2323'],
 }
 export interface personProps {
   // 用于记录Person的各类属性
-  userid: number,
+  userId: number,
   identity: number,
   password: string | null,
   phone: string,
@@ -95,7 +98,7 @@ export interface personProps {
   programmingSkills: string[]
 }
 export const defaultPerson: personProps = {
-  userid: 0,
+  userId: 0,
   identity: 3,
   password: null,
   phone: '',

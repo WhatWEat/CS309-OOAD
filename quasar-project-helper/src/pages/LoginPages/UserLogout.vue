@@ -5,13 +5,13 @@
         <q-card class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
-              <img src="http://localhost:9001/profile.svg">
+              <q-img :src="AvatarUrl"/>
             </q-avatar>
           </q-card-section>
           <q-card-section >
             <div class="text-center q-pt-lg">
               <div class="col text-h6 ellipsis">
-                Log in
+                Log in {{userid}}
               </div>
             </div>
           </q-card-section>
@@ -24,11 +24,6 @@
 <!--                v-model="personId"-->
 <!--                label="ID"-->
 <!--              />-->
-              <q-item class="col-12">
-                <q-item-section>
-                  <q-item-label>{{ userid }}</q-item-label>
-                </q-item-section>
-              </q-item>
 
               <q-input
                 type="password"
@@ -78,21 +73,22 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import {defineComponent, onMounted} from 'vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar';
 import {api} from 'boot/axios';
 import {useUserStore} from 'src/composables/useUserStore';
+import {getAvatarUrl} from "src/composables/usefulFunction";
 
 export default defineComponent({
   setup() {
     const router = useRouter()
     const $q = useQuasar()
     const password = ref('')
-    const {userid} = useUserStore()
+    const {userid,username} = useUserStore()
     const personId = ref(router.currentRoute.value.params.userid)
-
+    const AvatarUrl = ref()
     function getPasswordRules() {
       return [(val) => val.length >= 6 || 'The password length cannot be less than 6 digits']
     }
@@ -119,8 +115,11 @@ export default defineComponent({
         console.log(password)
       })
     }
-
+    onMounted(async () => {
+      AvatarUrl.value = await getAvatarUrl()
+    })
     function goToLogin() {
+      username.value = null;
       router.push('/login')
     }
 
@@ -131,10 +130,13 @@ export default defineComponent({
       password,
       getPasswordRules,
       login,
+      userid,
       goToLogin,
-      goToForgotPassword
+      goToForgotPassword,
+      AvatarUrl
     }
   }
+
 })
 </script>
 

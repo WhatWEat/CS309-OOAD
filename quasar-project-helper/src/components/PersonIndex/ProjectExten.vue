@@ -21,16 +21,16 @@
           {{ project.description }}
         </q-tab-panel>
 
-        <q-tab-panel name="group">
+        <q-tab-panel name="group" v-if="group_id!==-1">
           <div class="text-h6">
             <q-avatar>
-
               <q-icon color="blue" name="groups"></q-icon>
             </q-avatar>
+
             <span>
               {{ leader.name }}
               <q-tooltip anchor="center right" self="center left" class="bg-blue">
-                <q-badge color="blue" v-for="skill in leader.skills" :key="skill">
+                <q-badge color="blue" v-for="skill in leader.programmingSkills" :key="skill">
                   {{ skill }}
                 </q-badge>
               </q-tooltip>
@@ -41,12 +41,12 @@
           <q-separator/>
           <q-list dense class="row">
             <q-item class="flex-center" clickable v-ripple v-for="member in GroupMember"
-                    :key="member.id"
-                    :href="`/person/${member.id}`">
+                    :key="member.userId"
+                    :to="`/person/${member.userId}`">
               <q-item-label>
                 {{ member.name }}
                 <q-tooltip class="bg-blue">
-                  <q-badge color="blue" v-for="skill in member.skills" :key="skill">
+                  <q-badge color="blue" v-for="skill in member.programmingSkills" :key="skill">
                     {{ skill }}
                   </q-badge>
                 </q-tooltip>
@@ -54,33 +54,43 @@
             </q-item>
           </q-list>
         </q-tab-panel>
+        <q-tab-panel name="group" v-else>
+          <q-item dense clickable :to="`/projects/${project.projectId}/group-list`">
+            <q-item-section class="row text-h6">
+              <div>
+                <span>
+              you are not in a group. Click to join a group
+            </span>
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-tab-panel>
+        <q-tab-panel name="intended">
+          <div class="row q-gutter-sm">
+              <q-chip
+                v-for="(tag, index) in TeammateRequire"
+                :key="index"
+                square
+                class="text-white"
+                :color="getColor(index)"
+                removable
+                @remove="removeTeam(index)"
+              >
+                {{ tag }}
+              </q-chip>
+              <q-input
+                square
+                borderless
+                clearable
+                dense
+                autogrow
+                v-model="inputTagsValue"
+                placeholder="Add a tag"
+                @keyup.enter="handleInputConfirm"
+              />
 
-        <q-tab-panel name="skill">
-          <div class="row">
-            <el-tag
-              v-for="(tag,index) in TeammateRequire"
-              :key="tag"
-              class="q-pa-xs"
-              closable
-              :disable-transitions="false"
-              @close="handleClose(tag)"
-              :type="tagsColor[index % tagsColor.length]"
-            >
-              {{ tag }}
-            </el-tag>
-            <el-input
-              v-if="inputVisible"
-              ref="InputRef"
-              v-model="inputTagsValue"
-              class="q-pa-xs"
-              @keyup.enter="handleInputConfirm"
-              @blur="handleInputConfirm"
-            />
-            <el-button v-else class="q-pa-xs" size="small" @click="showInput">
-              + New Tag
-            </el-button>
+            </div>
 
-          </div>
         </q-tab-panel>
       </q-tab-panels>
 
@@ -95,16 +105,15 @@
       >
         <q-tab name="des" label="Description"/>
         <q-tab name="group" label="Group"/>
-        <q-tab name="skill" label="Intended teammates"/>
+        <q-tab name="intended" label="Intended teammates"/>
       </q-tabs>
     </q-card>
   </q-expansion-item>
 </template>
 
 <script setup lang="ts">
-import {projectProps, GroupMember} from "src/composables/comInterface";
+import {projectProps, GroupProps, personProps, defaultPerson} from "src/composables/comInterface";
 import {defineProps, nextTick, onMounted, ref} from 'vue';
-import {ElInput} from "element-plus";
 import {api} from "boot/axios";
 
 const tab = ref<string>('des')
@@ -113,50 +122,101 @@ const props = defineProps<{
 }>()
 
 // group
-const isGroup = ref<boolean>(true)
-const GroupMember = ref<GroupMember[]>([{name: 'andy', id: 1, skills: ['java','cpp']}, {name: 'andy1', id: 2, skills: ['springboot','vue']},
-  {name: 'andy2', id: 3, skills: ['python']}])
-const leader = ref<GroupMember>()
+const isGroup = ref<boolean>(false)
+const groupInfo = ref<GroupProps>()
+const GroupMember = ref<personProps[]>([])
+const leader = ref<personProps>(defaultPerson)
+const group_id = ref<number>()
 onMounted(() => {
-  api.get(``)
-})
-setGroup()
+  api.get(`/get_group_id/${props.project.projectId}`).then(res => {
+    group_id.value = res.data.body
+    isGroup.value = group_id.value !== -1
+    if (group_id.value !== -1) {
+      api.get(`/getGroupInfo/${group_id.value}`).then(res => {
+        groupInfo.value = res.data.body
+        setGroup()
+      }).catch(err => {
+        console.log(err)
+      })
+      return
+    }
 
-// skill change to intended teammate
-const inputVisible = ref<boolean>(false)
-const TeammateRequire = ref<string[]>(['会java', '懂springboot'])
-const inputTagsValue = ref<string>('')
-const InputRef = ref<InstanceType<typeof ElInput>>()
-const tagsColor = ref<("success" | "info" | "warning" | "danger")[]>([
-  'success',
-  'info',
-  'warning',
-  'danger',
-]);
+    // setGroup()
+  }).catch(err => {
+    console.log(err)
+  })
+})
 
 //group method
 function setGroup() {
-  leader.value = GroupMember.value.shift()
-  isGroup.value = GroupMember.value.length > 0;
+  let leader_id = groupInfo.value?.leaderId;
+  GroupMember.value = []
+  if (!groupInfo.value?.memberIds) {
+    return
+  }
+
+  for (const member of groupInfo.value.memberIds) {
+    if (member == leader_id) {
+      api.get(`/get_personal_info/${member}`).then(res => {
+        leader.value = res.data.body
+      }).catch(err => {
+        console.log(err)
+      })
+    } else {
+      api.get(`/get_personal_info/${member}`).then(res => {
+        // console.log('group member', res.data.body)
+        GroupMember.value.push(res.data.body)
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+
+  }
+
 }
 
-// skill method
+// intended change to intended teammate
+const inputVisible = ref<boolean>(false)
+const TeammateRequire = ref<string[]>(['会java', '懂springboot'])
+const inputTagsValue = ref<string>('')
+
+// intended teammates method
+function getColor(index: number): string {
+  const colors = ['primary', 'tertiary', 'positive', 'negative', 'info', 'warning'];
+  return colors[index % colors.length];
+}
+// TODO Check if the intended teammate is in the group
+function removeTeam(index: number) {
+
+  api.delete(`/stu/delete_intend_teammates`, {
+    data: {
+      key: props.project.projectId,
+      value: TeammateRequire.value[index]
+    }
+  }).then(res => {
+    console.log(res.data)
+  }).catch(err => {
+    console.log(err)
+  })
+  TeammateRequire.value.splice(index, 1);
+}
+
 const handleClose = (tag: string) => {
   TeammateRequire.value.splice(TeammateRequire.value.indexOf(tag), 1)
 }
-const showInput = () => {
-  inputVisible.value = true
-  nextTick(() => {
-    if (InputRef.value && InputRef.value.input) {
-      InputRef.value.input.focus()
-    }
-  })
-}
+
 const handleInputConfirm = () => {
   if (inputTagsValue.value) {
     TeammateRequire.value.push(inputTagsValue.value)
+    api.post(`/stu/add_intend_teammates`, {
+      "key": props.project.projectId,
+      "value": inputTagsValue.value
+    }).then(res => {
+      console.log(res.data)
+    }).catch(err => {
+      console.log(err)
+    })
   }
-  inputVisible.value = false
   inputTagsValue.value = ''
 }
 </script>

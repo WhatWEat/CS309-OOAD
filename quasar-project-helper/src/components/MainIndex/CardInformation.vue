@@ -83,20 +83,32 @@
         </q-card-section>
         <q-card-section class="bg-white q-mb-sm q-mx-xs">
           <div v-if="loadingMessage">
-            <q-scroll-area style="height: 200px" v-if="messages.length!==0">
-              <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
-                <q-item-section>
-                  <q-item-label>{{ msg.title }}</q-item-label>
-                  <q-item-label caption lines="1" class="ellipsis">{{
-                      truncate(msg.content)
-                    }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  {{ formatDateString(msg.createTime) }}
-                </q-item-section>
-              </q-item>
-            </q-scroll-area>
+            <q-infinite-scroll :offset="20"  @load="getNotice"
+                               v-if="messages.length!==0">
+              <q-scroll-area style="height: 200px">
+                <q-list>
+                  <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
+                    <q-item-section>
+                      <q-item-label>{{ msg.title }}</q-item-label>
+                      <q-item-label caption lines="1" class="ellipsis">{{
+                          truncate(msg.content)
+                        }}
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                      {{ formatDateString(msg.createTime) }}
+                    </q-item-section>
+                  </q-item>
+
+                </q-list>
+                <template v-slot:loading>
+                  <div class="row justify-center q-my-md">
+                    <q-spinner-dots color="primary" size="40px"/>
+                  </div>
+                </template>
+
+              </q-scroll-area>
+            </q-infinite-scroll>
             <div v-else class="justify-center" style="height: 200px">
               No announcement yet.
             </div>
@@ -167,16 +179,27 @@ const events = ref<assProps[]>([
 ])
 
 // announcements
-const messages = ref<noticeProps[]>([defaultNotice])
-const loadingMessage = ref(false)
+const messages = ref<noticeProps[]>([])
+const loadingMessage = ref(false), notice_page = ref(0)
 onMounted(() => {
-  api.get(`/notice-list/-1/0/10`).then((res) => {
-    messages.value = res.data.body;
-    loadingMessage.value = true
+  loadingMessage.value = true
+  // messages.value.push(defaultNotice)
+  // getNotice()
+})
+
+function getNotice(index: any, done: () => void) {
+  api.get(`/notice-list/-1/${notice_page.value}/3`).then((res) => {
+    let page_messages: noticeProps[] = res.data.body;
+    console.log('res', page_messages)
+    messages.value.push.apply(messages.value, page_messages)
+    loadingMessage.value = true;
+    notice_page.value++;
+    done()
   }).catch((err) => {
     console.log('err', err)
   })
-})
+}
+
 // calendar
 onMounted(() => {
   api.get(`/ass-list/-1/0/10`).then((res) => {

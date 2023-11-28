@@ -38,3 +38,4 @@ build/
 .vscode/
 /src/main/resources/application.properties
 / demandAnalysis.md
+node_modules

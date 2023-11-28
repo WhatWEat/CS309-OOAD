@@ -43,13 +43,13 @@
                       <q-list dense style="max-height: 200px; overflow-y: auto;">
                         <q-item
                           v-for="person in filteredPeople"
-                          :key="person.id"
+                          :key="person.userId"
                           clickable
-                          @click="moveToRight(person.id)"
+                          @click="moveToRight(person.userId)"
                         >
                           <q-item-section class="row">
                             <span>
-                              <q-chip square dense class="col-3" color="blue-4"> {{person.id}}</q-chip>
+                              <q-chip square dense class="col-3" color="blue-4"> {{person.userId}}</q-chip>
                               <span class="col">
                                 {{ person.name }}
                               </span>
@@ -62,13 +62,13 @@
                       <q-list dense>
                         <q-item
                           v-for="person in selectedPeople"
-                          :key="person.id"
+                          :key="person.userId"
                           clickable
-                          @click="moveToLeft(person.id)"
+                          @click="moveToLeft(person.userId)"
                         >
                           <q-item-section class="row">
                             <span>
-                              <q-chip square dense class="col-3 text-white" color="primary"> {{person.id}}</q-chip>
+                              <q-chip square dense class="col-3 text-white" color="primary"> {{person.userId}}</q-chip>
                               <span class="col">
                                 {{ person.name }}
                               </span>
@@ -103,15 +103,14 @@
           <q-list class="row">
             <q-item
               class="col-4"
-              :href="`/person/${ta.id}`"
+              :to="`/person/${ta.userId}`"
               v-for="ta in ta_list"
-              :key="ta.id"
+              :key="ta.userId"
               clickable
             >
-              <q-item-section class="row"
-                              >
+              <q-item-section class="row">
                 <span>
-                  <q-chip square dense class="col-3 text-white" color="primary"> {{ta.id}}</q-chip>
+                  <q-chip square dense class="col-3 text-white" color="primary"> {{ta.userId}}</q-chip>
                   <span class="col">
                     {{ ta.name }}
                   </span>
@@ -122,7 +121,7 @@
         </q-tab-panel>
         <q-tab-panel name="group">
           <div class="row">
-            <q-chip square v-for="group in group_list" :key="group.groupId" @click="clickGroup">
+            <q-chip square v-for="group in group_list" :key="group.groupId" @click="clickGroup" color="primary" class="text-white">
               {{group.groupName}}
               <q-badge color="green" floating transparent rounded>
                 {{group.members.length}}
@@ -156,67 +155,61 @@
 
 <script setup lang="ts">
 import {defineProps, onMounted, ref} from "vue";
-import {defaultGroup, GroupMember, GroupProps, projectProps} from "src/composables/comInterface";
+import {defaultGroup, personProps, GroupProps, projectProps} from "src/composables/comInterface";
 import {computed} from "vue-demi";
 import {api} from "boot/axios";
-
+import {useQuasar} from "quasar";
+const $q = useQuasar();
 const tab = ref<string>('des');
 const props = defineProps<{
   project: projectProps,
-  identity: number
+  ta_list_all: personProps[] | undefined,
+  identity: number | null
 }>()
 const project_show = ref<projectProps>(props.project);
 // TAs
 // all people is all the TAs, ta_list is the TAs in this project
-const allPeople = ref<GroupMember[]>([]), ta_list = ref<GroupMember[]>([]);
-const group_list = ref<GroupProps[]>([defaultGroup]);
+const allPeople = ref<personProps[]>([]), ta_list = ref<personProps[]>([]);
+const group_list = ref<GroupProps[]>([]);
 onMounted(()=>{
   // TODO
   // use api to get all people
-  allPeople.value = [{
-    id: 0,
-    name: 'person 1'
-  }, {
-    id: 1,
-    name: 'person 2'
-  }, {
-    id: 2,
-    name: 'person 3'
-  }];
-  ta_list.value = [{
-    id: 0,
-    name: 'person 1'
-  }];
-  // api.get(`/get_brief_groups_from_proj/${props.project.projectId}`).then(res => {
-  //   console.log('group', res.data)
-  //   group_list.value = res.data;
-  // }).catch(err => {
-  //   console.log(err)
-  // })
+  api.get(`/ta-list/${props.project.projectId}`).then(res => {
+    console.log('ta list', res.data)
+    ta_list.value = res.data;
+  }).catch(err => {
+    console.log(err)
+  })
+  allPeople.value = [];
+  api.get(`/get_brief_groups_from_proj/${props.project.projectId}`).then(res => {
+    group_list.value = res.data.body;
+  }).catch(err => {
+    console.log(err)
+  })
 })
 // edit group instruct
 const isAssignTA = ref<boolean>(false);
 // edit part
 const isEdit = ref<boolean>(false), project_edit = ref<projectProps>(props.project);
-const filter = ref<string>(''), selectedPeople = ref<GroupMember[]>([]);
+const filter = ref<string>(''), selectedPeople = ref<personProps[]>([]);
 const filteredPeople = computed(() => {
-  const num = Number(filter.value);
+  // const num = Number(filter.value);
   return allPeople.value.filter(
     person => (person.name.toLowerCase().includes(filter.value.toLowerCase()) ||
-        person.id.toString().includes(filter.value)) &&
-      !selectedPeople.value.some(selected => selected.id === person.id)
+        person.userId.toString().includes(filter.value)) &&
+      !selectedPeople.value.some(selected => selected.userId === person.userId)
   );
 });
 
-const moveToRight = (id: number) => {
-  const person = allPeople.value.find(p => p.id === id);
-  if (person && !selectedPeople.value.some(p => p.id === id)) {
+const moveToRight = (userId: number) => {
+  const person = allPeople.value.find(p => p.userId === userId);
+  if (person && !selectedPeople.value.some(p => p.userId === userId)) {
     selectedPeople.value.push(person);
   }
 };
 
-const moveToLeft = (id: number) => {
-  const index = selectedPeople.value.findIndex(p => p.id === id);
+const moveToLeft = (userId: number) => {
+  const index = selectedPeople.value.findIndex(p => p.userId === userId);
   if (index !== -1) {
     selectedPeople.value.splice(index, 1);
   }
@@ -224,14 +217,57 @@ const moveToLeft = (id: number) => {
 // save info
 function saveInfo() {
   console.log('save info')
-  project_show.value = JSON.parse(JSON.stringify(project_edit.value));
-  ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
 
-  // TODO
+  // TODO project basic info
+  if (project_show.value.name === project_edit.value.name &&
+    project_show.value.description === project_edit.value.description) {
+    console.log('no change')
+  } else {
+    project_show.value = JSON.parse(JSON.stringify(project_edit.value));
+    api.post(`/edit_project/${props.project.projectId}`,{
+      key: project_show.value.name,
+      value: project_show.value.description
+    }).then(res => {
+      notifySuccess()
+    }).catch(err => {
+      notifyFailed()
+      console.log(err)
+    })
+    console.log('change')
+  }
+
+  // TODO TAs
+  if (ta_list.value.length === 0) {
+    console.log('no change')
+  } else {
+    ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
+    api.post(`/assign_ta/${props.project.projectId}`,{
+      ta_list: ta_list.value.map(ta => ta.userId)
+    }).then(res => {
+      notifySuccess()
+    }).catch(err => {
+      notifyFailed()
+      console.log(err)
+    })
+    console.log('change')
+  }
   // use api to submit
   console.log(project_edit.value)
 }
-
+function notifySuccess() {
+  $q.notify({
+    color: 'positive',
+    message: 'Edit Success',
+    position: 'top'
+  })
+}
+function notifyFailed() {
+  $q.notify({
+    color: 'negative',
+    message: 'Edit Failed',
+    position: 'top'
+  })
+}
 function clickEdit() {
   isEdit.value = true
   project_show.value = JSON.parse(JSON.stringify(project_edit.value));

@@ -112,27 +112,27 @@ public class GroupService {
             return gp.mask();
     }
 
-    public void createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
+    public Long createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
         // FUNC: 给行projectId，调用者是否有权限使用
         if(!accessProject.test(group.getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
+        StringBuilder sb = new StringBuilder();
         if(group.getReportTime() != null && !group.getReportTime().isAfter(LocalDateTime.now()))
-            throw new InvalidFormException("报告时间不能早于当前时间");
+            sb.append("报告时间不能早于当前时间|");
         if(group.getDeadline() == null || !group.getDeadline().isAfter(LocalDateTime.now())){
-            throw new InvalidFormException("组队截止时间应该晚于当前时间");
+            sb.append("组队截止时间应该晚于当前时间|");
         }
         if(group.getMaxsize() == null || group.getMaxsize() <= 0)
-            throw new InvalidFormException("maxsize无意义");
+            sb.append("maxsize无意义|");
         User usr = usersMapper.findUserById(group.getInstructorId());
         if(usr == null || usr.getIdentity() > 2)
-            throw new InvalidFormException("instructorId不存在或不合法");
+            sb.append("instructorId不存在或不合法|");
         Long leaderId = group.getLeaderId();
         if(leaderId == null ||
             projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null ||
             groupMapper.findGroupOfStuInProject(leaderId, group.getProjectId()) != null)
-            throw new InvalidFormException("leaderId不合法或已经加入小组");
-        StringBuilder sb = new StringBuilder();
+            sb.append("leaderId不合法或已经加入小组|");
         if(group.getMaxsize() == null)
             sb.append("maxsize不能为空|");
         if(group.getGroupName() == null)
@@ -158,9 +158,11 @@ public class GroupService {
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             System.err.println(validIds);
             System.err.println(group.getGroupId()); // 这个是对的
+            return group.getGroupId();
         }catch (Exception e){
             System.err.println(e.getMessage());
         }
+        return (long)-1;
     }
     public void createGroup(ObjectCountWrapper<Group> ocw, Long creatorId, Predicate<Long> accessProject){
         // FUNC: 给行projectId，调用者是否有权限使用

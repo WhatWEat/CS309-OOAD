@@ -43,6 +43,10 @@ public interface ProjectMapper extends BaseMapper<Project> {
     //name , teacher_id均不为空
     void createProject(Project pj) throws PSQLException;
 
+    @Update("update project set (name, description) = (#{name}, #{description}) where projectid = #{projectId};")
+        //name , teacher_id均不为空
+    void editProj(Project pj);
+
     @Select("select teacherId from project where projectId = #{projectId}")
     Long findTeacherByProject(Long projectId) ;
 
@@ -74,8 +78,15 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Update("update stuInProject set intendedTeammates = #{intendedTeammates, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where projectId = #{projectId} and stuId = #{stuId}; ")
     void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates);
 
-    @Insert("insert into taOfProject(projectId, taId) values (#{projId}, #{taId});")
-    void designateTaToProj(long projId, long taId);
+    @Insert({
+        "<script>",
+        "insert into taOfProject(projectId, taId) values ",
+        "<foreach item='taId' index='index' collection='taIds' separator=','>",
+        "(#{projId}, #{taId})",
+        "</foreach>",
+        "</script>"
+    })
+    void designateTaToProj(long projId, List<Long> taIds);
 
     @Insert("delete from taOfProject where projectId = #{projId} and taId #{taId});")
     void removeTaFromProj(long projId, long taId);

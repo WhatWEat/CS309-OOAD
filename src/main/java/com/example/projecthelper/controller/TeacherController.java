@@ -83,6 +83,13 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/edit_project")
+    public ResponseResult<Object> editProj(HttpServletRequest request, @RequestBody Project project){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        projectService.editProject(project, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
 //    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
 //    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
 //                                                   @PathVariable("page") long page,
@@ -164,7 +171,7 @@ public class TeacherController {
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
-        groupService.createGroup(
+        Long id = groupService.createGroup(
             gp,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
             pjId -> Objects.equals(
@@ -172,7 +179,7 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(id, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/create_multiple_groups")
@@ -358,7 +365,7 @@ public class TeacherController {
 
     @PostMapping("/designate_ta_to_proj")
     public ResponseResult<Object> designateTaToProj(
-        KeyValueWrapper<Long, Long> pjTaId,
+        @RequestBody KeyValueWrapper<Long, List<Long>> pjTaId,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         projectService.designateTaToProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));

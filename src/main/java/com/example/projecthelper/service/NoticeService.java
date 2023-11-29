@@ -8,6 +8,8 @@ import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import java.util.ArrayList;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,43 +147,50 @@ public class NoticeService {
     }
 
 
-    public Notice recruitNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Invitation to Join Group");
-        ntc.setContent(noticeSubject(fromId, gpId, INVITATION));
-        return ntc;
-    }
-
-    public void createRecruitmentNotice(Long fromId, List<Long> toIds, Long pjId, Long gpId) {
+    public void createRecruitmentNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null || !Objects.equals(
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
+        }
+        //PROC: 筛选stuIds
+        Set<Long> stuIds = gpId_notice.getValue().getStuView().stream()
+            .filter(
+                e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null
+            )
+            .collect(Collectors.toSet());
+        stuIds.retainAll(
+            groupMapper.findStuNotInGpOfAProj(group.getProjectId()).stream()
+                .map(User::getUserId)
+                .collect(Collectors.toSet())
+        );
         try {
-            Notice notice = recruitNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
+            Notice notice = gpId_notice.getValue().recruit(userId, group.getGroupId(), group.getProjectId());
             noticeMapper.createNotice(notice);
             System.err.println(notice.getNoticeId());
-            noticeMapper.insertStuView(new HashSet<>(toIds), notice.getNoticeId());
+            if(!stuIds.isEmpty())
+                noticeMapper.insertStuView(stuIds, notice.getNoticeId());
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
     }
 
-    public Notice appNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Application to Join Group");
-        ntc.setContent(noticeSubject(fromId, gpId, APPLICATION));
-        return ntc;
-    }
 
-    public void createApplicationNotice(Long fromId, Long toId, Long pjId, Long gpId) {
+    public void createApplicationNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null || !Objects.equals(
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
+        }
         try {
-            Notice notice = appNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
+            Notice notice = gpId_notice.getValue().apply(userId, group.getGroupId(), group.getProjectId());
             noticeMapper.createNotice(notice);
             System.err.println(notice.getNoticeId());
-            noticeMapper.stuViewNotice(notice.getNoticeId(), toId);
+            noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }

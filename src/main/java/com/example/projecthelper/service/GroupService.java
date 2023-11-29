@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class GroupService {
@@ -255,6 +256,8 @@ public class GroupService {
 
     }
 
+
+
     public void ackInvitation(Long noticeId, Long stuId){
         Notice notice = noticeService.findNoticeById(noticeId);
         Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
@@ -262,22 +265,12 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            stuJoinGpSync(Long.parseLong(content[3]), stuId, false);
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Accept";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() != Notice.Type.RECRUITMENT.ordinal()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        stuJoinGpSync(notice.getGroupId(), stuId, false);
+        notice.setStatus(Notice.Status.AGREE.ordinal());
+        noticeMapper.updateNoticeStatus(notice);
     }
 
     public void nakInvitationOrApplication(Long noticeId, Long stuId){
@@ -287,21 +280,11 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Reject";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() == Notice.Type.NORMAL.ordinal()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        notice.setStatus(Notice.Status.REJECT.ordinal());
+        noticeMapper.updateNoticeStatus(notice);
     }
 
     public void ackApplication(Long noticeId, Long stuId){
@@ -311,25 +294,13 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            Group gp = groupMapper.findGroupById(Long.parseLong(content[3]));
-            if(gp == null || gp.getLeaderId() != stuId)
-                throw new AccessDeniedException("无权访问该小组");
-            stuJoinGpSync(Long.parseLong(content[3]), Long.parseLong(content[1]), false);
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Accept";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() != Notice.Type.APPLICATION.ordinal()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        stuJoinGpSync(notice.getGroupId(), notice.getFromId(), false);
+        notice.setStatus(Notice.Status.AGREE.ordinal());
+        noticeMapper.updateNoticeStatus(notice);
+
     }
 
 
@@ -346,25 +317,21 @@ public class GroupService {
         }else if(gp.getMaxsize() == cnt) {
             throw new AccessDeniedException("小组已满");
         }else if(needApp){
-            noticeService.createApplicationNotice(stuId, gp.getLeaderId(), gp.getProjectId(),
-                gp.getGroupId());
+            throw new AccessDeniedException("小组不是空组，请向小组长申请");
         }else {
             groupMapper.stuJoinGroup(stuId, gpId);
         }
     }
-    public void recruitMem(KeyValueWrapper<Long, List<Long>> gpId_stuIds, Long userId){
-        //FUNC: 确定userId在group中
-        Group group = groupMapper.findGroupById(gpId_stuIds.getKey());
-        if(group == null || Objects.equals(
-            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
-            group.getGroupId())){
-            throw new InvalidFormException("无效的groupId");
-        }
-        //PROC: 筛选stuIds
-        List<Long> stuIds = gpId_stuIds.getValue().stream().filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null).toList();
-        noticeService.createRecruitmentNotice(userId, stuIds, group.getProjectId(), group.getGroupId());
 
+    public void recruitMem(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createRecruitmentNotice( gpId_notice,  userId);
     }
+
+    public void applyToJoinGroup(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createApplicationNotice(gpId_notice, userId);
+    }
+
+
     public void joinGroup(Long groupId, Long stuId){
         //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
         Group gp = groupMapper.findGroupById(groupId);
@@ -378,7 +345,9 @@ public class GroupService {
             // 在这个proj中学生加入了其他小组
             throw new AccessDeniedException("您已经在其他小组中");
         }
-        stuJoinGpSync(gp.getGroupId(), stuId, true);
+        stuJoinGpSync(
+            groupId, stuId, true
+        );
     }
 
     public List<User> getGpMem(Long userId, Long pjId){

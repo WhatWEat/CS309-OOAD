@@ -149,6 +149,19 @@ public interface GroupMapper extends BaseMapper<Group> {
     Group findGroupOfStuInProject(long stuId, long projectId);
 
     @Select("""
+        select u.* from stuinproject sp join users u on sp.stuid = u.userid
+            where stuid not in(
+            select s.stuid
+            from stuingroup s join groups g on s.groupid = g.groupid
+            where g.projectid = sp.projectid
+        );"""
+    )
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findStuNotInGpOfAProj(long projectId);
+
+    @Select("""
             SELECT g.groupId,leaderId,instructorId , groupName, maxsize, projectId, teamTime, reportTime
             FROM groups g
             LEFT JOIN stuInGroup s ON g.groupId = s.groupId
@@ -164,7 +177,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     int findMemberOfGroup(long groupId);
 
     @Update("update groups set leaderid = #{leaderId} where groupid = #{groupId};")
-    void updateLeader(long leaderId, long groupId) throws PSQLException;
+    void updateLeader(long leaderId, long groupId);
 
     @Update("UPDATE groups SET visibility = #{visibility} WHERE groupid = 1;\n")
     void updateVisibility(long userId, long groupId, Boolean[] visibility) throws PSQLException;

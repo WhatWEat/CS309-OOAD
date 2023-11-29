@@ -17,6 +17,16 @@ public class Notice {
     private String content;
     private Long creatorId;
     private LocalDateTime createTime;
+    private int type; //FUNC:0是正常的notice，1是application，2是recruitment
+    private int status; //FUNC:0是未决定，1是已同意，2是已拒绝
+    private Long fromId;
+    private Long groupId;
+
+    @TableField(exist = false)
+    private String fromName;
+
+    @TableField(exist = false)
+    private String groupName;
 
     @TableField(exist = false)
     private String creatorName;
@@ -41,5 +51,54 @@ public class Notice {
     public Notice(){
     }
 
+    public Notice apply(Long fromId, Long groupId, Long projId){
+        this.creatorId = null;
+        this.fromId = fromId;
+        this.groupId = groupId;
+        this.projectId = projId;
+        this.status = Status.UNDECIDED.ordinal();
+        this.type = Type.APPLICATION.ordinal();
+        this.createTime = LocalDateTime.now();
+        return this;
+    }
+
+    public Notice recruit(Long fromId, Long groupId, Long projId){
+        this.creatorId = null;
+        this.fromId = fromId;
+        this.groupId = groupId;
+        this.projectId = projId;
+        this.status = Status.UNDECIDED.ordinal();
+        this.type = Type.RECRUITMENT.ordinal();
+        this.createTime = LocalDateTime.now();
+        return this;
+    }
+
+    public Notice agree(Long fromId, Long groupId, Long projId){
+        this.fromId = fromId;
+        this.groupId = groupId;
+        this.projectId = projId;
+        this.status = Status.AGREE.ordinal();
+        return this;
+    }
+
+    public enum Type{
+        NORMAL(0),
+        APPLICATION(1),
+        RECRUITMENT(2);
+
+        Type(int i) {
+
+        }
+    }
+
+    public enum Status{
+        UNDECIDED(0),
+        AGREE(1),
+        REJECT(2);
+
+        Status(int i) {
+
+        }
+    }
 
 }

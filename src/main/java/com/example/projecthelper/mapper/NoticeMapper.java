@@ -95,7 +95,10 @@ public interface NoticeMapper extends BaseMapper<Notice> {
 
 
 
-
+    @Update("UPDATE notice SET status = #{status} " +
+        "WHERE noticeId = #{noticeId};")
+        //title、content、creatorId均不为空，title长度上限为200，content为5000
+    void updateNoticeStatus(Notice notice);
 
     @Update("UPDATE notice SET title = #{title}, content = #{content} " +
             "WHERE noticeId = #{noticeId};")

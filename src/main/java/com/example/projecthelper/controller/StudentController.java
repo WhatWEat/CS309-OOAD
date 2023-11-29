@@ -151,11 +151,19 @@ public class StudentController {
 
 
     @PostMapping("/recruit_mem")
-    public ResponseResult<Object> recruitMem(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, List<Long>> gpId_stuIds){
+    public ResponseResult<Object> recruitMem(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.recruitMem(gpId_stuIds, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.recruitMem(gpId_notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @PostMapping("/apply_to_join_group")
+    public ResponseResult<Object> applyToJoinGroup(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.applyToJoinGroup(gpId_notice, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @PostMapping("/join_group")
     public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -170,11 +178,13 @@ public class StudentController {
     }
 
     @GetMapping("/get_group_id/{project_id}")
-    public ResponseResult<Long> getGroupId(HttpServletRequest request, @PathVariable("project_id") Long pjId){
+    public ResponseResult<KeyValueWrapper<Long, Boolean>> getGroupId(HttpServletRequest request, @PathVariable("project_id") Long pjId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Group gp = groupService.findGroupOfStuInProject(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), pjId);
         long result = gp == null ? -1 : gp.getGroupId();
-        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
+        boolean isLeader =
+            gp != null && gp.getLeaderId() == Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        return ResponseResult.ok(new KeyValueWrapper<>(result, isLeader), "Success", JWTUtil.updateJWT(jwt));
     }
 
     @DeleteMapping("/leave_group")

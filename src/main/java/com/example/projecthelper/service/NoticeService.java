@@ -56,6 +56,14 @@ public class NoticeService {
         return toIds;
     }
 
+    public List<Notice> getNoticesByAdm(Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
+
+        return noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
+    }
 
     public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize, String key) {
         if(key == null)

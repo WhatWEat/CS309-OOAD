@@ -123,6 +123,7 @@ public class UserController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Notice> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))){
+            case 0 -> noticeService.getNoticesByAdm(page, pageSize, searchKey);
             case 1 -> noticeService.getNoticesByTeacher(userId, projectId, page, pageSize, searchKey);
             case 2 -> noticeService.getNoticesByTa(userId, projectId, page, pageSize, searchKey);
             case 3 -> noticeService.getNoticesByStudent(userId, projectId, page, pageSize, searchKey);

@@ -17,6 +17,14 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select creatorId from notice where noticeId = #{noticeId};")
     Long findCreatorByNotice(Long noticeId);
 
+    @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
+        "    join project p on p.projectid= n.projectid" +
+        "    join users u on u.userid = n.creatorid" +
+        " where " +
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
+    List<Notice> findNoticeOfAdm(Long limit, Long offset, String key);
+
+
     //FUNC: 寻找一个学生在proj中的所有notice
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join stuviewnotice s on n.noticeid = s.noticeid" +

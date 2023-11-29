@@ -68,7 +68,8 @@ public class ProjectService {
         List<User> users = usersMapper.findUsersById(userIds);
         Set<Long> idSet = users.stream().filter(e -> e.getIdentity() == 3).map(User::getUserId).collect(Collectors.toSet());
         idSet.removeAll(new HashSet<>(projectMapper.findStuIdsByProject(projCreatorId)));
-        projectMapper.insertStuIds(projCreatorId, idSet);
+        if(!idSet.isEmpty())
+            projectMapper.insertStuIds(projCreatorId, idSet);
     }
 
     public Long findTeacherByProject(Long projectId){
@@ -128,8 +129,8 @@ public class ProjectService {
                 return ta != null && ta.getIdentity() == 2 && id == null;
             }
         ).distinct().toList();
-
-        projectMapper.designateTaToProj(projId, taId);
+        if(!taId.isEmpty())
+            projectMapper.designateTaToProj(projId, taId);
     }
 
     public void removeTaFromProj(long projId, long taId, long userId){

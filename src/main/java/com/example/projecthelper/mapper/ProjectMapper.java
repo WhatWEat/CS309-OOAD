@@ -78,15 +78,26 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Update("update stuInProject set intendedTeammates = #{intendedTeammates, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where projectId = #{projectId} and stuId = #{stuId}; ")
     void setIntendedTeammates(long projectId, Long stuId, List<String> intendedTeammates);
 
+//    @Insert({
+//        "<script>",
+//        "insert into taOfProject(projectId, taId) values ",
+//        "<foreach item='taId' index='index' collection='taIds' separator=','>",
+//        "(#{projId}, #{taId})",
+//        "</foreach>",
+//        "</script>"
+//    })
+//    void designateTaToProj(long projId, List<Long> taIds);
+
     @Insert({
         "<script>",
-        "insert into taOfProject(projectId, taId) values ",
+        "insert into taOfProject (projectId, taId) values ",
         "<foreach item='taId' index='index' collection='taIds' separator=','>",
         "(#{projId}, #{taId})",
         "</foreach>",
         "</script>"
     })
     void designateTaToProj(long projId, List<Long> taIds);
+
 
     @Insert("delete from taOfProject where projectId = #{projId} and taId #{taId});")
     void removeTaFromProj(long projId, long taId);

@@ -372,4 +372,7 @@ public class StudentController {
     public int findMemberOfGroup(@PathVariable long group_id){
         return groupService.findMemberOfGroup(group_id);
     }
+
+
+
 }

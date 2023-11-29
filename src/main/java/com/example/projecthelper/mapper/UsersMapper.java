@@ -3,6 +3,8 @@ package com.example.projecthelper.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
+
+import java.sql.Timestamp;
 import java.util.List;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
@@ -104,5 +106,10 @@ public interface UsersMapper extends BaseMapper<User> {
         "</script>"
     })
     void unfreezeUsers(List<Long> userIds);
+
+    @Select("select * from users where email = #{email};")
+    User findUserByMail(String email);
+
+
 
 }

@@ -12,14 +12,11 @@
 <script setup lang="ts">
 import {CardInfoProps} from 'components/MainIndex/CardComponent.vue';
 import {useUserStore} from 'src/composables/useUserStore';
-import {useRouter} from 'vue-router';
 import {onMounted, ref} from 'vue';
 import {watchEffect} from 'vue-demi';
 import CardSocial from 'components/MainIndex/CardSocial.vue';
 import NoticeCard from 'components/ProjectIndex/NoticeCard.vue';
 import HomeworkCard from 'components/ProjectIndex/HomeworkCard.vue';
-
-const router = useRouter()
 
 const userStore = useUserStore()
 const cardData = ref<CardInfoProps[]>([]);

@@ -1,6 +1,7 @@
 package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
+import com.example.projecthelper.Exceptions.OverdueException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.User;
@@ -176,9 +177,15 @@ public class GroupService {
         if(!accessProject.test(ocw.getObj().getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
+        StringBuilder sb = new StringBuilder();
+        if(ocw.getCount() <= 0)
+            sb.append("请创建大于等于一个小组");
         if(ocw.getObj().getMaxsize() == null || ocw.getObj().getMaxsize() <= 0)
-            throw new InvalidFormException("maxsize不合法");
-
+            sb.append("maxsize不合法|");
+        if(ocw.getObj().getDeadline() == null ||  ocw.getObj().getDeadline().isBefore(LocalDateTime.now()))
+            sb.append("截止时间不合法|");
+        if(!sb.isEmpty())
+            throw new InvalidFormException(sb.toString());
         List<Group> groups = Stream.generate(() -> ocw.getObj().clone()).limit(ocw.getCount()).toList();
         // 设置时间
         groups.forEach(g -> {
@@ -307,6 +314,8 @@ public class GroupService {
     public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
         Group gp = groupMapper.findGroupById(gpId);
         int cnt = groupMapper.findCntOfStuInGroup(gpId);
+        if(gp.getDeadline().isAfter(LocalDateTime.now()))
+            throw new OverdueException("超过组队的截止时间", gp.getDeadline(), LocalDateTime.now());
         if(cnt == 0){
             groupMapper.stuJoinGroup(stuId, gpId);
             try{

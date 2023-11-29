@@ -30,7 +30,7 @@
             <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
               <q-list class="bg-grey-4 text-black rounded-borders">
                 <q-item v-close-popup clickable @click="show_set_form = true">
-                  <q-item-label style="font-weight: bolder">Set global variables</q-item-label>
+                  <q-item-label style="font-weight: bolder">Create Groups</q-item-label>
                 </q-item>
 
                 <q-item v-close-popup clickable @click="show_insert_form = true">
@@ -161,13 +161,13 @@
       <group-form></group-form>
     </el-dialog>
   </div>
-  <!--  这里是设置小组变量表单弹窗部分-->
+  <!--  这里是设置批量创建小组弹窗部分-->
   <div>
     <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" center="true">
       <template v-slot:header>
-        <div style="font-size: 20px; font-weight: bolder">Set group variables</div>
+        <div style="font-size: 20px; font-weight: bolder">Create multiple groups</div>
       </template>
-      <set-variable-form></set-variable-form>
+      <set-variable-form :project-id="parseInt(projectId, 10)"></set-variable-form>
     </el-dialog>
   </div>
 
@@ -239,7 +239,7 @@ export default {
 
       groupId: '-1',
 
-      isGroupLeader: ref(),
+      isGroupLeader: ref(false),
 
       userData: useUserStore(),
 
@@ -500,24 +500,29 @@ export default {
     getGroupId() {
       api.get('/get_group_id/' + this.projectId).then(
         (response) => {
-          if (response.data.body != null){
-            this.groupId = response.data.body;
-            console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
-            console.log(useUserStore());
-          }
+          // this.groupId = response.data.body.groupId;
+          // this.isGroupLeader = response.data.body.isLeader;
+          // console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+          // console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+          console.log("responseHere:\n");
+          console.log(response.data);
         }
       ).catch((error) => {
         console.log("errorHere");
         console.log(error);
+
       });
-     }
+     },
+
+    //**********************************Post信息部分**********************************//
+    // 向服务器发送批量创建小组指令
   },
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
-    SetVariableForm: defineAsyncComponent(() => import('src/components/Component_Li/form/SetVariablesForm.vue')),
+    SetVariableForm: defineAsyncComponent(() => import('components/Component_Li/form/CreateGroupsForm.vue')),
   },
   mounted(){
     this.getProjectId();

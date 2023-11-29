@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.Notice;
 import java.util.Set;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 

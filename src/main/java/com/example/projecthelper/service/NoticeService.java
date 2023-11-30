@@ -181,13 +181,13 @@ public class NoticeService {
 //        try {
             AbstractNoticeFactory anf = new InvitationFactory();
             Notice notice = gpId_notice.getValue();
-            notice.setFromId(userId);
+            notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
 
             notice = anf.createNotice(notice);
             for(Long stuId: stuIds){
-                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.RECRUITMENT.ordinal());
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.RECRUITMENT.getValue());
                 if(previous != null){
                     previous.setCreateTime(LocalDateTime.now());
                     noticeMapper.updateNoticeTime(previous);
@@ -214,12 +214,12 @@ public class NoticeService {
         try {
             AbstractNoticeFactory anf = new ApplicationFactory();
             Notice notice = gpId_notice.getValue();
-            notice.setFromId(userId);
+            notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
 
             notice = anf.createNotice(notice);
-            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.ordinal());
+            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.getValue());
             if(previous != null){
                 previous.setCreateTime(LocalDateTime.now());
                 noticeMapper.updateNoticeTime(previous);

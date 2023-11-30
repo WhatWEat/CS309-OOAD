@@ -9,11 +9,10 @@ public class ApplicationFactory extends AbstractNoticeFactory{
         Notice nt = new ApplicationNotice();
         nt.setTitle(notice.getTitle());
         nt.setContent(notice.getContent());
-        nt.setCreatorId(null);
-        nt.setFromId(notice.getFromId());
+        nt.setCreatorId(notice.getCreatorId());
         nt.setGroupId(notice.getGroupId());
         nt.setProjectId(notice.getProjectId());
-        nt.setStatus(Notice.Status.UNDECIDED.ordinal());
+        nt.setStatus(Notice.Status.UNDECIDED.getValue());
         nt.setCreateTime(LocalDateTime.now());
         return nt;
     }

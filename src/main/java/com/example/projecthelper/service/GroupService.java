@@ -278,14 +278,12 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        if(notice.getType() != Notice.Type.RECRUITMENT.ordinal()){
+        if(notice.getType() != Notice.Type.RECRUITMENT.getValue()){
             throw new AccessDeniedException("该notice不是一个请求");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(notice.getGroupId(), groupMapper).
-            stuJoinGpSync(notice.getGroupId(), stuId, false);
-        notice.setStatus(Notice.Status.AGREE.ordinal());
-        noticeMapper.updateNoticeStatus(notice);
+            getGroupManager(notice.getGroupId(), groupMapper, noticeMapper).
+            stuJoinGpSync(notice.getGroupId(), stuId, false, noticeId);
     }
 
     public void nakInvitationOrApplication(Long noticeId, Long stuId){
@@ -295,28 +293,27 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        if(notice.getType() == Notice.Type.NORMAL.ordinal()){
+        if(notice.getType() == Notice.Type.NORMAL.getValue()){
             throw new AccessDeniedException("该notice不是一个请求");
         }
-        notice.setStatus(Notice.Status.REJECT.ordinal());
+        notice.setStatus(Notice.Status.REJECT.getValue());
         noticeMapper.updateNoticeStatus(notice);
     }
 
     public void ackApplication(Long noticeId, Long stuId){
         Notice notice = noticeService.findNoticeById(noticeId);
         Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
+        System.err.println(views+" "+stuId);
         if(!views.contains(stuId))
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        if(notice.getType() != Notice.Type.APPLICATION.ordinal()){
+        if(notice.getType() != Notice.Type.APPLICATION.getValue()){
             throw new AccessDeniedException("该notice不是一个请求");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(notice.getGroupId(), groupMapper).
-            stuJoinGpSync(notice.getGroupId(), notice.getFromId(), false);
-        notice.setStatus(Notice.Status.AGREE.ordinal());
-        noticeMapper.updateNoticeStatus(notice);
+            getGroupManager(notice.getGroupId(), groupMapper, noticeMapper).
+            stuJoinGpSync(notice.getGroupId(), notice.getCreatorId(), false, noticeId);
 
     }
 
@@ -372,9 +369,9 @@ public class GroupService {
             throw new AccessDeniedException("您已经在其他小组中");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(gp.getGroupId(), groupMapper).
+            getGroupManager(gp.getGroupId(), groupMapper, noticeMapper).
             stuJoinGpSync(
-                groupId, stuId, true
+                groupId, stuId, true, null
             );
     }
 

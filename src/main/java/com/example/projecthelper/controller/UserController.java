@@ -120,6 +120,7 @@ public class UserController {
                                                    @PathVariable(value = "search_key", required = false) String searchKey,
                                                    HttpServletRequest request) {
         // Use the projectId, page, and pageSize in your method
+        System.err.println(page+" "+pageSize+" "+searchKey+" "+projectId);
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Notice> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))){

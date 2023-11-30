@@ -40,7 +40,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
         " where s.stuid = #{stuId} and" +
-        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
+        "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};")
     List<Notice> findNoticeOfStu(Long stuId, Long limit, Long offset, String key);
 
     //FUNC: 寻找一个老师在proj中的所有notice
@@ -77,10 +77,10 @@ public interface NoticeMapper extends BaseMapper<Notice> {
 
 
     @Select("select n.* from notice n join stuviewnotice s on s.noticeId = n.noticeId " +
-        "where type = #{type} and status = 0 and fromId = #{fromId} and stuId = #{stuId}")
-    Notice getPreviousUndecidedNotice(Long fromId, Long stuId, int type);
-    @Insert("insert into notice ( title, content, creatorId, projectId, createTime, type, status, fromId, groupId)\n" +
-            "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime}, #{type}, #{status}, #{fromId}, #{groupId});")
+        "where type = #{type} and status = 0 and creatorId = #{creatorId} and stuId = #{stuId}")
+    Notice getPreviousUndecidedNotice(Long creatorId, Long stuId, int type);
+    @Insert("insert into notice ( title, content, creatorId, projectId, createTime, type, status, groupId)\n" +
+            "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime}, #{type}, #{status}, #{groupId});")
     @Options(useGeneratedKeys = true, keyProperty = "noticeId", keyColumn = "noticeid")
         //title、content、creatorId、projectId均不为空，title长度上限为200，content为5000
     void createNotice(Notice notice);
@@ -105,6 +105,24 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select stuId from stuViewNotice where noticeId = #{noticeId};")
     List<Long> findStuOfNotice(Long noticeId);
 
+
+
+    @Select("select n.noticeId from notice n" +
+        "    join stuviewnotice s on n.noticeid = s.noticeid" +
+        "    join project p on p.projectid= n.projectid" +
+        " where (s.stuid = #{stuId} and n.type = 2 or n.creatorId = #{stuId} and n.type = 1) and n.projectid = #{projId} and status = 0;")
+    List<Long> findUndecidedAppInvOfStuAndProj(Long stuId, Long projId);
+
+    @Update({
+        "<script>",
+        "UPDATE notice SET status = #{status} ",
+        "WHERE noticeId IN ",
+        "<foreach collection='noticeIds' item='noticeId' open='(' separator=',' close=')'>",
+        "#{noticeId}",
+        "</foreach>",
+        "</script>"
+    })
+    void updateNoticeStatusBySet(@Param("noticeIds") Set<Long> noticeIds, @Param("status") int status);
 
 
     @Update("UPDATE notice SET status = #{status} " +

@@ -11,6 +11,6 @@ import lombok.ToString;
 public class ApplicationNotice extends Notice {
     public ApplicationNotice(){
         super();
-        this.type = Type.APPLICATION.ordinal();
+        this.type = Type.APPLICATION.getValue();
     }
 }

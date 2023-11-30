@@ -19,7 +19,6 @@ public class Notice {
     protected LocalDateTime createTime;
     protected int type; //FUNC:0是正常的notice，1是application，2是recruitment
     protected int status; //FUNC:0是未决定，1是已同意，2是已拒绝
-    protected Long fromId;
     protected Long groupId;
 
     @TableField(exist = false)
@@ -73,33 +72,40 @@ public class Notice {
 //        return this;
 //    }
 
-    public Notice agree(Long fromId, Long groupId, Long projId){
-        this.fromId = fromId;
-        this.groupId = groupId;
-        this.projectId = projId;
-        this.status = Status.AGREE.ordinal();
-        return this;
-    }
+//    public Notice agree(Long fromId, Long groupId, Long projId){
+//        this.fromId = fromId;
+//        this.groupId = groupId;
+//        this.projectId = projId;
+//        this.status = Status.AGREE.ordinal();
+//        return this;
+//    }
 
+    @Getter
     public enum Type{
         NORMAL(0),
         APPLICATION(1),
         RECRUITMENT(2);
 
-        Type(int i) {
+        private final int value;
 
+        Type(int i) {
+            value = i;
         }
     }
 
+    @Getter
     public enum Status{
         EXPIRED(-1),
         UNDECIDED(0),
         AGREE(1),
         REJECT(2);
 
-        Status(int i) {
+        private final int value;
 
+        Status(int i) {
+            value = i;
         }
+
     }
 
 }

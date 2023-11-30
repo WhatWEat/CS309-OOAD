@@ -132,9 +132,10 @@ public class GroupService {
         if(usr == null || usr.getIdentity() > 2)
             sb.append("instructorId不存在或不合法|");
         Long leaderId = group.getLeaderId();
-        if(leaderId == null ||
+        if(leaderId != null && (
             projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null ||
             groupMapper.findGroupOfStuInProject(leaderId, group.getProjectId()) != null)
+        )
             sb.append("leaderId不合法或已经加入小组|");
         if(group.getMaxsize() == null)
             sb.append("maxsize不能为空|");
@@ -158,13 +159,15 @@ public class GroupService {
             .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
             .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
                 .collect(Collectors.toSet());
-        validIds.add(leaderId);
+        if(leaderId != null)
+            validIds.add(leaderId);
         validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
         group.setMemberIds(new ArrayList<>(validIds));
         group.setTechnicalStack(group.getTechnicalStack() == null ? new ArrayList<>(): group.getTechnicalStack());
         try{
             groupMapper.createGroup(group);
-            groupMapper.insertStuIntoGps(validIds, group.getGroupId());
+            if(!validIds.isEmpty())
+                groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             System.err.println(validIds);
             System.err.println(group.getGroupId()); // 这个是对的
             return group.getGroupId();
@@ -279,7 +282,7 @@ public class GroupService {
             throw new AccessDeniedException("该notice不是一个请求");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(notice.getGroupId()).
+            getGroupManager(notice.getGroupId(), groupMapper).
             stuJoinGpSync(notice.getGroupId(), stuId, false);
         notice.setStatus(Notice.Status.AGREE.ordinal());
         noticeMapper.updateNoticeStatus(notice);
@@ -310,7 +313,7 @@ public class GroupService {
             throw new AccessDeniedException("该notice不是一个请求");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(notice.getGroupId()).
+            getGroupManager(notice.getGroupId(), groupMapper).
             stuJoinGpSync(notice.getGroupId(), notice.getFromId(), false);
         notice.setStatus(Notice.Status.AGREE.ordinal());
         noticeMapper.updateNoticeStatus(notice);
@@ -368,7 +371,7 @@ public class GroupService {
             throw new AccessDeniedException("您已经在其他小组中");
         }
         GroupManagerFactory.getInstance().
-            getGroupManager(gp.getGroupId()).
+            getGroupManager(gp.getGroupId(), groupMapper).
             stuJoinGpSync(
                 groupId, stuId, true
             );

@@ -1,5 +1,6 @@
 package com.example.projecthelper.service.Flyweight;
 
+import com.example.projecthelper.mapper.GroupMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ public class GroupManagerFactory {
         return gmf;
     }
 
-    public GroupManager getGroupManager(Long gpId){
+    public GroupManager getGroupManager(Long gpId, GroupMapper groupMapper){
         if(!idGmMap.containsKey(gpId)){
             synchronized (GroupManagerFactory.class){
                 if(!idGmMap.containsKey(gpId)){
-                    idGmMap.put(gpId, new GroupManager());
+                    idGmMap.put(gpId, new GroupManager(groupMapper));
                 }
             }
         }

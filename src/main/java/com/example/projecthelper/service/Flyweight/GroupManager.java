@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Component;
 @Setter
 @Component
 public class GroupManager {
-    private Long groupId;
 
-    @Autowired
     private GroupMapper groupMapper;
+
+    public GroupManager(GroupMapper groupMapper){
+        this.groupMapper = groupMapper;
+    }
 
 
     public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){

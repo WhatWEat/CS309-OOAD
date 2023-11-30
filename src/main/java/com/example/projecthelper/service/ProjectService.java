@@ -69,7 +69,11 @@ public class ProjectService {
         Set<Long> idSet = users.stream().filter(e -> e.getIdentity() == 3).map(User::getUserId).collect(Collectors.toSet());
         idSet.removeAll(new HashSet<>(projectMapper.findStuIdsByProject(projCreatorId)));
         if(!idSet.isEmpty())
-            projectMapper.insertStuIds(projCreatorId, idSet);
+            try {
+                projectMapper.insertStuIds(ProjectId, idSet);
+            }catch (Exception e){
+                throw new InvalidFormException("请勿重复拉人进入项目");
+            }
     }
 
     public Long findTeacherByProject(Long projectId){

@@ -76,7 +76,8 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset, String key);
 
 
-    @Select("select n.* from notice n join stuviewnotice s on s.noticeId = n.noticeId where type = #{type} and status = 0 and fromId = #{fromId} and stuId = #{stuId}")
+    @Select("select n.* from notice n join stuviewnotice s on s.noticeId = n.noticeId " +
+        "where type = #{type} and status = 0 and fromId = #{fromId} and stuId = #{stuId}")
     Notice getPreviousUndecidedNotice(Long fromId, Long stuId, int type);
     @Insert("insert into notice ( title, content, creatorId, projectId, createTime, type, status, fromId, groupId)\n" +
             "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime}, #{type}, #{status}, #{fromId}, #{groupId});")

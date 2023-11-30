@@ -3,6 +3,8 @@ package com.example.projecthelper.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
+
+import java.sql.Timestamp;
 import java.util.List;
 import org.apache.ibatis.annotations.*;
 import org.postgresql.util.PSQLException;
@@ -15,11 +17,17 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     User findUserById(Long userId);
 
-    @Select("select * from users where identity = #{identity} limit #{limit} offset #{offset};")
+    @Select("select * from users where identity = #{identity};")
     @Results({
         @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<User> findUsersByIdentity(Integer identity, int limit, int offset);
+    List<User> findUsersByIdentity(Integer identity);
+
+    @Select("select * from users u join taOfProject t on u.userId = t.taId where t.projectId = #{projId};")
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findTaByProj(Long projId);
 
     @Select({
         "<script>",
@@ -104,5 +112,10 @@ public interface UsersMapper extends BaseMapper<User> {
         "</script>"
     })
     void unfreezeUsers(List<Long> userIds);
+
+    @Select("select * from users where email = #{email};")
+    User findUserByMail(String email);
+
+
 
 }

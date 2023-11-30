@@ -3,11 +3,17 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.entity.NoticeFactory.AbstractNoticeFactory;
+import com.example.projecthelper.entity.NoticeFactory.ApplicationFactory;
+import com.example.projecthelper.entity.NoticeFactory.InvitationFactory;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import java.util.ArrayList;
+import java.util.Collections;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,36 +60,48 @@ public class NoticeService {
         return toIds;
     }
 
+    public List<Notice> getNoticesByAdm(Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
 
-    public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize) {
-        if (projId == -1)
-            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize);
-        Long teaOfProj = projectMapper.findTeacherByProject(projId);
-        if (!Objects.equals(teaOfProj, userId)) {
-            throw new AccessDeniedException("无权访问该project");
-        }
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+        return noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
     }
 
-    public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
         if (projId == -1)
-            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize);
-        Long teaOfProj = projectMapper.findTeacherByProject(projId);
-        if (!Objects.equals(teaOfProj, userId)) {
-            throw new AccessDeniedException("无权访问该project");
-        }
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize);
+            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+    }
+
+    public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
+        if (projId == -1)
+            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
     }
 
 
-    public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Notice> getNoticesByStudent(Long userId, Long projId, Long page, Long pageSize, String key) {
+        if(key == null)
+            key = "%";
+        else
+            key = "%"+key+"%";
         Long checker = projectMapper.checkStuInProj(userId, projId);
         if (checker == null && projId != -1) {
             throw new AccessDeniedException("无权访问该project");
         }
         if (projId == -1)
-            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize);
-        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize);
+            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
+        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
     }
 
     //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert
@@ -141,43 +159,76 @@ public class NoticeService {
     }
 
 
-    public Notice recruitNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Invitation to Join Group");
-        ntc.setContent(noticeSubject(fromId, gpId, INVITATION));
-        return ntc;
-    }
-
-    public void createRecruitmentNotice(Long fromId, List<Long> toIds, Long pjId, Long gpId) {
-        try {
-            Notice notice = recruitNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            noticeMapper.insertStuView(new HashSet<>(toIds), notice.getNoticeId());
-        } catch (Exception e) {
-            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+    public void createRecruitmentNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null || !Objects.equals(
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
         }
+        //PROC: 筛选stuIds
+        Set<Long> stuIds = gpId_notice.getValue().getStuView().stream()
+            .filter(
+                e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null
+            )
+            .collect(Collectors.toSet());
+        stuIds.retainAll(
+            groupMapper.findStuNotInGpOfAProj(group.getProjectId()).stream()
+                .map(User::getUserId)
+                .collect(Collectors.toSet())
+        );
+//        try {
+            AbstractNoticeFactory anf = new InvitationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setCreatorId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            for(Long stuId: stuIds){
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.RECRUITMENT.getValue());
+                if(previous != null){
+                    previous.setCreateTime(LocalDateTime.now());
+                    noticeMapper.updateNoticeTime(previous);
+                    continue;
+                }
+                noticeMapper.createNotice(notice);
+                noticeMapper.insertStuView(Collections.singleton(stuId), notice.getNoticeId());
+            }
+
+//        } catch (Exception e) {
+//            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+//        }
     }
 
-    public Notice appNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Application to Join Group");
-        ntc.setContent(noticeSubject(fromId, gpId, APPLICATION));
-        return ntc;
-    }
 
-    public void createApplicationNotice(Long fromId, Long toId, Long pjId, Long gpId) {
+    public void createApplicationNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null ||
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()) != null
+        ){
+            throw new InvalidFormException("无效的groupId或者已经加入小组");
+        }
         try {
-            Notice notice = appNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            noticeMapper.stuViewNotice(notice.getNoticeId(), toId);
+            AbstractNoticeFactory anf = new ApplicationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setCreatorId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.getValue());
+            if(previous != null){
+                previous.setCreateTime(LocalDateTime.now());
+                noticeMapper.updateNoticeTime(previous);
+            }
+            else {
+                noticeMapper.createNotice(notice);
+                System.err.println(notice.getNoticeId());
+                noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
+            }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }

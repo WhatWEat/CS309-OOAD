@@ -83,6 +83,13 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/edit_project")
+    public ResponseResult<Object> editProj(HttpServletRequest request, @RequestBody Project project){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        projectService.editProject(project, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
 //    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
 //    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
 //                                                   @PathVariable("page") long page,
@@ -164,7 +171,7 @@ public class TeacherController {
     public ResponseResult<Object> createGroup(HttpServletRequest request, @RequestBody Group gp){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
-        groupService.createGroup(
+        Long id = groupService.createGroup(
             gp,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
             pjId -> Objects.equals(
@@ -172,14 +179,14 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(id, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/create_multiple_groups")
-    public ResponseResult<Object> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
+    public ResponseResult<List<Long>> createMultipleGroup(HttpServletRequest request, @RequestBody ObjectCountWrapper<Group> ocw){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
-        groupService.createGroup(
+        List<Long> ids = groupService.createGroup(
             ocw,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
             pjId -> Objects.equals(
@@ -187,7 +194,7 @@ public class TeacherController {
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(ids, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/modify_group_info")
@@ -199,6 +206,15 @@ public class TeacherController {
                 groupService.findCreatorByGroup(gpId),
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
             )
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/delete_group")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Long groupId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.deleteGroupForTea(
+            groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -347,19 +363,18 @@ public class TeacherController {
     }
 
     //PART IV: select ta
-    @GetMapping("/ta_list/{page}/{page_size}")
+    @GetMapping("/ta_list/{project_id}")
     public ResponseResult<List<User>> getTaList(
-        @PathVariable("page") int page,
-        @PathVariable("page_size") int page_size,
+        @PathVariable("project_id") Long projId,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), page, page_size);
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        List<User> users = userService.getUsersByIdentity(IdentityCode.TEACHER_ASSISTANT.getValue(), projId);
+        return ResponseResult.ok(users, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/designate_ta_to_proj")
     public ResponseResult<Object> designateTaToProj(
-        KeyValueWrapper<Long, Long> pjTaId,
+        @RequestBody KeyValueWrapper<Long, List<Long>> pjTaId,
         HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         projectService.designateTaToProj(pjTaId.getKey(), pjTaId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
@@ -414,6 +429,9 @@ public class TeacherController {
         String name = userService.getPersonName(userId);
         return ResponseResult.ok(name, "success", JWTUtil.updateJWT(jwt));
     }
+
+
+
 
 
 }

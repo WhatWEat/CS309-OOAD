@@ -37,6 +37,7 @@ public class SecurityController {
     private final AuthService authService;
     private final UserService userService;
     private final FileService fileService;
+
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
@@ -167,9 +168,29 @@ public class SecurityController {
     }
 
 
+
     /** 数据库功能测试
      *
      */
 
+    @PostMapping("/test_mail")
+    public ResponseResult<Object> testMail(HttpServletRequest request,
+                                           @RequestParam String address) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
+        System.out.println(address);
+
+        userService.sendMail(address);
+
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/test_code")
+    public ResponseResult<Object> testCode(HttpServletRequest request,
+                                           @RequestParam String address,
+                                           @RequestParam String code) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+
+        return ResponseResult.ok(userService.checkCode(code,address), "Success", JWTUtil.updateJWT(jwt));
+    }
 }

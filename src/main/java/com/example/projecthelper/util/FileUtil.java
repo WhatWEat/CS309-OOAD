@@ -30,7 +30,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtil {
-    public static final String PATH_PREFIX = "/Files/";
+    public static final String PATH_PREFIX = "Files/";
     public static final String TEA_PREFIX = "tea";
     public static final String STU_PREFIX = "stu";
     public static final String AVATAR_PREFIX = "avatar";

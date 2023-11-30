@@ -3,10 +3,8 @@
     <CardSocial icon_position="right"></CardSocial>
     <CardCharts></CardCharts>
 
-    <div class="row q-col-gutter-sm  q-py-sm">
-      <TodoList></TodoList>
+<!--      <TodoList></TodoList>-->
       <CardWithImage/>
-    </div>
   </q-page>
 </template>
 

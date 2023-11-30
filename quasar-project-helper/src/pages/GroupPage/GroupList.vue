@@ -145,16 +145,16 @@
   </div>
   <!--  这里是Edit表单弹窗部分-->
   <div>
-    <el-dialog v-model="show_edit_form" center="true">
+    <el-dialog v-model="show_edit_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
-      <group-form type="Edit" :project-id="projectId" :form-data="formData"></group-form>
+      <group-form @unfold="show_edit_form=false" @successDialog="handleSuccess" @errorDialog="handleError" type="Edit" :project-id="projectId" :form-data="formData"></group-form>
     </el-dialog>
   </div>
   <!--  这里是创建表单弹窗改部分-->
   <div>
-    <el-dialog v-model="show_insert_form" center="true">
+    <el-dialog v-model="show_insert_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -163,7 +163,7 @@
   </div>
   <!--  这里是设置批量创建小组弹窗部分-->
   <div>
-    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" center="true">
+    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" :center="true">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create multiple groups</div>
       </template>

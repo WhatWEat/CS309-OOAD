@@ -160,6 +160,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log("ProjectId: " + props.projectId)
+      postCreateMultiGroup()
     } else {
       return false
     }

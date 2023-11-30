@@ -23,7 +23,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     List<User> getTaListOfProj(Long projId);
 
     @Select("select g.*, u.name instructorName, u2.name leaderName " +
-        "from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where projectid = #{projId};")
+        "from groups g left join users u on u.userid = g.instructorid left join users u2 on u2.userid = g.leaderId where projectid = #{projId};")
     @Results({
         @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
         @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)
@@ -67,7 +67,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
-    @Select("select g.*, u.name instructorName, u2.name leaderName from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where groupid = #{groupId}")
+    @Select("select g.*, u.name instructorName, u2.name leaderName from groups g left join users u on u.userid = g.instructorid left join users u2 on u2.userid = g.leaderId where groupid = #{groupId}")
     @Results({
         @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
         @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)

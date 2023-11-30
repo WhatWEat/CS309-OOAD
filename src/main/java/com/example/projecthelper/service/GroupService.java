@@ -359,6 +359,7 @@ public class GroupService {
 
     public void joinGroup(Long groupId, Long stuId){
         //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
+        System.err.println(groupId);
         Group gp = groupMapper.findGroupById(groupId);
         if(gp == null){
             throw new InvalidFormException("小组不存在");

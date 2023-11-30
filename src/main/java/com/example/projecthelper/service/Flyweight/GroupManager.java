@@ -26,7 +26,7 @@ public class GroupManager {
     public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
         Group gp = groupMapper.findGroupById(gpId);
         int cnt = groupMapper.findCntOfStuInGroup(gpId);
-        if(gp.getDeadline().isAfter(LocalDateTime.now()))
+        if(gp.getDeadline().isBefore(LocalDateTime.now()))
             throw new OverdueException("超过组队的截止时间", gp.getDeadline(), LocalDateTime.now());
         if(cnt == 0){
             groupMapper.stuJoinGroup(stuId, gpId);

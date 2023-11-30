@@ -46,7 +46,7 @@
     </el-form-item>
 
     <el-form-item>
-      <el-button type="primary" @click="submitForm(FormRef)"
+      <el-button type="primary" @click="submitForm(FormRef), emit('unfold')"
       >Submit
       </el-button
       >
@@ -80,7 +80,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['change', 'delete'])
+const emit = defineEmits(['change', 'delete', 'errorDialog', "unfold","successDialog"])
 
 const FormData = reactive<FormData>({
   groupSize: '',
@@ -140,15 +140,27 @@ const rules = {
     ],
   }
 
+const errorMessage = {
+  'icon_name': 'error',
+  'icon_color': 'red',
+  'icon_text_color': 'black',
+  'text':""
+}
+const successMessage = {
+  'icon_name': 'done',
+  'icon_color': 'blue',
+  'icon_text_color': 'white',
+  'text':""
+}
+
+
 
 const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      postCreateMultiGroup()
-      console.log('submit!')
+      console.log("ProjectId: " + props.projectId)
     } else {
-      console.log('error submit!')
       return false
     }
   })
@@ -172,11 +184,11 @@ const postCreateMultiGroup = () => {
       "count": FormData.groupNumber,
   }
   ).then((response) => {
-    console.log("responseHere");
-    console.log(response.data);
+    successMessage.text = response.data.msg;
+    emit('successDialog', successMessage)
   }).catch((error) => {
-    console.log("errorHere");
-    console.log(error);
+    errorMessage.text = error.response.data.msg;
+    emit('errorDialog', errorMessage)
   });
 }
 </script>

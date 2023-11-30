@@ -149,7 +149,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
-      <group-form></group-form>
+      <group-form type="Edit" :project-id="projectId" :form-data="formData"></group-form>
     </el-dialog>
   </div>
   <!--  这里是创建表单弹窗改部分-->
@@ -158,7 +158,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
-      <group-form></group-form>
+      <group-form @errorDialog="handleError" @successDialog="handleSuccess" @unfold="show_insert_form = false" type="Create" :project-id="projectId"></group-form>
     </el-dialog>
   </div>
   <!--  这里是设置批量创建小组弹窗部分-->
@@ -167,9 +167,21 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create multiple groups</div>
       </template>
-      <set-variable-form :project-id="parseInt(projectId, 10)"></set-variable-form>
+      <create-groups-form @successDialog="handleSuccess" @unfold="show_set_form=false" @error-dialog="handleError" :project-id="parseInt(projectId, 10)"></create-groups-form>
     </el-dialog>
   </div>
+  <!--  这里是confirmDialog的报错提示部分,可以是报错，可以是提示,只有一个确认按钮-->
+  <div>
+    <q-dialog v-model="show_confirm_dialog">
+      <confirm-dialog :text = dialogMessage.text :icon_text_color= dialogMessage.icon_text_color :icon_color="dialogMessage.icon_color" :icon_name=dialogMessage.icon_name>
+        <template v-slot:button1><q-space></q-space></template>
+        <template v-slot:button2>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK" @click="show_confirm_dialog = false"/>
+        </template>
+      </confirm-dialog>
+    </q-dialog>
+  </div>
+
 
   <!--  这里是本小组信息部分-->
   <div class="row wrap justify-center items-start">
@@ -224,7 +236,7 @@ import {onMounted, ref} from "vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import {defineAsyncComponent} from "vue";
-import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";
+import {getUserData, formatDateString, merger, formatDateStringPro} from "src/composables/usefulFunction";
 //import {api} from 'boot/axios';
 //import {defineAsyncComponent, ref} from 'vue';
 //import {useUserStore} from 'src/composables/useUserStore';
@@ -242,6 +254,21 @@ export default {
       isGroupLeader: ref(false),
 
       userData: useUserStore(),
+
+      formData:{
+        groupId: '',
+        maxSize: '',
+        groupName: '',
+        date1_deadline: '',
+        date2_deadline: '',
+        data1_presentation: '',
+        data2_presentation: '',
+        instructor: '',
+        leader: '',
+        members: [],
+        technicalStack: [],
+        desc: '',
+      },
 
       isLoading: ref(false),
 
@@ -308,6 +335,8 @@ export default {
 
       show_invite_member: ref(false),
 
+      show_confirm_dialog: ref(false),
+
       p_x: ref('200'),
 
       p_y: ref('200'),
@@ -348,6 +377,13 @@ export default {
       },
 
       invite_member_id: '',
+
+      dialogMessage:{
+        'icon_name': 'error',
+        'icon_color': 'red',
+        'icon_text_color': 'black',
+        'text':"Dev error"
+      },
     }
   },
   methods: {
@@ -393,6 +429,47 @@ export default {
     },
     handleEditClick() {
       this.show_edit_form = true;
+      let groupId = this.selected_row.row.groupId;
+      api.get('/getGroupInfo/' + groupId).then(
+        async (response) => {
+          let tmp = {
+            avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+            groupId: response.data.body.groupId,
+            groupSize: response.data.body.members.length,
+            groupMaxSize: response.data.body.maxsize,
+            members: merger(response.data.body.members, response.data.body.memberIds),
+            creationTime: formatDateStringPro(response.data.body.teamTime),
+            deadline: formatDateStringPro(response.data.body.deadline),
+            presentationTime: formatDateStringPro(response.data.body.reportTime),
+            instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
+            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
+            moreInfo: response.data.body.description,
+          };
+          this.formData.groupId = groupId;
+          this.formData.maxSize = tmp.groupMaxSize;
+          this.formData.groupName = tmp.groupName;
+          // deadline是2023-10-01T16:00:00这种格式，需要转换
+          this.formData.date1_deadline = tmp.deadline.slice(0, 10)
+          this.formData.date2_deadline = tmp.deadline.slice(11, 19)
+
+
+          // presentation是2023-10-01T16:00:00这种格式，需要转换
+          this.formData.data1_presentation = tmp.presentationTime.slice(0, 10)
+          this.formData.data2_presentation = tmp.presentationTime.slice(11, 19)
+          this.formData.instructor = Object.values(tmp.instructor);
+          this.formData.leader = Object.values(tmp.leader);
+          this.formData.members = tmp.members;
+          this.formData.technicalStack = tmp.technicalStack;
+          this.formData.desc = tmp.moreInfo;
+
+          await this.$nextTick();
+
+          this.show_edit_form = true;
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
     },
     handleDeleClick() {
       this.show_warning = true;
@@ -401,7 +478,7 @@ export default {
     handleAddClick() {
       // 更新弹窗显示, 隐藏弹窗
       this.show_button_student = false;
-      // 跳转到编辑页面
+      this.postJoinGroup();
     },
     // 测试连接指令
     testConnection() {
@@ -422,7 +499,7 @@ export default {
 
       api.get('/getGroupInfo/1').then(
         (response) => {
-          console.log("responseHere:\n");
+          console.log("responseHere 获取小组简略信息部分:\n");
           console.log(response.data);
         }
       ).catch((error) => {
@@ -434,6 +511,14 @@ export default {
     handleSendInvite() {
       // 更新弹窗显示, 隐藏弹窗
       this.show_invite_member = false;
+    },
+    handleError(Message){
+       this.dialogMessage = Message;
+       this.show_confirm_dialog = true;
+    },
+    handleSuccess(Message){
+      this.dialogMessage = Message;
+      this.show_confirm_dialog = true;
     },
 
 
@@ -463,6 +548,10 @@ export default {
             // 将解析好的数据添加到rows中
             this.rows.push(temp);
           }
+          // console.log("responseHere 获取所有小组简略信息部分:\n");
+          // console.log(response.data);
+          // console.log("rows:\n");
+          // console.log(this.rows);
         }
       ).catch((error) => {
         console.log("errorHere");
@@ -504,25 +593,55 @@ export default {
           // this.isGroupLeader = response.data.body.isLeader;
           // console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
           // console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
-          console.log("responseHere:\n");
+          // console.log("responseHere:\n");
           console.log(response.data);
         }
       ).catch((error) => {
         console.log("errorHere");
         console.log(error);
-
       });
      },
 
     //**********************************Post信息部分**********************************//
-    // 向服务器发送批量创建小组指令
+    // 向服务器发送申请加入小组指令
+    postJoinGroup(){
+      api.post('/stu/join_group' + this.projectId, {
+        "key": this.selected_row.row.groupId,
+        "value": {
+          "title": "加入请求",
+          "content": "你好,我想加入你的小组,可以吗？",
+        }
+      }).then(
+        async (response) => {
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'blue',
+            'text': response.data.message,
+          }
+          // 上面执行完毕后,弹出对话框
+          await this.$nextTick();
+          this.show_confirm_dialog = true;
+        }
+      ).catch(async (error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response,
+        }
+        // 上面执行完毕后,弹出对话框
+        await this.$nextTick();
+        this.show_confirm_dialog = true;
+      });
+    },
   },
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
-    SetVariableForm: defineAsyncComponent(() => import('components/Component_Li/form/CreateGroupsForm.vue')),
+    CreateGroupsForm: defineAsyncComponent(() => import('components/Component_Li/form/CreateGroupsForm.vue')),
   },
   mounted(){
     this.getProjectId();

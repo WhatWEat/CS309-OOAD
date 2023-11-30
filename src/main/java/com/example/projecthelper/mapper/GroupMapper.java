@@ -23,7 +23,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     List<User> getTaListOfProj(Long projId);
 
     @Select("select g.*, u.name instructorName, u2.name leaderName " +
-        "from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where projectid = #{projId};")
+        "from groups g left join users u on u.userid = g.instructorid left join users u2 on u2.userid = g.leaderId where projectid = #{projId};")
     @Results({
         @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
         @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)
@@ -49,11 +49,9 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert({
         "<script>",
-        "INSERT INTO groups (maxsize, groupName, projectId, teamTime, reportTime, instructorId, creatorId, description, technicalStack) VALUES",
+        "INSERT INTO groups (maxsize, teamTime, creatorId, deadline, projectId, groupName) VALUES",
         "<foreach item='group' index='index' collection='groupList' separator=','>",
-        "(#{group.maxsize}, #{group.groupName}, #{group.projectId}, #{group.teamTime}, " +
-            "#{group.reportTime}, #{group.instructorId}, #{group.creatorId}, #{description}, " +
-            "#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler})",
+        "(#{group.maxsize}, #{group.teamTime}, #{group.creatorId}, #{group.deadline}, #{group.projectId}, #{group.groupName})" +
         "</foreach>",
         "</script>"
     })
@@ -69,7 +67,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select leaderId from groups where groupId = #{groupId}")
     long findLeaderByGroup(long groupId);
 
-    @Select("select g.*, u.name instructorName, u2.name leaderName from groups g join users u on u.userid = g.instructorid join users u2 on u2.userid = g.leaderId where groupid = #{groupId}")
+    @Select("select g.*, u.name instructorName, u2.name leaderName from groups g left join users u on u.userid = g.instructorid left join users u2 on u2.userid = g.leaderId where groupid = #{groupId}")
     @Results({
         @Result(property = "technicalStack", column = "technicalstack", typeHandler = StringListArrayTypeHandler.class),
         @Result(property = "visibility", column = "visibility", typeHandler = BooleanListArrayTypeHandler.class)
@@ -79,6 +77,8 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Select("select g.groupId from groups g join stuInGroup sIG on g.groupId = sIG.groupId where g.projectId = #{projectId} and sIG.stuId = #{userId}; ")
     Long findGroupIdOfUserInAProj(long userId, long projectId);
 
+    @Delete("delete from stuInGroup where groupId = #{groupId}")
+    void deleteStuInGroup(long groupId);
     @Insert({
         "<script>",
         "INSERT INTO stuInGroup (groupId, stuId) VALUES",
@@ -107,11 +107,20 @@ public interface GroupMapper extends BaseMapper<Group> {
             "leaderId =#{leaderId}, " +
             "maxsize =#{maxsize}, " +
             "description =#{description}, " +
+            "deadline =#{deadline}, " +
             "reportTime =#{reportTime}, " +
+            "technicalStack =#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, " +
             "instructorId =#{instructorId} " +
             "where groupId = #{groupId};")
     //max_size、group_name、instructor_id, groupId不能为空
     void updateGroupForTea(Group group) throws PSQLException;
+
+    @Delete("delete from groups where groupId = #{groupId};")
+    void deleteGroup(Long groupId);
+
+
+
+
 
     @Update("update groups set " +
         "maxsize =#{maxsize} " +
@@ -140,6 +149,19 @@ public interface GroupMapper extends BaseMapper<Group> {
     Group findGroupOfStuInProject(long stuId, long projectId);
 
     @Select("""
+        select u.* from stuinproject sp join users u on sp.stuid = u.userid
+            where stuid not in(
+            select s.stuid
+            from stuingroup s join groups g on s.groupid = g.groupid
+            where g.projectid = sp.projectid
+        );"""
+    )
+    @Results({
+        @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findStuNotInGpOfAProj(long projectId);
+
+    @Select("""
             SELECT g.groupId,leaderId,instructorId , groupName, maxsize, projectId, teamTime, reportTime
             FROM groups g
             LEFT JOIN stuInGroup s ON g.groupId = s.groupId
@@ -155,7 +177,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     int findMemberOfGroup(long groupId);
 
     @Update("update groups set leaderid = #{leaderId} where groupid = #{groupId};")
-    void updateLeader(long leaderId, long groupId) throws PSQLException;
+    void updateLeader(long leaderId, long groupId);
 
     @Update("UPDATE groups SET visibility = #{visibility} WHERE groupid = #{groupId};\n")
     void updateVisibility(long groupId, Boolean[] visibility) throws PSQLException;

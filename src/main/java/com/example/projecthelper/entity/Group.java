@@ -8,11 +8,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 @TableName("groups")
-public class Group {
+public class Group implements Cloneable{
     private Long groupId;
     private String groupName;
     private Long creatorId;
@@ -67,5 +69,16 @@ public class Group {
         }
         visibility = null;
         return this;
+    }
+
+    @Override
+    public Group clone() {
+        try {
+            Group clone = (Group) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

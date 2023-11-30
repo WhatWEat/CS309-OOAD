@@ -54,6 +54,11 @@ public class ProjectService {
         }
     }
 
+    public void editProject(Project project, Long userId){
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(project.getProjectId())))
+            throw new InvalidFormException("无权修改小组");
+        projectMapper.editProj(project);
+    }
     public void addStuToProject(Long ProjectId, List<Long> userIds, Long currentUserId){
         // 先验证身份
         Long projCreatorId = projectMapper.findTeacherByProject(ProjectId);
@@ -63,7 +68,12 @@ public class ProjectService {
         List<User> users = usersMapper.findUsersById(userIds);
         Set<Long> idSet = users.stream().filter(e -> e.getIdentity() == 3).map(User::getUserId).collect(Collectors.toSet());
         idSet.removeAll(new HashSet<>(projectMapper.findStuIdsByProject(projCreatorId)));
-        projectMapper.insertStuIds(projCreatorId, idSet);
+        if(!idSet.isEmpty())
+            try {
+                projectMapper.insertStuIds(ProjectId, idSet);
+            }catch (Exception e){
+                throw new InvalidFormException("请勿重复拉人进入项目");
+            }
     }
 
     public Long findTeacherByProject(Long projectId){
@@ -110,14 +120,21 @@ public class ProjectService {
 
     }
 
-    public void designateTaToProj(long projId, long taId, long userId){
+    public void designateTaToProj(long projId, List<Long> taId, long userId){
         Long teaId = projectMapper.findTeacherByProject(projId);
-        User ta = usersMapper.findUserById(taId);
         if(teaId != userId)
             throw new AccessDeniedException("无权修改别人的proj");
-        if(ta == null)
-            throw new InvalidFormException("无效id");
-        projectMapper.designateTaToProj(projId, taId);
+        if(taId == null)
+            return;
+        taId = taId.stream().filter(
+            e -> {
+                User ta = usersMapper.findUserById(e);
+                Long id = projectMapper.checkTaInProj(projId, e);
+                return ta != null && ta.getIdentity() == 2 && id == null;
+            }
+        ).distinct().toList();
+        if(!taId.isEmpty())
+            projectMapper.designateTaToProj(projId, taId);
     }
 
     public void removeTaFromProj(long projId, long taId, long userId){

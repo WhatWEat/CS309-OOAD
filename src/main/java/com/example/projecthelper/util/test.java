@@ -8,10 +8,18 @@ import org.springframework.stereotype.Service;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(generateValidJWT("30002000", "1"));
+        System.out.println(generateValidJWT("12110007", "3"));
     }
 
     public static String generateValidJWT(String userId, String identityCode){
         return JWTUtil.createJWT(userId, identityCode);
+    }
+}
+enum Type{
+    NORMAL(0),
+    APPLICATION(1),
+    RECRUITMENT(2);
+
+    Type(int i) {
     }
 }

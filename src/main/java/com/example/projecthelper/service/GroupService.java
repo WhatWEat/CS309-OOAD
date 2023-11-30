@@ -1,12 +1,14 @@
 package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
+import com.example.projecthelper.Exceptions.OverdueException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.User;
 
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.service.Flyweight.GroupManagerFactory;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.sql.SQLException;
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class GroupService {
@@ -112,69 +115,91 @@ public class GroupService {
             return gp.mask();
     }
 
-    public void createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
+    public Long createGroup(Group group, Long creatorId, Predicate<Long> accessProject){
         // FUNC: 给行projectId，调用者是否有权限使用
         if(!accessProject.test(group.getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
+        StringBuilder sb = new StringBuilder();
         if(group.getReportTime() != null && !group.getReportTime().isAfter(LocalDateTime.now()))
-            throw new InvalidFormException("报告时间不能早于当前时间");
+            sb.append("报告时间不能早于当前时间|");
         if(group.getDeadline() == null || !group.getDeadline().isAfter(LocalDateTime.now())){
-            throw new InvalidFormException("组队截止时间应该晚于当前时间");
+            sb.append("组队截止时间应该晚于当前时间|");
         }
         if(group.getMaxsize() == null || group.getMaxsize() <= 0)
-            throw new InvalidFormException("maxsize无意义");
+            sb.append("maxsize无意义|");
         User usr = usersMapper.findUserById(group.getInstructorId());
         if(usr == null || usr.getIdentity() > 2)
-            throw new InvalidFormException("instructorId不存在或不合法");
+            sb.append("instructorId不存在或不合法|");
         Long leaderId = group.getLeaderId();
-        if(leaderId == null ||
+        if(leaderId != null && (
             projectMapper.checkStuInProj(leaderId, group.getProjectId()) == null ||
             groupMapper.findGroupOfStuInProject(leaderId, group.getProjectId()) != null)
-            throw new InvalidFormException("leaderId不合法或已经加入小组");
-        try{
-            group.setCreatorId(creatorId);
-            group.setTeamTime(LocalDateTime.now());
-            System.err.println(group.getMemberIds());
-
-            // 插入学生进组
-            Set<Long> validIds = group.getMemberIds().stream()
-                .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
-                .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
-                    .collect(Collectors.toSet());
+        )
+            sb.append("leaderId不合法或已经加入小组|");
+        if(group.getMaxsize() == null)
+            sb.append("maxsize不能为空|");
+        if(group.getGroupName() == null)
+            sb.append("groupName不能为空|");
+        if(group.getProjectId() == null)
+            sb.append("projectId不能为空|");
+        if(group.getMemberIds() != null && group.getMemberIds().size() > group.getMaxsize())
+            sb.append("人数超限|");
+        if(!sb.isEmpty())
+            throw new InvalidFormException(sb.toString());
+        group.setCreatorId(creatorId);
+        group.setTeamTime(LocalDateTime.now());
+        System.err.println(group.getMemberIds());
+        // 插入学生进组
+        Set<Long> validIds;
+        if(group.getMemberIds() == null)
+            validIds = new HashSet<>();
+        else
+            validIds= group.getMemberIds().stream()
+            .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
+            .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
+                .collect(Collectors.toSet());
+        if(leaderId != null)
             validIds.add(leaderId);
-            validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
-            group.setMemberIds(new ArrayList<>(validIds));
+        validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
+        group.setMemberIds(new ArrayList<>(validIds));
+        group.setTechnicalStack(group.getTechnicalStack() == null ? new ArrayList<>(): group.getTechnicalStack());
+        try{
             groupMapper.createGroup(group);
-            groupMapper.insertStuIntoGps(validIds, group.getGroupId());
+            if(!validIds.isEmpty())
+                groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             System.err.println(validIds);
             System.err.println(group.getGroupId()); // 这个是对的
+            return group.getGroupId();
         }catch (Exception e){
             System.err.println(e.getMessage());
-            throw new InvalidFormException("maxsize、groupName、projectId。instructorId不能为空");
         }
+        return (long)-1;
     }
-    public void createGroup(ObjectCountWrapper<Group> ocw, Long creatorId, Predicate<Long> accessProject){
+    public List<Long> createGroup(ObjectCountWrapper<Group> ocw, Long creatorId, Predicate<Long> accessProject){
         // FUNC: 给行projectId，调用者是否有权限使用
         if(!accessProject.test(ocw.getObj().getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
-        if(ocw.getObj().getGroupName() == null || ocw.getObj().getMaxsize() == null || ocw.getObj().getInstructorId() == null)
-            throw new InvalidFormException("maxsize、groupName、projectId, instructorId不能为空");
-        if(!ocw.getObj().getReportTime().isAfter(LocalDateTime.now()))
-            throw new InvalidFormException("报告时间不能早于当前时间");
-
-        Long instructorId = ocw.getObj().getInstructorId();
-        User usr = usersMapper.findUserById(instructorId);
-        if(usr == null || usr.getIdentity() > 2)
-            throw new InvalidFormException("instructorId不存在或不合法");
-        List<Group> groups = Stream.generate(ocw::getObj).limit(ocw.getCount()).toList();
+        System.err.println(ocw.getObj().getProjectId());
+        StringBuilder sb = new StringBuilder();
+        if(ocw.getCount() <= 0)
+            sb.append("请创建大于等于一个小组");
+        if(ocw.getObj().getMaxsize() == null || ocw.getObj().getMaxsize() <= 0)
+            sb.append("maxsize不合法|");
+        if(ocw.getObj().getDeadline() == null ||  ocw.getObj().getDeadline().isBefore(LocalDateTime.now()))
+            sb.append("截止时间不合法|");
+        if(!sb.isEmpty())
+            throw new InvalidFormException(sb.toString());
+        List<Group> groups = Stream.generate(() -> ocw.getObj().clone()).limit(ocw.getCount()).toList();
         // 设置时间
         groups.forEach(g -> {
+            System.err.println(g.getProjectId());
             g.setCreatorId(creatorId);
             g.setTeamTime(LocalDateTime.now());
         });
         groupMapper.createGroups(groups);
+        return groups.stream().map(Group::getGroupId).toList();
     }
 
     public void updateAllGroupForTea(Group group, Long userId) {
@@ -198,21 +223,53 @@ public class GroupService {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
         if (accessGroup.test(group.getGroupId())) {
             Long pjId = groupMapper.findPjIdOfGroup(group.getGroupId());
+            StringBuilder sb = new StringBuilder();
             if(group.getInstructorId() == null || projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
-                throw new InvalidFormException("无效的instructorId");
-            if(group.getLeaderId() != null &&  projectMapper.checkStuInProj(group.getLeaderId(), pjId) == null)
-                throw new InvalidFormException("无效的leaderId");
+                sb.append("无效的instructorId|");
+            if(group.getLeaderId() == null ||  groupMapper.checkStuInGroup(group.getGroupId(), group.getLeaderId()) == null)
+                sb.append("无效的leaderId|");
+            if(group.getMaxsize() == null || group.getMaxsize() < findMemberOfGroup(group.getGroupId()))
+                sb.append("maxsize小于现在的人数|");
+            if(group.getReportTime() == null || group.getReportTime().isBefore(LocalDateTime.now()))
+                sb.append("报告时间应该晚于现在");
             if(group.getDeadline() == null || group.getDeadline().isBefore(LocalDateTime.now()))
-                throw new InvalidFormException("无效的ddl");
+                sb.append("组队截止日期应该晚于现在");
+            if(!sb.isEmpty())
+                throw new InvalidFormException(sb.toString());
+            group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
+            Set<Long> validIds;
+            if(group.getMemberIds() == null)
+                validIds = new HashSet<>();
+            else
+                validIds= group.getMemberIds().stream()
+                    .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
+                    .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
+                    .collect(Collectors.toSet());
+            validIds.add(group.getLeaderId());
+            validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
+            groupMapper.deleteStuInGroup(group.getGroupId());
+            groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
-            } catch (PSQLException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
         else
             throw new AccessDeniedException("无权修改小组信息");
     }
+
+    public void deleteGroupForTea(Long groupId, Long userId){
+        if(!Objects.equals(userId, groupMapper.findCreatorByGroup(groupId))){
+            throw new AccessDeniedException("无权删除小组");
+        }
+
+        groupMapper.deleteGroup(groupId);
+        groupMapper.deleteStuInGroup(groupId);
+
+    }
+
+
 
     public void ackInvitation(Long noticeId, Long stuId){
         Notice notice = noticeService.findNoticeById(noticeId);
@@ -221,22 +278,12 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            stuJoinGpSync(Long.parseLong(content[3]), stuId, false);
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Accept";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() != Notice.Type.RECRUITMENT.getValue()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        GroupManagerFactory.getInstance().
+            getGroupManager(notice.getGroupId(), groupMapper, noticeMapper).
+            stuJoinGpSync(notice.getGroupId(), stuId, false, noticeId);
     }
 
     public void nakInvitationOrApplication(Long noticeId, Long stuId){
@@ -246,86 +293,70 @@ public class GroupService {
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Reject";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() == Notice.Type.NORMAL.getValue()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        notice.setStatus(Notice.Status.REJECT.getValue());
+        noticeMapper.updateNoticeStatus(notice);
     }
 
     public void ackApplication(Long noticeId, Long stuId){
         Notice notice = noticeService.findNoticeById(noticeId);
         Set<Long> views = new HashSet<>(noticeMapper.findStuOfNotice(noticeId));
+        System.err.println(views+" "+stuId);
         if(!views.contains(stuId))
             throw new AccessDeniedException("无权访问该notice");
         if(notice == null)
             throw new InvalidFormException("无效的noticeid");
-        try{
-            String [] content = notice.getContent().split("[<>]");
-            Group gp = groupMapper.findGroupById(Long.parseLong(content[3]));
-            if(gp == null || gp.getLeaderId() != stuId)
-                throw new AccessDeniedException("无权访问该小组");
-            stuJoinGpSync(Long.parseLong(content[3]), Long.parseLong(content[1]), false);
-            StringBuilder sb = new StringBuilder();
-            content[5] = "Accept";
-            for(int i = 0; i < content.length; i++){
-                if(i % 2 == 0)
-                    sb.append(content[i]).append("<");
-                else
-                    sb.append(content[i]).append(">");
-            }
-            noticeMapper.updateNotice(notice);
-
-        }catch (IndexOutOfBoundsException | NumberFormatException | PSQLException e){
-            throw new InvalidFormException("无效的noticeid");
+        if(notice.getType() != Notice.Type.APPLICATION.getValue()){
+            throw new AccessDeniedException("该notice不是一个请求");
         }
+        GroupManagerFactory.getInstance().
+            getGroupManager(notice.getGroupId(), groupMapper, noticeMapper).
+            stuJoinGpSync(notice.getGroupId(), notice.getCreatorId(), false, noticeId);
+
     }
 
 
-    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
-        Group gp = groupMapper.findGroupById(gpId);
-        int cnt = groupMapper.findCntOfStuInGroup(gpId);
-        if(cnt == 0){
-            groupMapper.stuJoinGroup(stuId, gpId);
-            try{
-                groupMapper.updateLeader(stuId, gpId);
-            }catch (Exception e){
-                System.err.println(e.getMessage());
-            }
-        }else if(gp.getMaxsize() == cnt) {
-            throw new AccessDeniedException("小组已满");
-        }else if(needApp){
-            noticeService.createApplicationNotice(stuId, gp.getLeaderId(), gp.getProjectId(),
-                gp.getGroupId());
-        }else {
-            groupMapper.stuJoinGroup(stuId, gpId);
-        }
-    }
-    public void recruitMem(KeyValueWrapper<Long, List<Long>> gpId_stuIds, Long userId){
-        //FUNC: 确定userId在group中
-        Group group = groupMapper.findGroupById(gpId_stuIds.getKey());
-        if(group == null || Objects.equals(
-            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
-            group.getGroupId())){
-            throw new InvalidFormException("无效的groupId");
-        }
-        //PROC: 筛选stuIds
-        List<Long> stuIds = gpId_stuIds.getValue().stream().filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null).toList();
-        noticeService.createRecruitmentNotice(userId, stuIds, group.getProjectId(), group.getGroupId());
+//    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
+//        Group gp = groupMapper.findGroupById(gpId);
+//        int cnt = groupMapper.findCntOfStuInGroup(gpId);
+//        if(gp.getDeadline().isAfter(LocalDateTime.now()))
+//            throw new OverdueException("超过组队的截止时间", gp.getDeadline(), LocalDateTime.now());
+//        if(cnt == 0){
+//            groupMapper.stuJoinGroup(stuId, gpId);
+//            try{
+//                groupMapper.updateLeader(stuId, gpId);
+//            }catch (Exception e){
+//                System.err.println(e.getMessage());
+//            }
+//        }else if(gp.getMaxsize() == cnt) {
+//            throw new AccessDeniedException("小组已满");
+//        }else if(needApp){
+//            throw new AccessDeniedException("小组不是空组，请向小组长申请");
+//        }else {
+//            groupMapper.stuJoinGroup(stuId, gpId);
+//        }
+//    }
 
+    public List<User> getStuNotInGroup(Long pjId, Long userId){
+        if(projectMapper.checkStuInProj(userId, pjId) == null){
+            throw new AccessDeniedException("你不在小组中");
+        }
+        return groupMapper.findStuNotInGpOfAProj(pjId).stream().map(User::mask).toList();
     }
+    public void recruitMem(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createRecruitmentNotice( gpId_notice,  userId);
+    }
+
+    public void applyToJoinGroup(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createApplicationNotice(gpId_notice, userId);
+    }
+
+
     public void joinGroup(Long groupId, Long stuId){
         //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
+        System.err.println(groupId);
         Group gp = groupMapper.findGroupById(groupId);
         if(gp == null){
             throw new InvalidFormException("小组不存在");
@@ -337,7 +368,11 @@ public class GroupService {
             // 在这个proj中学生加入了其他小组
             throw new AccessDeniedException("您已经在其他小组中");
         }
-        stuJoinGpSync(gp.getGroupId(), stuId, true);
+        GroupManagerFactory.getInstance().
+            getGroupManager(gp.getGroupId(), groupMapper, noticeMapper).
+            stuJoinGpSync(
+                groupId, stuId, true, null
+            );
     }
 
     public List<User> getGpMem(Long userId, Long pjId){

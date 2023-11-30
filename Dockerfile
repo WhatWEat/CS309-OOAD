@@ -13,7 +13,7 @@ RUN chmod u+x /usr/local/ProjectHelper-0.0.1-SNAPSHOT.jar
 
 
 # 添加 Files 目录
-COPY Files /
+COPY Files /Files
 
 #设置时区
 RUN rm -f /etc/localtime \

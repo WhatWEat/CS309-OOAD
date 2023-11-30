@@ -3,6 +3,9 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
+import com.example.projecthelper.entity.NoticeFactory.AbstractNoticeFactory;
+import com.example.projecthelper.entity.NoticeFactory.ApplicationFactory;
+import com.example.projecthelper.entity.NoticeFactory.InvitationFactory;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
@@ -10,6 +13,7 @@ import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
+import java.util.Collections;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,31 +178,57 @@ public class NoticeService {
                 .map(User::getUserId)
                 .collect(Collectors.toSet())
         );
-        try {
-            Notice notice = gpId_notice.getValue().recruit(userId, group.getGroupId(), group.getProjectId());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            if(!stuIds.isEmpty())
-                noticeMapper.insertStuView(stuIds, notice.getNoticeId());
-        } catch (Exception e) {
-            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
-        }
+//        try {
+            AbstractNoticeFactory anf = new InvitationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setFromId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            for(Long stuId: stuIds){
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.RECRUITMENT.ordinal());
+                if(previous != null){
+                    previous.setCreateTime(LocalDateTime.now());
+                    noticeMapper.updateNoticeTime(previous);
+                    continue;
+                }
+                noticeMapper.createNotice(notice);
+                noticeMapper.insertStuView(Collections.singleton(stuId), notice.getNoticeId());
+            }
+
+//        } catch (Exception e) {
+//            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+//        }
     }
 
 
     public void createApplicationNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
-        if(group == null || !Objects.equals(
-            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
-            group.getGroupId())){
-            throw new InvalidFormException("无效的groupId");
+        if(group == null ||
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()) != null
+        ){
+            throw new InvalidFormException("无效的groupId或者已经加入小组");
         }
         try {
-            Notice notice = gpId_notice.getValue().apply(userId, group.getGroupId(), group.getProjectId());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
+            AbstractNoticeFactory anf = new ApplicationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setFromId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.ordinal());
+            if(previous != null){
+                previous.setCreateTime(LocalDateTime.now());
+                noticeMapper.updateNoticeTime(previous);
+            }
+            else {
+                noticeMapper.createNotice(notice);
+                System.err.println(notice.getNoticeId());
+                noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
+            }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }

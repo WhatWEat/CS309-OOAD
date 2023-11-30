@@ -49,9 +49,9 @@ public interface GroupMapper extends BaseMapper<Group> {
 
     @Insert({
         "<script>",
-        "INSERT INTO groups (maxsize, teamTime, creatorId, deadline) VALUES",
+        "INSERT INTO groups (maxsize, teamTime, creatorId, deadline, projectId, groupName) VALUES",
         "<foreach item='group' index='index' collection='groupList' separator=','>",
-        "(#{group.maxsize}, #{group.teamTime}, #{group.creatorId}, #{group.deadline})" +
+        "(#{group.maxsize}, #{group.teamTime}, #{group.creatorId}, #{group.deadline}, #{group.projectId}, #{group.groupName})" +
         "</foreach>",
         "</script>"
     })

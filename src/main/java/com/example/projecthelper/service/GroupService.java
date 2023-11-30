@@ -8,6 +8,7 @@ import com.example.projecthelper.entity.User;
 
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.service.Flyweight.GroupManagerFactory;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectCountWrapper;
 import java.sql.SQLException;
@@ -177,6 +178,7 @@ public class GroupService {
         if(!accessProject.test(ocw.getObj().getProjectId())){
             throw new AccessDeniedException("无权创建小组");
         }
+        System.err.println(ocw.getObj().getProjectId());
         StringBuilder sb = new StringBuilder();
         if(ocw.getCount() <= 0)
             sb.append("请创建大于等于一个小组");
@@ -189,6 +191,7 @@ public class GroupService {
         List<Group> groups = Stream.generate(() -> ocw.getObj().clone()).limit(ocw.getCount()).toList();
         // 设置时间
         groups.forEach(g -> {
+            System.err.println(g.getProjectId());
             g.setCreatorId(creatorId);
             g.setTeamTime(LocalDateTime.now());
         });
@@ -275,7 +278,9 @@ public class GroupService {
         if(notice.getType() != Notice.Type.RECRUITMENT.ordinal()){
             throw new AccessDeniedException("该notice不是一个请求");
         }
-        stuJoinGpSync(notice.getGroupId(), stuId, false);
+        GroupManagerFactory.getInstance().
+            getGroupManager(notice.getGroupId()).
+            stuJoinGpSync(notice.getGroupId(), stuId, false);
         notice.setStatus(Notice.Status.AGREE.ordinal());
         noticeMapper.updateNoticeStatus(notice);
     }
@@ -304,34 +309,42 @@ public class GroupService {
         if(notice.getType() != Notice.Type.APPLICATION.ordinal()){
             throw new AccessDeniedException("该notice不是一个请求");
         }
-        stuJoinGpSync(notice.getGroupId(), notice.getFromId(), false);
+        GroupManagerFactory.getInstance().
+            getGroupManager(notice.getGroupId()).
+            stuJoinGpSync(notice.getGroupId(), notice.getFromId(), false);
         notice.setStatus(Notice.Status.AGREE.ordinal());
         noticeMapper.updateNoticeStatus(notice);
 
     }
 
 
-    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
-        Group gp = groupMapper.findGroupById(gpId);
-        int cnt = groupMapper.findCntOfStuInGroup(gpId);
-        if(gp.getDeadline().isAfter(LocalDateTime.now()))
-            throw new OverdueException("超过组队的截止时间", gp.getDeadline(), LocalDateTime.now());
-        if(cnt == 0){
-            groupMapper.stuJoinGroup(stuId, gpId);
-            try{
-                groupMapper.updateLeader(stuId, gpId);
-            }catch (Exception e){
-                System.err.println(e.getMessage());
-            }
-        }else if(gp.getMaxsize() == cnt) {
-            throw new AccessDeniedException("小组已满");
-        }else if(needApp){
-            throw new AccessDeniedException("小组不是空组，请向小组长申请");
-        }else {
-            groupMapper.stuJoinGroup(stuId, gpId);
-        }
-    }
+//    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp){
+//        Group gp = groupMapper.findGroupById(gpId);
+//        int cnt = groupMapper.findCntOfStuInGroup(gpId);
+//        if(gp.getDeadline().isAfter(LocalDateTime.now()))
+//            throw new OverdueException("超过组队的截止时间", gp.getDeadline(), LocalDateTime.now());
+//        if(cnt == 0){
+//            groupMapper.stuJoinGroup(stuId, gpId);
+//            try{
+//                groupMapper.updateLeader(stuId, gpId);
+//            }catch (Exception e){
+//                System.err.println(e.getMessage());
+//            }
+//        }else if(gp.getMaxsize() == cnt) {
+//            throw new AccessDeniedException("小组已满");
+//        }else if(needApp){
+//            throw new AccessDeniedException("小组不是空组，请向小组长申请");
+//        }else {
+//            groupMapper.stuJoinGroup(stuId, gpId);
+//        }
+//    }
 
+    public List<User> getStuNotInGroup(Long pjId, Long userId){
+        if(projectMapper.checkStuInProj(userId, pjId) == null){
+            throw new AccessDeniedException("你不在小组中");
+        }
+        return groupMapper.findStuNotInGpOfAProj(pjId).stream().map(User::mask).toList();
+    }
     public void recruitMem(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
         noticeService.createRecruitmentNotice( gpId_notice,  userId);
     }
@@ -354,9 +367,11 @@ public class GroupService {
             // 在这个proj中学生加入了其他小组
             throw new AccessDeniedException("您已经在其他小组中");
         }
-        stuJoinGpSync(
-            groupId, stuId, true
-        );
+        GroupManagerFactory.getInstance().
+            getGroupManager(gp.getGroupId()).
+            stuJoinGpSync(
+                groupId, stuId, true
+            );
     }
 
     public List<User> getGpMem(Long userId, Long pjId){

@@ -150,6 +150,14 @@ public class StudentController {
     }
 
 
+    @GetMapping("/get_stu_not_in_group/{project_id}")
+    public ResponseResult<List<User>> getStuNotInGroup(HttpServletRequest request,
+                                                   @PathVariable("project_id") Long pjId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<User> users = groupService.getStuNotInGroup(pjId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(users, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @PostMapping("/recruit_mem")
     public ResponseResult<Object> recruitMem(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

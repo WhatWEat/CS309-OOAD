@@ -11,34 +11,34 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Notice {
-    private Long noticeId;
-    private Long projectId;
-    private String title;
-    private String content;
-    private Long creatorId;
-    private LocalDateTime createTime;
-    private int type; //FUNC:0是正常的notice，1是application，2是recruitment
-    private int status; //FUNC:0是未决定，1是已同意，2是已拒绝
-    private Long fromId;
-    private Long groupId;
+    protected Long noticeId;
+    protected Long projectId;
+    protected String title;
+    protected String content;
+    protected Long creatorId;
+    protected LocalDateTime createTime;
+    protected int type; //FUNC:0是正常的notice，1是application，2是recruitment
+    protected int status; //FUNC:0是未决定，1是已同意，2是已拒绝
+    protected Long fromId;
+    protected Long groupId;
 
     @TableField(exist = false)
-    private String fromName;
+    protected String fromName;
 
     @TableField(exist = false)
-    private String groupName;
+    protected String groupName;
 
     @TableField(exist = false)
-    private String creatorName;
+    protected String creatorName;
 
     @TableField(exist = false)
-    private String projectName;
+    protected String projectName;
 
     @TableField(exist = false)
-    private List<Long> stuView;
+    protected List<Long> stuView;
 
     @TableField(exist = false)
-    private Boolean toAll = false;
+    protected Boolean toAll = false;
 
     public Notice(Long noticeId, Long projectId, String title, String content, Long creatorId) {
         this.noticeId = noticeId;
@@ -51,27 +51,27 @@ public class Notice {
     public Notice(){
     }
 
-    public Notice apply(Long fromId, Long groupId, Long projId){
-        this.creatorId = null;
-        this.fromId = fromId;
-        this.groupId = groupId;
-        this.projectId = projId;
-        this.status = Status.UNDECIDED.ordinal();
-        this.type = Type.APPLICATION.ordinal();
-        this.createTime = LocalDateTime.now();
-        return this;
-    }
-
-    public Notice recruit(Long fromId, Long groupId, Long projId){
-        this.creatorId = null;
-        this.fromId = fromId;
-        this.groupId = groupId;
-        this.projectId = projId;
-        this.status = Status.UNDECIDED.ordinal();
-        this.type = Type.RECRUITMENT.ordinal();
-        this.createTime = LocalDateTime.now();
-        return this;
-    }
+//    public Notice apply(Long fromId, Long groupId, Long projId){
+//        this.creatorId = null;
+//        this.fromId = fromId;
+//        this.groupId = groupId;
+//        this.projectId = projId;
+//        this.status = Status.UNDECIDED.ordinal();
+//        this.type = Type.APPLICATION.ordinal();
+//        this.createTime = LocalDateTime.now();
+//        return this;
+//    }
+//
+//    public Notice recruit(Long fromId, Long groupId, Long projId){
+//        this.creatorId = null;
+//        this.fromId = fromId;
+//        this.groupId = groupId;
+//        this.projectId = projId;
+//        this.status = Status.UNDECIDED.ordinal();
+//        this.type = Type.RECRUITMENT.ordinal();
+//        this.createTime = LocalDateTime.now();
+//        return this;
+//    }
 
     public Notice agree(Long fromId, Long groupId, Long projId){
         this.fromId = fromId;
@@ -92,6 +92,7 @@ public class Notice {
     }
 
     public enum Status{
+        EXPIRED(-1),
         UNDECIDED(0),
         AGREE(1),
         REJECT(2);

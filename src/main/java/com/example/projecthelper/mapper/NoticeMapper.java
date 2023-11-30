@@ -75,11 +75,14 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
     List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset, String key);
 
-    @Insert("insert into notice ( title, content, creatorId, projectId, createTime)\n" +
-            "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime});")
+
+    @Select("select n.* from notice n join stuviewnotice s on s.noticeId = n.noticeId where type = #{type} and status = 0 and fromId = #{fromId} and stuId = #{stuId}")
+    Notice getPreviousUndecidedNotice(Long fromId, Long stuId, int type);
+    @Insert("insert into notice ( title, content, creatorId, projectId, createTime, type, status, fromId, groupId)\n" +
+            "VALUES (#{title},#{content},#{creatorId},#{projectId}, #{createTime}, #{type}, #{status}, #{fromId}, #{groupId});")
     @Options(useGeneratedKeys = true, keyProperty = "noticeId", keyColumn = "noticeid")
         //title、content、creatorId、projectId均不为空，title长度上限为200，content为5000
-    void createNotice(Notice notice) throws PSQLException;
+    void createNotice(Notice notice);
 
     @Insert("insert into stuviewnotice (noticeId, stuId) VALUES (#{noticeId}, #{stuId});")
     //二者同时不为空
@@ -107,6 +110,11 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "WHERE noticeId = #{noticeId};")
         //title、content、creatorId均不为空，title长度上限为200，content为5000
     void updateNoticeStatus(Notice notice);
+
+    @Update("UPDATE notice SET createTime = #{createTime} " +
+        "WHERE noticeId = #{noticeId};")
+        //title、content、creatorId均不为空，title长度上限为200，content为5000
+    void updateNoticeTime(Notice notice);
 
     @Update("UPDATE notice SET title = #{title}, content = #{content} " +
             "WHERE noticeId = #{noticeId};")

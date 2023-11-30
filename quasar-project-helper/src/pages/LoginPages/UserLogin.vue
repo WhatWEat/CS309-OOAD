@@ -54,13 +54,18 @@
                     v-model="loginEmail"
                     label="Email"
                     class="col-12"
-                    :suffix="selectedEmailDomain">
+                    :suffix="selectedEmailDomain"
+                  >
                     <template v-slot:append>
                       <q-btn-dropdown dense flat>
                         <q-list>
-                          <q-item clickable v-close-popup v-for="(item, index) in emailDomains"
-                                  :key="index"
-                                  @click="selectEmailDomain(index)">
+                          <q-item
+                            clickable
+                            v-close-popup
+                            v-for="(item, index) in emailDomains"
+                            :key="index"
+                            @click="selectEmailDomain(index)"
+                          >
                             <q-item-section>
                               <q-item-label>{{ item }}</q-item-label>
                             </q-item-section>
@@ -69,10 +74,7 @@
                       </q-btn-dropdown>
                     </template>
                   </q-input>
-                  <q-input dense
-                           outline
-                           class="col-12"
-                          label="Code">
+                  <q-input dense outline class="col-12" label="Code">
                     <template v-slot:append>
                       <q-btn
                         dense
@@ -81,9 +83,29 @@
                         @click="sendEmailCode"
                         v-if="countdown === 0"
                       />
-                      <div v-else>
-                        {{ countdown }}s
-                      </div>
+                      <div v-else>{{ countdown }}s</div>
+                    </template>
+                  </q-input>
+                </q-tab-panel>
+                <q-tab-panel name="phone" class="col-12 row">
+                  <q-input
+                    dense
+                    outlined
+                    v-model="loginPhone"
+                    label="Phone"
+                    class="col-12"
+                  >
+                  </q-input>
+                  <q-input dense outline class="col-12" label="Code">
+                    <template v-slot:append>
+                      <q-btn
+                        dense
+                        flat
+                        icon="send"
+                        @click="sendPhoneCode"
+                        v-if="countdown_phone === 0"
+                      />
+                      <div v-else>{{ countdown_phone }}s</div>
                     </template>
                   </q-input>
                 </q-tab-panel>
@@ -99,17 +121,7 @@
                 </div>
                 <div>
                   <q-btn
-                    label="register"
-                    type="button"
-                    color="primary"
-                    @click="goToRegister"
-                  />
-                </div>
-              </div>
-              <div style="display: flex; justify-content: space-between">
-                <div>
-                  <q-btn
-                    label="forgot"
+                    label="forgot password"
                     type="button"
                     color="primary"
                     class="q-mr-sm"
@@ -140,19 +152,28 @@ export default defineComponent({
     const loginType = ref("studentId"); // 默认为学号登录
     const loginValue = ref("");
     const password = ref("");
-    const loginEmail = ref(""), countdown = ref(0);
-    const selectedEmailDomain = ref('gmail.com')
-    const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn',
-      '@mail.sustech.edu.cn'])
+    // email login
+    const loginEmail = ref(""),
+      countdown = ref(0);
+    const selectedEmailDomain = ref("gmail.com");
+    const emailDomains = ref([
+      "@gmail.com",
+      "@yahoo.com",
+      "@outlook.com",
+      "@qq.com",
+      "@sustech.edu.cn",
+      "@mail.sustech.edu.cn",
+    ]);
     function selectEmailDomain(index) {
-      selectedEmailDomain.value = emailDomains.value[index]
+      selectedEmailDomain.value = emailDomains.value[index];
     }
-    function sendEmailCode(){
+    function sendEmailCode() {
+      // TODO 发送邮箱验证码
       $q.notify({
-        color: 'green',
-        textColor: 'white',
-        icon: 'mail',
-        message: '验证码已发送'
+        color: "green",
+        textColor: "white",
+        icon: "mail",
+        message: "Code has been sent",
       });
       // 开始倒计时
       countdown.value = 60;
@@ -163,16 +184,27 @@ export default defineComponent({
         }
       }, 1000);
     }
-    function goToStudentIdLogin() {
-      loginType.value = "studentId";
-    }
-
-    function goToEmailLogin() {
-      loginType.value = "email";
-    }
-
-    function goToPhoneLogin() {
-      loginType.value = "phone";
+    //phone login
+    const countdown_phone = ref(0);
+    const loginPhone = ref("");
+    const phone_code = ref("");
+    function sendPhoneCode() {
+      // TODO 发送手机验证码
+      // api.get()
+      $q.notify({
+        color: "green",
+        textColor: "white",
+        icon: "mail",
+        message: "Code has been sent",
+      });
+      // 开始倒计时
+      countdown_phone.value = 60;
+      const interval = setInterval(() => {
+        countdown_phone.value--;
+        if (countdown_phone.value === 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
     }
 
     function getLoginValueRules() {
@@ -197,32 +229,55 @@ export default defineComponent({
           val.length >= 6 || "The password length cannot be less than 6 digits",
       ];
     }
-    function login() {
-      api
-        .post("/login", {
-          key: loginValue.value,
-          value: password.value,
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.data.statusCode === 200) {
-            localStorage.setItem("Token", res.data.jwt_token);
-            router.push("/");
-          }
-          //   不要改动以下代码
-        })
-        .catch((err) => {
-          $q.notify({
-            message: err.response.data.msg,
-            position: "center",
-          });
-          console.log(err);
-          console.log(loginValue);
-          console.log(password);
+    function loginStudentId(){
+      api.post("/login", {
+        key: loginValue.value,
+        value: password.value,
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.statusCode === 200) {
+          localStorage.setItem("Token", res.data.jwt_token);
+          router.push("/");
+        }
+        //   不要改动以下代码
+      })
+      .catch((err) => {
+        $q.notify({
+          message: err.response.data.msg,
+          position: "center",
         });
+        console.log(err);
+        console.log(loginValue);
+        console.log(password);
+      });
+    }
+    function loginByEmail(){
+      api.get("/email-login", {
+        params: {
+          email: loginEmail.value + selectedEmailDomain.value,
+          code: phone_code.value,
+        },
+      })
+    }
+    function loginByPhone(){
+      api.get("/phone-login", {
+        params: {
+          phone: loginPhone.value,
+          code: phone_code.value,
+        },
+      })
+    }
+    function login() {
+      if (loginType.value === "studentId") {
+        loginStudentId();
+      } else if (loginType.value === "email") {
+        loginByEmail();
+      } else if (loginType.value === "phone") {
+        loginByPhone();
+      }
       console.log("登录:", loginValue.value, password.value);
     }
-
     function goToRegister() {
       router.push("/Register");
     }
@@ -239,10 +294,11 @@ export default defineComponent({
       emailDomains,
       password,
       countdown,
+      countdown_phone,
+      loginPhone,
+      phone_code,
+      sendPhoneCode,
       selectEmailDomain,
-      goToStudentIdLogin,
-      goToEmailLogin,
-      goToPhoneLogin,
       getLoginValueRules,
       getPasswordRules,
       login,

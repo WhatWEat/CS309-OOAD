@@ -17,6 +17,8 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     User findUserById(Long userId);
 
+
+
     @Select("select * from users where identity = #{identity};")
     @Results({
         @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)

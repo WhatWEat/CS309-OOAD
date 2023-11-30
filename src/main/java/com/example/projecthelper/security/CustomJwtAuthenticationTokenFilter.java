@@ -46,7 +46,6 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        System.err.println("hereeeee");
         // get token from header:  Authorization: Bearer <token>
         String token = request.getHeader(AUTH_HEADER);
         if (Objects.isNull(token)){

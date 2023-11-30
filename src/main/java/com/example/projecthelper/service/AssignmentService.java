@@ -42,11 +42,20 @@ public class AssignmentService {
         this.fileService = fileService;
     }
 
+    public List<Assignment> getAssignmentsByAdm(Long page, Long pageSize){
+        List<Assignment> results = assignmentMapper.getAssByAdm(pageSize, page * pageSize);
+
+        results.forEach(a ->
+            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        );
+        return results;
+    }
+
 
     public List<Assignment> getAssignmentsByTea(Long userId, Long projId, Long page, Long pageSize){
         List<Assignment> results;
         if(projId == -1){
-            results = assignmentMapper.getAssByTea(userId);
+            results = assignmentMapper.getAssByTea(userId, pageSize, page * pageSize);
         }
         else{
             Long teaOfProj = projectMapper.findTeacherByProject(projId);
@@ -64,7 +73,7 @@ public class AssignmentService {
     public List<Assignment> getAssignmentsByTa(Long userId, Long projId, Long page, Long pageSize){
         List<Assignment> results;
         if(projId == -1){
-            results = assignmentMapper.getAssByTa(userId);
+            results = assignmentMapper.getAssByTa(userId, pageSize, page * pageSize);
         }
         else {
             Long taOfProj = projectMapper.checkTaInProj(projId, userId);
@@ -83,7 +92,7 @@ public class AssignmentService {
     public List<Assignment> getAssignmentsByStu(Long userId, Long projId, Long page, Long pageSize){
         List<Assignment> results;
         if(projId == -1){
-            results = assignmentMapper.getAssByStu(userId);
+            results = assignmentMapper.getAssByStu(userId, pageSize, page * pageSize);
         }
         else {
             System.err.println(userId+" "+projId);

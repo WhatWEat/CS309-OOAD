@@ -64,6 +64,11 @@ onMounted(() => {
     essentialLinks.value =
       [
         {
+          title: 'Home',
+          icon: 'home',
+          link: '/'
+        },
+        {
           title: 'Announcements',
           icon: 'record_voice_over',
           link: '/announcements'

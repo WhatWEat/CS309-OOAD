@@ -145,16 +145,16 @@
   </div>
   <!--  这里是Edit表单弹窗部分-->
   <div>
-    <el-dialog v-model="show_edit_form" center="true">
+    <el-dialog v-model="show_edit_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
-      <group-form type="Edit" :project-id="projectId" :form-data="formData"></group-form>
+      <group-form @unfold="show_edit_form=false" @successDialog="handleSuccess" @errorDialog="handleError" type="Edit" :project-id="projectId" :form-data="formData"></group-form>
     </el-dialog>
   </div>
   <!--  这里是创建表单弹窗改部分-->
   <div>
-    <el-dialog v-model="show_insert_form" center="true">
+    <el-dialog v-model="show_insert_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -163,7 +163,7 @@
   </div>
   <!--  这里是设置批量创建小组弹窗部分-->
   <div>
-    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" center="true">
+    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" :center="true">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create multiple groups</div>
       </template>
@@ -587,13 +587,13 @@ export default {
     },
     // 获取该学生的所在小组的ID
     getGroupId() {
-      api.get('/get_group_id/' + this.projectId).then(
+      api.get('/stu/get_group_id/' + this.projectId).then(
         (response) => {
-          // this.groupId = response.data.body.groupId;
-          // this.isGroupLeader = response.data.body.isLeader;
-          // console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
-          // console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
-          // console.log("responseHere:\n");
+          this.groupId = response.data.body.key;
+          this.isGroupLeader = response.data.body.value;
+          console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+          console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+          console.log("responseHere:\n");
           console.log(response.data);
         }
       ).catch((error) => {
@@ -605,7 +605,7 @@ export default {
     //**********************************Post信息部分**********************************//
     // 向服务器发送申请加入小组指令
     postJoinGroup(){
-      api.post('/stu/join_group' + this.projectId, {
+      api.post('/stu/apply_to_join_group', {
         "key": this.selected_row.row.groupId,
         "value": {
           "title": "加入请求",
@@ -616,8 +616,8 @@ export default {
           this.dialogMessage = {
             'icon_name': 'done',
             'icon_color': 'green',
-            'icon_text_color': 'blue',
-            'text': response.data.message,
+            'icon_text_color': 'white',
+            'text': response.data.msg,
           }
           // 上面执行完毕后,弹出对话框
           await this.$nextTick();

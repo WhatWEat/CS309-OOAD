@@ -4,7 +4,7 @@
     <!--      <el-input v-model="formData_temp.groupId"></el-input>-->
     <!--    </el-form-item>-->
     <el-form-item label="GroupMaxSize" prop="maxSize">
-      <el-input v-model="formData_temp.maxSize"></el-input>
+      <el-input v-model.number="formData_temp.maxSize"></el-input>
     </el-form-item>
     <el-form-item label="GroupName" prop="groupName">
       <el-input v-model="formData_temp.groupName"></el-input>
@@ -242,12 +242,12 @@ export default defineComponent({
       this.$refs[formName].validate((valid) => {
         console.log("提交创建小组的表单");
         console.log({
-          "projectId": this.projectId,
+          "projectId":  parseInt(this.projectId),
           "maxsize": this.formData_temp.maxSize,
           "groupName": this.formData_temp.groupName,
           "instructorId": this.formData_temp.instructor,
           "deadline": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
-          "reportTime": this.formData_temp.date2_deadline + "T" + this.formData_temp.date2_deadline,
+          "reportTime": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
           "description": this.formData_temp.desc,
           "leaderId": this.formData_temp.leader,
           "memberIds": this.formData_temp.members,
@@ -262,7 +262,7 @@ export default defineComponent({
               "groupName": this.formData_temp.groupName,
               "instructorId": this.formData_temp.instructor,
               "deadline": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
-              "reportTime": this.formData_temp.date2_deadline + "T" + this.formData_temp.date2_deadline,
+              "reportTime": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
               "description": this.formData_temp.desc,
               "leaderId": this.formData_temp.leader,
               "memberIds": this.formData_temp.members,
@@ -292,12 +292,12 @@ export default defineComponent({
             {
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
-              "instructorId": this.formData_temp.instructor,
-              "leaderId": this.formData_temp.leader,
+              "instructorId": Object.values(this.formData_temp.instructor)[0],
+              "leaderId": Object.values(this.formData_temp.leader)[0],
               "groupId": this.formData_temp.groupId,
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
-              "deadline": this.formData_temp.date2_deadline + "T" + this.formData_temp.date2_deadline,
-              "memberIds": this.formData_temp.members,
+              "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
+              "memberIds": Object.values(this.formData_temp.members),
             }
           ).then((res) => {
             console.log("提交成功了");
@@ -306,18 +306,17 @@ export default defineComponent({
           }).catch((err) => {
             console.log("提交失败了");
             console.log(err)
-
             this.errorMessage.text = err.response.data.msg;
             this.$emit("errorDialog", this.errorMessage);
-            console.error({
+            console.log({
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
-              "instructorId": this.formData_temp.instructor,
-              "leaderId": this.formData_temp.leader,
+              "instructorId": Object.values(this.formData_temp.instructor),
+              "leaderId": Object.values(this.formData_temp.leader),
               "groupId": this.formData_temp.groupId,
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
-              "deadline": this.formData_temp.date2_deadline + "T" + this.formData_temp.date2_deadline,
-              "memberIds": this.formData_temp.members,
+              "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
+              "memberIds": Object.values(this.formData_temp.members),
             })
           })
         } else {

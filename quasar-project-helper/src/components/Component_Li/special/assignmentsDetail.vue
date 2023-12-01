@@ -43,7 +43,6 @@
               </q-item-section>
             </q-item>
           </q-card>
-
           <q-card class="my-card" style="min-width: 540px;left: 0px;min-height: 120px;">
             <q-item>
               <q-item-section>
@@ -104,7 +103,6 @@
 import {defineComponent} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 
-
 export default defineComponent({
   name: "AssignmentDetail",
   data() {
@@ -143,7 +141,15 @@ export default defineComponent({
         }
       ]
     }
-  }
+  },
+  watch: {
+    AssignmentDetail: {
+      handler: function (val, oldVal) {
+        console.log(val);
+      },
+      deep: true
+    }
+  },
 })
 </script>
 

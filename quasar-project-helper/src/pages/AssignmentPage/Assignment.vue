@@ -1,4 +1,5 @@
 <template>
+  <div>
   <q-toolbar class="bg-grey-4 text-black rounded-borders">
     <q-btn
       flat
@@ -6,12 +7,11 @@
     ></q-btn>
     <q-toolbar-title></q-toolbar-title>
     <q-btn-group push>
-      <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>
-      <q-btn :color="color_group" icon="groups" label="Group" push @click="buttonHandle"></q-btn>
+      <q-btn text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
+      <q-btn text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
     </q-btn-group>
   </q-toolbar>
-<!--  <router-view></router-view>-->
-
+  </div>
   <div v-show="isPersonal">
     <assignment-table :columns="columns_personal" :rows="rows_personal" table-title="Personal">
     </assignment-table>
@@ -22,7 +22,6 @@
   </div>
 
    Dev   userData:
-  {{ userData}}
 </template>
 
 <script>
@@ -36,7 +35,7 @@ export default {
   data() {
     return {
       path: '',
-      color_personal: 'grey-5',
+      color_personal: 'secondary',
       color_group: 'grey-4',
 
       userData:useUserStore(),
@@ -109,9 +108,19 @@ export default {
     }
   },
   methods: {
-    buttonHandle() {
-      this.isPersonal = !this.isPersonal
-      this.isGroup = !this.isGroup
+    buttonHandle(btn_name) {
+      if (btn_name === 'Personal' && !this.isPersonal) {
+        this.isPersonal = !this.isPersonal
+        this.isGroup = !this.isGroup
+        this.color_personal = 'secondary'
+        this.color_group = 'grey-4'
+      } else if (btn_name === 'Group' && !this.isGroup) {
+        this.isPersonal = !this.isPersonal
+        this.isGroup = !this.isGroup
+        this.color_personal = 'grey-4'
+        this.color_group = 'secondary'
+      }
+
     },
 
     //***********************Get请求消息*************************
@@ -136,32 +145,32 @@ export default {
     },
     // 获取该学生的所有作业列表
     getAssignmentList() {
-      console.log("尝试获取作业列表");
       api.get('/ass-list/'+ this.projectId +'/0/10000').then((res) => {
         this.rows_group = []
         this.rows_personal = []
-        console.log("res:");
-        console.log(res);
+        // console.log("res:");
+        // console.log(res);
         for (let i = 0; i < res.data.body.length; i++) {
             let tmp ={};
             if (res.data.body.type ==='i'){
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
-              // tmp['deadLine'] = res.data.body[i].deadline.replace(;
+              //2023-12-02T15:45:30, 把T换成空格
+              tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;
               tmp['moreInfo'] = res.data.body[i].moreInfo;
               this.rows_personal.push(tmp)
             }
             else {
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
-              tmp['deadLine'] = res.data.body[i].deadline;
+              tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;
               tmp['moreInfo'] = res.data.body[i].moreInfo;
               this.rows_group.push(tmp)
             }
         }
-        console.log()
-        console.log(this.rows_group);
-        console.log(this.rows_personal);
+        // console.log()
+        // console.log(this.rows_group);
+        // console.log(this.rows_personal);
       }).catch((err) => {
         console.log("err:");
         console.log(err);
@@ -182,3 +191,36 @@ export default {
 <style scoped>
 
 </style>
+
+
+
+
+
+
+
+
+
+
+
+<!--<template>-->
+<!--    <q-toolbar class="bg-grey-4 text-black rounded-borders">-->
+<!--      <q-btn-->
+<!--        flat-->
+<!--        label="Assignments"-->
+<!--      ></q-btn>-->
+<!--      <q-toolbar-title></q-toolbar-title>-->
+<!--      <q-btn-group push>-->
+<!--        <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>-->
+<!--        <q-btn :color="color_group" icon="groups" label="Group" push @click="buttonHandle"></q-btn>-->
+<!--      </q-btn-group>-->
+<!--    </q-toolbar>-->
+<!--</template>-->
+
+<!--<script>-->
+<!--import {defineAsyncComponent, ref} from 'vue';-->
+<!--import {useUserStore} from "src/composables/useUserStore";-->
+<!--import {api} from "boot/axios";-->
+<!--import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";-->
+<!--</script>-->
+
+

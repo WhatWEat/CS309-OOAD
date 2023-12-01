@@ -3,9 +3,9 @@
   <div class="q-pa-md ">
     <q-table
       v-model:selected="selected"
-      :columns="columns"
+      :columns="columns_temp"
       :filter="search"
-      :rows="rows"
+      :rows="rows_temp"
       :separator="separator"
       :title="tableTitle"
       card-class="bg-grey-2"
@@ -38,7 +38,6 @@
           </q-input>
         </q-toolbar>
       </template>
-      <!--        修改按钮插槽-->
     </q-table>
   </div>
 
@@ -47,7 +46,7 @@
     <q-dialog v-model="show_deleteDialog_student">
       <q-chat-message
         :text="['What are you doing?']"
-        avatar="../../../assets/iKun.jpg"
+        avatar="https://i.postimg.cc/02xBVpw2/ikun.jpg"
         bg-color="primary"
         name="Qi-Kun Xue"
         stamp="now"
@@ -105,6 +104,8 @@
 <script>
 import {defineAsyncComponent, defineComponent, ref} from 'vue'
 import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
+import cloneDeep from "lodash/cloneDeep";
 
 export default defineComponent({
   name: "AssignmentTable",
@@ -168,6 +169,9 @@ export default defineComponent({
       },
 
       userData: useUserStore(),
+
+      columns_temp: cloneDeep(this.columns),
+      rows_temp: cloneDeep(this.rows),
 
       show_assignment_detail: ref(false),
       show_button_teacher: ref(false),

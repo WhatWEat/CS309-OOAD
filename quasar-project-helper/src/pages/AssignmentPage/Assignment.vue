@@ -100,44 +100,82 @@ export default {
         },
       ],
 
+      groupId: '-1',
+      projectId: '',
+
       isPersonal: ref(true),
       isGroup : ref(false),
+      isGroupLeader: ref(false),
     }
   },
   methods: {
     buttonHandle() {
-      const regex = /\/personal$/;
-      const regex2 = /\/group$/;
-      this.path = this.$route.path
-      console.log(this.path)
-
-      if (regex.test(this.path)) {
-        const newpath = this.path.replace(/\/[^/]*$/, '/group')
-        console.log("newpath", newpath)
-        this.$router.push(newpath)
-        this.color_group = 'grey-5'
-        this.color_personal = 'grey-4'
-      } else if (regex2.test(this.path)) {
-        const newpath = this.path.replace(/\/[^/]*$/, '/personal')
-        console.log("newpath", newpath)
-        this.$router.push(newpath)
-        this.color_group = 'grey-4'
-        this.color_personal = 'grey-5'
-      } else {
-        const newpath = this.path.replace(/\/[^/]*$/, '')
-        console.log("newpath", newpath)
-        this.$router.push(newpath)
-        this.color_group = 'grey-4'
-        this.color_personal = 'grey-5'
-      }
-
       this.isPersonal = !this.isPersonal
       this.isGroup = !this.isGroup
+    },
+
+    //***********************Get请求消息*************************
+    getProjectId() {
+      console.log("尝试获取ProjectId...\n")
+      this.projectId = this.$route.params.projectID;
+      console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
+    },
+    // 获取该学生的所在小组的ID
+    getGroupId() {
+      api.get('/stu/get_group_id/' + this.projectId).then(
+        (response) => {
+          this.groupId = response.data.body.key;
+          this.isGroupLeader = response.data.body.value;
+          console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+          console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
+    },
+    // 获取该学生的所有作业列表
+    getAssignmentList() {
+      console.log("尝试获取作业列表");
+      api.get('/ass-list/'+ this.projectId +'/0/10000').then((res) => {
+        this.rows_group = []
+        this.rows_personal = []
+        console.log("res:");
+        console.log(res);
+        for (let i = 0; i < res.data.body.length; i++) {
+            let tmp ={};
+            if (res.data.body.type ==='i'){
+              tmp['AssignmentName'] = res.data.body[i].assignmentId;
+              // tmp['deadLine'] = res.data.body[i].deadline.replace(;
+              tmp['instructor'] = res.data.body[i].creatorName;
+              tmp['moreInfo'] = res.data.body[i].moreInfo;
+              this.rows_personal.push(tmp)
+            }
+            else {
+              tmp['AssignmentName'] = res.data.body[i].assignmentId;
+              tmp['deadLine'] = res.data.body[i].deadline;
+              tmp['instructor'] = res.data.body[i].creatorName;
+              tmp['moreInfo'] = res.data.body[i].moreInfo;
+              this.rows_group.push(tmp)
+            }
+        }
+        console.log()
+        console.log(this.rows_group);
+        console.log(this.rows_personal);
+      }).catch((err) => {
+        console.log("err:");
+        console.log(err);
+      })
     }
   },
   components: {
     AssignmentTable: defineAsyncComponent(() => import('src/components/Component_Li/table/assignmentTable.vue')),
   },
+  mounted() {
+    this.getProjectId();
+    this.getGroupId();
+    this.getAssignmentList();
+  }
 }
 </script>
 

@@ -59,8 +59,9 @@ export async function getAvatarUrl() {
     }
     return localStorage.getItem('avatar');
   } catch (error) {
+
     console.error("Failed to get avatar URL", error);
-    return null;
+    return "https://cdn.quasar.dev/img/boy-avatar.png";
   }
 }
 
@@ -87,7 +88,7 @@ export async function getAvatarUrlById(id: number) {
     return localStorage.getItem(`avatar_${id}`);
   } catch (error) {
     console.error("Failed to get avatar URL", error);
-    return null;
+    return "https://cdn.quasar.dev/img/boy-avatar.png";
   }
 }
 

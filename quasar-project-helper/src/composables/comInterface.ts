@@ -11,6 +11,9 @@ export interface noticeProps {
   createTime?: string;
   stuView: null | string;
   toAll: boolean;
+  type?: number;
+  projectName?: string;
+  groupId?: number;
 }
 withDefaults(defineProps<noticeProps>(), {
   noticeId: 0,

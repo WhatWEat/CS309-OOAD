@@ -79,6 +79,7 @@
                       <q-btn
                         dense
                         flat
+                        v-model="email_code"
                         icon="send"
                         @click="sendEmailCode"
                         v-if="countdown === 0"
@@ -137,177 +138,166 @@
   </q-layout>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
-import { api } from "boot/axios";
-import { useUserStore } from "src/composables/useUserStore";
+<script setup>
+import {defineComponent} from "vue";
+import {ref} from "vue";
+import {useRouter} from "vue-router";
+import {useQuasar} from "quasar";
+import {api} from "boot/axios";
+import {useUserStore} from "src/composables/useUserStore";
 
-export default defineComponent({
-  setup() {
-    const router = useRouter();
-    const $q = useQuasar();
-    const loginType = ref("studentId"); // 默认为学号登录
-    const loginValue = ref("");
-    const password = ref("");
-    // email login
-    const loginEmail = ref(""),
-      countdown = ref(0);
-    const selectedEmailDomain = ref("gmail.com");
-    const emailDomains = ref([
-      "@gmail.com",
-      "@yahoo.com",
-      "@outlook.com",
-      "@qq.com",
-      "@sustech.edu.cn",
-      "@mail.sustech.edu.cn",
-    ]);
-    function selectEmailDomain(index) {
-      selectedEmailDomain.value = emailDomains.value[index];
-    }
-    function sendEmailCode() {
-      // TODO 发送邮箱验证码
-      $q.notify({
-        color: "green",
-        textColor: "white",
-        icon: "mail",
-        message: "Code has been sent",
-      });
-      // 开始倒计时
-      countdown.value = 60;
-      const interval = setInterval(() => {
-        countdown.value--;
-        if (countdown.value === 0) {
-          clearInterval(interval);
-        }
-      }, 1000);
-    }
-    //phone login
-    const countdown_phone = ref(0);
-    const loginPhone = ref("");
-    const phone_code = ref("");
-    function sendPhoneCode() {
-      // TODO 发送手机验证码
-      // api.get()
-      $q.notify({
-        color: "green",
-        textColor: "white",
-        icon: "mail",
-        message: "Code has been sent",
-      });
-      // 开始倒计时
-      countdown_phone.value = 60;
-      const interval = setInterval(() => {
-        countdown_phone.value--;
-        if (countdown_phone.value === 0) {
-          clearInterval(interval);
-        }
-      }, 1000);
-    }
+const router = useRouter();
+const $q = useQuasar();
+const loginType = ref("studentId"); // 默认为学号登录
+const loginValue = ref("");
+const password = ref("");
+// email login
+const loginEmail = ref(""), email_code = ref(''),
+  countdown = ref(0);
+const selectedEmailDomain = ref("gmail.com");
+const emailDomains = ref([
+  "@gmail.com",
+  "@yahoo.com",
+  "@outlook.com",
+  "@qq.com",
+  "@sustech.edu.cn",
+  "@mail.sustech.edu.cn",
+]);
 
-    function getLoginValueRules() {
-      const rules = [];
+function selectEmailDomain(index) {
+  selectedEmailDomain.value = emailDomains.value[index];
+}
 
-      if (loginType.value === "studentId") {
-        rules.push((val) => val.length === 8 || "Student ID must be 8 digits");
-      } else if (loginType.value === "email") {
-        rules.push((val) => /.+@.+\..+/.test(val) || "Incorrect email format");
-      } else if (loginType.value === "phone") {
-        rules.push(
-          (val) => val.length === 11 || "Phone number must be 11 digits"
-        );
+function sendEmailCode() {
+  // TODO 发送邮箱验证码
+  // 开始倒计时
+  let email = loginEmail.value + selectedEmailDomain.value;
+  console.log(email);
+  api.post(`/request_code`, email).then(res => {
+    console.log('返回',res.data)
+    console.log('合成',email)
+    $q.notify({
+      color: "green",
+      textColor: "white",
+      icon: "mail",
+      message: "Code has been sent",
+    });
+    countdown.value = 60;
+    const interval = setInterval(() => {
+      countdown.value--;
+      if (countdown.value === 0) {
+        clearInterval(interval);
       }
+    }, 1000);
+  }).catch(err => {
+    console.log(err)
+  })
 
-      return rules;
-    }
+}
 
-    function getPasswordRules() {
-      return [
-        (val) =>
-          val.length >= 6 || "The password length cannot be less than 6 digits",
-      ];
-    }
-    function loginStudentId(){
-      api.post("/login", {
-        key: loginValue.value,
-        value: password.value,
-      })
-      .then((res) => {
-        console.log(res.data);
-        if (res.data.statusCode === 200) {
-          localStorage.setItem("Token", res.data.jwt_token);
-          router.push("/");
-        }
-        //   不要改动以下代码
-      })
-      .catch((err) => {
-        $q.notify({
-          message: err.response.data.msg,
-          position: "center",
-        });
-        console.log(err);
-        console.log(loginValue);
-        console.log(password);
-      });
-    }
-    function loginByEmail(){
-      api.get("/email-login", {
-        params: {
-          email: loginEmail.value + selectedEmailDomain.value,
-          code: phone_code.value,
-        },
-      })
-    }
-    function loginByPhone(){
-      api.get("/phone-login", {
-        params: {
-          phone: loginPhone.value,
-          code: phone_code.value,
-        },
-      })
-    }
-    function login() {
-      if (loginType.value === "studentId") {
-        loginStudentId();
-      } else if (loginType.value === "email") {
-        loginByEmail();
-      } else if (loginType.value === "phone") {
-        loginByPhone();
-      }
-      console.log("登录:", loginValue.value, password.value);
-    }
-    function goToRegister() {
-      router.push("/Register");
-    }
+//phone login
+const countdown_phone = ref(0);
+const loginPhone = ref("");
+const phone_code = ref("");
 
-    function goToForgotPassword() {
-      router.push("/ForgotPassword");
+function sendPhoneCode() {
+  // TODO 发送手机验证码
+  // api.get()
+  $q.notify({
+    color: "green",
+    textColor: "white",
+    icon: "mail",
+    message: "Code has been sent",
+  });
+  // 开始倒计时
+  countdown_phone.value = 60;
+  const interval = setInterval(() => {
+    countdown_phone.value--;
+    if (countdown_phone.value === 0) {
+      clearInterval(interval);
     }
+  }, 1000);
+}
 
-    return {
-      loginType,
-      loginValue,
-      loginEmail,
-      selectedEmailDomain,
-      emailDomains,
-      password,
-      countdown,
-      countdown_phone,
-      loginPhone,
-      phone_code,
-      sendPhoneCode,
-      selectEmailDomain,
-      getLoginValueRules,
-      getPasswordRules,
-      login,
-      sendEmailCode,
-      goToRegister,
-      goToForgotPassword,
-    };
-  },
-});
+function getLoginValueRules() {
+  const rules = [];
+
+  if (loginType.value === "studentId") {
+    rules.push((val) => val.length === 8 || "Student ID must be 8 digits");
+  } else if (loginType.value === "email") {
+    rules.push((val) => /.+@.+\..+/.test(val) || "Incorrect email format");
+  } else if (loginType.value === "phone") {
+    rules.push(
+      (val) => val.length === 11 || "Phone number must be 11 digits"
+    );
+  }
+
+  return rules;
+}
+
+function getPasswordRules() {
+  return [
+    (val) =>
+      val.length >= 6 || "The password length cannot be less than 6 digits",
+  ];
+}
+
+function loginStudentId() {
+  api.post("/login", {
+    key: loginValue.value,
+    value: password.value,
+  })
+  .then((res) => {
+    console.log(res.data);
+    if (res.data.statusCode === 200) {
+      localStorage.setItem("Token", res.data.jwt_token);
+      router.push("/");
+    }
+    //   不要改动以下代码
+  })
+  .catch((err) => {
+    $q.notify({
+      message: err.response.data.msg,
+      position: "center",
+    });
+    console.log(err);
+    console.log(loginValue);
+    console.log(password);
+  });
+}
+
+function loginByEmail() {
+  api.get(`/login_with_email_code/${loginEmail.value}/${code}`)
+}
+
+function loginByPhone() {
+  api.get("/phone-login", {
+    params: {
+      phone: loginPhone.value,
+      code: phone_code.value,
+    },
+  })
+}
+
+function login() {
+  if (loginType.value === "studentId") {
+    loginStudentId();
+  } else if (loginType.value === "email") {
+    loginByEmail();
+  } else if (loginType.value === "phone") {
+    loginByPhone();
+  }
+  console.log("登录:", loginValue.value, password.value);
+}
+
+function goToRegister() {
+  router.push("/Register");
+}
+
+function goToForgotPassword() {
+  router.push("/ForgotPassword");
+}
+
 </script>
 
 <style>

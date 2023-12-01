@@ -234,47 +234,97 @@ public class NoticeService {
         }
     }
 
-    public Notice removeNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Removed from Group");
-        ntc.setContent(noticeSubject(fromId, gpId, REMOVE));
-        return ntc;
-    }
+    public void createRemoveNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null || !Objects.equals(
+                groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+                group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
+        }
+        if (!userId.equals(group.getLeaderId())){
+            throw new InvalidFormException("无权将他人移出小组");
+        }
 
-    public void createRemoveNotice(Long fromId, Long toId, Long pjId, Long gpId) {
+        Set<Long> stuIds = gpId_notice.getValue().getStuView().stream()
+                .filter(
+                        e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null
+                )
+                .collect(Collectors.toSet());
+        stuIds.retainAll(
+                groupMapper.findStuNotInGpOfAProj(group.getProjectId()).stream()
+                        .map(User::getUserId)
+                        .collect(Collectors.toSet())
+        );
+
         try {
-            Notice notice = removeNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            noticeMapper.stuViewNotice(notice.getNoticeId(), toId);
+            AbstractNoticeFactory anf = new ApplicationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setCreatorId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            for(Long stuId: stuIds){
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.REMOVE.getValue());
+                if(previous != null){
+                    previous.setCreateTime(LocalDateTime.now());
+                    noticeMapper.updateNoticeTime(previous);
+                    continue;
+                }
+                noticeMapper.createNotice(notice);
+                noticeMapper.insertStuView(Collections.singleton(stuId), notice.getNoticeId());
+            }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
     }
 
-    public Notice transferNotice(Long fromId, Long pjId, Long gpId) {
-        Notice ntc = new Notice();
-        ntc.setProjectId(pjId);
-        ntc.setTitle("Group Leader Transfer");
-        ntc.setContent(noticeSubject(fromId, gpId, TRANSFER));
-        return ntc;
-    }
+    public void createTransferNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
+        //FUNC: 确定userId在group中
+        Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        if(group == null || !Objects.equals(
+                groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+                group.getGroupId())){
+            throw new InvalidFormException("无效的groupId");
+        }
+        if (!userId.equals(group.getLeaderId())){
+            throw new InvalidFormException("您不是小组的组长");
+        }
+        Set<Long> stuIds = gpId_notice.getValue().getStuView().stream()
+                .filter(
+                        e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null
+                )
+                .collect(Collectors.toSet());
+        stuIds.retainAll(
+                groupMapper.findStuNotInGpOfAProj(group.getProjectId()).stream()
+                        .map(User::getUserId)
+                        .collect(Collectors.toSet())
+        );
 
-    public void createTransferNotice(Long fromId, Long toId, Long pjId, Long gpId) {
         try {
-            Notice notice = transferNotice(fromId, pjId, gpId);
-            notice.setCreatorId(fromId);
-            notice.setCreateTime(LocalDateTime.now());
-            noticeMapper.createNotice(notice);
-            System.err.println(notice.getNoticeId());
-            noticeMapper.stuViewNotice(notice.getNoticeId(), toId);
+            AbstractNoticeFactory anf = new ApplicationFactory();
+            Notice notice = gpId_notice.getValue();
+            notice.setCreatorId(userId);
+            notice.setGroupId(group.getGroupId());
+            notice.setProjectId(group.getProjectId());
+
+            notice = anf.createNotice(notice);
+            for(Long stuId: stuIds){
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.TRANSFER.getValue());
+                if(previous != null){
+                    previous.setCreateTime(LocalDateTime.now());
+                    noticeMapper.updateNoticeTime(previous);
+                    continue;
+                }
+                noticeMapper.createNotice(notice);
+                noticeMapper.insertStuView(Collections.singleton(stuId), notice.getNoticeId());
+            }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
     }
+
 
     //PROC：get Notice --> get noticeId --> compare creatorId and id in JWT --> update
     public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice) {

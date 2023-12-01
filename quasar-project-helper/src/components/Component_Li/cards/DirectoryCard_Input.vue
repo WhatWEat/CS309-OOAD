@@ -1,10 +1,10 @@
 <template>
-  <q-card bordered class="no-shadow">
+  <q-card bordered class="">
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
         <q-avatar class="shadow-10" size="60px">
-          <img src="temp">
+          <img src='https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4'>
         </q-avatar>
       </q-item-section>
 
@@ -219,7 +219,68 @@ import {useUserStore} from 'src/composables/useUserStore';
 
 export default defineComponent({
   name: "DirectoryCard",
-  props: ['groupId', "groupSize", 'members', "creationTime", "deadLine", "presentationTime", "leader", 'instructor', "maxSize", "moreInformation"],
+  props: {
+    'groupData': {
+      type: Object,
+      required: true,
+      default: () => {
+        return {
+          groupId: '',
+          maxSize: '',
+          groupName: 'Dev Team',
+          date1_deadline: '',
+          date2_deadline: '',
+          data1_presentation: '',
+          data2_presentation: '',
+          instructor: '',
+          leader: '',
+          members: [],
+          technicalStack: [],
+          desc: '',
+        }
+      }
+    },
+    'groupId': {
+      type: String,
+      required: true
+    },
+    "groupSize": {
+      type: Number,
+      required: true
+    },
+    'members': {
+      type: Array,
+      required: true
+    },
+    "creationTime": {
+      type: String,
+      required: true
+    },
+    "deadLine": {
+      type: String,
+      required: true
+    },
+    "presentationTime": {
+      type: String,
+      required: true
+    },
+    "leader": {
+      type: Object,
+      required: true
+    },
+    'instructor': {
+      type: Object,
+      required: true
+    },
+    "maxSize": {
+      type: Number,
+      required: true
+    },
+    "moreInformation": {
+        type: String,
+        required: true
+      }
+  },
   emits: ['update:groupId', 'update:groupSize', 'update:members', 'update:creationTime', 'update:deadLine', 'update:presentationTime', 'update:leader', 'update:maxSize', 'update:moreInformation'],
   methods: {
     reset() {
@@ -248,6 +309,9 @@ export default defineComponent({
         maxSize: true,
         moreInformation: false,
       },
+      groupData_temp: this.groupData,
+
+
       groupId_temp: this.groupId.value,
       groupSize_temp: this.groupSize,
       members_temp: this.members,

@@ -133,12 +133,11 @@
       >
         <template v-slot:button1>
           <!--           这个是取消按钮，颜色好好选一下-->
-          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"
-                 @click="confirm_1 = false"/>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"/>
         </template>
         <template v-slot:button2>
           <!--            这个是确认按钮-->
-          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK" @click="confirm_1 = false"/>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK" @click="deleteGroup(), console.log('删除至少点击了')"/>
         </template>
       </confirm-dialog>
     </q-dialog>
@@ -463,7 +462,6 @@ export default {
           this.formData.desc = tmp.moreInfo;
 
           await this.$nextTick();
-
           this.show_edit_form = true;
         }
       ).catch((error) => {
@@ -633,6 +631,39 @@ export default {
         // 上面执行完毕后,弹出对话框
         await this.$nextTick();
         this.show_confirm_dialog = true;
+      });
+    },
+
+
+    //**********************************Delete信息部分**********************************//
+    deleteGroup() {
+      console.log("删除小组的ID为：" + this.selected_row.row.groupId + "，类型为：" + typeof (this.selected_row.row.groupId) + "。\n");
+      let groupId = this.selected_row.row.groupId;
+      api.delete('/tea/delete_group', {data: 169}).then(
+        (response) => {
+          console.log(response);
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'white',
+            'text': response.data.msg,
+          }
+          this.show_confirm_dialog = true;
+          this.getGroupList();
+        }
+      ).catch((error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response.data.msg,
+        }
+        this.show_confirm_dialog = true;
+        console.log("errorHere");
+        console.log(error);
+        console.log('group_id');
+        console.log(this.selected_row.row.groupId);
+
       });
     },
   },

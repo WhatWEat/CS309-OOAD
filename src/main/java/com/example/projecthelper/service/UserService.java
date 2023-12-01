@@ -132,6 +132,8 @@ public class UserService {
     //发送带有验证码的邮件
     public void sendMail(String to) {
         User user = usersMapper.findUserByMail(to);
+        if(user == null)
+            throw new InvalidFormException("邮箱错误");
         if(user.isFrozen())
             throw new AccountFrozenException("账户已冻结");
 

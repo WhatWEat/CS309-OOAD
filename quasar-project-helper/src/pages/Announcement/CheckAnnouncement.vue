@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md q-gutter-sm bg-page">
-    <q-separator />
+    <q-separator/>
 
     <div class="bg-table-list">
       <q-banner inline-actions class="text-black bg-listcolor">
@@ -29,7 +29,7 @@
             </q-chip>
           </template>
           <template v-slot:append>
-            <q-icon v-if="currentInput === ''" name="search" />
+            <q-icon v-if="currentInput === ''" name="search"/>
             <q-icon
               v-else
               name="clear"
@@ -39,21 +39,24 @@
           </template>
         </q-input>
         <template v-slot:action>
-          <p class="q-px-sm" />
-          <q-btn unelevated @click="removeRow()" color="red" label="Remove" />
-          <p class="q-px-sm" />
+          <p class="q-px-sm"/>
+          <q-btn unelevated @click="removeRow()" color="red" label="Remove"
+                 v-if="identity<=2 && identity>=0"/>
+          <p class="q-px-sm"/>
           <q-btn
+            v-if="identity<=2 && identity>=0"
             unelevated
             @click="onNewClickAction()"
-            color="black"
+            color="green"
             label="ADD"
           />
+
         </template>
       </q-banner>
       <q-table
         :rows="data"
         :columns="columns"
-        row-key="title"
+        row-key="noticeId"
         selection="multiple"
         v-model:selected="selected"
         v-model:pagination="pagination"
@@ -63,7 +66,7 @@
       >
         <template v-slot:header="props">
           <q-tr :props="props">
-            <q-th auto-width />
+            <q-th auto-width/>
             <q-th v-for="col in props.cols" :key="col.name" :props="props">
               {{ col.label }}
             </q-th>
@@ -73,29 +76,31 @@
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td>
-              <q-checkbox v-model="props.selected" />
+              <q-checkbox v-model="props.selected"/>
             </q-td>
             <q-td key="title" :props="props">
               <span>{{ props.row.title }}</span>
               <q-popup-edit
                 v-model="props.row.title"
                 title="Update title"
+                @save="save(props.row)"
                 buttons
                 v-slot="scope"
               >
-                <q-input type="text" v-model="scope.value" dense autofocus />
+                <q-input type="text" v-model="scope.value" dense autofocus/>
               </q-popup-edit>
             </q-td>
             <q-td key="content" :props="props">
-              <span>{{ props.row.content.substring(0, 10) }}</span>
-              <q-popup-edit buttons v-model="props.row.content" v-slot="scope">
-                <q-editor
-                  v-model="scope.value"
-                  min-height="5rem"
-                  autofocus
-                  @keyup.enter.stop
-                />
+              <span>{{ truncate(props.row.content) }}</span>
+              <q-popup-edit
+                buttons
+                title="Update content"
+                v-model="props.row.content"
+                @save="save(props.row)"
+                v-slot="scope">
+                <q-input type="text" v-model="scope.value" dense autofocus/>
               </q-popup-edit>
+
             </q-td>
             <q-td key="creatorName" :props="props">
               <span>{{ props.row.creatorName }}</span>
@@ -103,7 +108,7 @@
             <q-td key="createTime" :props="props">
               <span>{{ formatDateString(props.row.createTime) }}</span>
             </q-td>
-            <q-td auto-width>
+            <q-td key="noticeId" auto-width>
               <q-btn
                 size="sm"
                 color="accent"
@@ -116,31 +121,75 @@
           </q-tr>
           <q-tr v-show="props.expand" :props="props">
             <q-td colspan="100%">
-              <div class="text-left" style="font-size: 20px">
-                This is the detailed content for row above:
-                {{ props.row.content }}.
-              </div>
+              <q-card flat>
+                <q-item>
+                  <q-item-section avatar>
+                    <q-btn round flat size="sm" :to="`/person/${props.row.creatorId}`">
+                      <q-avatar size="md">
+                        <q-img :src="avatarMap.get(props.row.creatorId)"></q-img>
+                      </q-avatar>
+                    </q-btn>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ props.row.title }}</q-item-label>
+                    <q-item-label caption>
+                      {{ props.row.creatorName }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section avatar>
+                    <q-btn round flat size="md" icon="edit">
+                    </q-btn>
+                  </q-item-section>
+                </q-item>
+
+                <q-separator/>
+                <q-card-section style="font-size: 20px">
+                  {{ props.row.content }}
+                </q-card-section>
+                <q-card-section v-if="props.row.type==1" class="q-gutter-lg">
+                  <q-btn round flat color="green" icon="done" @click="clickAcceptGroup(props.row)"/>
+                  <q-btn round flat color="red" icon="close" @click="clickRejectGroup(props.row)"/>
+                </q-card-section>
+              </q-card>
             </q-td>
           </q-tr>
         </template>
       </q-table>
-      <q-separator v-if="data.length > 0" />
+
+      <q-separator v-if="data.length > 0"/>
     </div>
+    <q-dialog v-model="isNewDialogOpen">
+      <q-card>
+        <q-card-section>
+                          <AddAnnouncement/>
+          {{isNewDialogOpen}}
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { formatDateString, useProjectId } from "src/composables/usefulFunction";
-import { onMounted, ref, watch } from "vue";
-import { defaultNotice, noticeProps } from "src/composables/comInterface";
-import { api } from "boot/axios";
-import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
+import {
+  formatDateString,
+  getAvatarUrlById,
+  truncate,
+  useProjectId
+} from "src/composables/usefulFunction";
+import {onMounted, ref, watch} from "vue";
+import {defaultNotice, noticeProps} from "src/composables/comInterface";
+import {api} from "boot/axios";
+import {useQuasar} from "quasar";
+import {useRouter} from "vue-router";
+import {useUserStore} from "src/composables/useUserStore";
+import {computed} from "vue-demi";
+import AddAnnouncement from "components/AnnouncementsList/addAnnouncement.vue";
 
 const router = useRouter();
+const $q = useQuasar();
 const data = ref<noticeProps[]>([defaultNotice]);
 const loading = ref(true),
-  selected = ref([]),
+  selected = ref<noticeProps[]>([]),
   show_detail = ref(false);
 const hideSelectedBanner = ref(true);
 const columns = [
@@ -149,7 +198,7 @@ const columns = [
     required: true,
     label: "title",
     align: "left",
-    field: (row:noticeProps) => row.title,
+    field: (row: noticeProps) => row.title,
     format: (val: any) => `${val}`,
     sortable: true,
   },
@@ -176,16 +225,17 @@ const columns = [
     required: true,
     label: "create time",
     align: "left",
-    field: (row : noticeProps) => row.createTime,
+    field: (row: noticeProps) => row.createTime,
     format: (val: any) => `${val}`,
     sortable: true,
   },
 ];
+// 分页
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 });
-
+//TODO 手机适配 考虑用grid
 watch(pagination, (newVal, oldVal) => {
   if (
     newVal.page !== oldVal.page ||
@@ -194,12 +244,66 @@ watch(pagination, (newVal, oldVal) => {
     onRefresh();
   }
 });
+// 获取身份,avatar
+const {identity} = useUserStore(),
+  avatarMap = ref<Map<number, string | null>>(new Map<number, string | null>());
 
+// 同意进组
+function clickAcceptGroup(notice: noticeProps){
+  let noticeId = notice.noticeId
+  api.post('/stu/ack_application',noticeId).then(res => {
+    console.log(res)
+    $q.notify({
+      position: 'top',
+      message: 'accept success',
+      color: 'positive'
+    })
+  }).catch(err => {
+    console.log(err)
+  })
+  console.log('accept')
+}
+function clickRejectGroup(notice: noticeProps){
+  let noticeId = notice.noticeId
+  api.post('/stu/nak_invitation_or_application',noticeId).then(res => {
+    console.log(res)
+    $q.notify({
+      position: 'top',
+      message: 'reject success',
+      color: 'danger'
+    })
+  }).catch(err => {
+    console.log(err)
+  })
+  console.log('reject')
+}
+// 编辑部分
+function save(props: noticeProps){
+  console.log('save')
+  console.log(props)
+  api.put('/tea/modify_notice',props).then(res => {
+    console.log(res)
+    $q.notify({
+      position: 'top',
+      message: 'save success',
+      color: 'positive'
+    })
+  }).catch(err => {
+    console.log(err)
+  })
+}
+// 删除操作
+function removeRow() {
+  const selectedRows = [...selected.value];
+
+  onRefresh();
+  selected.value = [];
+}
 async function created() {
   await onRefresh();
 }
 
-function handleRowDbclick(evt, row, index) {
+function handleRowDbclick() {
   show_detail.value = true;
 }
 
@@ -222,32 +326,38 @@ async function onRefresh() {
   let project_id = Number.isNaN(projectID.value) ? -1 : projectID.value;
   if (search === "") {
     api
-      .get(
-        `/notice-list/${project_id}/${pagination.value.page - 1}/${
-          pagination.value.rowsPerPage
-        }`
-      )
-      .then((res) => {
-        data.value = res.data.body;
-        loading.value = false;
-      })
-      .catch((err) => {
-        console.log("err", err);
-      });
+    .get(
+      `/notice-list/${project_id}/${pagination.value.page - 1}/${
+        pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+      }`
+    )
+    .then(async (res) => {
+      data.value = res.data.body;
+      console.log(data.value)
+      for (const notice of data.value){
+        if (!avatarMap.value.has(notice.creatorId)) {
+          avatarMap.value.set(notice.creatorId,await getAvatarUrlById(notice.creatorId));
+        }
+      }
+      loading.value = false;
+    })
+    .catch((err) => {
+      console.log("err", err);
+    });
   } else {
     api
-      .get(
-        `/notice-list/${project_id}/${pagination.value.page - 1}/${
-          pagination.value.rowsPerPage
-        }/${search}`
-      )
-      .then((res) => {
-        data.value = res.data.body;
-        loading.value = false;
-      })
-      .catch((err) => {
-        console.log("err", err);
-      });
+    .get(
+      `/notice-list/${project_id}/${pagination.value.page - 1}/${
+        pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+      }/${search}`
+    )
+    .then((res) => {
+      data.value = res.data.body;
+      loading.value = false;
+    })
+    .catch((err) => {
+      console.log("err", err);
+    });
   }
 }
 
@@ -268,30 +378,16 @@ function onRequestAction(value) {
 //   console.info(query);
 //   return query;
 // }
-
+const isNewDialogOpen = ref(false);
 function onNewClickAction() {
-  const queryParams = {
-    title: "",
-    content: "",
-    projected: "",
-  };
-
-  router.push({ path: "/announcements/new", query: queryParams });
+  isNewDialogOpen.value = true;
+  console.log('open dialog', isNewDialogOpen.value)
 }
 
-function removeRow() {
-  const selectedRows = [...selected.value];
 
-  selectedRows.forEach((index) => {
-    rows.splice(index, 1);
-  });
-
-  selected.value = [];
-}
 
 const tags = ref<Set<string>>(new Set());
 const currentInput = ref<string>("");
-const $q = useQuasar();
 const emit = defineEmits(["update:tags"]);
 
 function addTag() {

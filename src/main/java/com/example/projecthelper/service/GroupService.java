@@ -248,8 +248,6 @@ public class GroupService {
                     .collect(Collectors.toSet());
             validIds = validIds.stream().limit(group.getMaxsize()-1).collect(Collectors.toSet());
             validIds.add(group.getLeaderId());
-            System.err.println(validIds);
-            System.err.println(groupMapper.findGroupOfStuInProject(12110008, pjId));
             groupMapper.deleteStuInGroup(group.getGroupId());
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {

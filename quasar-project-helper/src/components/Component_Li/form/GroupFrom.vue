@@ -301,6 +301,7 @@ export default defineComponent({
             }
           ).then((res) => {
             console.log("提交成功了");
+            console.log(res);
             this.successMessage.text = res.data.msg;
             this.$emit("successDialog", this.successMessage);
           }).catch((err) => {
@@ -333,10 +334,15 @@ export default defineComponent({
       this.inputVisible_technical = true;
     },
     handleInputConfirm_members() {
+      console.log('handleInputConfirm_members')
+      console.log(this.inputValue_members)
       if (this.inputValue_members) {
-        this.formData_temp.members.push(this.inputValue_members)
+        this.formData_temp.members[this.inputValue_members] = this.inputValue_members
         console.log('Have pushed' + this.inputValue_members.value + '\n')
         console.log('Now members are: ' + this.formData_temp.members + '\n')
+      }
+      else {
+        console.log('inputValue_members is null')
       }
       this.inputVisible_members = false
       this.inputValue_members = ''

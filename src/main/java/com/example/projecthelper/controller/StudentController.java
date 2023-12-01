@@ -172,6 +172,20 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/group_leader_transfer")
+    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.transferLeader(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/remove_member")
+    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.removeMen(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @PostMapping("/join_group")
     public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -310,23 +324,7 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/group_leader_transfer")
-    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request,
-                                                    @RequestBody KeyValueWrapper<Long, Long> group_member ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.groupLeaderTransfer(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                group_member.getKey(),group_member.getValue());
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
 
-    @PostMapping("/remove_member")
-    public ResponseResult<Object> removeMember(HttpServletRequest request,
-                                                      @RequestBody KeyValueWrapper<Long, Long> group_member ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.removeMember(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                group_member.getKey(),group_member.getValue());
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
 
 
 

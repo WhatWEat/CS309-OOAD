@@ -252,10 +252,14 @@ public class AssignmentService {
             submittedAssMapper.removeAss(assignmentId, userId);
         }
         else if (assignment.getType().equals("g")){
+
             Long gpId = groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId());
             if(gpId != null){
-                fileService.removeFilesOfSubmittedAss(assignment, gpId);
-                submittedAssMapper.removeAss(assignmentId, gpId);
+                if(!Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))){
+                    fileService.removeFilesOfSubmittedAss(assignment, gpId);
+                    submittedAssMapper.removeAss(assignmentId, gpId);
+                    return;
+                }
             }
             throw new AccessDeniedException("你不在小组中");
         }

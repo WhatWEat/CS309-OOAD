@@ -4,6 +4,7 @@ import com.example.projecthelper.security.BlacklistFilter;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.security.JwtAuthenticationProvider;
 import com.example.projecthelper.security.UnauthorizedHandler;
+import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.IdentityCode;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> {
-            web.ignoring().requestMatchers("/login", "/signup", "/logout");
+            web.ignoring().requestMatchers(HTTPUtil.IGNORE_PATTERN);
         };
     }
 

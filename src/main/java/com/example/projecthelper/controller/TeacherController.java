@@ -210,8 +210,8 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_group")
-    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Long groupId){
+    @DeleteMapping("/delete_group/{groupId}")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @PathVariable("groupId") Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.deleteGroupForTea(
             groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))

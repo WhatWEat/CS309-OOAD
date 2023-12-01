@@ -3,6 +3,7 @@ package com.example.projecthelper.security;
 import com.example.projecthelper.Exceptions.AccountFrozenException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.LogUtil;
@@ -39,14 +40,17 @@ public class CustomJwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UsersMapper usersMapper;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws
         ServletException, IOException {
         if (HTTPUtil.requestSpecifiedPattern(HTTPUtil.IGNORE_PATTERN, request)){
+            System.err.println("here");
             filterChain.doFilter(request, response);
             return;
         }
-        System.err.println("hereeeee");
         // get token from header:  Authorization: Bearer <token>
         String token = request.getHeader(AUTH_HEADER);
         if (Objects.isNull(token)){

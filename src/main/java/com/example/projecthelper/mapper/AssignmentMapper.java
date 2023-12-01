@@ -20,6 +20,15 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
+        "join users u on a.creatorid = u.userid order by a.releaseTime desc limit #{limit} offset #{offset};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByAdm(Long limit, Long offset);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
         "join users u on a.creatorid = u.userid where p.projectid = #{projectId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
@@ -30,31 +39,31 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where s.stuId = #{stuId} order by a.releaseTime desc;")
+        "join users u on a.creatorid = u.userid where s.stuId = #{stuId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByStu(Long stuId);
+    List<Assignment> getAssByStu(Long stuId, Long limit, Long offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join taOfProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where s.taId = #{taId} order by a.releaseTime desc;")
+        "join users u on a.creatorid = u.userid where s.taId = #{taId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByTa(Long taId);
+    List<Assignment> getAssByTa(Long taId, Long limit, Long offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
-        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId} order by a.releaseTime desc;")
+        "join users u on a.creatorid = u.userid where a.creatorId = #{teaId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByTea(Long teaId);
+    List<Assignment> getAssByTea(Long teaId, Long limit, Long offset);
 
 
     @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId, deadline, releaseTime, requireExtension)\n" +

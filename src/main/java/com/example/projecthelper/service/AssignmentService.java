@@ -64,8 +64,10 @@ public class AssignmentService {
             }
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
-        results.forEach(a ->
-            a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
+        results.forEach(a ->{
+                if(a.getFilePaths() != null)
+                    a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList());
+            }
         );
         return results;
     }

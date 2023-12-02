@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 
-public class NoticeCache {
+public class AssignmentCache {
     @Autowired
     private NoticeMapper noticeMapper; // 假设你有一个与数据库交互的Repository
 

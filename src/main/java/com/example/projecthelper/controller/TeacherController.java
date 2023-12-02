@@ -270,7 +270,7 @@ public class TeacherController {
         @RequestParam("deadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         LocalDateTime deadline,
         @RequestParam("requireExtension") String requireExtension,
-        @RequestParam("files") List<MultipartFile> files) {
+        @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Assignment assignment = new Assignment();
         assignment.setTitle(title);
         assignment.setDescription(description);

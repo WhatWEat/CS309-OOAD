@@ -88,7 +88,9 @@ public class Notice {
     public enum Type{
         NORMAL(0),
         APPLICATION(1),
-        RECRUITMENT(2);
+        RECRUITMENT(2),
+        REMOVE(3),
+        TRANSFER(4);
 
         private final int value;
 

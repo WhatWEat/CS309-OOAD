@@ -1,39 +1,19 @@
 <template>
   <div class="q-pa-md">
-    <q-scroll-area style="height: 200px">
-      <q-infinite-scroll @load="onLoad" :offset="10" >
-        <div v-for="(item, index) in items" :key="index" class="caption">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum repellendus sit voluptate voluptas eveniet porro. Rerum blanditiis perferendis totam, ea at omnis vel numquam exercitationem aut, natus minima, porro labore.</p>
-        </div>
-        <template v-slot:loading>
-          <div class="row justify-center q-my-md">
-            <q-spinner-dots color="primary" size="40px" />
-          </div>
-        </template>
-
-      </q-infinite-scroll>
-    </q-scroll-area>
+    <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf" v-if="loading">
+    </PDFViewer>
 
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup lang="ts">
+import {onMounted, ref} from 'vue'
+import PDFViewer from "components/ViewComponent/PDFViewer.vue";
+const loading = ref(false)
+onMounted(()=>{
+  console.log('log')
+  loading.value = true
+})
 
-export default {
-  setup () {
-    const items = ref([ {}, {}, {}, {}, {}, {}, {} ])
 
-    return {
-      items,
-      onLoad (index, done) {
-        console.log('nxt')
-        setTimeout(() => {
-          items.value.push({}, {}, {}, {}, {}, {}, {})
-          done()
-        }, 1000)
-      }
-    }
-  }
-}
 </script>

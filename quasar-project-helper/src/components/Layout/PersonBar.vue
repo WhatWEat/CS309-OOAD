@@ -51,12 +51,7 @@ function handleClickPerson() {
 const avatarSrc = ref<string | null>('https://cdn.quasar.dev/img/boy-avatar.png'), messageNumber = ref(0);
 const messages = ref<noticeProps[]>([])
 onMounted(async () => {
-  const cachedAvatar = localStorage.getItem('avatar')
-  if (cachedAvatar) {
-    avatarSrc.value = cachedAvatar
-  } else {
-    avatarSrc.value = (await getAvatarUrl());
-  }
+  avatarSrc.value = (await getAvatarUrl());
   api.get('/notice-list/-1/0/999').then(res => {
     messageNumber.value = res.data.body.length
     messages.value = res.data.body;

@@ -64,6 +64,11 @@ onMounted(() => {
   watchEffect(() => {
       essentialLinks.value = [
         {
+          title: 'Overview',
+          icon: 'home',
+          link: `/projects/${projectID.value}`,
+        },
+        {
           title: 'Announcements',
           icon: 'record_voice_over',
           link: `/projects/${projectID.value}/announcements/`
@@ -72,11 +77,6 @@ onMounted(() => {
           title: 'Group',
           icon: 'supervisor_account',
           link: `/projects/${projectID.value}/group-list`
-        },
-        {
-          title: 'Chat',
-          icon: 'chat',
-          link: 'https://forum.quasar.dev'
         },
         {
           title: 'Homework',

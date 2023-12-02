@@ -354,6 +354,13 @@ public class GroupService {
         noticeService.createApplicationNotice(gpId_notice, userId);
     }
 
+    public void removeMen(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createRemoveNotice( gpId_notice,  userId);
+    }
+
+    public void transferLeader(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+        noticeService.createTransferNotice( gpId_notice,  userId);
+    }
 
     public void joinGroup(Long groupId, Long stuId){
         //PROC: 检查小组存在 -> 检查学生是不是在group对应的proj中 -> 检查是否已经加入小组 -> 成功加入
@@ -434,48 +441,6 @@ public class GroupService {
             throw new InvalidFormException("leaderId需要为long");
         }
     }
-
-    public void removeMember(long leaderId,long groupId, long memberId){
-        Group group = groupMapper.findGroupById(groupId);
-        if (group == null){
-            throw new InvalidFormException("小组不存在");
-        }
-        if (leaderId != group.getLeaderId()){
-            throw new AccessDeniedException("无权修改小组信息");
-        }
-        if(groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()) == null ||
-                !groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()).equals(group.getGroupId())){
-            throw new AccessDeniedException("所选成员不在小组中");
-        }
-        try {
-            groupMapper.removeMember(groupId,memberId);
-        } catch (Exception e) {
-            throw new InvalidFormException("leaderId需要为long");
-        }
-        noticeService.createRemoveNotice(leaderId,memberId,group.getProjectId(),groupId);
-    }
-
-    public void groupLeaderTransfer(long leaderId,long groupId, long memberId){
-        Group group = groupMapper.findGroupById(groupId);
-        if (group == null){
-            throw new InvalidFormException("小组不存在");
-        }
-        if (leaderId != group.getLeaderId()){
-            throw new AccessDeniedException("无权修改小组信息");
-        }
-         if(groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()) == null ||
-                !groupMapper.findGroupIdOfUserInAProj(memberId, group.getProjectId()).equals(group.getGroupId())){
-            throw new AccessDeniedException("所选成员不在小组中");
-        }
-        try {
-            groupMapper.updateLeader(memberId,groupId);
-
-        } catch (Exception e) {
-            throw new InvalidFormException("leaderId需要为long");
-        }
-        noticeService.createTransferNotice(leaderId,memberId,group.getProjectId(),groupId);
-    }
-
 
     public void updateGroupForLeader(Group group, long user_id) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者

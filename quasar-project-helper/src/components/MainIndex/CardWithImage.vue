@@ -1,10 +1,10 @@
 <template>
-  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="height: 300px">
+  <div class="col-12" style="height: 400px">
     <q-card class="my-card no-shadow" bordered>
       <q-img
         :src="imgUrl"
         basic
-        height="350px"
+        height="400px"
       >
         <div class="absolute-bottom-left bg-transparent q-ml-md">
           <div class="text-h1">

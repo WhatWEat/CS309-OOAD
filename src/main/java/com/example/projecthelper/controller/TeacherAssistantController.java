@@ -1,6 +1,7 @@
 package com.example.projecthelper.controller;
 
 import com.example.projecthelper.entity.Assignment;
+import com.example.projecthelper.entity.Evaluation;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.service.AssignmentService;
@@ -206,6 +207,27 @@ public class TeacherAssistantController {
         );
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/view_evaluation/{assignment_id}/{submitid}/{togroup}/{grade}")
+    public ResponseResult<List<Evaluation>> viewEva(
+            HttpServletRequest request,
+            @PathVariable("assignment_id") Long assignmentId,
+            @PathVariable("grade") Float grade,
+            @PathVariable("submitid") Long submitid,
+            @PathVariable("togroup") Long togroup){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+
+        List<Evaluation> evaluations = assignmentService.viewEva(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                grade,
+                submitid,
+                togroup,
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(evaluations, "Success", JWTUtil.updateJWT(jwt));
+    }
+
 
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{stu_id}/{filename}")
     public ResponseEntity<Resource> getSubmittedAssFile(

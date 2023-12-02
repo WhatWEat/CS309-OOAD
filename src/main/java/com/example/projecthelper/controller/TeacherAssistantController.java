@@ -103,8 +103,8 @@ public class TeacherAssistantController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody Long noticeId){
+    @PostMapping("/delete_notice")
+    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.deleteNotice(
             noticeId,

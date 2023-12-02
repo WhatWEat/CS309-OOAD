@@ -51,11 +51,13 @@ public class NoticeService {
         } else {
             List<Long> ids = notice.getStuView();
             //FUNC: 筛选掉identity不等于3的
-            toIds = usersMapper
+            if(ids!= null && !ids.isEmpty())
+                toIds = usersMapper
                     .findUsersById(ids)
                     .stream()
                     .filter(user -> Objects.equals(user.getIdentity(), 3))
                     .map(User::getUserId).collect(Collectors.toSet());
+            else toIds = new HashSet<>();
         }
 
         return toIds;
@@ -328,17 +330,20 @@ public class NoticeService {
             if (!toIds.isEmpty())
                 noticeMapper.insertStuView(toIds, notice.getNoticeId());
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new InvalidFormException("title or content is null");
         }
     }
 
     //PROC：get noticeId --> compare creatorId and id in JWT --> delete --> deleteStuView
-    public void deleteNotice(Long noticeId, Predicate<Long> accessNotice) {
-        if (accessNotice.test(noticeId)) {
-            noticeMapper.deleteNotice(noticeId);
-            noticeMapper.deleteStuViewNoticeByNotice(noticeId);
-        } else
-            throw new AccessDeniedException("您没有权限删除该公告");
+    public void deleteNotice(List<Long> noticeIds, Predicate<Long> accessNotice) {
+        noticeIds.forEach(noticeId -> {
+            if (accessNotice.test(noticeId)) {
+                noticeMapper.deleteNotice(noticeId);
+                noticeMapper.deleteStuViewNoticeByNotice(noticeId);
+            }
+        });
+
     }
 
     public Notice findNoticeById(Long noticeId) {

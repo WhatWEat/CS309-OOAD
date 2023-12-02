@@ -133,15 +133,18 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody Long noticeId){
+    @PostMapping("/delete_notice")
+    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.deleteNotice(
-            noticeId,
-            ntId -> Objects.equals(
-                noticeService.findNoticeById(ntId).getCreatorId(),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
+            noticeIds,
+            ntId -> {
+                Notice ntc = noticeService.findNoticeById(ntId);
+                return Objects.equals(
+                    projectService.findTeacherByProject(ntc.getProjectId()),
+                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                ) && ntc.getType() == 0;
+            }
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }

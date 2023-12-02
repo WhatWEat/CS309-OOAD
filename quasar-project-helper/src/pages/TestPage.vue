@@ -10,14 +10,18 @@
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import PDFViewer from "components/ViewComponent/PDFViewer.vue";
-import axios from "boot/axios";
+import axios, {api} from "boot/axios";
+import {getDownloadBlob} from "src/composables/usefulFunction";
 const loading = ref(false)
 onMounted(()=>{
   console.log('log')
   loading.value = true
 })
 function getToken(){
-  axios.post('https://sm.ms/api/v2/').then
+  api.get('/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf',{responseType: 'blob'}).then((res)=>{
+    console.log(res.data,'blob')
+    getDownloadBlob(res.data,'test.pdf');
+  })
 }
 
 </script>

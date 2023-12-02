@@ -91,7 +91,18 @@ export async function getAvatarUrlById(id: number) {
     return "https://cdn.quasar.dev/img/boy-avatar.png";
   }
 }
+export function getDownloadBlob(blobFile: Blob, fileName: string) {
+  const blobUrl = URL.createObjectURL(blobFile);
 
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click(); // 模拟点击
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+}
 //******************Li weihao******************//
 
 export function merger(key: [], value: []): object;

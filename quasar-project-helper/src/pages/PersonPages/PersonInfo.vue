@@ -2,7 +2,7 @@
   <q-page class="q-pa-sm">
     <div class="row q-col-gutter-sm justify-center">
       <ProfileCard bg_color="bg-blue-1"></ProfileCard>
-      <PasswordCard v-if="personId===identity"></PasswordCard>
+      <PasswordCard v-if="personId===userid"></PasswordCard>
     </div>
   </q-page>
 
@@ -16,7 +16,7 @@ import {usePersonId} from "src/composables/usefulFunction";
 import {useUserStore} from "src/composables/useUserStore";
 
 const personId = usePersonId();
-const {identity} = useUserStore();
+const {userid} = useUserStore();
 </script>
 
 <style scoped>

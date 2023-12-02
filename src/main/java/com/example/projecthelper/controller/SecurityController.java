@@ -79,16 +79,12 @@ public class SecurityController {
     @PostMapping("/edit_personal_info")
     public ResponseResult<Object> editPersonalInfo(
         HttpServletRequest request,
-        @RequestParam("phone") String phone,
-        @RequestParam("email") String email,
         @RequestParam("name") String name,
         @RequestParam("gender") String gender,
         @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
         @RequestParam(value = "programmingSkills", required = false) List<String> programmingSkills,
         @RequestParam(value = "avatar", required = false) MultipartFile avatar){
         User user = new User();
-        user.setPhone(phone);
-        user.setEmail(email);
         user.setName(name);
         user.setGender(gender);
         user.setBirthday(birthday);

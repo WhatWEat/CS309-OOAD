@@ -36,6 +36,9 @@ public class UserService {
     private FileService fileService;
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private OssService ossService;
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     @Autowired
@@ -51,9 +54,10 @@ public class UserService {
             );
             if(user.getAvatar() != null){
                 fileService.removeOriAvatar(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
-                String path = FileUtil.generateAvatarPath(user.getUserId());
-                String avP = FileUtil.saveFile(path, user.getAvatar().getOriginalFilename(), user.getAvatar());
-                user.setAvatarPath(avP);
+//                String path = FileUtil.generateAvatarPath(user.getUserId());
+//                String avP = FileUtil.saveFile(path, user.getAvatar().getOriginalFilename(), user.getAvatar());
+                String avP = ossService.uploadImage(user.getAvatar(), user.getUserId());
+                user.setAvatarPath(user.getAvatar().getOriginalFilename());
             }
             else {
                 user.setAvatarPath(usersMapper.findUserById(Long.parseLong(JWTUtil.getUserIdByToken(jwt))).getAvatarPath());
@@ -68,7 +72,10 @@ public class UserService {
         User user = usersMapper.findUserById(userId);
         System.err.println(user);
         if(user != null){
-            user.setAvatarPath(null);
+            if(user.getAvatarPath() != null)
+                user.setAvatarPath(ossService.toUrl(user.getAvatarPath(), userId));
+            else
+                user.setAvatarPath(ossService.defaultAvatarUrl());
             user.setPassword(null);
         }
         else

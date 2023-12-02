@@ -29,14 +29,16 @@ public class FileService {
     private final ProjectMapper projectMapper;
     private final GroupMapper groupMapper;
     private final UsersMapper usersMapper;
+    private final OssService ossService;
 
     @Autowired
     public FileService(AssignmentMapper assignmentMapper, ProjectMapper projectMapper, GroupMapper groupMapper,
-                       UsersMapper usersMapper) {
+                       UsersMapper usersMapper, OssService ossService) {
         this.assignmentMapper = assignmentMapper;
         this.projectMapper = projectMapper;
         this.groupMapper = groupMapper;
         this.usersMapper = usersMapper;
+        this.ossService = ossService;
     }
 
     public Resource getAvatar(Long userId){
@@ -58,13 +60,14 @@ public class FileService {
     public void removeOriAvatar(Long userId){
         User user = usersMapper.findUserById(userId);
         if(user.getAvatarPath() != null){
-            Path pth = Paths.get(user.getAvatarPath());
-            try {
-                Files.delete(pth);
-            } catch (IOException e) {
-                // Handle the possible IOException here
-                System.err.println(e.getMessage());
-            }
+            ossService.deleteImage(ossService.toUrl(user.getAvatarPath(), userId));
+//            Path pth = Paths.get(user.getAvatarPath());
+//            try {
+//                Files.delete(pth);
+//            } catch (IOException e) {
+//                // Handle the possible IOException here
+//                System.err.println(e.getMessage());
+//            }
         }
 
     }

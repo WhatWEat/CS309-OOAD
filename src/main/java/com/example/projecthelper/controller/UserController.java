@@ -60,10 +60,7 @@ public class UserController {
     ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<Project> projects = projectService.getProjectList(
-            new KeyValueWrapper<>(
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
-            ),
+            user_id,
             page, page_size
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));

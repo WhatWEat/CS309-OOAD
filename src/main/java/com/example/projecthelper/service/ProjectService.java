@@ -32,16 +32,20 @@ public class ProjectService {
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
-    public List<Project> getProjectList(KeyValueWrapper<Long, Integer> idIdentityWrapper, int page, int page_size){
-        return switch (idIdentityWrapper.getValue()) {
+    public List<Project> getProjectList(Long userId, int page, int page_size){
+        User user = usersMapper.findUserById(userId);
+        if(user == null)
+            throw new InvalidFormException("无效的id");
+
+        return switch (user.getIdentity()) {
             case 0 ->
                 projectMapper.getProjByAdm(page_size, page * page_size);
             case 1 ->
-                projectMapper.getProjByTea(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByTea(userId, page_size, page * page_size);
             case 2 ->
-                projectMapper.getProjByTa(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByTa(userId, page_size, page * page_size);
             case 3 ->
-                projectMapper.getProjByStu(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByStu(userId, page_size, page * page_size);
             default -> null;
         };
     }

@@ -77,8 +77,6 @@ public interface UsersMapper extends BaseMapper<User> {
 
 
     @Update("UPDATE users SET " +
-            "phone = #{phone},"+
-            "email = #{email},"+
             "name = #{name},"+
             "gender = #{gender},"+
             "birthday = #{birthday},"+

@@ -450,11 +450,15 @@ public class AssignmentService {
                 return 2;
             }
             default -> {
-                //TODO:这地方本来是小组互评
+                SubmittedAssignment submittedAssignment = submittedAssMapper.findGroupSubByAss(assId, group.getGroupId());
+                if (submittedAssignment == null) {
+                    return 0;
+                }
+                else  {
+                    return 1;
+                }
             }
         }
-
-        return -1;
     }
 
 

@@ -3,7 +3,11 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.AccountFrozenException;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.config.RedisConfig;
+import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.User;
+import com.example.projecthelper.mapper.AssignmentMapper;
+import com.example.projecthelper.mapper.NoticeMapper;
+import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.JWTUtil;
@@ -32,6 +36,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     private UsersMapper usersMapper;
+    @Autowired
+    private ProjectMapper projectMapper;
+    @Autowired
+    private NoticeMapper noticeMapper;
+    @Autowired
+    private AssignmentMapper assignmentMapper;
+
     @Autowired
     private FileService fileService;
     @Autowired
@@ -102,6 +113,41 @@ public class UserService {
         }else {
             throw new InvalidFormException("找不到用户");
         }
+    }
+
+    public List<Integer> getCnt(Long userId, Long identity){
+        int projCnt;
+        int ntcCnt;
+        int assCnt;
+        switch (identity.intValue()){
+            case 0:
+                projCnt = projectMapper.getProjCntByAdm();
+                ntcCnt = noticeMapper.getNtcCntByAdm();
+                assCnt = assignmentMapper.getAssCntByAdm();
+                break;
+            case 1:
+                projCnt = projectMapper.getProjCntByTea(userId);
+                ntcCnt = noticeMapper.getNtcCntByTea(userId);
+                assCnt = assignmentMapper.getAssCntByTea(userId);
+                break;
+            case 2:
+                projCnt = projectMapper.getProjCntByTa(userId);
+                ntcCnt = noticeMapper.getNtcCntByTa(userId);
+                assCnt = assignmentMapper.getAssCntByTa(userId);
+                break;
+            case 3:
+                projCnt = projectMapper.getProjCntByStu(userId);
+                ntcCnt = noticeMapper.getNtcCntByStu(userId);
+                assCnt = assignmentMapper.getAssCntByStu(userId);
+                break;
+            default:
+                return null;
+        }
+        List<Integer> cnt = new ArrayList<>();
+        cnt.add(projCnt);
+        cnt.add(ntcCnt);
+        cnt.add(assCnt);
+        return cnt;
     }
 
 //    @Bean

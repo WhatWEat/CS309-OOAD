@@ -17,6 +17,28 @@ import org.postgresql.util.PSQLException;
 @Mapper
 public interface AssignmentMapper extends BaseMapper<Assignment> {
 
+    @Select("select count(*) " +
+        "from project p join stuinproject s on s.projectid = p.projectid " +
+        "join assignment a on a.projectid = p.projectid " +
+        "                where stuid = #{stuId};")
+    int getAssCntByStu(Long stuId);
+
+    @Select("select count(*) " +
+        "    from project p join taofproject t on t.projectid = p.projectid " +
+        "    join assignment a on a.projectid = p.projectid " +
+        "    where taid = #{taId};")
+    int getAssCntByTa(Long taId);
+
+    @Select("select count(*) " +
+        "from project p join assignment a on a.projectid = p.projectid " +
+        "where p.teacherid = #{teaId};")
+    int getAssCntByTea(Long teaId);
+
+    @Select("select count(*) " +
+        "from assignment;")
+    int getAssCntByAdm();
+
+
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +

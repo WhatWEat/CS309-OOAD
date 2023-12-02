@@ -51,6 +51,14 @@ public class UserController {
         this.noticeService = noticeService;
     }
 
+    @GetMapping("/get_pj_ntc_ass_cnt")
+    public ResponseResult<List<Integer>> getCnt(
+        HttpServletRequest request
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<Integer> cnt = userService.getCnt(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt)));
+        return ResponseResult.ok(cnt, "Success", JWTUtil.updateJWT(jwt));
+    }
     @GetMapping("/project-list/{page}/{page_size}/{user_id}")
     public ResponseResult<List<Project>> getProjectList(
         HttpServletRequest request,

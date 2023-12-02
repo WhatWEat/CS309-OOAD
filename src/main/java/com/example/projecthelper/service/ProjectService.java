@@ -76,6 +76,19 @@ public class ProjectService {
             }
     }
 
+    public KeyValueWrapper<List<Long>, List<String>> getStuList(Long pjId, Long userId){
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(pjId)))
+            throw new AccessDeniedException("无权修改查看别人的proj");
+        List<Long> stuIds = projectMapper.findStuIdsByProject(pjId);
+        List<String> names;
+        if(stuIds != null)
+             names = usersMapper.findUsernamesById(stuIds);
+        else
+            names = new ArrayList<>();
+        return new KeyValueWrapper<>(stuIds, names);
+
+    }
+
     public Long findTeacherByProject(Long projectId){
         return projectMapper.findTeacherByProject(projectId);
     }

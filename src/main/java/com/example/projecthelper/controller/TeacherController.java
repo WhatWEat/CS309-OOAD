@@ -90,6 +90,20 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("/stu-list/{project_id}")
+    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
+        HttpServletRequest request, @PathVariable("project_id") Long pjId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(
+            projectService.getStuList(
+                pjId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            ),
+            "Success", JWTUtil.updateJWT(jwt)
+        );
+    }
+
 //    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
 //    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
 //                                                   @PathVariable("page") long page,

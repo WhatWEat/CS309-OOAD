@@ -115,6 +115,15 @@ public class UserController {
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("ass/{ass_id}")
+    public ResponseResult<Assignment> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        int identity = Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt));
+        Assignment assignment = assignmentService.getAssById(ass_id, userId, identity);
+
+        return ResponseResult.ok(assignment, "success", JWTUtil.updateJWT(jwt));
+    }
     @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
     public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
                                                            @PathVariable("page") long page,

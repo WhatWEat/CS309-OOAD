@@ -104,10 +104,39 @@ public class AssignmentService {
             results.forEach(a ->
                     a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
             );
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
 
         }
         return results;
+    }
+
+    public Assignment getAssById(Long ass_id, Long user_id, int identity){
+        Assignment assignment = assignmentMapper.findAssById(ass_id);
+        if(assignment == null){
+            throw new InvalidFormException("assId不正确");
+        }
+        switch (identity){
+            case 1:
+                if(!Objects.equals(user_id, projectMapper.findTeacherByProject(assignment.getProjectId())))
+                    throw new AccessDeniedException("无权访问该ass");
+                break;
+            case 2:
+                if(!Objects.equals(user_id, projectMapper.checkTaInProj(assignment.getProjectId(), user_id)))
+                    throw new AccessDeniedException("无权访问该ass");
+                break;
+            case 3:
+                if(!Objects.equals(user_id, projectMapper.checkStuInProj(assignment.getProjectId(), user_id)))
+                    throw new AccessDeniedException("无权访问该ass");
+                break;
+        }
+        try{
+            assignment.setFilePaths(
+                assignment.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList()
+            );
+        }catch (NullPointerException ignored){
+
+        }
+        return assignment;
     }
 
     public void createAss(Assignment assignment, Long creatorId, Predicate<Long> accessProject) {

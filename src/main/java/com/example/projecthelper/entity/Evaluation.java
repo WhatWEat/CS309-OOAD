@@ -16,10 +16,10 @@ public class Evaluation {
     private  Float grade;
     private  Timestamp commentTime;
     private  String content;
-    private Long submitId;
+    private Long assignmentId;
 
     public Evaluation(long evaluationId, long projectId, long commentGroup, long commentedGroup,
-                      float grade, Timestamp commentTime, String content, long submitId) {
+                      float grade, Timestamp commentTime, String content, long assignmentId) {
         this.evaluationId = evaluationId;
         this.projectId = projectId;
         this.commentGroup = commentGroup;
@@ -27,7 +27,7 @@ public class Evaluation {
         this.grade = grade;
         this.commentTime = commentTime;
         this.content = content;
-        this.submitId = submitId;
+        this.assignmentId = assignmentId;
     }
 
     public Evaluation() {

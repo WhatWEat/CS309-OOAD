@@ -1,10 +1,6 @@
 package com.example.projecthelper.controller;
 
-import com.example.projecthelper.entity.Assignment;
-import com.example.projecthelper.entity.Group;
-import com.example.projecthelper.entity.Notice;
-import com.example.projecthelper.entity.SubmittedAssignment;
-import com.example.projecthelper.entity.User;
+import com.example.projecthelper.entity.*;
 import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.FileService;
 import com.example.projecthelper.service.GroupService;
@@ -283,18 +279,18 @@ public class StudentController {
     @PostMapping("/submit_evaluation")
     public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
                                                    @RequestParam("assignmentId") Long assignmentId,
-                                                   @RequestParam("text") String text,
+                                                   @RequestParam("content") String content,
                                                    @RequestParam("grade") Float grade,
-                                                   @RequestParam("togroup") Long togroup
+                                                   @RequestParam("commentedGroup") Long commentedGroup
                                                    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        SubmittedAssignment submittedAssignment = new SubmittedAssignment();
-        submittedAssignment.setAssignmentId(assignmentId);
-        submittedAssignment.setText(text);
-        submittedAssignment.setGrade(grade);
-        submittedAssignment.setTogroup(togroup);
+        Evaluation evaluation = new Evaluation();
+        evaluation.setAssignmentId(assignmentId);
+        evaluation.setContent(content);
+        evaluation.setGrade(grade);
+        evaluation.setCommentedGroup(commentedGroup);
         assignmentService.submitEva(
-                submittedAssignment,
+                evaluation,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
@@ -309,6 +305,17 @@ public class StudentController {
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+    @DeleteMapping("/remove_eva/{assignmentId}")
+    public ResponseResult<Object> removeEva(HttpServletRequest request, @PathVariable("assignmentId") Long assignmentId,
+                                            @PathVariable("commentedgroup") Long commentedgroup){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.removeEva(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                commentedgroup
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
     @GetMapping("/view_sub/{assignment_id}")
     public ResponseResult<SubmittedAssignment> viewSub(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
@@ -318,6 +325,16 @@ public class StudentController {
             Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(submittedAssignment, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/view_eva/{assignment_id}")
+    public ResponseResult<Float> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        float eva = assignmentService.viewEvaByStu(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(eva, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{filename}")

@@ -1,6 +1,7 @@
 package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.projecthelper.entity.Evaluation;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
 import org.apache.ibatis.annotations.*;
@@ -17,11 +18,21 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
         //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
     void submitAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
+    @Insert("insert into evaluation(assignmentId, commentgroup, commentedgroup,grade, content, comment, submittedTime)\n" +
+            "VALUES (#{assignmentId}, #{commentgroup},#{commentedgroup},#{grade}, #{content}, #{comment}, now()) ;")
+
+        //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
+    void submitEva(Evaluation evaluation) throws PSQLException;
+
     @Delete("delete from submittedassignment where assignmentid = 1;")
     void deleteSubmittedAssByAssId(Long assId);
 
     @Delete("delete from submittedAssignment where assignmentId = #{assignmentId} and submitterId = #{submitterId};")
     void deleteOriginalSubmit(SubmittedAssignment submittedAssignment);
+
+    @Delete("delete from evaluation where assignmentId = #{assignmentId} and commentgroup = #{commentgroup} " +
+            "and commentedgroup = #{commentedgroup};")
+    void deleteOriginalEva(Evaluation evaluation);
 
     @Select("select * from submittedAssignment where submitId = #{submitId}")
     SubmittedAssignment findSubmittedAssignmentById(long submitId);
@@ -34,6 +45,9 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 
     @Delete("delete from submittedassignment where assignmentId = #{assId} and submitterId = #{submitterId};")
     void removeAss(long assId, long submitterId);
+
+    @Delete("delete from evaluation where assignmentId = #{assId} and commentgroup = #{commentgroup} and commentedgroup = #{commentedgroup} ;")
+    void removeEva(long assId, long commentgroup, long commentedgroup);
 
 //    @Delete("delete from stuassignment where assignmentid = #{assignmentId} and stuid = #{stuId};")
 //    void removeStuAss(long assignmentId, long stuId);
@@ -141,25 +155,32 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     //以下是与小组互评相关方法
     @Select("""
             <script>
-                SELECT * FROM submittedAssignment
-                WHERE togroup IS NOT NULL
-                
-                    <if test="togroup != null">
-                        AND togroup = #{togroup}
+                SELECT * FROM evaluation s
+                WHERE commentedgroup IS NOT NULL
+                    <if test='commentedgroup != null and !commentedgroup.isEmpty()'>
+                        AND (
+                            <foreach collection='togroup' item='item' index='index' separator=' AND '>
+                                s.commentedgroup = #{item}
+                            </foreach>)
                     </if>
-                    <if test="submitterid != null">
-                        AND submitterid = #{submitterid}
+                    <if test='submitterid != null and !submitterid.isEmpty()'>
+                        AND (
+                            <foreach collection='submitterid' item='item' index='index' separator=' AND '>
+                                s.commentgroup = #{item}
+                            </foreach>)
                     </if>
-                    <if test="grade != null">
-                        AND grade = #{grade}
+                    <if test='grade != null and !grade.isEmpty()'>
+                        AND (
+                            <foreach collection='grade' item='item' index='index' separator=' AND '>
+                                s.grade = #{item}
+                            </foreach>)
                     </if>
-                
             </script>
             """)
-    List<SubmittedAssignment> searchEvaluation(long submitterid, long togroup, double grade);
+    List<SubmittedAssignment> searchEvaluation(List<Long> submitterid, List<Long> togroup, List<Float> grade);
 
-    @Select("SELECT AVG(grade) FROM submittedAssignment WHERE togroup = #{togroup};")
-    double avgGrade(long togroup);
+    @Select("SELECT AVG(grade) FROM evaluation WHERE commentedgroup = #{commentedgroup};")
+    float avgGrade(long commentedgroup);
 
 
 }

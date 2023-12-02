@@ -207,7 +207,7 @@ public class TeacherAssistantController {
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/view_all_evaluation/{assignment_id}/{submitid}/{togroup}/{grade}")
+    @GetMapping("/view_evaluation/{assignment_id}/{submitid}/{togroup}/{grade}")
     public ResponseResult<List<SubmittedAssignment>> viewEva(
             HttpServletRequest request,
             @PathVariable("assignment_id") Long assignmentId,

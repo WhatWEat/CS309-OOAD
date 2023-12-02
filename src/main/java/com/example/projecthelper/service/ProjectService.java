@@ -113,7 +113,7 @@ public class ProjectService {
             throw new InvalidFormException("你不在proj中");
         // TODO: 进行异步处理
         System.err.println(intendedTeammates.getClass()+" "+intendedTeammate);
-//        intendedTeammates = new ArrayList<>(intendedTeammates);
+        intendedTeammates = new ArrayList<>(intendedTeammates);
         intendedTeammates.add(intendedTeammate);
         projectMapper.setIntendedTeammates(projectId, stuId, intendedTeammates);
     }

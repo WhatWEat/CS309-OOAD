@@ -51,9 +51,13 @@ public class UserController {
         this.noticeService = noticeService;
     }
 
-    @GetMapping("/project-list/{page}/{page_size}")
+    @GetMapping("/project-list/{page}/{page_size}/{user_id}")
     public ResponseResult<List<Project>> getProjectList(
-        HttpServletRequest request, @PathVariable int page, @PathVariable int page_size){
+        HttpServletRequest request,
+        @PathVariable int page,
+        @PathVariable int page_size,
+        @PathVariable Long user_id
+    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<Project> projects = projectService.getProjectList(
             new KeyValueWrapper<>(
@@ -64,6 +68,17 @@ public class UserController {
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/intend_teammates/{project_id}/{user_id}")
+    public ResponseResult<List<String>> getIntendTeammates(
+        HttpServletRequest request,
+        @PathVariable Long project_id,
+        @PathVariable Long user_id
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(projectService.getIntendedTeammates(project_id, user_id), "success", JWTUtil.updateJWT(jwt));
+    }
+
 
     @GetMapping("/getGroupInfo/{group_id}")
     public ResponseResult<Group> getGroupById(

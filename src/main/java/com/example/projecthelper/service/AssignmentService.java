@@ -357,7 +357,7 @@ public class AssignmentService {
         return sas;
     }
 
-    public List<SubmittedAssignment> viewEva(long assignmentId, long userId, float grade, long submitid, long togroup, Integer identity) {
+    public List<Evaluation> viewEva(long assignmentId, long userId, float grade, long submitid, long togroup, Integer identity) {
         Assignment ass = assignmentMapper.findAssById(assignmentId);
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
@@ -435,9 +435,12 @@ public class AssignmentService {
 
     public int getAssState(long assId, long userId, Predicate<Long> accessProject) {
         Assignment assignment = assignmentMapper.findAssById(assId);
+        if (assignment == null){
+            throw new AccessDeniedException("无效的作业id");
+        }
         Group group = groupMapper.findGroupOfStuInProject(userId, assignment.getProjectId());
-        if (!accessProject.test(assignment.getProjectId())) {
-            throw new AccessDeniedException("无法访问project");
+        if (projectMapper.checkStuInProj(userId, assignment.getProjectId()) == null) {
+            throw new AccessDeniedException("无权查看");
         }
         switch (assignment.getType()) {
             case "i" -> {
@@ -461,12 +464,7 @@ public class AssignmentService {
                 return 2;
             }
             default -> {
-                SubmittedAssignment submittedAssignment = submittedAssMapper.findGroupSubByAss(assId, group.getGroupId());
-                if (submittedAssignment == null) {
-                    return 0;
-                } else {
-                    return 1;
-                }
+                return -1;
             }
         }
     }

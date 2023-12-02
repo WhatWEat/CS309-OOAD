@@ -99,8 +99,6 @@
       <assignment-form></assignment-form>
     </el-dialog>
   </div>
-
-
 </template>
 
 <script>
@@ -194,6 +192,7 @@ export default defineComponent({
       show_deleteDialog_teacher: ref(false),
 
       AssignmentDetail: {
+        assignmentId: -1,
         AssignmentName: 'Assignment 1',
         studentName: "Liwehao",
         submitTime: '2020-10-7',
@@ -214,6 +213,9 @@ export default defineComponent({
           'No re-submission is allowed.\n' +
           '\n' +
           'No late submission is allowed.',
+        filePaths: null,
+        files:null,
+        type:null,
       },
       AssignmentAttachment: [
         {
@@ -232,9 +234,13 @@ export default defineComponent({
       let assignmentId = row.AssignmentName;
       this.getSelectedAssignment(assignmentId);
       this.show_assignment_detail = true
-      console.log("双击了第" + index + "行")
-      console.log("assignmentDetail: ")
-      console.log(this.AssignmentDetail)
+      this.$q.notify({
+        type: 'positive',
+        message: 'Switch assignment Success',
+        position:'top',
+        progress:true,
+        timeout: 1000,
+      })
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
@@ -259,74 +265,11 @@ export default defineComponent({
     //*************************************GET*************************************
     //获取指定作业的详细信息
     getSelectedAssignment(assignmentsId) {
-      let  res_body = {
-        "assignmentId": 1,
-        "projectId": 1,
-        "title": "ass1",
-        "fullMark": 120,
-        "description": "test",
-        "type": "i",// i 个人 g 小组作业
-        "creatorId": 30002000,
-        "deadline": "2024-11-02T15:45:30",
-        "releaseTime": "2023-11-07T15:55:44.618481",
-        "filePaths": [
-          "Week8-Transport.pdf",
-          "Wireshark_TCP_v8.0.pdf",
-          "class-dia (1).png"
-        ],
-        "requireExtension": ".pdf",
-        "projectName": "CS309",
-        "creatorName": "Andy",
-        "files": null,
-        "state": 0,
-        "grade": -1,
-      }
-      this.AssignmentDetail.AssignmentName = res_body.title;
-      this.AssignmentDetail.deadLine = res_body.deadline.replace('T',' ').slice(0,19);
-      this.AssignmentDetail.grade = (res_body.grade === -1) ? 'Not Graded' : res_body.grade;
-      this.AssignmentDetail.state = res_body.state;
-      this.AssignmentDetail.moreInfo = res_body.description;
-      this.AssignmentDetail.instructor = res_body.creatorName;
-      this.AssignmentDetail.isReturned = () => {
-        if (res_body.state === 0) {
-          return 'Not Submitted'
-        } else if (res_body.state === 1) {
-          return 'Waiting for Grading'
-        } else if (res_body.state === 2) {
-          return 'Returned'
-        }
-      }
-      this.AssignmentDetail.state =  res_body.state;
-      this.AssignmentDetail.matGrade = res_body.fullMark;
-      this.AssignmentDetail.studentName = this.userData.username;
-      // 这里把releaseTime当作submitTime
-      this.AssignmentDetail.submitTime = res_body.releaseTime.replace('T',' ').slice(0,19);
-      api.get('/assignments/' + assignmentsId).then((res) => {
-        // this.AssignmentDetail = res.data;
-        let  res_body = {
-          "assignmentId": 1,
-          "projectId": 1,
-          "title": "ass1",
-          "fullMark": 120,
-          "description": "test",
-          "type": "i",// i 个人 g 小组作业
-          "creatorId": 30002000,
-          "deadline": "2024-11-02T15:45:30",
-          "releaseTime": "2023-11-07T15:55:44.618481",
-          "filePaths": [
-            "Week8-Transport.pdf",
-            "Wireshark_TCP_v8.0.pdf",
-            "class-dia (1).png"
-          ],
-          "requireExtension": ".pdf",
-          "projectName": "CS309",
-          "creatorName": "Andy",
-          "files": null,
-          "state": 0,
-			    "grade": -1,
-      }
+      api.get('/ass/' + assignmentsId).then((res) => {
+        let  res_body = res.data.body;
+        this.AssignmentDetail.assignmentId = assignmentsId;
         this.AssignmentDetail.AssignmentName = res_body.title;
-        this.AssignmentDetail.deadLine = res_body.deadline;
+        this.AssignmentDetail.deadLine = res_body.deadline.slice(0,19).replace('T',' ');
         this.AssignmentDetail.grade = (res_body.grade === -1) ? 'Not Graded' : res_body.grade;
         this.AssignmentDetail.state = res_body.state;
         this.AssignmentDetail.moreInfo = res_body.description;
@@ -344,8 +287,15 @@ export default defineComponent({
         this.AssignmentDetail.matGrade = res_body.fullMark;
         this.AssignmentDetail.studentName = this.userData.username;
         // 这里把releaseTime当作submitTime
-        this.AssignmentDetail.submitTime = res_body.releaseTime;
+        this.AssignmentDetail.submitTime = res_body.releaseTime.slice(0,19).replace('T',' ');
+        this.AssignmentDetail.files = res_body.files;
+        this.AssignmentDetail.filePaths = res_body.filePaths;
+        this.AssignmentDetail.type =  res_body.type;
 
+        // console.log ("AssignmentDetail: ")
+        // console.log (this.AssignmentDetail)
+        // console.log ("res.data: ")
+        // console.log (res.data)
       }).catch((err) => {
         console.log(err);
       })

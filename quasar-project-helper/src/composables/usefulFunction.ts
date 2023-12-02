@@ -104,7 +104,6 @@ export function getDownloadBlob(blobFile: Blob, fileName: string) {
   URL.revokeObjectURL(blobUrl);
 }
 //******************Li weihao******************//
-
 export function merger(key: [], value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {

@@ -44,14 +44,15 @@ const props = defineProps<{
   fileName: string
 }>();
 onMounted(()=>{
+  console.log("mounte PDF界面")
   api.get(props.getApiUrl,{responseType: 'blob'}).then(res=>{
+    console.log("成功api")
     blobToBase64(res.data).then(base64 =>{
       pdfSource.value = base64;
       isLoading.value = true;
     })
   }).catch(err=>{
     console.log(err)
-
   })
 })
 const handleDocumentRender = () => {

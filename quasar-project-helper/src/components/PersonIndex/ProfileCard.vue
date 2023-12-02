@@ -255,7 +255,7 @@ const {username, userid, identity} = useUserStore()
 const person_id = ref(1);
 const email = ref(''), gender = ref(4), phone = ref(''),
   skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
-const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref(''), avatar_clone = ref()
+const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref<string|undefined>(''), avatar_clone = ref()
 const newSkill = ref(), colorList = ref(['warning', 'teal', 'glossy', 'primary'])
 const isEditing = ref(false), isShowDialog = ref(false), isFresh = ref(true)
 const selectedEmailDomain = ref('gmail.com')
@@ -279,12 +279,9 @@ onMounted(() => {
         personInfo.value = res.data.body
         copyPersonInfo()
         username.value = personInfo.value.name
+        avatar_preview.value = personInfo.value.avatarPath
+        avatar_clone.value = avatar_preview.value
         console.log('init',personInfo.value)
-      })
-      api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {
-        const blob = new Blob([res.data], { type: 'image/jpeg' });
-        avatar_preview.value = URL.createObjectURL(blob);
-        avatar_clone.value = avatar_preview.value;
       })
     }
   })

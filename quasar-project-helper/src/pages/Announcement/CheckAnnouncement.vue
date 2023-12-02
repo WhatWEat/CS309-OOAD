@@ -84,6 +84,7 @@
                 v-model="props.row.title"
                 title="Update title"
                 @save="save(props.row)"
+                v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid"
                 buttons
                 v-slot="scope"
               >
@@ -97,6 +98,7 @@
                 title="Update content"
                 v-model="props.row.content"
                 @save="save(props.row)"
+                v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid"
                 v-slot="scope">
                 <q-input type="text" v-model="scope.value" dense autofocus @keyup.enter="scope.set"/>
               </q-popup-edit>
@@ -159,7 +161,7 @@
       <q-separator v-if="data.length > 0"/>
     </div>
     <q-dialog v-model="isNewDialogOpen">
-      <AddAnnouncement :edit="false"/>
+      <AddAnnouncement @save="onRefresh" :edit="false"/>
     </q-dialog>
   </div>
 </template>
@@ -240,7 +242,7 @@ watch(pagination, (newVal, oldVal) => {
   }
 });
 // 获取身份,avatar
-const {identity} = useUserStore(),
+const {userid, identity} = useUserStore(),
   avatarMap = ref<Map<number, string | null>>(new Map<number, string | null>());
 
 // 同意进组
@@ -276,9 +278,7 @@ function clickRejectGroup(notice: noticeProps) {
 
 // 保存
 function save(notice: noticeProps){
-  console.log(notice)
   api.put('/tea/modify_notice', notice).then(res => {
-    console.log(res)
     $q.notify({
       position: 'top',
       message: 'save success',
@@ -291,8 +291,16 @@ function save(notice: noticeProps){
 
 // 删除操作
 function removeRow() {
-  const selectedRows = [...selected.value];
-
+  const selectedRows = [...selected.value.map((row) => row.noticeId)];
+  api.post('/tea/delete_notice', selectedRows).then(res => {
+    $q.notify({
+      position: 'top',
+      message: 'delete success',
+      color: 'negative'
+    })
+  }).catch(err => {
+    console.log(err)
+  })
   onRefresh();
   selected.value = [];
 }

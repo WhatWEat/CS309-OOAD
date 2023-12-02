@@ -9,7 +9,7 @@ export interface noticeProps {
   creatorId: number;
   creatorName?: string;
   createTime?: string;
-  stuView: null | string;
+  stuView: null | number[];
   toAll: boolean;
   type?: number;
   projectName?: string;
@@ -127,10 +127,10 @@ withDefaults(defineProps<unfreezeProps>(), {
 export const defaultNotice: noticeProps = {
   noticeId: 0,
   projectId: 0,
-  title: 'project1',
-  content: '11111111111111111111一共20个1',
+  title: '',
+  content: '',
   creatorId: 0,
-  creatorName: 'Andy',
+  creatorName: '',
   stuView: null,
   toAll: false,
 }

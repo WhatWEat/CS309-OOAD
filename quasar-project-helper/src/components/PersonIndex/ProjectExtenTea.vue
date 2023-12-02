@@ -10,7 +10,7 @@
           {{ project.teacherName }}
         </q-item-label>
       </q-item-section>
-      <q-item-section side v-if="identity<=1 && identity >= 0">
+      <q-item-section side v-if="identity<=1 && identity >= 0 && person_id == user_id">
         <q-btn flat @click.stop="clickEdit" label="Edit"></q-btn>
       </q-item-section>
       <q-dialog v-model="isEdit" persistent>
@@ -170,7 +170,9 @@ const tab = ref<string>('des');
 const props = defineProps<{
   project: projectProps,
   ta_list_all: personProps[] | undefined,
-  identity: number | null
+  identity: number | null,
+  person_id: number | null,
+  user_id: number | null
 }>()
 const project_show = ref<projectProps>(props.project);
 // TAs

@@ -87,18 +87,18 @@
                 buttons
                 v-slot="scope"
               >
-                <q-input type="text" v-model="scope.value" dense autofocus/>
+                <q-input type="text" v-model="scope.value" dense autofocus @keyup.enter="scope.set"/>
               </q-popup-edit>
             </q-td>
             <q-td key="content" :props="props">
-              <span>{{ truncate(props.row.content) }}</span>
+              <div v-html="truncate(props.row.content)"></div>
               <q-popup-edit
                 buttons
                 title="Update content"
                 v-model="props.row.content"
                 @save="save(props.row)"
                 v-slot="scope">
-                <q-input type="text" v-model="scope.value" dense autofocus/>
+                <q-input type="text" v-model="scope.value" dense autofocus @keyup.enter="scope.set"/>
               </q-popup-edit>
 
             </q-td>
@@ -144,7 +144,7 @@
 
                 <q-separator/>
                 <q-card-section style="font-size: 20px">
-                  {{ props.row.content }}
+                  <div v-html="props.row.content"></div>
                 </q-card-section>
                 <q-card-section v-if="props.row.type==1" class="q-gutter-lg">
                   <q-btn round flat color="green" icon="done" @click="clickAcceptGroup(props.row)"/>
@@ -159,12 +159,7 @@
       <q-separator v-if="data.length > 0"/>
     </div>
     <q-dialog v-model="isNewDialogOpen">
-      <q-card>
-        <q-card-section>
-                          <AddAnnouncement/>
-          {{isNewDialogOpen}}
-        </q-card-section>
-      </q-card>
+      <AddAnnouncement :edit="false"/>
     </q-dialog>
   </div>
 </template>
@@ -249,9 +244,9 @@ const {identity} = useUserStore(),
   avatarMap = ref<Map<number, string | null>>(new Map<number, string | null>());
 
 // 同意进组
-function clickAcceptGroup(notice: noticeProps){
+function clickAcceptGroup(notice: noticeProps) {
   let noticeId = notice.noticeId
-  api.post('/stu/ack_application',noticeId).then(res => {
+  api.post('/stu/ack_application', noticeId).then(res => {
     console.log(res)
     $q.notify({
       position: 'top',
@@ -263,9 +258,10 @@ function clickAcceptGroup(notice: noticeProps){
   })
   console.log('accept')
 }
-function clickRejectGroup(notice: noticeProps){
+
+function clickRejectGroup(notice: noticeProps) {
   let noticeId = notice.noticeId
-  api.post('/stu/nak_invitation_or_application',noticeId).then(res => {
+  api.post('/stu/nak_invitation_or_application', noticeId).then(res => {
     console.log(res)
     $q.notify({
       position: 'top',
@@ -277,11 +273,11 @@ function clickRejectGroup(notice: noticeProps){
   })
   console.log('reject')
 }
-// 编辑部分
-function save(props: noticeProps){
-  console.log('save')
-  console.log(props)
-  api.put('/tea/modify_notice',props).then(res => {
+
+// 保存
+function save(notice: noticeProps){
+  console.log(notice)
+  api.put('/tea/modify_notice', notice).then(res => {
     console.log(res)
     $q.notify({
       position: 'top',
@@ -292,6 +288,7 @@ function save(props: noticeProps){
     console.log(err)
   })
 }
+
 // 删除操作
 function removeRow() {
   const selectedRows = [...selected.value];
@@ -299,6 +296,7 @@ function removeRow() {
   onRefresh();
   selected.value = [];
 }
+
 async function created() {
   await onRefresh();
 }
@@ -334,9 +332,9 @@ async function onRefresh() {
     .then(async (res) => {
       data.value = res.data.body;
       console.log(data.value)
-      for (const notice of data.value){
+      for (const notice of data.value) {
         if (!avatarMap.value.has(notice.creatorId)) {
-          avatarMap.value.set(notice.creatorId,await getAvatarUrlById(notice.creatorId));
+          avatarMap.value.set(notice.creatorId, await getAvatarUrlById(notice.creatorId));
         }
       }
       loading.value = false;
@@ -379,11 +377,11 @@ function onRequestAction(value) {
 //   return query;
 // }
 const isNewDialogOpen = ref(false);
+
 function onNewClickAction() {
   isNewDialogOpen.value = true;
   console.log('open dialog', isNewDialogOpen.value)
 }
-
 
 
 const tags = ref<Set<string>>(new Set());

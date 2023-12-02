@@ -21,7 +21,7 @@
           {{ project.description }}
         </q-tab-panel>
 
-        <q-tab-panel name="group" v-if="group_id!==-1">
+        <q-tab-panel name="group" v-if="isGroup">
           <div class="text-h6">
             <q-avatar>
               <q-icon color="blue" name="groups"></q-icon>
@@ -58,38 +58,42 @@
           <q-item dense clickable :to="`/projects/${project.projectId}/group-list`">
             <q-item-section class="row text-h6">
               <div>
-                <span>
-              you are not in a group. Click to join a group
-            </span>
+                <span v-if="person_id==userid">
+                  you are not in a group. Click to join a group
+                </span>
+                <span v-else>
+                  She/he is not in a group. Click to invite her/him to join a group
+                </span>
               </div>
             </q-item-section>
           </q-item>
         </q-tab-panel>
         <q-tab-panel name="intended">
           <div class="row q-gutter-sm">
-              <q-chip
-                v-for="(tag, index) in TeammateRequire"
-                :key="index"
-                square
-                class="text-white"
-                :color="getColor(index)"
-                removable
-                @remove="removeTeam(index)"
-              >
-                {{ tag }}
-              </q-chip>
-              <q-input
-                square
-                borderless
-                clearable
-                dense
-                autogrow
-                v-model="inputTagsValue"
-                placeholder="Add a tag"
-                @keyup.enter="handleInputConfirm"
-              />
+            <q-chip
+              v-for="(tag, index) in TeammateRequire"
+              :key="index"
+              square
+              class="text-white"
+              :color="getColor(index)"
+              removable
+              @remove="removeTeam(index)"
+            >
+              {{ tag }}
+            </q-chip>
+            <q-input
+              v-if="userid==person_id"
+              square
+              borderless
+              clearable
+              dense
+              autogrow
+              v-model="inputTagsValue"
+              placeholder="Add a tag"
+              @keyup.enter="handleInputConfirm"
+            />
 
-            </div>
+          </div>
 
         </q-tab-panel>
       </q-tab-panels>
@@ -115,6 +119,8 @@
 import {projectProps, GroupProps, personProps, defaultPerson} from "src/composables/comInterface";
 import {defineProps, nextTick, onMounted, ref} from 'vue';
 import {api} from "boot/axios";
+import {usePersonId} from "src/composables/usefulFunction";
+import {useUserStore} from "src/composables/useUserStore";
 
 const tab = ref<string>('des')
 const props = defineProps<{
@@ -130,8 +136,9 @@ const group_id = ref<number>()
 onMounted(() => {
   api.get(`/get_group_id/${props.project.projectId}`).then(res => {
     group_id.value = res.data.body
-    isGroup.value = group_id.value !== -1
-    if (group_id.value !== -1) {
+    console.log(group_id.value, 'group_id')
+    isGroup.value = group_id.value !== undefined && group_id.value !== -1
+    if (group_id.value !== undefined && group_id.value !== -1) {
       api.get(`/getGroupInfo/${group_id.value}`).then(res => {
         groupInfo.value = res.data.body
         setGroup()
@@ -179,15 +186,26 @@ function setGroup() {
 const inputVisible = ref<boolean>(false)
 const TeammateRequire = ref<string[]>(['会java', '懂springboot'])
 const inputTagsValue = ref<string>('')
+const person_id = ref(), {userid} = useUserStore();
+onMounted(() => {
+  // todo 改成不同人看的不一样
+  person_id.value = usePersonId();
+  api.get(`/stu/intend_teammates/${props.project.projectId}`).then(res => {
+    TeammateRequire.value = res.data.body
+    console.log('teammates', res.data.body)
+  }).catch(err => {
+    console.log(err)
+  })
+})
 
 // intended teammates method
 function getColor(index: number): string {
   const colors = ['primary', 'tertiary', 'positive', 'negative', 'info', 'warning'];
   return colors[index % colors.length];
 }
+
 // TODO Check if the intended teammate is in the group
 function removeTeam(index: number) {
-
   api.delete(`/stu/delete_intend_teammates`, {
     data: {
       key: props.project.projectId,
@@ -206,11 +224,14 @@ const handleClose = (tag: string) => {
 }
 
 const handleInputConfirm = () => {
+  // todo 添加
   if (inputTagsValue.value) {
     TeammateRequire.value.push(inputTagsValue.value)
+    console.log('tag add', inputTagsValue.value)
+    let add_tags = [inputTagsValue.value];
     api.post(`/stu/add_intend_teammates`, {
-      "key": props.project.projectId,
-      "value": inputTagsValue.value
+      key: props.project.projectId,
+      value: add_tags
     }).then(res => {
       console.log(res.data)
     }).catch(err => {

@@ -10,7 +10,7 @@
 
       <q-item-section>
         <q-item-label>{{ msg.title }}</q-item-label>
-        <q-item-label caption lines="1">{{ msg.content }}</q-item-label>
+        <q-item-label caption lines="1"><div v-html="msg.content"></div></q-item-label>
       </q-item-section>
 
       <q-item-section side>

@@ -231,7 +231,7 @@
 
 <script setup lang="ts">
 import {useUserStore} from 'src/composables/useUserStore';
-import {getAvatarUrl} from 'src/composables/usefulFunction';
+import {getAvatarUrl, usePersonId} from 'src/composables/usefulFunction';
 import {ref, defineProps, onMounted} from 'vue';
 import {useQuasar} from 'quasar';
 import {useCurrentPageUser} from 'stores/user-store';
@@ -252,7 +252,7 @@ const usePerson = useCurrentPageUser()
 const $q = useQuasar()
 const {username, userid, identity} = useUserStore()
 
-const {person_id} = storeToRefs(usePerson)
+const person_id = ref(1);
 const email = ref(''), gender = ref(4), phone = ref(''),
   skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
 const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref(''), avatar_clone = ref()
@@ -268,15 +268,17 @@ const genderList = ref([{label: 'male', value: 1}, {label: 'female', value: 2},
 //axios to initial
 const personInfo = ref<personProps>(defaultPerson)
 onMounted(() => {
+  person_id.value = usePersonId();
+  console.log('person_id',person_id.value)
   watchEffect(() => {
     personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
     if (identity.value !== -1 && isFresh.value) {
       // console.log("isfresh", isFresh.value)
       api.get(`/get_personal_info/${person_id.value}`).then((res) => {
-        // console.log(res.data)
+        console.log(res.data)
         personInfo.value = res.data.body
         copyPersonInfo()
-
+        username.value = personInfo.value.name
         console.log('init',personInfo.value)
       })
       api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {

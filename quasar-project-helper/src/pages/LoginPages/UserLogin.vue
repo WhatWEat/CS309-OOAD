@@ -74,12 +74,11 @@
                       </q-btn-dropdown>
                     </template>
                   </q-input>
-                  <q-input dense outline class="col-12" label="Code">
+                  <q-input dense outline v-model="email_code" class="col-12" label="Code">
                     <template v-slot:append>
                       <q-btn
                         dense
                         flat
-                        v-model="email_code"
                         icon="send"
                         @click="sendEmailCode"
                         v-if="countdown === 0"
@@ -172,9 +171,10 @@ function sendEmailCode() {
   // TODO 发送邮箱验证码
   // 开始倒计时
   let email = loginEmail.value + selectedEmailDomain.value;
-  console.log(email);
-  api.post(`/request_code`, email).then(res => {
-    console.log('返回',res.data)
+  api.post(`/request_code`, email,{
+    headers: {
+      'Content-Type': 'text/plain'
+    }}).then(res => {
     console.log('合成',email)
     $q.notify({
       color: "green",
@@ -221,7 +221,6 @@ function sendPhoneCode() {
 
 function getLoginValueRules() {
   const rules = [];
-
   if (loginType.value === "studentId") {
     rules.push((val) => val.length === 8 || "Student ID must be 8 digits");
   } else if (loginType.value === "email") {
@@ -265,9 +264,23 @@ function loginStudentId() {
     console.log(password);
   });
 }
-
+//1053246332
 function loginByEmail() {
-  api.get(`/login_with_email_code/${loginEmail.value}/${code}`)
+  console.log('code',email_code.value)
+  let email = loginEmail.value+selectedEmailDomain.value;
+  console.log('email',email)
+  api.post(`/login_with_email_code`,{
+    key: email,
+    value: email_code.value,
+  }).then(res => {
+    console.log(res.data)
+    if (res.data.statusCode === 200) {
+      localStorage.setItem("Token", res.data.jwt_token);
+      router.push("/");
+    }
+  }).catch(err => {
+    console.log(err)
+  })
 }
 
 function loginByPhone() {

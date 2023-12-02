@@ -72,7 +72,10 @@ async function handleItemList(newIdentity){
     const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
     const groupResponse = ref(0), groupDis = ref('Group Member');
     if(newIdentity === 3){
-      groupResponse.value = (await api.get(`/stu/group_members/${project_id.value}`)).data.body.length;
+      let group = (await api.get(`/stu/group_members/${project_id.value}`)).data.body;
+      // console.log('group',group)
+      if (group === undefined) groupResponse.value = 0
+      else groupResponse.value = group.length;
     } else {
       groupDis.value = 'Group Number'
       groupResponse.value = (await api.get(`/get_brief_groups_from_proj/${project_id.value}`)).data.body.length;
@@ -96,7 +99,7 @@ async function handleItemList(newIdentity){
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        value: `${assignmentResponse.data.body.length}`,
+        value: `${assignmentResponse.data.body === undefined ? 0 : assignmentResponse.data.body.length}`,
         // value: `1`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
@@ -104,7 +107,7 @@ async function handleItemList(newIdentity){
       {
         title: 'Announcements',
         icon: 'fa-solid fa-comments',
-        value: `${noticeResponse.data.body.length}`,
+        value: `${noticeResponse.data.body === undefined ? 0 : noticeResponse.data.body.length}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }
@@ -112,7 +115,7 @@ async function handleItemList(newIdentity){
   } else {
     const noticeResponse = await api.get(`/notice-list/-1/0/1000`)
     const assignmentResponse = await api.get(`/ass-list/-1/0/1000`)
-    const projectResponse = await api.get(`/project-list/0/1000`)
+    const projectResponse = await api.get(`/project-list/0/1000/${userid.value}`)
     items.value = [
       {
         title: 'Profile',
@@ -124,21 +127,21 @@ async function handleItemList(newIdentity){
       {
         title: 'Projects',
         icon: 'fa-solid fa-person-digging',
-        value: `${projectResponse.data.body.length}`,
+        value: `${projectResponse.data.body === undefined ? 0 : projectResponse.data.body.length}`,
         color1: '#f37169',
         color2: '#f34636'
       },
       {
         title: 'Announcements',
         icon: 'fa-solid fa-envelope',
-        value: `${noticeResponse.data.body.length}`,
+        value: `${noticeResponse.data.body === undefined ? 0 : noticeResponse.data.body.length}`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
       },
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        value: `${assignmentResponse.data.body.length}`,
+        value: `${assignmentResponse.data.body === undefined ? 0 : assignmentResponse.data.body.length}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }

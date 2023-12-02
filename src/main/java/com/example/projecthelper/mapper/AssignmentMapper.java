@@ -38,6 +38,15 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
         "join project p on a.projectid = p.projectid " +
+        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} order by a.releaseTime desc limit #{limit} offset #{offset};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByProjWithoutLimit(Long projectId);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
         "join stuInProject s on p.projectid = s.projectid " +
         "join users u on a.creatorid = u.userid where s.stuId = #{stuId} order by a.releaseTime desc limit #{limit} offset #{offset};")
     @Results({

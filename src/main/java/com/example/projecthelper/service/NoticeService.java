@@ -88,7 +88,10 @@ public class NoticeService {
         result.forEach(e -> {
             if(Objects.equals(userId, projectMapper.findTeacherByProject(e.getProjectId())) && e.getType() == 0){
                 e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
-                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                if(e.getStuView() != null && !e.getStuView().isEmpty())
+                    e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                else
+                    e.setStuViewName(new ArrayList<>());
             }
         });
         return result;

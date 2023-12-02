@@ -76,8 +76,6 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Delete("delete from assignment where assignmentid = #{assId};")
     void deleteAss(Long assId);
 
-
-
     @Update("update assignment set filePaths = #{filePaths, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} where assignmentId = #{assId}")
     void updateFilePathOfAss(List<String> filePaths, Long assId);
 

@@ -159,13 +159,13 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
                 WHERE commentedgroup IS NOT NULL
                     <if test='commentedgroup != null and !commentedgroup.isEmpty()'>
                         AND (
-                            <foreach collection='togroup' item='item' index='index' separator=' AND '>
+                            <foreach collection='commentedgroup' item='item' index='index' separator=' AND '>
                                 s.commentedgroup = #{item}
                             </foreach>)
                     </if>
-                    <if test='submitterid != null and !submitterid.isEmpty()'>
+                    <if test='commentgroup != null and !commentgroup.isEmpty()'>
                         AND (
-                            <foreach collection='submitterid' item='item' index='index' separator=' AND '>
+                            <foreach collection='commentgroup' item='item' index='index' separator=' AND '>
                                 s.commentgroup = #{item}
                             </foreach>)
                     </if>
@@ -177,7 +177,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
                     </if>
             </script>
             """)
-    List<SubmittedAssignment> searchEvaluation(List<Long> submitterid, List<Long> togroup, List<Float> grade);
+    List<Evaluation> searchEvaluation(List<Long> commentgroup, List<Long> commentedgroup, List<Float> grade);
 
     @Select("SELECT AVG(grade) FROM evaluation WHERE commentedgroup = #{commentedgroup};")
     float avgGrade(long commentedgroup);

@@ -173,24 +173,22 @@ public class SecurityController {
      *
      */
 
-    @PostMapping("/test_mail")
-    public ResponseResult<Object> testMail(HttpServletRequest request,
-                                           @RequestParam String address) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+    @PostMapping("/request_code")
+    public ResponseResult<Object> testMail(@RequestBody String address) {
 
         System.out.println(address);
 
+
         userService.sendMail(address);
 
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(null, "Success", null);
     }
 
-    @PostMapping("/test_code")
-    public ResponseResult<Object> testCode(HttpServletRequest request,
-                                           @RequestParam String address,
-                                           @RequestParam String code) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-
-        return ResponseResult.ok(userService.checkCode(code,address), "Success", JWTUtil.updateJWT(jwt));
+    @PostMapping("/login_with_email_code")
+    public ResponseResult<Object> testCode(
+        @RequestBody KeyValueWrapper<String, String> address_code
+    ) {
+        String jwt = userService.checkCode(address_code.getValue(), address_code.getKey());
+        return ResponseResult.ok(null, "Success", jwt);
     }
 }

@@ -133,98 +133,156 @@
       >
         <template v-slot:button1>
           <!--           这个是取消按钮，颜色好好选一下-->
-          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"
-                 @click="confirm_1 = false"/>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"/>
         </template>
         <template v-slot:button2>
           <!--            这个是确认按钮-->
-          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK" @click="confirm_1 = false"/>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK"
+                 @click="deleteGroup(), console.log('删除至少点击了')"/>
         </template>
       </confirm-dialog>
     </q-dialog>
   </div>
   <!--  这里是Edit表单弹窗部分-->
   <div>
-    <el-dialog v-model="show_edit_form" center="true">
+    <el-dialog v-model="show_edit_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
       </template>
-      <group-form></group-form>
+      <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+                  @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
     </el-dialog>
   </div>
   <!--  这里是创建表单弹窗改部分-->
   <div>
-    <el-dialog v-model="show_insert_form" center="true">
+    <el-dialog v-model="show_insert_form" :center=true>
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
-      <group-form></group-form>
+      <group-form :project-id="projectId" type="Create" @errorDialog="handleError"
+                  @successDialog="handleSuccess" @unfold="show_insert_form = false"></group-form>
     </el-dialog>
   </div>
   <!--  这里是设置批量创建小组弹窗部分-->
   <div>
-    <el-dialog v-model="show_set_form" :style="{width: '60%' , 'border-radius': '15px'}" center="true">
+    <el-dialog v-model="show_set_form" :center="true" :style="{width: '60%' , 'border-radius': '15px'}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create multiple groups</div>
       </template>
-      <set-variable-form :project-id="parseInt(projectId, 10)"></set-variable-form>
+      <create-groups-form :project-id="parseInt(projectId, 10)" @successDialog="handleSuccess"
+                          @unfold="show_set_form=false"
+                          @error-dialog="handleError"></create-groups-form>
     </el-dialog>
   </div>
+  <!--  这里是confirmDialog的报错提示部分,可以是报错，可以是提示,只有一个确认按钮-->
+  <div>
+    <q-dialog v-model="show_confirm_dialog">
+      <confirm-dialog :icon_color="dialogMessage.icon_color" :icon_name=dialogMessage.icon_name
+                      :icon_text_color=dialogMessage.icon_text_color :text=dialogMessage.text>
+        <template v-slot:button1>
+          <q-space></q-space>
+        </template>
+        <template v-slot:button2>
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK"
+                 @click="show_confirm_dialog = false"/>
+        </template>
+      </confirm-dialog>
+    </q-dialog>
+  </div>
+  <!--  这里是确认退出小组的弹窗-->
+  <div>
+    <q-dialog v-model="show_leave_warning" name="confirmWarning">
+      <confirm-dialog :icon_color="warning_date.icon_color" :icon_name="warning_date.icon_name"
+                      :icon_text_color="warning_date.icon_text_color" :style="{borderRadius: '20px'}"
+                      :text="warning_date.text"
+                      :title="warning_date.title"
+      >
+        <template v-slot:button1>
+          <!--           这个是取消按钮，颜色好好选一下-->
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="green-4" label="Cancel"/>
+        </template>
+        <template v-slot:button2>
+          <!--            这个是确认按钮-->
+          <q-btn v-close-popup :style="{borderRadius: '10px'}" color="red-5" label="OK"
+                 @click="deleteLeaveGroup(),console.log('好吧至少点击了')"/>
+        </template>
+      </confirm-dialog>
+    </q-dialog>
+  </div>
+
 
   <!--  这里是本小组信息部分-->
   <div class="row wrap justify-center items-start">
     <div class="col-11 justify-between">
-      <DirectoryCard_Input v-model:presentation-time="card_data.presentationTime"
-                           :creation-time="card_data.creationTime" :dead-line="card_data.deadline"
-                           :deadline="card_data.deadline" :detail="card_data.moreInfo"
-                           :group-id="card_data.groupId"
-                           :group-size="card_data.groupSize" :instructor="card_data.instructor"
-                           :leader="card_data.leader"
-                           :max-size="card_data.groupMaxSize" :members="card_data.members"
-                           :more-information="card_data.moreInfo"
-                           :style="{width: '100%' , 'border-radius': '20px'}">
+      {{ groupId }}
+      <DirectoryCard_Input :disable-list="disableList"
+                           :group-data=formData_user_self
+                           :isGroupLeader="isGroupLeader"
+                           :style="{width: '100%' , 'border-radius': '20px'}"
+                           avatar="https://i.postimg.cc/P5HTzptm/img.png">
         <template v-slot:members_btn>
 
         </template>
         <template v-slot:invite_detail_input>
-          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"
-                   outlined>
-            <template v-slot:append>
-              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>
-            </template>
-            <template v-slot:hint>
-              Length hint
-            </template>
-            <template v-slot:after>
-              <q-btn dense flat icon="send" round @click="handleSendInvite"/>
-            </template>
-          </q-input>
+<!--          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"-->
+<!--                   outlined>-->
+<!--            <template v-slot:append>-->
+<!--              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>-->
+<!--            </template>-->
+<!--            <template v-slot:hint>-->
+<!--              Length hint-->
+<!--            </template>-->
+<!--            <template v-slot:after>-->
+<!--              <q-btn dense flat icon="send" round @click="handleSendInvite"/>-->
+<!--            </template>-->
+<!--          </q-input>-->
         </template>
         <template v-slot:right_btn>
           <q-item-label>
             <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
-                   @click="show_invite_member=true"/>
+                   @click="show_invite_member=!show_invite_member"/>
           </q-item-label>
-          <q-item-label v-if="isGroupLeader">
-            <q-btn class="bg-indigo-7 text-white" flat icon="exit_to_app" round size="sm"/>
+          <q-item-label v-if="!isGroupLeader">
+            <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
           </q-item-label>
           <q-item-label v-else>
-            <q-btn class="bg-indigo-7 text-white" flat icon="manage_accounts" round size="sm"/>
+            <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
           </q-item-label>
         </template>
       </DirectoryCard_Input>
     </div>
+    <div class="q-pa-lg q-gutter-md">
+      <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
+        <q-card>
+          <q-card-section>
+            <div class="align-middle">
+              <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
+                       outlined @keyup.enter.stop="handleSendInvite">
+                <template v-slot:append>
+                  <q-btn dense rounded flat v-show="invite_member_id !== ''">
+                    <q-icon name="close" @click="invite_member_id = ''"/>
+                  </q-btn>
+                </template>
+                <template v-slot:hint>
+                  Length hint
+                </template>
+                <template v-slot:after>
+                  <q-btn dense flat icon="send" round @click="handleSendInvite" />
+                </template>
+              </q-input>
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
+    </div>
   </div>
-
-
 </template>
 
 <script>
-import {onMounted, ref} from "vue";
+import {defineAsyncComponent, ref} from "vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
-import {defineAsyncComponent} from "vue";
-import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";
+import {formatDateString, formatDateStringPro, getUserData, merger} from "src/composables/usefulFunction";
 //import {api} from 'boot/axios';
 //import {defineAsyncComponent, ref} from 'vue';
 //import {useUserStore} from 'src/composables/useUserStore';
@@ -239,11 +297,88 @@ export default {
 
       groupId: '-1',
 
+      disableList: {
+        members: true,
+        creationTime: true,
+        deadLine: true,
+        presentationTime: true,
+        instructor: true,
+        leader: true,
+        maxSize: true,
+        moreInformation: true,
+      },
+
       isGroupLeader: ref(false),
 
       userData: useUserStore(),
 
-      isLoading: ref(false),
+      formData: {
+        groupId: '',
+        maxSize: '',
+        groupName: '',
+        date1_deadline: '',
+        date2_deadline: '',
+        data1_presentation: '',
+        data2_presentation: '',
+        instructor: '',
+        leader: '',
+        members: [],
+        technicalStack: [],
+        desc: '',
+      },
+
+      formData_user_self: {
+        groupId: '',
+        maxSize: '',
+        groupName: '',
+        date1_deadline: '',
+        date2_deadline: '',
+        data1_presentation: '',
+        data2_presentation: '',
+        instructor: '',
+        leader: '',
+        members: [],
+        technicalStack: [],
+        desc: '',
+      },
+      // formData_user_self: {
+      //   "groupId": 1,
+      //   "groupName": "group1",
+      //   "creatorId": 30002000,
+      //   "instructorId": 30002000,
+      //   "instructorName": "Andy",
+      //   "leaderId": 12110000,
+      //   "leaderName": "stu0",
+      //   "maxsize": 10,
+      //   "projectId": 1,
+      //   "teamTime": "2023-11-06T23:47:18.995108",
+      //   "deadline": "2024-03-10T10:00:00",
+      //   "reportTime": "2024-10-10T10:00:00",
+      //   "description": null,
+      //   "technicalStack": null,
+      //   "visibility": [
+      //     true,
+      //     true,
+      //     true,
+      //     true
+      //   ],
+      //   "recruitment": null,
+      //   "memberIds": [
+      //     12110002,
+      //     12110004,
+      //     12110001,
+      //     12110003,
+      //     12110000
+      //   ],
+      //   "members": [
+      //     "stu2",
+      //     "stu4",
+      //     "stu1",
+      //     "stu0",
+      //     "stu0"
+      //   ],
+      //   "memCnt": 5
+      // },
 
       columns: [
         {
@@ -298,6 +433,8 @@ export default {
 
       show_set_form: ref(false),
 
+      show_leave_warning: ref(false),
+
       show_warning: ref(false),
 
       show_edit_form: ref(false),
@@ -307,6 +444,8 @@ export default {
       show_detail: ref(false),
 
       show_invite_member: ref(false),
+
+      show_confirm_dialog: ref(false),
 
       p_x: ref('200'),
 
@@ -348,15 +487,16 @@ export default {
       },
 
       invite_member_id: '',
+
+      dialogMessage: {
+        'icon_name': 'error',
+        'icon_color': 'red',
+        'icon_text_color': 'black',
+        'text': "Dev error"
+      },
     }
   },
   methods: {
-    // 获取该用户是否为组长
-    getIfGroupLeader() {
-      console.log("尝试获取用户是否为组长...\n")
-      this.isGroupLeader = true;
-      console.log("在Monted中获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
-    },
     // 导出GroupList表格
     exportTable() {
       this.$refs.table.exportCsv({
@@ -393,6 +533,46 @@ export default {
     },
     handleEditClick() {
       this.show_edit_form = true;
+      let groupId = this.selected_row.row.groupId;
+      api.get('/getGroupInfo/' + groupId).then(
+        async (response) => {
+          let tmp = {
+            avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+            groupId: response.data.body.groupId,
+            groupSize: response.data.body.members.length,
+            groupMaxSize: response.data.body.maxsize,
+            members: merger(response.data.body.members, response.data.body.memberIds),
+            creationTime: formatDateStringPro(response.data.body.teamTime),
+            deadline: formatDateStringPro(response.data.body.deadline),
+            presentationTime: formatDateStringPro(response.data.body.reportTime),
+            instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
+            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
+            moreInfo: response.data.body.description,
+          };
+          this.formData.groupId = groupId;
+          this.formData.maxSize = tmp.groupMaxSize;
+          this.formData.groupName = tmp.groupName;
+          // deadline是2023-10-01T16:00:00这种格式，需要转换
+          this.formData.date1_deadline = tmp.deadline.slice(0, 10)
+          this.formData.date2_deadline = tmp.deadline.slice(11, 19)
+
+
+          // presentation是2023-10-01T16:00:00这种格式，需要转换
+          this.formData.data1_presentation = tmp.presentationTime.slice(0, 10)
+          this.formData.data2_presentation = tmp.presentationTime.slice(11, 19)
+          this.formData.instructor = Object.values(tmp.instructor);
+          this.formData.leader = Object.values(tmp.leader);
+          this.formData.members = tmp.members;
+          this.formData.technicalStack = tmp.technicalStack;
+          this.formData.desc = tmp.moreInfo;
+
+          await this.$nextTick();
+          this.show_edit_form = true;
+        }
+      ).catch((error) => {
+        console.log("errorHere");
+        console.log(error);
+      });
     },
     handleDeleClick() {
       this.show_warning = true;
@@ -401,7 +581,7 @@ export default {
     handleAddClick() {
       // 更新弹窗显示, 隐藏弹窗
       this.show_button_student = false;
-      // 跳转到编辑页面
+      this.postJoinGroup();
     },
     // 测试连接指令
     testConnection() {
@@ -422,7 +602,7 @@ export default {
 
       api.get('/getGroupInfo/1').then(
         (response) => {
-          console.log("responseHere:\n");
+          console.log("responseHere 获取小组简略信息部分:\n");
           console.log(response.data);
         }
       ).catch((error) => {
@@ -434,6 +614,16 @@ export default {
     handleSendInvite() {
       // 更新弹窗显示, 隐藏弹窗
       this.show_invite_member = false;
+      // 向服务器发送邀请新同学指令
+      this.postInvite();
+    },
+    handleError(Message) {
+      this.dialogMessage = Message;
+      this.show_confirm_dialog = true;
+    },
+    handleSuccess(Message) {
+      this.dialogMessage = Message;
+      this.show_confirm_dialog = true;
     },
 
 
@@ -463,6 +653,10 @@ export default {
             // 将解析好的数据添加到rows中
             this.rows.push(temp);
           }
+          // console.log("responseHere 获取所有小组简略信息部分:\n");
+          // console.log(response.data);
+          // console.log("rows:\n");
+          // console.log(this.rows);
         }
       ).catch((error) => {
         console.log("errorHere");
@@ -488,8 +682,6 @@ export default {
           }
           this.card_data = tmp
           this.show_detail = true;
-          console.log(response);
-          console.log(this.card_data);
         }
       ).catch((error) => {
         console.log("errorHere");
@@ -498,36 +690,217 @@ export default {
     },
     // 获取该学生的所在小组的ID
     getGroupId() {
-      api.get('/get_group_id/' + this.projectId).then(
+      api.get('/stu/get_group_id/' + this.projectId).then(
         (response) => {
-          // this.groupId = response.data.body.groupId;
-          // this.isGroupLeader = response.data.body.isLeader;
-          // console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
-          // console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+          this.groupId = response.data.body.key;
+          this.isGroupLeader = response.data.body.value;
+          console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+          console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
           console.log("responseHere:\n");
           console.log(response.data);
+          if (this.isGroupLeader) {
+            this.disableList.moreInformation = false;
+            this.disableList.presentationTime = false;
+          }
         }
       ).catch((error) => {
         console.log("errorHere");
         console.log(error);
-
       });
-     },
+    },
+    // 获取该学生的所在小组的详细信息
+    getGroupUserSelfDetail() {
+      api.get('/getGroupInfo/' + 2).then(
+        (response) => {
+          let tmp = response.data.body
+          tmp.members = merger(tmp.members, tmp.memberIds)
+          delete tmp.memberIds
+          tmp.instructor = merger(tmp.instructorName, tmp.instructorId)
+          delete tmp.instructorName
+          delete tmp.instructorId
+          tmp.leader = merger(tmp.leaderName, tmp.leaderId)
+          delete tmp.leaderName
+          delete tmp.leaderId
+          tmp.creationTime = formatDateStringPro(tmp.teamTime)
+          tmp.deadline = formatDateStringPro(tmp.deadline)
+          tmp.presentationTime = formatDateStringPro(tmp.reportTime)
+
+          tmp['maxSize'] = tmp.maxsize
+          delete tmp.maxsize
+
+          tmp['desc'] = tmp.description
+          delete tmp.description
+
+          tmp['date1_deadline'] = tmp.deadline.slice(0, 10)
+          tmp['date2_deadline'] = tmp.deadline.slice(11, 19)
+          tmp['data1_presentation'] = tmp.presentationTime.slice(0, 10)
+          tmp['data2_presentation'] = tmp.presentationTime.slice(11, 19)
+          tmp['date1_creationTime'] = tmp.creationTime.slice(0, 10)
+          tmp['date2_creationTime'] = tmp.creationTime.slice(11, 19)
+
+          delete tmp.memberIds
+          delete tmp.instructorId
+          delete tmp.instructorName
+
+          // tmp = {
+          //     groupId: '9999',
+          //     maxSize: '9999',
+          //     groupName: 'Dev Team',
+          //     date1_deadline: '2002-10-1',
+          //     date2_deadline: '10:00',
+          //     data1_presentation: '2000-10-1',
+          //     data2_presentation: '10:00',
+          //     instructor: '20001000',
+          //     leader: '20001000',
+          //     members: [12110415,1211100,124,12],
+          //     technicalStack: [],
+          //     desc: 'Dev Team des',
+          //   }
+
+          this.formData_user_self = tmp
+          console.log(tmp);
+
+        }
+      ).catch((error) => {
+        console.log(error);
+      });
+    },
 
     //**********************************Post信息部分**********************************//
-    // 向服务器发送批量创建小组指令
+    // 向服务器发送申请加入小组指令
+    postJoinGroup() {
+      api.post('/stu/apply_to_join_group', {
+        "key": this.selected_row.row.groupId,
+        "value": {
+          "title": "加入请求",
+          "content": "你好,我想加入你的小组,可以吗？",
+        }
+      }).then(
+        async (response) => {
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'white',
+            'text': response.data.msg,
+          }
+          // 上面执行完毕后,弹出对话框
+          await this.$nextTick();
+          this.show_confirm_dialog = true;
+        }
+      ).catch(async (error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response.data.msg,
+        }
+        // 上面执行完毕后,弹出对话框
+        await this.$nextTick();
+        this.show_confirm_dialog = true;
+      });
+    },
+    postInvite(){
+      api.post('/stu/recruit_mem', {
+        "key": this.groupId,
+        "value": {
+          "title": "邀请进组",
+          "content": "你好，我想邀请你加入我的小组，可以吗？",
+          "stuView": [ //招募对象的id
+            this.invite_member_id
+          ]
+        }
+      }).then(
+        async (response) => {
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'white',
+            'text': response.data.msg,
+          }
+          // 上面执行完毕后,弹出对话框
+          await this.$nextTick();
+          this.show_confirm_dialog = true;
+        }
+      ).catch(async (error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response.data.msg,
+        }
+        // 上面执行完毕后,弹出对话框
+        await this.$nextTick();
+        this.show_confirm_dialog = true;
+      });
+      this.invite_member_id = ''
+    },
+
+    //**********************************Delete信息部分**********************************//
+    deleteGroup() {
+      let groupId = this.selected_row.row.groupId;
+      api.delete('/tea/delete_group/' + groupId).then(
+        (response) => {
+          console.log(response);
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'white',
+            'text': response.data.msg,
+          }
+          this.show_confirm_dialog = true;
+          this.getGroupList();
+        }
+      ).catch((error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response.data.msg,
+        }
+        this.show_confirm_dialog = true;
+        console.log("errorHere");
+        console.log(error);
+        console.log('group_id');
+        console.log(this.selected_row.row.groupId);
+
+      });
+    },
+    deleteLeaveGroup() {
+      let groupId = this.selected_row.row.groupId;
+      api.delete('/stu/leave_group').then(
+        (response) => {
+          console.log(response);
+          this.dialogMessage = {
+            'icon_name': 'done',
+            'icon_color': 'green',
+            'icon_text_color': 'white',
+            'text': response.data.msg,
+          }
+          this.show_confirm_dialog = true;
+        }
+      ).catch((error) => {
+        this.dialogMessage = {
+          'icon_name': 'error',
+          'icon_color': 'red',
+          'icon_text_color': 'white',
+          'text': error.response.data.msg,
+        }
+        this.show_confirm_dialog = true;
+      });
+    },
   },
   components: {
     DirectoryCard: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('components/Component_Li/dialog/ConfirmDialog.vue')),
     GroupForm: defineAsyncComponent(() => import('src/components/Component_Li/form/GroupFrom.vue')),
     DirectoryCard_Input: defineAsyncComponent(() => import('src/components/Component_Li/cards/DirectoryCard_Input.vue')),
-    SetVariableForm: defineAsyncComponent(() => import('components/Component_Li/form/CreateGroupsForm.vue')),
+    CreateGroupsForm: defineAsyncComponent(() => import('components/Component_Li/form/CreateGroupsForm.vue')),
   },
-  mounted(){
+  mounted() {
     this.getProjectId();
     this.getGroupList();
     this.getGroupId();
+    this.getGroupUserSelfDetail();
   },
   filters: {
     // 将时间戳转化为日期

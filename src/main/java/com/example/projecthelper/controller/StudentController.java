@@ -1,10 +1,6 @@
 package com.example.projecthelper.controller;
 
-import com.example.projecthelper.entity.Assignment;
-import com.example.projecthelper.entity.Group;
-import com.example.projecthelper.entity.Notice;
-import com.example.projecthelper.entity.SubmittedAssignment;
-import com.example.projecthelper.entity.User;
+import com.example.projecthelper.entity.*;
 import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.FileService;
 import com.example.projecthelper.service.GroupService;
@@ -138,7 +134,7 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_intend_teammates")
+    @PostMapping("/delete_intend_teammates")
     public ResponseResult<Object> deleteIntendTeammates(
         HttpServletRequest request,
         @RequestBody KeyValueWrapper<Long, String> kvw){
@@ -172,6 +168,20 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/group_leader_transfer")
+    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.transferLeader(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/remove_member")
+    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.removeMen(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @PostMapping("/join_group")
     public ResponseResult<Object> joinGroup(HttpServletRequest request, @RequestBody Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -195,8 +205,8 @@ public class StudentController {
         return ResponseResult.ok(new KeyValueWrapper<>(result, isLeader), "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/leave_group")
-    public ResponseResult<Object> leaveGroup(HttpServletRequest request, @RequestBody Long projId){
+    @DeleteMapping("/leave_group/{project_id}")
+    public ResponseResult<Object> leaveGroup(HttpServletRequest request, @PathVariable("project_id") Long projId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.leaveGroup(projId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
@@ -266,12 +276,43 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/remove_submitted_ass")
-    public ResponseResult<Object> removeAss(HttpServletRequest request, @RequestBody Long assignmentId){
+    @PostMapping("/submit_evaluation")
+    public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
+                                                   @RequestParam("assignmentId") Long assignmentId,
+                                                   @RequestParam("content") String content,
+                                                   @RequestParam("grade") Float grade,
+                                                   @RequestParam("commentedGroup") Long commentedGroup
+                                                   ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Evaluation evaluation = new Evaluation();
+        evaluation.setAssignmentId(assignmentId);
+        evaluation.setContent(content);
+        evaluation.setGrade(grade);
+        evaluation.setCommentedGroup(commentedGroup);
+        assignmentService.submitEva(
+                evaluation,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @DeleteMapping("/remove_submitted_ass/{assignmentId}")
+    public ResponseResult<Object> removeAss(HttpServletRequest request, @PathVariable("assignmentId") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.removeSubmittedAss(
             assignmentId,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @DeleteMapping("/remove_eva/{assignmentId}")
+    public ResponseResult<Object> removeEva(HttpServletRequest request, @PathVariable("assignmentId") Long assignmentId,
+                                            @PathVariable("commentedgroup") Long commentedgroup){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        assignmentService.removeEva(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                commentedgroup
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -284,6 +325,16 @@ public class StudentController {
             Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
         return ResponseResult.ok(submittedAssignment, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @GetMapping("/view_eva/{assignment_id}")
+    public ResponseResult<Float> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        float eva = assignmentService.viewEvaByStu(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(eva, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{filename}")
@@ -310,23 +361,7 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/group_leader_transfer")
-    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request,
-                                                    @RequestBody KeyValueWrapper<Long, Long> group_member ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.groupLeaderTransfer(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                group_member.getKey(),group_member.getValue());
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
 
-    @PostMapping("/remove_member")
-    public ResponseResult<Object> removeMember(HttpServletRequest request,
-                                                      @RequestBody KeyValueWrapper<Long, Long> group_member ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.removeMember(Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                group_member.getKey(),group_member.getValue());
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
 
 
 

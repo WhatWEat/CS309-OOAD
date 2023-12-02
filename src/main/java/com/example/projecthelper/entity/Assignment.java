@@ -27,6 +27,8 @@ public class Assignment {
     private String creatorName;
     @TableField(exist = false)
     private List<MultipartFile> files;
+    @TableField(exist = false)
+    private boolean state;
 
 
     public Assignment(Long assignmentId,Long projectId, String title, int fullMark, String description, String type, Long creatorId) {

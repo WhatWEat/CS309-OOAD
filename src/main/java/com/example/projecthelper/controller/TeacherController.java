@@ -1,11 +1,6 @@
 package com.example.projecthelper.controller;
 
-import com.example.projecthelper.entity.Assignment;
-import com.example.projecthelper.entity.Group;
-import com.example.projecthelper.entity.Notice;
-import com.example.projecthelper.entity.Project;
-import com.example.projecthelper.entity.SubmittedAssignment;
-import com.example.projecthelper.entity.User;
+import com.example.projecthelper.entity.*;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.IdentityCode;
@@ -122,10 +117,13 @@ public class TeacherController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.modifyNoticeWithUser(
             notice,
-            ntId -> Objects.equals(
-                noticeService.findNoticeById(ntId).getCreatorId(),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
+            ntId -> {
+                Notice ntc = noticeService.findNoticeById(ntId);
+                return Objects.equals(
+                    projectService.findTeacherByProject(ntc.getProjectId()),
+                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                ) && ntc.getType() == 0;
+            }
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -210,8 +208,8 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_group")
-    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Long groupId){
+    @DeleteMapping("/delete_group/{groupId}")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @PathVariable("groupId") Long groupId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.deleteGroupForTea(
             groupId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))
@@ -267,7 +265,7 @@ public class TeacherController {
         @RequestParam("deadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         LocalDateTime deadline,
         @RequestParam("requireExtension") String requireExtension,
-        @RequestParam("files") List<MultipartFile> files) {
+        @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Assignment assignment = new Assignment();
         assignment.setTitle(title);
         assignment.setDescription(description);
@@ -317,6 +315,25 @@ public class TeacherController {
             Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @GetMapping("/view_evaluation/{assignment_id}/{submitid}/{togroup}/{grade}")
+    public ResponseResult<List<Evaluation>> viewEva(
+            HttpServletRequest request,
+            @PathVariable("assignment_id") Long assignmentId,
+            @PathVariable("grade") Float grade,
+            @PathVariable("submitid") Long submitid,
+            @PathVariable("togroup") Long togroup){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+
+        List<Evaluation> evaluations = assignmentService.viewEva(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                grade,
+                submitid,
+                togroup,
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(evaluations, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{stu_id}/{filename}")

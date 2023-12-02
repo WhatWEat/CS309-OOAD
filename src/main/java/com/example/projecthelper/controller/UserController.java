@@ -104,6 +104,7 @@ public class UserController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Assignment> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))) {
+            case 0 -> assignmentService.getAssignmentsByAdm(page, pageSize);
             case 1 -> assignmentService.getAssignmentsByTea(userId, projectId, page, pageSize);
             case 2 -> assignmentService.getAssignmentsByTa(userId, projectId, page, pageSize);
             case 3 -> assignmentService.getAssignmentsByStu(userId, projectId, page, pageSize);

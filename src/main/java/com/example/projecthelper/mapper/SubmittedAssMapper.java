@@ -1,6 +1,7 @@
 package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.projecthelper.entity.Evaluation;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
 import org.apache.ibatis.annotations.*;
@@ -12,16 +13,26 @@ import java.util.List;
 public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     @Insert("insert into submittedassignment(assignmentId, submitterId, text, comment, filepaths, submittedTime)\n" +
             "VALUES (#{assignmentId}, #{submitterId}, #{text}, #{comment}, " +
-        "#{filepaths, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, #{submittedTime});")
+            "#{filepaths, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, #{submittedTime});")
 
         //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
     void submitAss(SubmittedAssignment submittedAssignment) throws PSQLException;
+
+    @Insert("insert into evaluation(assignmentId, commentgroup, commentedgroup,grade, content, comment, submittedTime)\n" +
+            "VALUES (#{assignmentId}, #{commentgroup},#{commentedgroup},#{grade}, #{content}, #{comment}, now()) ;")
+
+        //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
+    void submitEva(Evaluation evaluation) throws PSQLException;
 
     @Delete("delete from submittedassignment where assignmentid = 1;")
     void deleteSubmittedAssByAssId(Long assId);
 
     @Delete("delete from submittedAssignment where assignmentId = #{assignmentId} and submitterId = #{submitterId};")
     void deleteOriginalSubmit(SubmittedAssignment submittedAssignment);
+
+    @Delete("delete from evaluation where assignmentId = #{assignmentId} and commentgroup = #{commentgroup} " +
+            "and commentedgroup = #{commentedgroup};")
+    void deleteOriginalEva(Evaluation evaluation);
 
     @Select("select * from submittedAssignment where submitId = #{submitId}")
     SubmittedAssignment findSubmittedAssignmentById(long submitId);
@@ -34,6 +45,9 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 
     @Delete("delete from submittedassignment where assignmentId = #{assId} and submitterId = #{submitterId};")
     void removeAss(long assId, long submitterId);
+
+    @Delete("delete from evaluation where assignmentId = #{assId} and commentgroup = #{commentgroup} and commentedgroup = #{commentedgroup} ;")
+    void removeEva(long assId, long commentgroup, long commentedgroup);
 
 //    @Delete("delete from stuassignment where assignmentid = #{assignmentId} and stuid = #{stuId};")
 //    void removeStuAss(long assignmentId, long stuId);
@@ -55,7 +69,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
             JOIN groupSubmit gs ON sa.submitId = gs.submitId
             WHERE sa.projectId = #{projectId} AND gs.groupId = #{groupId};
             """)
-    List<SubmittedAssignment> findGroupSubByProject( long projectId, long groupId);
+    List<SubmittedAssignment> findGroupSubByProject(long projectId, long groupId);
 
     @Select("""
             SELECT sa.submitId, sa.assignmentId, sa.grade, sa.projectId, sa.text, sa.comment, sa.filepath, sa.review
@@ -63,7 +77,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
             JOIN stuSubmit ss ON sa.submitId = ss.submitId
             WHERE sa.assignmentid = #{assignmentId} AND ss.stuId = #{stuId};
             """)
-    SubmittedAssignment findStuSubByAss( long assignmentId, long stuId);
+    SubmittedAssignment findStuSubByAss(long assignmentId, long stuId);
 
     @Select("""
             SELECT sa.submitId, sa.assignmentId, sa.grade, sa.projectId, sa.text, sa.comment, sa.filepath, sa.review
@@ -71,24 +85,24 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
             JOIN groupSubmit gs ON sa.submitId = gs.submitId
             WHERE sa.assignmentid = #{assignmentId} AND gs.groupId = #{groupId};
             """)
-    SubmittedAssignment findGroupSubByAss( long assignmentId, long groupId);
+    SubmittedAssignment findGroupSubByAss(long assignmentId, long groupId);
 
 
     @Select("select * from submittedassignment where assignmentid = #{assignmentId} " +
-        "limit #{limit} offset #{offset};")
+            "limit #{limit} offset #{offset};")
     @Results({
-        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+            @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     List<SubmittedAssignment> findAllSub(long assignmentId, long limit, long offset);
 
     @Select("select * from submittedassignment where assignmentId = #{assId} and submitterId = #{submitterId};")
     @Results({
-        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+            @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     SubmittedAssignment viewSub(long assId, long submitterId);
 
     @Update("UPDATE submittedAssignment SET grade = #{grade}, comment = #{comment}, review = #{review} " +
-        "WHERE submitterid = #{submitterId} and assignmentId = #{assignmentId};")
+            "WHERE submitterid = #{submitterId} and assignmentId = #{assignmentId};")
     void gradeAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
 
@@ -108,35 +122,65 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 //                      @Param("assignmentId") long assignmentId);
 
     @Update({
-        "<script>",
-        "UPDATE submittedAssignment",
-        "<set>",
-        "grade = CASE submitterId",
-        "<foreach item='sa' index='index' collection='sas' separator=' '>",
-        "WHEN #{sa.submitterId} THEN #{sa.grade}",
-        "</foreach>",
-        "END,",
-        "comment = CASE submitterId",
-        "<foreach item='sa' index='index' collection='sas' separator=' '>",
-        "WHEN #{sa.submitterId} THEN #{sa.comment}",
-        "</foreach>",
-        "END,",
-        "review = CASE submitterId",
-        "<foreach item='sa' index='index' collection='sas' separator=' '>",
-        "WHEN #{sa.submitterId} THEN #{sa.review}",
-        "</foreach>",
-        "END",
-        "</set>",
-        "WHERE assignmentId = #{assignmentId}",
-        "AND submitterId IN",
-        "<foreach item='sa' index='index' collection='sas' open='(' separator=',' close=')'>",
-        "#{sa.submitterId}",
-        "</foreach>",
-        "</script>"
+            "<script>",
+            "UPDATE submittedAssignment",
+            "<set>",
+            "grade = CASE submitterId",
+            "<foreach item='sa' index='index' collection='sas' separator=' '>",
+            "WHEN #{sa.submitterId} THEN #{sa.grade}",
+            "</foreach>",
+            "END,",
+            "comment = CASE submitterId",
+            "<foreach item='sa' index='index' collection='sas' separator=' '>",
+            "WHEN #{sa.submitterId} THEN #{sa.comment}",
+            "</foreach>",
+            "END,",
+            "review = CASE submitterId",
+            "<foreach item='sa' index='index' collection='sas' separator=' '>",
+            "WHEN #{sa.submitterId} THEN #{sa.review}",
+            "</foreach>",
+            "END",
+            "</set>",
+            "WHERE assignmentId = #{assignmentId}",
+            "AND submitterId IN",
+            "<foreach item='sa' index='index' collection='sas' open='(' separator=',' close=')'>",
+            "#{sa.submitterId}",
+            "</foreach>",
+            "</script>"
     })
     void updateGrades(@Param("sas") List<SubmittedAssignment> sas,
                       @Param("assignmentId") long assignmentId);
 
+
+    //以下是与小组互评相关方法
+    @Select("""
+            <script>
+                SELECT * FROM evaluation s
+                WHERE commentedgroup IS NOT NULL
+                    <if test='commentedgroup != null and !commentedgroup.isEmpty()'>
+                        AND (
+                            <foreach collection='commentedgroup' item='item' index='index' separator=' AND '>
+                                s.commentedgroup = #{item}
+                            </foreach>)
+                    </if>
+                    <if test='commentgroup != null and !commentgroup.isEmpty()'>
+                        AND (
+                            <foreach collection='commentgroup' item='item' index='index' separator=' AND '>
+                                s.commentgroup = #{item}
+                            </foreach>)
+                    </if>
+                    <if test='grade != null and !grade.isEmpty()'>
+                        AND (
+                            <foreach collection='grade' item='item' index='index' separator=' AND '>
+                                s.grade = #{item}
+                            </foreach>)
+                    </if>
+            </script>
+            """)
+    List<Evaluation> searchEvaluation(List<Long> commentgroup, List<Long> commentedgroup, List<Float> grade);
+
+    @Select("SELECT AVG(grade) FROM evaluation WHERE commentedgroup = #{commentedgroup};")
+    float avgGrade(long commentedgroup);
 
 
 }

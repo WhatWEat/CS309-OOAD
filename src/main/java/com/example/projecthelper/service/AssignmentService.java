@@ -125,7 +125,7 @@ public class AssignmentService {
                     throw new AccessDeniedException("无权访问该ass");
                 break;
             case 3:
-                if(!Objects.equals(user_id, projectMapper.checkStuInProj(assignment.getProjectId(), user_id)))
+                if(!Objects.equals(user_id, projectMapper.checkStuInProj(user_id, assignment.getProjectId())))
                     throw new AccessDeniedException("无权访问该ass");
                 break;
         }

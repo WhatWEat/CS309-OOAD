@@ -62,7 +62,6 @@ export async function getAvatarUrl() {
       }
     }
     const res = (await api.get(`/get_personal_info`)).data.body.avatarPath;
-    console.log(res.data, 'avatar')
     localStorage.setItem(`avatar`, res);
     localStorage.setItem(`avatar_time`, new Date().toISOString());
     return localStorage.getItem('avatar');

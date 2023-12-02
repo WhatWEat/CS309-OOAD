@@ -138,7 +138,7 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_intend_teammates")
+    @PostMapping("/delete_intend_teammates")
     public ResponseResult<Object> deleteIntendTeammates(
         HttpServletRequest request,
         @RequestBody KeyValueWrapper<Long, String> kvw){
@@ -209,8 +209,8 @@ public class StudentController {
         return ResponseResult.ok(new KeyValueWrapper<>(result, isLeader), "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/leave_group")
-    public ResponseResult<Object> leaveGroup(HttpServletRequest request, @RequestBody Long projId){
+    @DeleteMapping("/leave_group/{project_id}")
+    public ResponseResult<Object> leaveGroup(HttpServletRequest request, @PathVariable("project_id") Long projId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.leaveGroup(projId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
@@ -280,8 +280,8 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/remove_submitted_ass")
-    public ResponseResult<Object> removeAss(HttpServletRequest request, @RequestBody Long assignmentId){
+    @DeleteMapping("/remove_submitted_ass/{assignmentId}")
+    public ResponseResult<Object> removeAss(HttpServletRequest request, @PathVariable("assignmentId") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         assignmentService.removeSubmittedAss(
             assignmentId,

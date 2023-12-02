@@ -122,10 +122,13 @@ public class TeacherController {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.modifyNoticeWithUser(
             notice,
-            ntId -> Objects.equals(
-                noticeService.findNoticeById(ntId).getCreatorId(),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
+            ntId -> {
+                Notice ntc = noticeService.findNoticeById(ntId);
+                return Objects.equals(
+                    projectService.findTeacherByProject(ntc.getProjectId()),
+                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                ) && ntc.getType() == 0;
+            }
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -267,7 +270,7 @@ public class TeacherController {
         @RequestParam("deadline") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         LocalDateTime deadline,
         @RequestParam("requireExtension") String requireExtension,
-        @RequestParam("files") List<MultipartFile> files) {
+        @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Assignment assignment = new Assignment();
         assignment.setTitle(title);
         assignment.setDescription(description);

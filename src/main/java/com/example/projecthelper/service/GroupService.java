@@ -242,11 +242,12 @@ public class GroupService {
                 validIds = new HashSet<>();
             else
                 validIds= group.getMemberIds().stream()
-                    .filter(e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null)
-                    .filter(e -> groupMapper.findGroupOfStuInProject(e, group.getProjectId()) == null)
+                    .filter(e -> projectMapper.checkStuInProj(e, pjId) != null)
+                    .filter(e -> groupMapper.findGroupOfStuInProject(e, pjId) == null)
+                    .filter(e -> !Objects.equals(e, group.getLeaderId()))
                     .collect(Collectors.toSet());
+            validIds = validIds.stream().limit(group.getMaxsize()-1).collect(Collectors.toSet());
             validIds.add(group.getLeaderId());
-            validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
             groupMapper.deleteStuInGroup(group.getGroupId());
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {

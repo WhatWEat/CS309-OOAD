@@ -48,7 +48,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where p.teacherId = #{teaId} and n.projectid = #{projId} and" +
+        " where p.teacherId = #{teaId} and n.projectid = #{projId} and type = 0 and" +
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};")
     List<Notice> findNoticeOfTeaAndProj(Long teaId, Long projId, Long limit, Long offset, String key);
 
@@ -56,7 +56,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where p.teacherId = #{teaId} and" +
+        " where p.teacherId = #{teaId} and type = 0 and" +
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
     List<Notice> findNoticeOfTea(Long teaId, Long limit, Long offset, String key);
 
@@ -64,7 +64,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
         "    join taOfProject t on t.projectid = n.projectid" +
-        " where t.taId = #{taId} and n.projectid = #{projId} and" +
+        " where t.taId = #{taId} and n.projectid = #{projId} and type = 0 and" +
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};")
     List<Notice> findNoticeOfTaAndProj(Long taId, Long projId, Long limit, Long offset, String key);
 
@@ -72,7 +72,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
         "    join taOfProject t on t.projectid = n.projectid" +
-        " where t.taId = #{taId} and" +
+        " where t.taId = #{taId} and type = 0 and" +
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
     List<Notice> findNoticeOfTa(Long taId, Long limit, Long offset, String key);
 

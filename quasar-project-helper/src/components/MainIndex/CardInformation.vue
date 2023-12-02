@@ -144,8 +144,9 @@ import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass'
 import {formatDateString, getAvatarUrlById, truncate} from 'src/composables/usefulFunction';
-import {computed} from 'vue-demi';
+import {computed, watchEffect} from 'vue-demi';
 import {assProps, noticeProps, projectProps} from "src/composables/comInterface";
+import {useUserStore} from "src/composables/useUserStore";
 
 const selectedDate = ref(today())
 
@@ -163,15 +164,20 @@ function getCurrentDay(day: number) {
 const projects = ref<projectProps[]>([]);
 const avatarMap = ref<Map<string, string|null>>(new Map<string, string|null>());
 const loadingProject = ref(false), project_page = ref(0)
+const {userid} = useUserStore();
 onMounted(() => {
-  getProject(0,()=>void 0)
+  watchEffect(()=>{
+    if (userid.value !== -1 && loadingProject.value === false){
+      getProject(0,()=>void 0)
+    }
+  })
 })
 function getProject(index=0, done:()=>void){
-  if (index > project_page.value) {
+  if (index > project_page.value || userid.value === -1) {
     done()
     return
   }
-  api.get(`/project-list/${index}/5`).then(async res => {
+  api.get(`/project-list/${index}/5/${userid.value}`).then(async res => {
     let page_projects: projectProps[] = res.data.body;
     projects.value.push.apply(projects.value, page_projects);
     for (const project of page_projects) {

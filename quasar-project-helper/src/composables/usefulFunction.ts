@@ -39,7 +39,6 @@ export function formatDateStringPro(isoString: string) {
 
 export function useProjectId() {
   const route = useRoute();
-  console.log("route",route)
 
   const projectId = route.params.projectID as string;
   return Number(projectId);
@@ -47,7 +46,8 @@ export function useProjectId() {
 
 export function usePersonId() {
   const route = useRoute();
-  const personId = route.params.personID as string;
+
+  const personId = route.params.personId as string;
   return Number(personId);
 }
 
@@ -56,7 +56,8 @@ export async function getAvatarUrl() {
     if (localStorage.getItem(`avatar`) && localStorage.getItem(`avatar_time`)) {
       const now = new Date();
       const last = new Date(localStorage.getItem(`avatar_time`) as string);
-      if (now.getTime() - last.getTime() < 1000 * 60 * 2) {
+      if (now.getTime() - last.getTime() < 1000 * 60) {
+        // console.log("avatar from cache")
         return localStorage.getItem(`avatar`);
       }
     }
@@ -67,6 +68,7 @@ export async function getAvatarUrl() {
     reader.onloadend = function () {
       const base64data = reader.result;
       if (typeof base64data === "string") {
+        // console.log(base64data, 'base64')
         localStorage.setItem('avatar', base64data);
         localStorage.setItem(`avatar_time`, new Date().toISOString());
       }
@@ -139,16 +141,14 @@ export async function getUserData() {
     const response = await api.get('/get_personal_info');
     if (response.data.statusCode !== 200) {
       throw new Error('error in fetchUser');
-    }
-    else {
+    } else {
       userDate.userid = response.data.body.userId;
       userDate.identity = response.data.body.identity
       userDate.username = response.data.body.name;
       userDate.jwt_token = response.data.jwt_token;
     }
     return userDate;
-  }
-  catch (error) {
+  } catch (error) {
     userDate.userid = -1;
     userDate.username = null;
     userDate.identity = -1;

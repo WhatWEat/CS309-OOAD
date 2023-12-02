@@ -79,11 +79,6 @@ onMounted(() => {
           link: '',
           list: true
         },
-        // {
-        //   title: 'Chat',
-        //   icon: 'chat',
-        //   link: 'https://forum.quasar.dev'
-        // },
         {
           title: 'Person',
           icon: 'account_box',
@@ -106,11 +101,18 @@ onMounted(() => {
 });
 const leftDrawerOpen = ref(true)
 const miniState = ref(true)
+const isFresh = ref(true)
 onMounted(() => {
-  api.get('/project-list/0/1000').then(res => {
-    essentialLinks.value[1].subItems = res.data.body;
-  }).catch(err => {
-    console.log(err)
+  watchEffect(()=>{
+    if (userid.value === -1 && isFresh.value) {
+      return
+    }
+    api.get(`/project-list/0/1000/${userid.value}`).then(res => {
+      essentialLinks.value[2].subItems = res.data.body;
+      isFresh.value = false
+    }).catch(err => {
+      console.log(err)
+    })
   })
 });
 

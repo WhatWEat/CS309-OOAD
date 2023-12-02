@@ -68,13 +68,7 @@ withDefaults(defineProps<EssentialLinkProps>(), {
     name: "CS309",
     teacherId: 30002000,
     teacherName: "Andy"
-  }, {
-      projectId: 2,
-      description: 'null',
-      name: "CS309",
-      teacherId: 30002000,
-      teacherName: "Andy"
-    }]
+  }]
 });
 
 </script>

@@ -118,7 +118,6 @@ export default {
         this.color_personal = 'grey-4'
         this.color_group = 'secondary'
       }
-
     },
 
     //***********************Get请求消息*************************

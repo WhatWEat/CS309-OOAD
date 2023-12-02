@@ -99,26 +99,29 @@
           </q-item>
 
           <q-separator size="2px"/>
-          <div v-for="attachment in AssignmentAttachment" :key="attachment" class="attachment-item">
+          <div v-for="filePaths in AssignmentDetail.filePaths" :key="filePaths" class="attachment-item">
             <q-item>
               <q-item-section avatar>
                 <q-icon class="col-3" name="attachment" size="2rem"/>
               </q-item-section>
               <q-item-section>
-                <span class="text-h6 text-weight-regular ">
-                  <a :href="attachment.fileAddress">{{ attachment.fileName }}</a>
-                </span>
+                <q-btn @click="handleFileClick(filePaths)"> {{filePaths}} </q-btn>
+                <a href="#" class="fake-link" @click="handleFileClick(filePaths)">{{filePaths}}</a>
               </q-item-section>
             </q-item>
+          </div>
+          <div v-if="AssignmentDetail.filePaths === null">
+            <q-item :style="{height:'45px'}">
+            <q-item-section  avatar>
+              <span class="text-h6 text-weight-light">No Attachment</span>
+            </q-item-section></q-item>
           </div>
 
           <!--      虚拟的分割线部分-->
           <!--      下半部分-->
-
           <q-separator color="white" size="35px"/>
-
           <!--      学生提交作业-->
-          <div>
+          <div v-if='userData.identity===3 && AssignmentDetail.type!=="e"'>
             <!--      提交作业的部分-->
             <q-item clickable>
               <q-item-section>
@@ -156,9 +159,44 @@
               </q-item-section>
             </q-item>
           </div>
+          <!--     特殊作业提交-->
+          <div v-else-if="userData.identity===3">
+            <!--      提交作业的部分-->
+            <q-item clickable>
+              <q-item-section>
+                <q-item-label style="font-weight: bolder;font-size: x-large">Peer Evaluation</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn color="primary" dense flat icon="upload" size="md" @click="postGradeAssignment">
+                  <q-tooltip :offset="[10, 10]" anchor="center left" self="center right">Submit your Grade!
+                  </q-tooltip>
+                </q-btn>
+              </q-item-section>
+            </q-item>
+            <!--      作业评论部分-->
+            <div>
+              <q-item>
+                <q-input v-model.number="grade" label="Grade" outlined type="number">
+                  <template v-slot:append>
+                    <q-avatar>
+                      <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg">
+                    </q-avatar>
+                  </template>
+                </q-input>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-editor  min-height="3rem" :square="true"
+                             v-model="editorInput"  :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
+                             placeholder="Type your description here...">
+                  </q-editor>
+                </q-item-section>
+              </q-item>
+            </div>
 
+          </div>
           <!--     教师批改作业-->
-          <div>
+          <div v-else>
             <!--      提交作业的部分-->
             <q-item clickable>
               <q-item-section>
@@ -190,66 +228,44 @@
             </q-item>
           </div>
 
-          <!--     特殊作业提交-->
-          <div>
-            <!--      提交作业的部分-->
-              <q-item clickable>
-                <q-item-section>
-                  <q-item-label style="font-weight: bolder;font-size: x-large">Peer Evaluation</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-btn color="primary" dense flat icon="upload" size="md" @click="postGradeAssignment">
-                    <q-tooltip :offset="[10, 10]" anchor="center left" self="center right">Submit your Grade!
-                    </q-tooltip>
-                  </q-btn>
-                </q-item-section>
-              </q-item>
-              <!--      作业评论部分-->
-            <div>
-              <q-item>
-                <q-input v-model.number="grade" label="Grade" outlined type="number">
-                  <template v-slot:append>
-                    <q-avatar>
-                      <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg">
-                    </q-avatar>
-                  </template>
-                </q-input>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-editor  min-height="3rem" :square="true"
-                             v-model="editorInput"  :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
-                    placeholder="Type your description here...">
-                  </q-editor>
-                </q-item-section>
-              </q-item>
-            </div>
-
-          </div>
-
         </q-card>
       </div>
     </div>
   </div>
+
+
+<!--  作业预览部分-->
+  <div>
+      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">
+      </PDFViewer>
+  </div>
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import {defineComponent,ref} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
+import {getDownloadBlob} from "src/composables/usefulFunction";
 
 export default defineComponent({
   name: "AssignmentDetail",
+  components: {
+    PDFViewer: () => import('src/components/ViewComponent/PDFViewer.vue'),
+  },
   data() {
     return {
       userData: useUserStore(),
 
       editorInput: '',
       grade: '',
+      fileName:'',
+      getApiUrl:'',
 
       width: '32%',
       minHeight: '690px',
       formData: new FormData(),
+
+      showPDF: ref(false),
     }
   },
   methods: {
@@ -279,6 +295,11 @@ export default defineComponent({
         this.formData.delete('file')
       }
       // console.log(this.formData.get('file'))
+    },
+
+    handleFileClick(filePaths) {
+      this.getAssFile(filePaths);
+
     },
 
     //**********************************POST***************************************
@@ -358,11 +379,52 @@ export default defineComponent({
         })
       })
     },
+
+    //**********************************GET***************************************
+    async getAssFile(filePaths) {
+      let identity = this.userData.identity === 3 ? 'stu' : 'tea';
+      let isSuccess = false;
+      await api.get(('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths), {responseType: 'blob'}).then((res) => {
+        getDownloadBlob(res.data, filePaths)
+        this.$q.notify({
+          color: 'positive',
+          position: 'top',
+          message: 'Download successfully!',
+          icon: 'check',
+          timeout: 1000,
+        })
+        isSuccess = true
+        console.log("到这里了吧" + isSuccess)
+
+      }).catch((err) => {
+        this.$q.notify({
+          type: 'negative',
+          message: 'There is something wrong'
+        })
+        console.log(err)
+      })
+
+      // console.clear()
+      // console.log("测试pdf部分")
+      // console.log(filePaths.slice(-4))
+      // console.log(filePaths.slice(-4) === '.pdf')
+      // console.log(isSuccess)
+      // 判断filePaths的最后三位是不是pdf
+      if (isSuccess && filePaths.slice(-4) === '.pdf') {
+        console.log("进入")
+        this.fileName = filePaths;
+        this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
+        this.showPDF = true;
+        // console.log("应该到了吧")
+      }
+      // console.log(this.showPDF)
+    },
   },
   props: {
     AssignmentDetail: {
       required: true,
       default: {
+        assignmentId: -1,
         AssignmentName: 'Assignment 1',
         studentName: "Liwehao",
         submitTime: '2020-10-7',
@@ -373,6 +435,9 @@ export default defineComponent({
         isReturned: true,
         moreInfo: 'Dev',
         state: 0,
+        filePaths: null,
+        files:null,
+        type:null,
       }
     },
     AssignmentAttachment: {

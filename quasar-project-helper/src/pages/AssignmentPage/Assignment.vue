@@ -13,15 +13,13 @@
   </q-toolbar>
   </div>
   <div v-show="isPersonal">
-    <assignment-table :columns="columns_personal" :rows="rows_personal" table-title="Personal">
+    <assignment-table :columns="columns_personal" :rows="rows_personal" :project-id="projectId" :group-id="groupId" table-title="Personal">
     </assignment-table>
   </div>
   <div v-show="isGroup">
     <assignment-table  :columns="columns_group" :rows="rows_group" table-title="Group">
     </assignment-table>
   </div>
-
-   Dev   userData:
 </template>
 
 <script>
@@ -99,8 +97,8 @@ export default {
         },
       ],
 
-      groupId: '-1',
-      projectId: '',
+      groupId: -1,
+      projectId: -1,
 
       isPersonal: ref(true),
       isGroup : ref(false),
@@ -127,6 +125,7 @@ export default {
     getProjectId() {
       console.log("尝试获取ProjectId...\n")
       this.projectId = this.$route.params.projectID;
+      this.projectId = parseInt(this.projectId);
       console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
     },
     // 获取该学生的所在小组的ID

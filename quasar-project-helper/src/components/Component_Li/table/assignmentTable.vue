@@ -24,7 +24,7 @@
             <q-list>
               <q-item v-close-popup clickable @click="show_create_ass_table = true">
                 <q-item-section>
-                  <q-item-label>Create Assignment</q-item-label>
+                  <q-item-label class="text-weight-bold">Create Assignment</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -62,8 +62,10 @@
   </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
-                       :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
+    <AssignmentsDetail  :project-id="projectId"
+                        :group-id="groupId"
+                        :AssignmentAttachment="AssignmentAttachment"
+                        :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
   </div>
   <!--  右键弹窗部分-->
   <div>
@@ -85,7 +87,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
-      <assignment-form></assignment-form>
+      <assignment-form @unfold="this.show_create_ass_table = false"></assignment-form>
     </el-dialog>
   </div>
   <!--  修改作业表单部分-->
@@ -155,7 +157,17 @@ export default defineComponent({
       required: true,
       type: String,
       default: 'Dev'
-    }
+    },
+    projectId: {
+      required: true,
+      type: Number,
+      default: -1
+    },
+    groupId: {
+      required: true,
+      type: Number,
+      default: -1
+    },
   },
   data() {
     return {
@@ -270,7 +282,7 @@ export default defineComponent({
         "grade": -1,
       }
       this.AssignmentDetail.AssignmentName = res_body.title;
-      this.AssignmentDetail.deadLine = res_body.deadline;
+      this.AssignmentDetail.deadLine = res_body.deadline.replace('T',' ').slice(0,19);
       this.AssignmentDetail.grade = (res_body.grade === -1) ? 'Not Graded' : res_body.grade;
       this.AssignmentDetail.state = res_body.state;
       this.AssignmentDetail.moreInfo = res_body.description;
@@ -288,7 +300,7 @@ export default defineComponent({
       this.AssignmentDetail.matGrade = res_body.fullMark;
       this.AssignmentDetail.studentName = this.userData.username;
       // 这里把releaseTime当作submitTime
-      this.AssignmentDetail.submitTime = res_body.releaseTime;
+      this.AssignmentDetail.submitTime = res_body.releaseTime.replace('T',' ').slice(0,19);
       api.get('/assignments/' + assignmentsId).then((res) => {
         // this.AssignmentDetail = res.data;
         let  res_body = {

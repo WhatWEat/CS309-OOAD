@@ -20,6 +20,7 @@ public class SubmittedAssignment {
     private List<String> filepaths;
     private String review;
     private LocalDateTime submittedTime;
+    private Long togroup;
     @TableField(exist = false)
     private List<MultipartFile> files;
     public SubmittedAssignment(Long submitId, Long assignmentId, Long submitterId) {
@@ -33,7 +34,6 @@ public class SubmittedAssignment {
         this.comment = comment;
         this.review = review;
     }
-
 
 
     public SubmittedAssignment() {

@@ -321,6 +321,24 @@ public class TeacherController {
         );
         return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
     }
+    @GetMapping("/view_all_evaluation/{assignment_id}/{submitid}/{togroup}/{grade}")
+    public ResponseResult<List<SubmittedAssignment>> viewEva(
+            HttpServletRequest request,
+            @PathVariable("assignment_id") Long assignmentId,
+            @PathVariable("grade") Long grade,
+            @PathVariable("submitid") Long submitid,
+            @PathVariable("togroup") Long togroup){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<SubmittedAssignment> submittedAssignments = assignmentService.viewEva(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                grade,
+                submitid,
+                togroup,
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(submittedAssignments, "Success", JWTUtil.updateJWT(jwt));
+    }
 
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{stu_id}/{filename}")
     public ResponseEntity<Resource> getSubmittedAssFile(

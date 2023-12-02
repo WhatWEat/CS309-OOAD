@@ -280,6 +280,26 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/submit_evaluation")
+    public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
+                                                   @RequestParam("assignmentId") Long assignmentId,
+                                                   @RequestParam("text") String text,
+                                                   @RequestParam("grade") Float grade,
+                                                   @RequestParam("togroup") Long togroup
+                                                   ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        SubmittedAssignment submittedAssignment = new SubmittedAssignment();
+        submittedAssignment.setAssignmentId(assignmentId);
+        submittedAssignment.setText(text);
+        submittedAssignment.setGrade(grade);
+        submittedAssignment.setTogroup(togroup);
+        assignmentService.submitEva(
+                submittedAssignment,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @DeleteMapping("/remove_submitted_ass/{assignmentId}")
     public ResponseResult<Object> removeAss(HttpServletRequest request, @PathVariable("assignmentId") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

@@ -14,6 +14,7 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.aspectj.weaver.ast.Not;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,12 @@ public class NoticeService {
         else
             key = "%"+key+"%";
 
-        return noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
+        List<Notice> result = noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+            e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+        });
+        return result;
     }
 
     public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize, String key) {
@@ -74,9 +80,18 @@ public class NoticeService {
             key = "%";
         else
             key = "%"+key+"%";
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, projectMapper.findTeacherByProject(e.getProjectId())) && e.getType() == 0){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            }
+        });
+        return result;
     }
 
     public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize, String key) {
@@ -84,9 +99,19 @@ public class NoticeService {
             key = "%";
         else
             key = "%"+key+"%";
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, e.getCreatorId()) && e.getType() == 0){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            }
+        });
+        return result;
+
     }
 
 
@@ -99,9 +124,20 @@ public class NoticeService {
         if (checker == null && projId != -1) {
             throw new AccessDeniedException("无权访问该project");
         }
+
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, e.getCreatorId())){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            }
+        });
+        return result;
+
     }
 
     //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert

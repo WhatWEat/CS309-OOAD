@@ -72,7 +72,7 @@ public class FileService {
 
     }
 
-    public Resource getFilesOfAssByTeaOrTa(Long userId, Long assId, String fileName, Integer identity){
+    public Resource getFilesOfAssByTeaOrTa(Long userId, Long assId, String fileName, Integer identity, boolean isPdf){
         Assignment ass = assignmentMapper.findAssById(assId);
         if(ass == null)
             throw new AccessDeniedException("无效的作业id");

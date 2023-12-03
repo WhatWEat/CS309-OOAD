@@ -12,6 +12,7 @@ import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import com.example.projecthelper.util.Wrappers.ObjectWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Arrays;
@@ -209,21 +210,22 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/ack_invitation")
-    public ResponseResult<Object> ackInvitation(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> ackInvitation(HttpServletRequest request, @RequestBody
+    ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.ackInvitation(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.ackInvitation(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/ack_application")
-    public ResponseResult<Object> ackApplication(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> ackApplication(HttpServletRequest request, @RequestBody ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.ackApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.ackApplication(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/nak_invitation_or_application")
-    public ResponseResult<Object> nakInvitationOrApplication(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> nakInvitationOrApplication(HttpServletRequest request, @RequestBody ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.nakInvitationOrApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.nakInvitationOrApplication(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

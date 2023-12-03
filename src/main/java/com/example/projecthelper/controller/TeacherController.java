@@ -264,7 +264,7 @@ public class TeacherController {
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)), false);
         System.err.println(rec.getFilename());
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
@@ -279,12 +279,13 @@ public class TeacherController {
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)), true);
         System.err.println(rec.getFilename());
-        return ResponseEntity.ok()
+        ResponseEntity<Resource> response = ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
             .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
             .body(rec);
+        return response;
     }
 
     @PostMapping("/post_assignment")

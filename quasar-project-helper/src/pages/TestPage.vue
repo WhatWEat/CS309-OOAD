@@ -1,20 +1,22 @@
 <template>
-  <div class="q-pa-md">
-    <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf"
-               fileName="name.pdf">
-    </PDFViewer>
+  <div class="q-pa-md row">
+    <MDViewer class="col-12">
+    </MDViewer>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import {defineAsyncComponent, defineComponent, onMounted, ref} from 'vue'
 import PDFViewer from "components/ViewComponent/PDFViewer.vue";
+import MDViewer from "components/ViewComponent/MDViewer.vue";
+import {api} from "boot/axios";
 
 const loading = ref(false)
-export default defineComponent({
-  name: "AssignmentDetail",
-  components: {
-    PDFViewer: defineAsyncComponent(() => import('src/components/ViewComponent/PDFViewer.vue')),
-  }
+onMounted(()=>{
+  api.get('/tea/get_ass_file/34/test.md').then((res)=>{
+    console.log('response',res)
+  }).catch((err)=>{
+    console.log(err)
+  })
 })
 </script>

@@ -188,9 +188,8 @@ const TeammateRequire = ref<string[]>(['会java', '懂springboot'])
 const inputTagsValue = ref<string>('')
 const person_id = ref(), {userid} = useUserStore();
 onMounted(() => {
-  // todo 改成不同人看的不一样
   person_id.value = usePersonId();
-  api.get(`/intend_teammates/${person_id.value}/${props.project.projectId}/`).then(res => {
+  api.get(`/intend_teammates/${props.project.projectId}/${person_id.value}`).then(res => {
     TeammateRequire.value = res.data.body
     console.log('teammates', res.data.body)
   }).catch(err => {
@@ -204,14 +203,9 @@ function getColor(index: number): string {
   return colors[index % colors.length];
 }
 
-// TODO Check if the intended teammate is in the group
 function removeTeam(index: number) {
-  api.delete(`/stu/delete_intend_teammates`, {
-    data: {
-      key: props.project.projectId,
-      value: TeammateRequire.value[index]
-    }
-  }).then(res => {
+  console.log('remove', TeammateRequire.value[index])
+  api.delete(`/stu/delete_intend_teammates/${props.project.projectId}/${TeammateRequire.value[index].trim()}`).then(res => {
     console.log(res.data)
   }).catch(err => {
     console.log(err)
@@ -224,14 +218,13 @@ const handleClose = (tag: string) => {
 }
 
 const handleInputConfirm = () => {
-  // todo 添加
   if (inputTagsValue.value) {
     TeammateRequire.value.push(inputTagsValue.value)
     console.log('tag add', inputTagsValue.value)
     let add_tags = [inputTagsValue.value];
     api.post(`/stu/add_intend_teammates`, {
       key: props.project.projectId,
-      value: add_tags
+      value: add_tags[0].trim()
     }).then(res => {
       console.log(res.data)
     }).catch(err => {

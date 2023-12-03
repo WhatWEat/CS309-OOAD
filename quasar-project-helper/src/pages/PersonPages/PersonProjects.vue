@@ -69,12 +69,10 @@ onMounted(() => {
       console.log(err)
     })
   }
-  //todo 不同人看不同project
   watchEffect(() => {
     if (identity.value !== -1 && !isLoading.value) {
       isLoading.value = true
-      // api.get(`/project-list/0/10`).then(res => {
-        api.get(`/project-list/0/10/${person_id.value}`).then(res => {
+      api.get(`/project-list/0/10/${person_id.value}`).then(res => {
         origin_project_list.value = res.data.body;
         project_list.value = origin_project_list.value
         isLoading.value = true

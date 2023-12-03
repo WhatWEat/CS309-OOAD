@@ -38,8 +38,8 @@
           <q-card>
             <q-card-section>
               <q-item>
-                <q-item-section class="text-h7">
-                  To Which Project ?
+                <q-item-section class="text-h6">
+                  Project
                 </q-item-section>
                 <q-item-section side>
                   <q-select
@@ -50,7 +50,7 @@
                     map-options
                     use-input
                     input-debounce="0"
-                    style="width: 200px"
+                    style="width: 170px"
                     @filter="filterFn"
                   />
                   <template v-slot:no-option>
@@ -63,11 +63,12 @@
                 </q-item-section>
               </q-item>
               <q-item>
-                <q-item-section class="text-h7"> To All ?</q-item-section>
+                <q-item-section class="text-h6"> To All ?</q-item-section>
                 <q-item-section side>
                   <q-toggle v-model="noticeProps.toAll" />
                 </q-item-section>
               </q-item>
+              <q-separator></q-separator>
               <q-card-section class="row" v-if="!noticeProps.toAll">
                 <div class="col-6">
                   <q-input v-model="filter" placeholder="Search Students" />

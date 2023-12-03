@@ -249,7 +249,6 @@ function saveInfo() {
     console.log('change')
   }
 
-  // TODO TAs
   if (selectedPeople.value.length === 0 && _.isEqual(ta_list.value, selectedPeople.value)) {
     console.log('no change')
   } else {
@@ -297,7 +296,7 @@ function saveGroup() {
   project_show.value = JSON.parse(JSON.stringify(project_edit.value));
   ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
 
-  // TODO
+  // TODO 暂时不做了
   // use api to submit
   console.log(project_edit.value)
 }

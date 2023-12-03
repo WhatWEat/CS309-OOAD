@@ -178,8 +178,21 @@ public class SecurityController {
 
         System.out.println(address);
 
-
         userService.sendMail(address);
+
+        return ResponseResult.ok(null, "Success", null);
+    }
+
+    @PostMapping("/request_massage")
+    public ResponseResult<Object> testPhone(@RequestParam("phone") String phone) {
+
+        System.out.println(phone);
+
+        try {
+            userService.sendMassage(phone);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseResult.ok(null, "Success", null);
     }

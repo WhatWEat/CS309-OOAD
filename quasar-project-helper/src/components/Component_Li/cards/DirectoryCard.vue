@@ -1,10 +1,10 @@
 <template>
-  <q-card bordered class="no-shadow">
+  <q-card bordered class="no-shadow" style="width: 200px">
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
         <q-avatar class="shadow-10" size="60px">
-          <img :src="avatar">
+          <q-img :src="avatar"/>
         </q-avatar>
       </q-item-section>
 
@@ -39,21 +39,21 @@
         </q-item-label>
       </q-item-section>
 
-      <q-item-section side>
-        <q-item-label>
-          <q-btn class="bg-indigo-7 text-white" flat icon="fab fa-facebook" round size="sm"/>
-        </q-item-label>
-        <q-item-label>
-          <q-btn class="bg-info text-white" flat icon="fab fa-twitter" round size="sm"/>
-        </q-item-label>
+<!--      <q-item-section side>-->
+<!--        <q-item-label>-->
+<!--          <q-btn class="bg-indigo-7 text-white" flat icon="fab fa-facebook" round size="sm"/>-->
+<!--        </q-item-label>-->
+<!--        <q-item-label>-->
+<!--          <q-btn class="bg-info text-white" flat icon="fab fa-twitter" round size="sm"/>-->
+<!--        </q-item-label>-->
 
-      </q-item-section>
+<!--      </q-item-section>-->
     </q-item>
     <!--    间隔线部分-->
     <q-separator></q-separator>
     <!--    下方详细信息部分-->
-    <q-card-section>
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+    <q-card-section class="row">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           Creation Time :
         </span>
@@ -62,7 +62,7 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           Deadline :
         </span>
@@ -71,8 +71,8 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
-        <span style="font-weight: bold;">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
+        <span style="font-weight: bold;" >
           Presentation Time :
         </span>
         <span style="font-weight: normal;">
@@ -80,7 +80,7 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           Instructor :
         </span>
@@ -89,7 +89,7 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           Leader :
         </span>
@@ -98,7 +98,7 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           Max Size :
         </span>
@@ -107,7 +107,7 @@
         </span>
       </div>
 
-      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1">
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
           More Info :
         </span>

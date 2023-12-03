@@ -2,10 +2,7 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.Exceptions.OverdueException;
-import com.example.projecthelper.entity.Assignment;
-import com.example.projecthelper.entity.Evaluation;
-import com.example.projecthelper.entity.Group;
-import com.example.projecthelper.entity.SubmittedAssignment;
+import com.example.projecthelper.entity.*;
 import com.example.projecthelper.mapper.*;
 import com.example.projecthelper.util.FileUtil;
 import org.postgresql.util.PSQLException;
@@ -16,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -336,6 +334,22 @@ public class AssignmentService {
         throw new AccessDeniedException("无权查看作业");
     }
 
+    public List<Group> selectToCommented(long assignmentId, long stuId) {
+        Assignment assignment = assignmentMapper.findAssById(assignmentId);
+
+        Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
+        if (gpId != null) {
+            List<Evaluation> commented = submittedAssMapper.selectCommented(assignment.getProjectId(),gpId);
+            List<Group> groups = groupMapper.findAllGroup(assignment.getProjectId());
+            groups.removeIf(group -> group.getGroupId().equals(gpId));
+            for (Evaluation commented1 : commented){
+                groups.removeIf(group -> group.getGroupId().equals(commented1.getCommentedGroup()));
+            }
+            return groups;
+        }
+        throw new AccessDeniedException("无权查看作业");
+    }
+
     public List<SubmittedAssignment> viewAllSub(long assignmentId, long userId, long page, long pageSize, Integer identity) {
         Assignment ass = assignmentMapper.findAssById(assignmentId);
         if (ass == null)
@@ -411,6 +425,32 @@ public class AssignmentService {
 
     }
 
+    public List<SubmittedAssignment> getStuAllSub(Long projectId, Long userId ){
+        if(projectMapper.checkStuInProj(userId,projectId) == null){
+            throw new AccessDeniedException("您不在project中");
+        }
+        Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
+        List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
+        if (group!=null){
+            submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
+        }
+        return submittedAssignments;
+    }
+
+    public HashMap<Long,List<SubmittedAssignment>>getProAllSub(Long projectId,Long userId,Predicate<Long> accessProject){
+        if (!accessProject.test(projectId)) {
+            System.err.println(projectId);
+            throw new AccessDeniedException("无权查看作业");
+        }
+        List<User> stus = usersMapper.findStuByProj(projectId);
+        HashMap<Long,List<SubmittedAssignment>> map = new HashMap<>();
+
+        for (User stu : stus){
+            map.put(stu.getUserId(),getStuAllSub(projectId,stu.getUserId()));
+        }
+
+        return map;
+    }
 
     //这个方法是读取文件批量更新成绩
     public void gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
@@ -431,6 +471,8 @@ public class AssignmentService {
         result.forEach(System.err::println);
         submittedAssMapper.updateGrades(result, assignmentId);
     }
+
+
 
 
     public int getAssState(long assId, long userId, Predicate<Long> accessProject) {

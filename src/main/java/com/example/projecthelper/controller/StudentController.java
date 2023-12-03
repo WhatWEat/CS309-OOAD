@@ -366,13 +366,16 @@ public class StudentController {
     }
 
 
-    @GetMapping("/GradeBook/{project_id}")
+    @GetMapping("/GradeBook/{project_id}/{page}/{pageSize}")
     public ResponseResult<List<SubmittedAssignment>> GradeBook(
             @PathVariable("project_id") Long projId,
+            @PathVariable("page") Integer page,
+            @PathVariable("pageSize") Integer pageSize,
             HttpServletRequest request) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<SubmittedAssignment> out = assignmentService.getStuAllSub(projId,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                page,pageSize
                 );
         return ResponseResult.ok(out, "Success", JWTUtil.updateJWT(jwt));
     }

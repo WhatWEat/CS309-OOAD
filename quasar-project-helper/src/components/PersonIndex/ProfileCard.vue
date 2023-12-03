@@ -277,6 +277,7 @@ onMounted(() => {
       api.get(`/get_personal_info/${person_id.value}`).then((res) => {
         console.log(res.data)
         personInfo.value = res.data.body
+        personInfo.value.gender = personInfo.value.gender.toLowerCase()
         copyPersonInfo()
         username.value = personInfo.value.name
         avatar_preview.value = personInfo.value.avatarPath

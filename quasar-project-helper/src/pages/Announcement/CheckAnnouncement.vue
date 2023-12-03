@@ -54,6 +54,7 @@
         </template>
       </q-banner>
       <q-table
+        :grid="$q.screen.lt.sm"
         :rows="data"
         :columns="columns"
         row-key="noticeId"
@@ -73,13 +74,55 @@
           </q-tr>
         </template>
 
+        <template v-slot:item="props">
+          <div
+            class="q-py-xs col-12 grid-style-transition"
+            :style="props.selected ? 'transform: scale(0.95);' : ''"
+          >
+            <q-card :class="props.selected ? 'bg-grey-2' : ''">
+              <q-card-section class="row items-center">
+                <q-checkbox dense v-model="props.selected" :label="props.row.name"/>
+                <q-space>
+                </q-space>
+                <q-btn flat size="sm" icon="edit" @click="openEdit(props.row)"
+                       v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid"/>
+                <q-btn flat size="sm" icon="expand_more" @click="openPhoneView(props.row)"/>
+              </q-card-section>
+              <q-separator/>
+              <q-list dense>
+                <q-item v-for="col in props.cols.filter(col => col.name !== 'createTime')"
+                        :key="col.name">
+                  <q-item-section>
+                    <q-item-label>{{ col.label }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption>
+                      <div v-html="truncate(col.value,20)">
+                      </div>
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label> create Time</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption>
+                      {{ formatDateString(props.row.createTime) }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+        </template>
         <template v-slot:body="props">
           <q-tr :props="props">
             <q-td>
               <q-checkbox v-model="props.selected"/>
             </q-td>
             <q-td key="title" :props="props">
-              <span>{{ props.row.title }}</span>
+              <span>{{ truncate(props.row.title, 10) }}</span>
               <q-popup-edit
                 v-model="props.row.title"
                 title="Update title"
@@ -88,7 +131,8 @@
                 buttons
                 v-slot="scope"
               >
-                <q-input type="text" v-model="scope.value" dense autofocus @keyup.enter="scope.set"/>
+                <q-input type="text" v-model="scope.value" dense autofocus
+                         @keyup.enter="scope.set"/>
               </q-popup-edit>
             </q-td>
             <q-td key="content" :props="props">
@@ -100,7 +144,8 @@
                 @save="save(props.row)"
                 v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid"
                 v-slot="scope">
-                <q-input type="text" v-model="scope.value" dense autofocus @keyup.enter="scope.set"/>
+                <q-input type="text" v-model="scope.value" dense autofocus
+                         @keyup.enter="scope.set"/>
               </q-popup-edit>
 
             </q-td>
@@ -138,8 +183,9 @@
                       {{ props.row.creatorName }}
                     </q-item-label>
                   </q-item-section>
-                  <q-item-section avatar>
-                    <q-btn round flat size="md" icon="edit">
+                  <q-item-section avatar
+                                  v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid">
+                    <q-btn @click="openEdit(props.row)" round flat size="md" icon="edit">
                     </q-btn>
                   </q-item-section>
                 </q-item>
@@ -148,9 +194,29 @@
                 <q-card-section style="font-size: 20px">
                   <div v-html="props.row.content"></div>
                 </q-card-section>
-                <q-card-section v-if="props.row.type==1" class="q-gutter-lg">
-                  <q-btn round flat color="green" icon="done" @click="clickAcceptGroup(props.row)"/>
-                  <q-btn round flat color="red" icon="close" @click="clickRejectGroup(props.row)"/>
+                <q-separator/>
+                <q-card-section v-if="checkNoticeType(props.row, 0)">
+                  <q-item v-if="statusDictionary[props.row.status] !== undefined">
+                    <q-item-section>
+                      <q-item-label class="text-h5">status</q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                      <q-item-label caption>
+                        <q-chip square>
+                          <q-icon :name="`${statusDictionary[props.row.status][2]}`"
+                                  :color="`${statusDictionary[props.row.status][1]}`"/>
+                          <span
+                            :class="`text-weight-bold text-${statusDictionary[props.row.status][1]}`">{{ statusDictionary[props.row.status][0] }}</span>
+                        </q-chip>
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                  <q-item v-if="checkNoticeType(props.row, 1)" class="q-gutter-lg">
+                    <q-btn round flat color="green" icon="done"
+                           @click="clickAcceptGroup(props.row)"/>
+                    <q-btn round flat color="red" icon="close"
+                           @click="clickRejectGroup(props.row)"/>
+                  </q-item>
                 </q-card-section>
               </q-card>
             </q-td>
@@ -162,6 +228,57 @@
     </div>
     <q-dialog v-model="isNewDialogOpen">
       <AddAnnouncement @save="onRefresh" :edit="false"/>
+    </q-dialog>
+    <q-dialog v-model="isEditDialogOpen">
+      <AddAnnouncement @save="onRefresh" :edit="true" :notice="selectedNotice"/>
+    </q-dialog>
+    <q-dialog v-model="isPhoneView">
+      <q-card flat style="height: 30vh; width: 80vh;">
+        <q-item>
+          <q-item-section avatar>
+            <q-btn round flat size="sm" :to="`/person/${phoneViewNotice!.creatorId}`">
+              <q-avatar size="md">
+                <q-img :src="avatarMap.get(phoneViewNotice!.creatorId)"></q-img>
+              </q-avatar>
+            </q-btn>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ phoneViewNotice!.title }}</q-item-label>
+            <q-item-label caption>
+              {{ phoneViewNotice!.creatorName }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-separator/>
+        <q-card-section style="font-size: 25px">
+          <div v-html="phoneViewNotice!.content"></div>
+        </q-card-section>
+        <q-separator/>
+        <q-card-section v-if="checkNoticeType(phoneViewNotice!, 0)">
+          <q-item>
+            <q-item-section>
+              <q-item-label class="text-h5">status</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-item-label caption>
+                <q-chip square>
+                  <q-icon :name="`${statusDictionary[phoneViewNotice!.status][2]}`"
+                          :color="`${statusDictionary[phoneViewNotice!.status][1]}`"/>
+                  <span
+                    :class="`text-weight-bold text-${statusDictionary[phoneViewNotice!.status][1]}`">{{ statusDictionary[phoneViewNotice!.status][0] }}</span>
+                </q-chip>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item v-if="checkNoticeType(phoneViewNotice!, 1)" class="q-gutter-lg">
+            <q-btn round flat color="green" icon="done"
+                   @click="clickAcceptGroup(phoneViewNotice!)"/>
+            <q-btn round flat color="red" icon="close" @click="clickRejectGroup(phoneViewNotice!)"/>
+          </q-item>
+        </q-card-section>
+
+      </q-card>
     </q-dialog>
   </div>
 </template>
@@ -177,12 +294,9 @@ import {onMounted, ref, watch} from "vue";
 import {defaultNotice, noticeProps} from "src/composables/comInterface";
 import {api} from "boot/axios";
 import {useQuasar} from "quasar";
-import {useRouter} from "vue-router";
 import {useUserStore} from "src/composables/useUserStore";
-import {computed} from "vue-demi";
 import AddAnnouncement from "components/AnnouncementsList/addAnnouncement.vue";
 
-const router = useRouter();
 const $q = useQuasar();
 const data = ref<noticeProps[]>([defaultNotice]);
 const loading = ref(true),
@@ -227,12 +341,16 @@ const columns = [
     sortable: true,
   },
 ];
+
 // 分页
+function testProps(row: noticeProps) {
+  console.log(row)
+}
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 });
-//TODO 手机适配 考虑用grid 同时对Edit添加对话框
 watch(pagination, (newVal, oldVal) => {
   if (
     newVal.page !== oldVal.page ||
@@ -247,38 +365,76 @@ const {userid, identity} = useUserStore(),
 
 // 同意进组
 function clickAcceptGroup(notice: noticeProps) {
-  let noticeId = notice.noticeId
-  api.post('/stu/ack_application', noticeId).then(res => {
-    console.log(res)
-    $q.notify({
-      position: 'top',
-      message: 'accept success',
-      color: 'positive'
-    })
-  }).catch(err => {
-    console.log(err)
-  })
-  console.log('accept')
+  let noticeId = notice.noticeId, type = notice.type;
+  switch (type) {
+    case 2:
+      api.post('/stu/ack_invitation', {
+        object: noticeId
+      }).then(res => {
+        console.log(res)
+        $q.notify({
+          position: 'top',
+          message: 'accept success',
+          color: 'positive'
+        })
+        notice.status = 1
+      }).catch(err => {
+        $q.notify({
+          position: 'top',
+          message: 'accept failed, please try again',
+          color: 'negative'
+        })
+        onRefresh();
+        console.log(err)
+      })
+      break
+    case 1:
+      api.post('/stu/ack_application', {
+        object: noticeId
+      }).then(res => {
+        console.log(res)
+        $q.notify({
+          position: 'top',
+          message: 'accept success',
+          color: 'positive'
+        })
+        notice.status = 1
+      }).catch(err => {
+        $q.notify({
+          position: 'top',
+          message: 'accept failed, please try again',
+          color: 'negative'
+        })
+        onRefresh();
+        console.log(err)
+      })
+      break
+  }
+  // onRefresh();
 }
 
 function clickRejectGroup(notice: noticeProps) {
   let noticeId = notice.noticeId
-  api.post('/stu/nak_invitation_or_application', noticeId).then(res => {
+  api.post('/stu/nak_invitation_or_application', {
+    object: noticeId
+  }).then(res => {
     console.log(res)
     $q.notify({
       position: 'top',
       message: 'reject success',
       color: 'danger'
     })
+    notice.status = 2
   }).catch(err => {
     console.log(err)
   })
+  // onRefresh();
   console.log('reject')
 }
 
 // 保存
-function save(notice: noticeProps){
-  api.put('/tea/modify_notice', notice).then(res => {
+function save(notice: noticeProps) {
+  api.put('/tea/modify_notice', notice).then(() => {
     $q.notify({
       position: 'top',
       message: 'save success',
@@ -292,7 +448,7 @@ function save(notice: noticeProps){
 // 删除操作
 function removeRow() {
   const selectedRows = [...selected.value.map((row) => row.noticeId)];
-  api.post('/tea/delete_notice', selectedRows).then(res => {
+  api.post('/tea/delete_notice', selectedRows).then(() => {
     $q.notify({
       position: 'top',
       message: 'delete success',
@@ -305,19 +461,10 @@ function removeRow() {
   selected.value = [];
 }
 
-async function created() {
-  await onRefresh();
-}
-
 function handleRowDbclick() {
   show_detail.value = true;
 }
 
-async function beforeRouteUpdate(to, from, next) {
-  console.info("beforeRouteUpdate");
-  await onRefresh();
-  next();
-}
 
 const projectID = ref(-1);
 onMounted(() => {
@@ -367,23 +514,7 @@ async function onRefresh() {
   }
 }
 
-function onRequestAction(value) {
-  console.info("onRequestAction");
-  console.info(value);
-  tablePagination.rowsPerPage = value.rowsPerPage;
-}
-
-// function getQuery() {
-//   let query = {};
-//   for (let i = 0; i < this.queryColumns.length; i++) {
-//     const queryColumn = this.queryColumns[i];
-//     if (queryColumn.value && queryColumn.value.trim() !== "") {
-//       query[queryColumn.name] = queryColumn.value;
-//     }
-//   }
-//   console.info(query);
-//   return query;
-// }
+// 打开新建框
 const isNewDialogOpen = ref(false);
 
 function onNewClickAction() {
@@ -391,7 +522,43 @@ function onNewClickAction() {
   console.log('open dialog', isNewDialogOpen.value)
 }
 
+// 打开编辑框
+const isEditDialogOpen = ref(false);
+const selectedNotice = ref<noticeProps>();
 
+function openEdit(notice: noticeProps) {
+  selectedNotice.value = JSON.parse(JSON.stringify(notice));
+  isEditDialogOpen.value = true;
+}
+
+// 打开手机查看
+const isPhoneView = ref(false), phoneViewNotice = ref<noticeProps>();
+
+function openPhoneView(notice: noticeProps) {
+  phoneViewNotice.value = JSON.parse(JSON.stringify(notice));
+  isPhoneView.value = true;
+}
+
+// 判断信息类型
+const statusDictionary: { [key: number]: [string, string, string] } = {
+  0: ["Undecided", "blue", "hourglass_top"],
+  1: ["Accepted", "green", "done"],
+  2: ["Rejected", "red", "close"],
+  "-1": ["Expired", "orange", "hourglass_disabled"]
+};
+
+function checkNoticeType(notice: noticeProps, type: number) {
+  switch (type) {
+    case 0:
+      return notice.type !== 0;
+    case 1:
+      return notice.type === 1 && notice.status === 0 || notice.type === 2 && notice.status === 0;
+    default:
+      return false;
+  }
+}
+
+// 搜索tags
 const tags = ref<Set<string>>(new Set());
 const currentInput = ref<string>("");
 const emit = defineEmits(["update:tags"]);

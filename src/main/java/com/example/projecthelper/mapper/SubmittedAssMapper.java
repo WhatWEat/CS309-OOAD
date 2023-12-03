@@ -185,7 +185,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     List<Evaluation> searchEvaluation(List<Long> commentgroup, List<Long> commentedgroup, List<Float> grade);
 
     @Select("SELECT AVG(grade) FROM evaluation WHERE commentedgroup = #{commentedgroup};")
-    float avgGrade(long commentedgroup);
+    Double avgGrade(long commentedgroup);
 
     @Select("select * from evaluation where projectid = #{projectid} and commentgroup = #{commentgroup}")
     List<Evaluation> selectCommented(long projectid,long commentgroup);

@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 @Service
@@ -346,8 +343,6 @@ public class AssignmentService {
             return;
         }
         throw new AccessDeniedException("你不在小组中");
-
-
     }
 
     public SubmittedAssignment viewSubByStu(long assignmentId, long stuId) {
@@ -370,19 +365,23 @@ public class AssignmentService {
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public float viewEvaByStu(long assignmentId, long stuId) {
+    public Double viewEvaByStu(long assignmentId, long stuId) {
         Assignment assignment = assignmentMapper.findAssById(assignmentId);
-
+        System.out.println(assignment.getProjectId());
         Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
+
+        System.out.println(gpId);
         if (gpId != null) {
-            return submittedAssMapper.avgGrade(gpId);
+            if (submittedAssMapper.avgGrade(gpId)!=null){
+                return submittedAssMapper.avgGrade(gpId);
+            }else return 0d;
+
         }
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public List<Group> selectToCommented(long assignmentId, long stuId) {
+    public List<Long> selectToCommented(long assignmentId, long stuId) {
         Assignment assignment = assignmentMapper.findAssById(assignmentId);
-
         Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
         if (gpId != null) {
             List<Evaluation> commented = submittedAssMapper.selectCommented(assignment.getProjectId(),gpId);
@@ -391,7 +390,16 @@ public class AssignmentService {
             for (Evaluation commented1 : commented){
                 groups.removeIf(group -> group.getGroupId().equals(commented1.getCommentedGroup()));
             }
-            return groups;
+            List<Long> out = new ArrayList<>();
+            Random random = new Random();
+            for ( int i = 0; i< 3-commented.size();i++){
+                Group group = groups.get(random.nextInt(groups.size()));
+                while (out.contains(group.getGroupId())){
+                    group = groups.get(random.nextInt(groups.size()));
+                }
+                out.add(group.getGroupId());
+            }
+            return out;
         }
         throw new AccessDeniedException("无权查看作业");
     }

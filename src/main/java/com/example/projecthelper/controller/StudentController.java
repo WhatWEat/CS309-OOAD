@@ -322,9 +322,9 @@ public class StudentController {
     }
 
     @GetMapping("/view_eva/{assignment_id}")
-    public ResponseResult<Float> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<Double> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        float eva = assignmentService.viewEvaByStu(
+        Double eva = assignmentService.viewEvaByStu(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
@@ -332,9 +332,9 @@ public class StudentController {
     }
 
     @GetMapping("/to_comment/{assignment_id}")
-    public ResponseResult<List<Group>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<List<Long>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<Group> groups = assignmentService.selectToCommented(
+        List<Long> groups = assignmentService.selectToCommented(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );

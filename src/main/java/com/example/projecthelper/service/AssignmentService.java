@@ -64,6 +64,9 @@ public class AssignmentService {
         results.forEach(a -> {
                     if (a.getFilePaths() != null)
                         a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList());
+            if (a.getAssignmentId() == 34) {
+                System.err.println(a.getFilePaths());
+            }
                 }
         );
         return results;

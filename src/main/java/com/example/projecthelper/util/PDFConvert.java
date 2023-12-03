@@ -23,13 +23,13 @@ import org.commonmark.renderer.html.HtmlRenderer;
 public class PDFConvert {
     private static com.aspose.words.License wordLicense = new com.aspose.words.License();
     private static com.aspose.slides.License pptLicense = new com.aspose.slides.License();
-    public static final Set<String> WORDS_EXTENSION = new HashSet<>(
+    private static final Set<String> WORDS_EXTENSION = new HashSet<>(
         Arrays.asList(
             ".docx", ".doc", ".odt", ".rtf", ".txt", ".html", ".htm", ".mhtml", ".mht", ".xml"
         )
     );
 
-    public static final Set<String> SLIDES_EXTENSION = new HashSet<>(
+    private static final Set<String> SLIDES_EXTENSION = new HashSet<>(
         Arrays.asList(
             ".pptx", ".ppt", ".ppsx", ".pps", ".potx", ".pot", ".odp"
         )
@@ -61,6 +61,22 @@ public class PDFConvert {
             doc.save(outputPath, com.aspose.words.SaveFormat.PDF);
         } catch (Exception e) {
             System.out.printf("Problem about convert word %s to pdf %s \n", inputPath, outputPath);
+            throw new InvalidFormException("文件不支持转为pdf");
+        }
+    }
+
+    public static void convertToPdf(String inputPath, String outputPath){
+        try{
+            String extension = inputPath.substring(inputPath.lastIndexOf("."));
+            if(WORDS_EXTENSION.contains(extension)){
+                wordConvert(inputPath, outputPath);
+            }
+            else if(SLIDES_EXTENSION.contains(extension)){
+                pptConvert(inputPath, outputPath);
+            }
+            else
+                throw new InvalidFormException("文件不支持转为pdf");
+        }catch (IndexOutOfBoundsException e){
             throw new InvalidFormException("文件不支持转为pdf");
         }
     }

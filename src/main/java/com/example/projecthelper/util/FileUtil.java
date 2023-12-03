@@ -258,7 +258,11 @@ public class FileUtil {
 
     public static String getFilenameFromPath(String path){
         int dotIndex = path.lastIndexOf('\\');
-        if (dotIndex > 0) {
+        int dotIndex2 = path.lastIndexOf("/");
+        if (dotIndex2 > 0) {
+            return path.substring(dotIndex2+1);
+        }
+        else if(dotIndex > 0){
             return path.substring(dotIndex+1);
         }
         return path;

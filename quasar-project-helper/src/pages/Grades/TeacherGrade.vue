@@ -1,10 +1,22 @@
 <template>
   <div class="q-pa-md">
-    <q-file color="purple-12" v-model="model1" label="upload file to grade">
+    <q-file
+      color="purple-12"
+      v-model="model"
+      label="upload file to grade"
+      @update:model-value="onFileChange"
+    >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
       </template>
     </q-file>
+    <q-dialog v-model="isShowDialog">
+      <q-banner>Are you sure to save this file</q-banner>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
+      </q-card-actions>
+      </q-dialog>
     <q-table
       title="Grades"
       :rows="data"
@@ -72,20 +84,23 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDateString} from "src/composables/usefulFunction";
-import { ref, watch} from 'vue';
+import {formatDateString, usePersonId} from "src/composables/usefulFunction";
+import {onMounted, ref, watch} from 'vue';
 import {defaultTGrade, tgradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
-import {useQuasar} from "quasar";
 import { useRouter } from 'vue-router'
 import LineChart from "components/Chart/LineChart.vue"
 import BarChart from "components/Chart/BarChart.vue";
+import {useUserStore} from "src/composables/useUserStore";
+import {watchEffect} from "vue-demi";
 
+const {identity} = useUserStore();
 const  router = useRouter()
-const projectID = ref(router.currentRoute.value.params.projectID)
 const data = ref<tgradeProps[]>([defaultTGrade]);
 const loading = ref(true)
 const filter = ref('')
+const person_id = ref(1);
+const model = ref(null),isShowDialog = ref(false), avatar_preview = ref('')
 const columns = [
   {
     name: "homework",
@@ -153,6 +168,29 @@ watch(pagination, (newVal, oldVal)=>{
     onRefresh();
   }
 })
+
+
+onMounted(() => {
+  person_id.value = usePersonId();
+  console.log('person_id',person_id.value)
+  watchEffect(() => {
+    if (identity.value == 3) {
+      api.get(`/grade_list/${person_id.value}`).then((res) => {
+        console.log(res.data)
+        personInfo.value = res.data.body
+        copyPersonInfo()
+        username.value = personInfo.value.name
+      })
+      api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {
+        const blob = new Blob([res.data], { type: 'image/jpeg' });
+        avatar_preview.value = URL.createObjectURL(blob);
+        avatar_clone.value = avatar_preview.value;
+      })
+    }
+  })
+})
+
+
 async function onRefresh() {
   loading.value = true
   api.get(`/grade-list/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
@@ -164,7 +202,32 @@ async function onRefresh() {
   })
 }
 
-function turnToChart() {
-  router.push('/projects/${projectID.value}/sgrade/chart')
+function saveUploadAvatar() {
+  isShowDialog.value = false;
+  if(model.value){
+    data.value.name = model.value.name;
+    model.value = null;
+  }
 }
+
+function cancelUploadAvatar() {
+  isShowDialog.value = false;
+  model.value = null;
+}
+function onFileChange(){
+  const file = model.value
+  if(file){
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      avatar_preview.value = reader.result as string
+    }
+    reader.onerror = (error) => {
+      console.log(error)
+    }
+    isShowDialog.value = true
+  }
+}
+
+
 </script>

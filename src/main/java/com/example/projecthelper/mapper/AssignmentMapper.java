@@ -117,11 +117,13 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     })
     Assignment findAssById(long assignmentId);
 
+
     @Select("select * from submittedAssignment where assignmentid =#{assignmentId} and submitterId = #{submitterId};")
     @Results({
         @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     SubmittedAssignment findSubAssById(long assignmentId, long submitterId);
+
 
 }
 

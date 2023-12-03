@@ -168,8 +168,6 @@ function selectEmailDomain(index) {
 }
 
 function sendEmailCode() {
-  // TODO 发送邮箱验证码
-  // 开始倒计时
   let email = loginEmail.value + selectedEmailDomain.value;
   api.post(`/request_code`, email,{
     headers: {

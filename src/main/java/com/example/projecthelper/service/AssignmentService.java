@@ -8,6 +8,7 @@ import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.mapper.*;
 import com.example.projecthelper.util.FileUtil;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -110,7 +111,7 @@ public class AssignmentService {
         return results;
     }
 
-    public Assignment getAssById(Long ass_id, Long user_id, int identity){
+    public KeyValueWrapper<Assignment, SubmittedAssignment> getAssById(Long ass_id, Long user_id, int identity){
         Assignment assignment = assignmentMapper.findAssById(ass_id);
         if(assignment == null){
             throw new InvalidFormException("assId不正确");
@@ -129,14 +130,30 @@ public class AssignmentService {
                     throw new AccessDeniedException("无权访问该ass");
                 break;
         }
+        String type = assignment.getType();
+        SubmittedAssignment submittedAssignment = null;
+        if(identity == 3){
+            if(type.equals("i"))
+                submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+            if(type.equals("g")){
+                Long gpId = groupMapper.findGroupIdOfUserInAProj(user_id, assignment.getProjectId());
+                submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+            }
+        }
+        assignment.setState(
+            Assignment.AssignmentState.getState(assignment, submittedAssignment).getValue()
+        );
         try{
             assignment.setFilePaths(
                 assignment.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList()
             );
+            submittedAssignment.setFilepaths(
+                submittedAssignment.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList()
+            );
         }catch (NullPointerException ignored){
 
         }
-        return assignment;
+        return new KeyValueWrapper<>(assignment, submittedAssignment);
     }
 
     public void createAss(Assignment assignment, Long creatorId, Predicate<Long> accessProject) {

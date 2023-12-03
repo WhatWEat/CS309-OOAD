@@ -308,12 +308,13 @@ public class TeacherController {
 
     }
 
-    @DeleteMapping("delete_ass")
-    public ResponseResult<Object> deleteAss(@RequestBody Long assId, HttpServletRequest request){
+    @DeleteMapping("delete_ass/{ass_id}")
+    public ResponseResult<Object> deleteAss(HttpServletRequest request,
+                                            @PathVariable Long ass_id){
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), assId);
-        assignmentService.deleteAss(assId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), ass_id);
+        assignmentService.deleteAss(ass_id, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

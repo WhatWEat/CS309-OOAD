@@ -107,20 +107,20 @@ public class SecurityController {
         return ResponseResult.ok(user, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping({"/get_avatar/{search_id}", "/get_avatar"})
-    public ResponseEntity<Resource> getAvatar(HttpServletRequest request,
-                                              @PathVariable(required = false) Long search_id) {
-        System.err.println("search_id"+search_id);
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Long searchId = search_id == null ? userId: search_id;
-        Resource rec = fileService.getAvatar(searchId);
-        System.err.println(rec.getFilename());
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
-            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
-            .body(rec);
-    }
+//    @GetMapping({"/get_avatar/{search_id}", "/get_avatar"})
+//    public ResponseEntity<Resource> getAvatar(HttpServletRequest request,
+//                                              @PathVariable(required = false) Long search_id) {
+//        System.err.println("search_id"+search_id);
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+//        Long searchId = search_id == null ? userId: search_id;
+//        Resource rec = fileService.getAvatar(searchId);
+//        System.err.println(rec.getFilename());
+//        return ResponseEntity.ok()
+//            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+//            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+//            .body(rec);
+//    }
 
     @PostMapping("/change_password")
     public ResponseResult<Object> changePassword(HttpServletRequest request, @RequestBody KeyValueWrapper<String, KeyValueWrapper<String, String>> kvw){

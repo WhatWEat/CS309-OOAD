@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
@@ -116,11 +117,11 @@ public class UserController {
     }
 
     @GetMapping("ass/{ass_id}")
-    public ResponseResult<Assignment> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
+    public ResponseResult<KeyValueWrapper<Assignment, SubmittedAssignment>> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         int identity = Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt));
-        Assignment assignment = assignmentService.getAssById(ass_id, userId, identity);
+        KeyValueWrapper<Assignment, SubmittedAssignment> assignment = assignmentService.getAssById(ass_id, userId, identity);
 
         return ResponseResult.ok(assignment, "success", JWTUtil.updateJWT(jwt));
     }

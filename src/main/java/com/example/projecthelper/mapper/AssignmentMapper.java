@@ -2,6 +2,7 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Assignment;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
@@ -115,6 +116,12 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     Assignment findAssById(long assignmentId);
+
+    @Select("select * from submittedAssignment where assignmentid =#{assignmentId} and submitterId = #{submitterId};")
+    @Results({
+        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    SubmittedAssignment findSubAssById(long assignmentId, long submitterId);
 
 }
 

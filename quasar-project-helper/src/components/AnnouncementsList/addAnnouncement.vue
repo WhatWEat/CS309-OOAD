@@ -162,7 +162,7 @@ const projectOptions = ref<projectProps[]>([]),
   isGetStuView = ref(false),
   isLoadingProject = ref(false);
 
-const { userid } = useUserStore();
+const { userid,identity } = useUserStore();
 onMounted(() => {
   if (props.edit) {
     noticeProps.value = props.notice!;
@@ -192,8 +192,8 @@ const person_id_list = ref<number[]>([]),
   person_list_map = ref<Map<number, string>>(new Map<number, string>());
 watchEffect(async () => {
   if (project.value?.projectId) {
-    api.get(`/tea/stu-list/${project.value.projectId}`).then((res) => {
-      person_id_list.value = res.data.body.key;
+    api.get(`/stu-list/${project.value.projectId}`).then((res) => {
+      person_id_list.value = res.data.body.key ? res.data.body.key : [];
       person_name_list.value = res.data.body.value;
       person_id_list.value.forEach((v, i) => {
         person_list_map.value.set(v, person_name_list.value[i]);

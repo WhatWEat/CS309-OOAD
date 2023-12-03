@@ -106,9 +106,9 @@ public class NoticeService {
             key = "%"+key+"%";
         List<Notice> result = null;
         if (projId == -1)
-            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
         else
-            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result = noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
         result.forEach(e -> {
             if(Objects.equals(userId, e.getCreatorId()) && e.getType() == 0){
                 e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
@@ -132,9 +132,9 @@ public class NoticeService {
 
         List<Notice> result = null;
         if (projId == -1)
-            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
         else
-            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result = noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
         result.forEach(e -> {
             if(Objects.equals(userId, e.getCreatorId())){
                 e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));

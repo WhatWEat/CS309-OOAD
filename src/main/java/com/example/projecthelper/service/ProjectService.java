@@ -85,7 +85,7 @@ public class ProjectService {
             throw new AccessDeniedException("无权修改查看别人的proj");
         List<Long> stuIds = projectMapper.findStuIdsByProject(pjId);
         List<String> names;
-        if(stuIds != null)
+        if(stuIds != null && !stuIds.isEmpty())
              names = usersMapper.findUsernamesById(stuIds);
         else
             names = new ArrayList<>();

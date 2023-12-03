@@ -374,7 +374,7 @@ public class AssignmentService {
         if (gpId != null) {
             if (submittedAssMapper.avgGrade(gpId)!=null){
                 return submittedAssMapper.avgGrade(gpId);
-            }else return 0d;
+            }else return -1d;
 
         }
         throw new AccessDeniedException("无权查看作业");

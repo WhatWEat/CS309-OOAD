@@ -190,35 +190,3 @@ export default {
 
 </style>
 
-
-
-
-
-
-
-
-
-
-
-<!--<template>-->
-<!--    <q-toolbar class="bg-grey-4 text-black rounded-borders">-->
-<!--      <q-btn-->
-<!--        flat-->
-<!--        label="Assignments"-->
-<!--      ></q-btn>-->
-<!--      <q-toolbar-title></q-toolbar-title>-->
-<!--      <q-btn-group push>-->
-<!--        <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>-->
-<!--        <q-btn :color="color_group" icon="groups" label="Group" push @click="buttonHandle"></q-btn>-->
-<!--      </q-btn-group>-->
-<!--    </q-toolbar>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--import {defineAsyncComponent, ref} from 'vue';-->
-<!--import {useUserStore} from "src/composables/useUserStore";-->
-<!--import {api} from "boot/axios";-->
-<!--import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";-->
-<!--</script>-->
-
-

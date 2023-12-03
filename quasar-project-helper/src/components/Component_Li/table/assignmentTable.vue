@@ -266,7 +266,9 @@ export default defineComponent({
     //获取指定作业的详细信息
     getSelectedAssignment(assignmentsId) {
       api.get('/ass/' + assignmentsId).then((res) => {
-        let  res_body = res.data.body;
+        console.log('获取作业的详细返回值在这里' + res)
+        console.log (res)
+        let  res_body = res.data.body.key;
         this.AssignmentDetail.assignmentId = assignmentsId;
         this.AssignmentDetail.AssignmentName = res_body.title;
         this.AssignmentDetail.deadLine = res_body.deadline.slice(0,19).replace('T',' ');
@@ -292,10 +294,10 @@ export default defineComponent({
         this.AssignmentDetail.filePaths = res_body.filePaths;
         this.AssignmentDetail.type =  res_body.type;
 
-        // console.log ("AssignmentDetail: ")
-        // console.log (this.AssignmentDetail)
-        // console.log ("res.data: ")
-        // console.log (res.data)
+        console.log ("AssignmentDetail: ")
+        console.log (this.AssignmentDetail)
+        console.log ("res.data: ")
+        console.log (res.data)
       }).catch((err) => {
         console.log(err);
       })

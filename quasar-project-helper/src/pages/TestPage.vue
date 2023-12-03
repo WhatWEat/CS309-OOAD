@@ -1,27 +1,20 @@
 <template>
   <div class="q-pa-md">
-<!--    <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf" v-if="loading">-->
-<!--    </PDFViewer>-->
-    <q-btn @click="getToken"></q-btn>
-  <q-img src="https://cs309-projecthelper-oss.oss-cn-shenzhen.aliyuncs.com/avatar/30002000/avator1.jpg"></q-img>
+    <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf"
+               fileName="name.pdf">
+    </PDFViewer>
   </div>
 </template>
 
-<script setup lang="ts">
-import {onMounted, ref} from 'vue'
+<script>
+import {defineAsyncComponent, defineComponent, onMounted, ref} from 'vue'
 import PDFViewer from "components/ViewComponent/PDFViewer.vue";
-import axios, {api} from "boot/axios";
-import {getDownloadBlob} from "src/composables/usefulFunction";
-const loading = ref(false)
-onMounted(()=>{
-  console.log('log')
-  loading.value = true
-})
-function getToken(){
-  api.get('/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf',{responseType: 'blob'}).then((res)=>{
-    console.log(res.data,'blob')
-    getDownloadBlob(res.data,'test.pdf');
-  })
-}
 
+const loading = ref(false)
+export default defineComponent({
+  name: "AssignmentDetail",
+  components: {
+    PDFViewer: defineAsyncComponent(() => import('src/components/ViewComponent/PDFViewer.vue')),
+  }
+})
 </script>

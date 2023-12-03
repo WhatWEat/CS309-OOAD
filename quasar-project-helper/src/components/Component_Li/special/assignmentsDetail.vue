@@ -106,7 +106,6 @@
               </q-item-section>
               <q-item-section>
                 <q-btn @click="handleFileClick(filePaths)"> {{filePaths}} </q-btn>
-                <a href="#" class="fake-link" @click="handleFileClick(filePaths)">{{filePaths}}</a>
               </q-item-section>
             </q-item>
           </div>
@@ -231,19 +230,18 @@
         </q-card>
       </div>
     </div>
-    <div>测试事实上
-      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">
-      </PDFViewer>
-    </div>
+
   </div>
 
-
-<!--  作业预览部分-->
-<!--  <div>-->
-<!--      <q-btn @click></q-btn>-->
-<!--      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">-->
-<!--      </PDFViewer>-->
-<!--  </div>-->
+  <div>
+    <q-dialog v-model="this.showPDF" :full-width="true" :full-heigh="true" transition-duration="500"  :persistent="true">
+      <q-card :square=false :bordered="true">
+        <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf"
+                   fileName="name.pdf">
+        </PDFViewer>
+      </q-card>
+    </q-dialog>
+  </div>
 </template>
 
 <script>

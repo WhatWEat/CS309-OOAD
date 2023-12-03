@@ -246,7 +246,22 @@ public class StudentController {
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename);
+        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename, false);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
+    @GetMapping(value = "/get_ass_file_pdf_version/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssPdfFile(@PathVariable("assignment_id") Long assignmentId,
+                                               @PathVariable("filename") String filename,
+                                               HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename, true);
         System.err.println(rec.getFilename());
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))

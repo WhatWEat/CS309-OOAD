@@ -9,6 +9,7 @@ import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.FileUtil;
+import com.example.projecthelper.util.PDFConvert;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -89,18 +90,30 @@ public class FileService {
         Path fp = Paths.get(FileUtil.generateAssPath(ass)).resolve(fileName).normalize();
         System.err.println(fp.toString());
         try{
-            Resource rec = new UrlResource(fp.toUri());
-            if(rec.exists()){
-                return rec;
+            if(!isPdf || fileName.endsWith(".pdf")){
+                Resource rec = new UrlResource(fp.toUri());
+                if(rec.exists()){
+                    return rec;
+                }
+                else
+                    throw new FileProcessingException("找不到文件");
             }
-            else
-                throw new FileProcessingException("找不到文件");
+            else{
+                Path op = Paths.get(FileUtil.generateAssPath(ass)).resolve(FileUtil.toPdfExtension(fileName)).normalize();
+                PDFConvert.convertToPdf(fp.toString(), op.toString());
+                Resource rec = new UrlResource(op.toUri());
+                if(rec.exists()){
+                    return rec;
+                }
+                else
+                    throw new FileProcessingException("找不到文件");
+            }
         }catch (MalformedURLException | FileProcessingException e){
             throw new FileProcessingException("找不到文件");
         }
     }
 
-    public Resource getFilesOfAssByStu(Long userId, Long assId, String fileName){
+    public Resource getFilesOfAssByStu(Long userId, Long assId, String fileName, boolean isPdf){
         Assignment ass = assignmentMapper.findAssById(assId);
         if(ass == null)
             throw new AccessDeniedException("assignmentId不合法");
@@ -109,12 +122,23 @@ public class FileService {
         Path fp = Paths.get(FileUtil.generateAssPath(ass)).resolve(fileName).normalize();
         System.err.println(fp.toString());
         try{
-            Resource rec = new UrlResource(fp.toUri());
-            if(rec.exists()){
-                return rec;
+            if(!isPdf || fileName.endsWith(".pdf")) {
+                Resource rec = new UrlResource(fp.toUri());
+                if (rec.exists()) {
+                    return rec;
+                } else
+                    throw new FileProcessingException("找不到文件");
             }
-            else
-                throw new FileProcessingException("找不到文件");
+            else{
+                Path op = Paths.get(FileUtil.generateAssPath(ass)).resolve(FileUtil.toPdfExtension(fileName)).normalize();
+                PDFConvert.convertToPdf(fp.toString(), op.toString());
+                Resource rec = new UrlResource(op.toUri());
+                if(rec.exists()){
+                    return rec;
+                }
+                else
+                    throw new FileProcessingException("找不到文件");
+            }
         }catch (MalformedURLException | FileProcessingException e){
             throw new FileProcessingException("找不到文件");
         }

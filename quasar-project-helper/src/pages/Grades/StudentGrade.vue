@@ -1,5 +1,23 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md" >
+    <q-file
+      v-if="identity<=2 && identity>=0"
+      color="purple-12"
+      v-model="model"
+      label="upload file to grade"
+      @update:model-value="onFileChange"
+    >
+      <template v-slot:prepend>
+        <q-icon name="attach_file" />
+      </template>
+    </q-file>
+    <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
+      <p>Are you sure to save this file</p>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
+      </q-card-actions>
+    </q-dialog>
     <q-table
       title="Grades"
       :rows="data"
@@ -14,14 +32,30 @@
           <q-td key="homework" :props="props">
             <span>{{ props.row.name }}</span>
           </q-td>
-          <q-td key="grade" :props="props">
+          <q-td key="grade" :props="props" v-if="identity ==3">
             <span>{{ props.row.grade }}</span>
+            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0">
+              <q-input type="number" v-model="scope.value" dense autofocus />
+            </q-popup-edit>
           </q-td>
-          <q-td key="contribution" :props="props">
-            <span>{{ props.row.contribution }}</span>
+          <q-td key="studentID" :props="props">
+            <span>{{ props.row.studentID }}</span>
           </q-td>
           <q-td key="comment" :props="props">
             <span>{{ props.row.comment }}</span>
+            <q-popup-edit
+              buttons
+              v-model="props.row.comment"
+              v-slot="scope"
+              v-if="identity<=2 && identity>=0"
+            >
+              <q-editor
+                v-model="scope.value"
+                min-height="5rem"
+                autofocus
+                @keyup.enter.stop
+              />
+            </q-popup-edit>
           </q-td>
           <q-td key="reviewerName" :props="props">
             <span>{{ props.row.reviewerName }}</span>
@@ -41,20 +75,34 @@
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
+  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+      <bar-chart></bar-chart>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+      <line-chart></line-chart>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import {formatDateString} from "src/composables/usefulFunction";
-import { ref, watch} from 'vue';
+import {formatDateString, usePersonId, useProjectId} from "src/composables/usefulFunction";
+import {onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
 import {useQuasar} from "quasar";
 import { useRouter } from 'vue-router'
+import {useUserStore} from "src/composables/useUserStore";
+import {watchEffect} from "vue-demi";
+import BarChart from "components/Chart/BarChart.vue";
+import LineChart from "components/Chart/LineChart.vue";
 
+const {identity} = useUserStore()
 const  router = useRouter()
 const projectID = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([defaultGrade]);
 const loading = ref(true)
+const person_id = ref(1);
 const filter = ref('')
 const columns = [
   {
@@ -67,20 +115,20 @@ const columns = [
     sortable: true
   },
   {
+    name: "studentID",
+    required: true,
+    label: "studentID",
+    align: "left",
+    field: row => row.studentID,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
     name: "grade",
     required: true,
     label: "grade",
     align: "left",
     field: row => row.grade,
-    format: val => `${val}`,
-    sortable: true
-  },
-  {
-    name: "contribution",
-    required: true,
-    label: "contribution",
-    align: "left",
-    field: row => row.contribution,
     format: val => `${val}`,
     sortable: true
   },
@@ -123,6 +171,26 @@ watch(pagination, (newVal, oldVal)=>{
     onRefresh();
   }
 })
+
+
+
+onMounted(() => {
+  person_id.value = usePersonId();
+  watchEffect(() => {
+    personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
+    if (identity.value !== -1 && isFresh.value) {
+      api.get(`/grade_list/${projectID.value}/${person_id.value}`).then((res) => {
+        console.log(res.data)
+        data.value = res.data.body
+      })
+    } else {
+      api.get(`/get_personal_info/${projectID.value}`).then((res) => {
+        console.log(res.data)
+        data.value = res.data.body
+      })
+    }
+  })
+})
 async function onRefresh() {
   loading.value = true
   api.get(`/grade-list/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
@@ -133,5 +201,46 @@ async function onRefresh() {
     console.log('err', err)
   })
 }
+async function created() {
+  await onRefresh();
+}
+
+async function beforeRouteUpdate(to, from, next) {
+  console.info("beforeRouteUpdate");
+  await onRefresh();
+  next();
+}
+
+function saveUploadAvatar() {
+  isShowDialog.value = false;
+  if(model.value){
+    data.value.name = model.value.name;
+    model.value = null;
+  }
+}
+
+function cancelUploadAvatar() {
+  isShowDialog.value = false;
+  model.value = null;
+}
+function onFileChange(){
+  const file = model.value
+  if(file){
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      avatar_preview.value = reader.result as string
+    }
+    reader.onerror = (error) => {
+      console.log(error)
+    }
+    isShowDialog.value = true
+  }
+}
+
+onMounted(() => {
+  projectID.value = useProjectId();
+  onRefresh();
+});
 
 </script>

@@ -61,18 +61,9 @@ export async function getAvatarUrl() {
         return localStorage.getItem(`avatar`);
       }
     }
-    const res = await api.get(`/get_avatar`, {responseType: 'arraybuffer'});
-    const blob = new Blob([res.data], {type: 'image/jpeg'});
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onloadend = function () {
-      const base64data = reader.result;
-      if (typeof base64data === "string") {
-        // console.log(base64data, 'base64')
-        localStorage.setItem('avatar', base64data);
-        localStorage.setItem(`avatar_time`, new Date().toISOString());
-      }
-    }
+    const res = (await api.get(`/get_personal_info`)).data.body.avatarPath;
+    localStorage.setItem(`avatar`, res);
+    localStorage.setItem(`avatar_time`, new Date().toISOString());
     return localStorage.getItem('avatar');
   } catch (error) {
 
@@ -90,26 +81,28 @@ export async function getAvatarUrlById(id: number) {
         return localStorage.getItem(`avatar_${id}`);
       }
     }
-    const res = await api.get(`/get_avatar/${id}`, {responseType: 'arraybuffer'});
-    const blob = new Blob([res.data], {type: 'image/jpeg'});
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.onloadend = function () {
-      const base64data = reader.result;
-      if (typeof base64data === "string") {
-        localStorage.setItem(`avatar_${id}`, base64data);
-        localStorage.setItem(`avatar_${id}_time`, new Date().toISOString());
-      }
-    }
+    const res = (await api.get(`/get_personal_info/${id}`)).data.body.avatarPath;
+    localStorage.setItem(`avatar_${id}`, res);
+    localStorage.setItem(`avatar_${id}_time`, new Date().toISOString());
     return localStorage.getItem(`avatar_${id}`);
   } catch (error) {
     console.error("Failed to get avatar URL", error);
     return "https://cdn.quasar.dev/img/boy-avatar.png";
   }
 }
+export function getDownloadBlob(blobFile: Blob, fileName: string) {
+  const blobUrl = URL.createObjectURL(blobFile);
 
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click(); // 模拟点击
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+}
 //******************Li weihao******************//
-
 export function merger(key: [], value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {

@@ -3,9 +3,9 @@
   <div class="q-pa-md ">
     <q-table
       v-model:selected="selected"
-      :columns="columns"
+      :columns="columns_temp"
       :filter="search"
-      :rows="rows"
+      :rows="rows_temp"
       :separator="separator"
       :title="tableTitle"
       card-class="bg-grey-2"
@@ -24,7 +24,7 @@
             <q-list>
               <q-item v-close-popup clickable @click="show_create_ass_table = true">
                 <q-item-section>
-                  <q-item-label>Create Assignment</q-item-label>
+                  <q-item-label class="text-weight-bold">Create Assignment</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -38,7 +38,6 @@
           </q-input>
         </q-toolbar>
       </template>
-      <!--        修改按钮插槽-->
     </q-table>
   </div>
 
@@ -47,7 +46,7 @@
     <q-dialog v-model="show_deleteDialog_student">
       <q-chat-message
         :text="['What are you doing?']"
-        avatar="../../../assets/iKun.jpg"
+        avatar="https://i.postimg.cc/02xBVpw2/ikun.jpg"
         bg-color="primary"
         name="Qi-Kun Xue"
         stamp="now"
@@ -63,8 +62,10 @@
   </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
-                       :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
+    <AssignmentsDetail  :project-id="projectId"
+                        :group-id="groupId"
+                        :AssignmentAttachment="AssignmentAttachment"
+                        :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
   </div>
   <!--  右键弹窗部分-->
   <div>
@@ -86,7 +87,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
-      <assignment-form></assignment-form>
+      <assignment-form @unfold="this.show_create_ass_table = false"></assignment-form>
     </el-dialog>
   </div>
   <!--  修改作业表单部分-->
@@ -98,13 +99,13 @@
       <assignment-form></assignment-form>
     </el-dialog>
   </div>
-
-
 </template>
 
 <script>
 import {defineAsyncComponent, defineComponent, ref} from 'vue'
 import {useUserStore} from "src/composables/useUserStore";
+import {api} from "boot/axios";
+import cloneDeep from "lodash/cloneDeep";
 
 export default defineComponent({
   name: "AssignmentTable",
@@ -154,7 +155,17 @@ export default defineComponent({
       required: true,
       type: String,
       default: 'Dev'
-    }
+    },
+    projectId: {
+      required: true,
+      type: Number,
+      default: -1
+    },
+    groupId: {
+      required: true,
+      type: Number,
+      default: -1
+    },
   },
   data() {
     return {
@@ -169,6 +180,9 @@ export default defineComponent({
 
       userData: useUserStore(),
 
+      columns_temp: cloneDeep(this.columns),
+      rows_temp: cloneDeep(this.rows),
+
       show_assignment_detail: ref(false),
       show_button_teacher: ref(false),
       show_button_student: ref(false),
@@ -178,6 +192,7 @@ export default defineComponent({
       show_deleteDialog_teacher: ref(false),
 
       AssignmentDetail: {
+        assignmentId: -1,
         AssignmentName: 'Assignment 1',
         studentName: "Liwehao",
         submitTime: '2020-10-7',
@@ -198,6 +213,9 @@ export default defineComponent({
           'No re-submission is allowed.\n' +
           '\n' +
           'No late submission is allowed.',
+        filePaths: null,
+        files:null,
+        type:null,
       },
       AssignmentAttachment: [
         {
@@ -212,8 +230,17 @@ export default defineComponent({
     }
   },
   methods: {
-    handleRowDbclick(row) {
+    handleRowDbclick(env, row, index) {
+      let assignmentId = row.AssignmentName;
+      this.getSelectedAssignment(assignmentId);
       this.show_assignment_detail = true
+      this.$q.notify({
+        type: 'positive',
+        message: 'Switch assignment Success',
+        position:'top',
+        progress:true,
+        timeout: 1000,
+      })
     },
     handleRowContextmenu(evt, row, index) {
       // 更新弹窗位置
@@ -234,11 +261,58 @@ export default defineComponent({
         this.show_button_student = false;
       });
     },
+
+    //*************************************GET*************************************
+    //获取指定作业的详细信息
+    getSelectedAssignment(assignmentsId) {
+      api.get('/ass/' + assignmentsId).then((res) => {
+        let  res_body = res.data.body;
+        this.AssignmentDetail.assignmentId = assignmentsId;
+        this.AssignmentDetail.AssignmentName = res_body.title;
+        this.AssignmentDetail.deadLine = res_body.deadline.slice(0,19).replace('T',' ');
+        this.AssignmentDetail.grade = (res_body.grade === -1) ? 'Not Graded' : res_body.grade;
+        this.AssignmentDetail.state = res_body.state;
+        this.AssignmentDetail.moreInfo = res_body.description;
+        this.AssignmentDetail.instructor = res_body.creatorName;
+        this.AssignmentDetail.isReturned = () => {
+          if (res_body.state === 0) {
+            return 'Not Submitted'
+          } else if (res_body.state === 1) {
+            return 'Waiting for Grading'
+          } else if (res_body.state === 2) {
+            return 'Returned'
+          }
+        }
+        this.AssignmentDetail.state =  res_body.state;
+        this.AssignmentDetail.matGrade = res_body.fullMark;
+        this.AssignmentDetail.studentName = this.userData.username;
+        // 这里把releaseTime当作submitTime
+        this.AssignmentDetail.submitTime = res_body.releaseTime.slice(0,19).replace('T',' ');
+        this.AssignmentDetail.files = res_body.files;
+        this.AssignmentDetail.filePaths = res_body.filePaths;
+        this.AssignmentDetail.type =  res_body.type;
+
+        // console.log ("AssignmentDetail: ")
+        // console.log (this.AssignmentDetail)
+        // console.log ("res.data: ")
+        // console.log (res.data)
+      }).catch((err) => {
+        console.log(err);
+      })
+    },
   },
   components: {
     AssignmentsDetail: defineAsyncComponent(() => import('src/components/Component_Li/special/assignmentsDetail.vue')),
     AssignmentForm: defineAsyncComponent(() => import('src/components/Component_Li/form/AssignmentForm.vue')),
     ConfirmDialog: defineAsyncComponent(() => import('src/components/Component_Li/dialog/ConfirmDialog.vue')),
+  },
+  watch: {
+    rows: {
+      handler: function (newVal, oldVal) {
+        this.rows_temp = cloneDeep(newVal);
+      },
+      deep: true
+    },
   }
 })
 </script>

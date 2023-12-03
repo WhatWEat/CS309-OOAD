@@ -219,7 +219,7 @@
                            :group-data=formData_user_self
                            :isGroupLeader="isGroupLeader"
                            :style="{width: '100%' , 'border-radius': '20px'}"
-                           avatar="https://files.oaiusercontent.com/file-x6PnnxUzina3lkZnqhf2XSMh?se=2023-12-01T07%3A59%3A06Z&sp=r&sv=2021-08-06&sr=b&rscc=max-age%3D31536000%2C%20immutable&rscd=attachment%3B%20filename%3D18c9f5e2-a43a-44a9-a177-7fcab28aa1fa.webp&sig=4iLXmf/mjsCzhYQ1VPwbYwfZUCxA34huyA8gBsoxsoY%3D">
+                           avatar="https://i.postimg.cc/P5HTzptm/img.png">
         <template v-slot:members_btn>
 
         </template>
@@ -379,8 +379,6 @@ export default {
       //   ],
       //   "memCnt": 5
       // },
-
-      isLoading: ref(false),
 
       columns: [
         {

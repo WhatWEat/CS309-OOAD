@@ -15,8 +15,8 @@ import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,9 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Objects;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -336,6 +333,16 @@ public class StudentController {
         return ResponseResult.ok(eva, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("/to_comment/{assignment_id}")
+    public ResponseResult<List<Group>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<Group> groups = assignmentService.selectToCommented(
+                assignmentId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
+    }
+
     @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{filename}")
     public ResponseEntity<Resource> getSubmittedAssFile(
         @PathVariable("assignment_id") Long assignmentId,
@@ -361,7 +368,16 @@ public class StudentController {
     }
 
 
-
+    @GetMapping("/GradeBook/{project_id}")
+    public ResponseResult<List<SubmittedAssignment>> GradeBook(
+            @PathVariable("project_id") Long projId,
+            HttpServletRequest request) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<SubmittedAssignment> out = assignmentService.getStuAllSub(projId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                );
+        return ResponseResult.ok(out, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 
 

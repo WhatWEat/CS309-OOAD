@@ -248,6 +248,7 @@ export interface personProps {
   gender: string,
   birthday: string,
   avatar: File,
+  avatarPath?: string,
   programmingSkills: string[]
 }
 export const defaultPerson: personProps = {

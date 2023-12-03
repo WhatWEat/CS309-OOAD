@@ -25,6 +25,7 @@
       :filter="filter"
       row-key="name"
       v-model:pagination="pagination"
+      :loading="isLoadingGrade"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -162,7 +163,17 @@ const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 })
-
+// 初始化
+const isLoadingGrade = ref(true);
+onMounted(()=>{
+  watchEffect(()=>{
+    if (identity.value !== -1 && isLoadingGrade.value){
+      console.log('initit')
+      onRefresh();
+      isLoadingGrade.value = false;
+    }
+  })
+})
 watch(pagination, (newVal, oldVal)=>{
   if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
     onRefresh();
@@ -170,48 +181,54 @@ watch(pagination, (newVal, oldVal)=>{
 })
 
 async function onRefresh() {
+  isLoadingGrade.value = true;
   if (identity.value == 3) {
+    // TODO 增加分页
+    console.log('shouji ')
     api
       .get(
-        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
-          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
-        }`
+        `/stu/GradeBook/${project_id.value}`
       )
       .then((res) => {
-        data.value = res.data;
+        data.value = res.data.body;
         console.log(data.value)
+        console.log('success')
+        isLoadingGrade.value = false;
       }).catch((err) => {
       console.log('err', err)
       console.log('cuowu')
     });
-  }else {
+  }else if(identity.value !== -1) {
     api
       .get(
-        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+        `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
           pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
         }`
       )
       .then((res) => {
+        console.log('identity',identity.value)
+        console.log('res',res)
         const hashmap = res.data;
         for (const [studentID, grades] of Object.entries(hashmap)) {
           data.value.studentID = studentID;
           data.value = grades
         }
+        isLoadingGrade.value = false;
       })
       .catch((err) => {
         console.log("err", err);
       });
   }
 }
-async function created() {
-  await onRefresh();
-}
-
-async function beforeRouteUpdate(to, from, next) {
-  console.info("beforeRouteUpdate");
-  await onRefresh();
-  next();
-}
+// async function created() {
+//   await onRefresh();
+// }
+//
+// async function beforeRouteUpdate(to, from, next) {
+//   console.info("beforeRouteUpdate");
+//   await onRefresh();
+//   next();
+// }
 
 function saveUploadAvatar() {
   isShowDialog.value = false;

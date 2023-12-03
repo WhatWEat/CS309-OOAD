@@ -129,7 +129,7 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/delete_intend_teammates/{projId}/{value}")
+    @DeleteMapping("/delete_intend_teammates/{projId}/{value}")
     public ResponseResult<Object> deleteIntendTeammates(
         HttpServletRequest request,
         @PathVariable Long projId,

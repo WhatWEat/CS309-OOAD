@@ -130,7 +130,7 @@ public class ProjectService {
         int index = intendedTeammates.indexOf(intendedTeammate);
         // 如果存在，则删除它
         if (index != -1) {
-//            intendedTeammates = new ArrayList<>(intendedTeammates);
+            intendedTeammates = new ArrayList<>(intendedTeammates);
             intendedTeammates.remove(index);
         }
         projectMapper.setIntendedTeammates(projectId, stuId, intendedTeammates);

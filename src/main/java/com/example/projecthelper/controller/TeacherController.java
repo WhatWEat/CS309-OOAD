@@ -272,6 +272,21 @@ public class TeacherController {
             .body(rec);
     }
 
+    @GetMapping(value = "/get_ass_file_pdf_version/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssFilePdfVersion(@PathVariable("assignment_id") Long assignmentId,
+                                               @PathVariable("filename") String filename,
+                                               HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
     @PostMapping("/post_assignment")
     public ResponseResult<Object> postAssignment(HttpServletRequest request,
         @RequestParam("title") String title,

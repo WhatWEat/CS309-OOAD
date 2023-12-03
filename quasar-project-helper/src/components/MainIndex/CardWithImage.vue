@@ -7,7 +7,10 @@
         height="400px"
       >
         <div class="absolute-bottom-left bg-transparent q-ml-md">
-          <div class="text-h1">
+          <div class="text-h1 gt-xs">
+            {{ formatTime(currentTime) }}
+          </div>
+          <div class="text-h2 lt-sm">
             {{ formatTime(currentTime) }}
           </div>
           <div class="text-h5">
@@ -21,6 +24,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
+import {aw} from "app/dist/spa/assets/index.6e7c6110";
 
 const imgUrls = ref<string[]>(['https://cdn.quasar.dev/img/parallax2.jpg', 'https://cdn.quasar.dev/img/parallax1.jpg',
   'https://pic.imgdb.cn/item/6560bfeec458853aefc5ac10.jpg', 'https://pic.imgdb.cn/item/6560c06cc458853aefc80277.webp', 'https://pic.imgdb.cn/item/6560c06cc458853aefc8031c.jpg'])

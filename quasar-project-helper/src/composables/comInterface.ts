@@ -12,6 +12,7 @@ export interface noticeProps {
   stuView: null | number[];
   toAll: boolean;
   type?: number;
+  status?: number;
   projectName?: string;
   groupId?: number;
 }

@@ -15,7 +15,7 @@
               </q-item>
               <q-item class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
                 <q-item-section>
-                  <q-input dense outlined v-model="noticeProps.title"/>
+                  <q-input dense outlined v-model="noticeProps.title" />
                 </q-item-section>
               </q-item>
               <q-item class="col-12">
@@ -23,7 +23,7 @@
               </q-item>
               <q-item class="col-12">
                 <q-item-section>
-                  <q-editor v-model="noticeProps.content" min-height="5rem"/>
+                  <q-editor v-model="noticeProps.content" min-height="5rem" />
                 </q-item-section>
               </q-item>
             </q-card-section>
@@ -39,7 +39,7 @@
             <q-card-section>
               <q-item>
                 <q-item-section class="text-h6">
-                  To Which Project ?
+                  Project
                 </q-item-section>
                 <q-item-section side>
                   <q-select
@@ -50,7 +50,7 @@
                     map-options
                     use-input
                     input-debounce="0"
-                    style="width: 200px"
+                    style="width: 170px"
                     @filter="filterFn"
                   />
                   <template v-slot:no-option>
@@ -65,59 +65,67 @@
               <q-item>
                 <q-item-section class="text-h6"> To All ?</q-item-section>
                 <q-item-section side>
-                  <q-toggle v-model="noticeProps.toAll"/>
+                  <q-toggle v-model="noticeProps.toAll" />
                 </q-item-section>
               </q-item>
+              <q-separator></q-separator>
               <q-card-section class="row" v-if="!noticeProps.toAll">
-                  <div class="col-6">
-                    <q-input v-model="filter" placeholder="Search Students"/>
-                    <q-list dense style="max-height: 200px; overflow-y: auto;">
-                      <q-item
-                        v-for="person in filteredPeople"
-                        :key="person"
-                        clickable
-                        @click="moveToRight(person)"
-                      >
-                        <q-item-section class="row">
-                                          <span>
-                                            <q-chip square dense class="col-3"
-                                                    color="blue-4"> {{ person }}</q-chip>
-                                            <span class="col">
-                                              {{ person_list_map.get(person) }}
-                                            </span>
-                                          </span>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </div>
-                  <div class="col-6" style="height: 250px; overflow-y: auto;">
-                    <q-list dense>
-                      <q-item
-                        v-for="person in selectedPeople"
-                        :key="person"
-                        clickable
-                        @click="moveToLeft(person)"
-                      >
-                        <q-item-section class="row">
-                                          <span>
-                                            <q-chip square dense class="col-3 text-white"
-                                                    color="primary"> {{ person }}</q-chip>
-                                            <span class="col">
-                                              {{ person_list_map.get(person) }}
-                                            </span>
-                                          </span>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </div>
+                <div class="col-6">
+                  <q-input v-model="filter" placeholder="Search Students" />
+                  <q-list dense style="max-height: 200px; overflow-y: auto">
+                    <q-item
+                      v-for="person in filteredPeople"
+                      :key="person"
+                      clickable
+                      @click="moveToRight(person)"
+                    >
+                      <q-item-section class="row">
+                        <span>
+                          <q-chip square dense class="col-3" color="blue-4">
+                            {{ person }}</q-chip
+                          >
+                          <span class="col">
+                            {{ person_list_map.get(person) }}
+                          </span>
+                        </span>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </div>
+                <div class="col-6" style="height: 250px; overflow-y: auto">
+                  <q-list dense>
+                    <q-item
+                      v-for="person in selectedPeople"
+                      :key="person"
+                      clickable
+                      @click="moveToLeft(person)"
+                    >
+                      <q-item-section class="row">
+                        <span>
+                          <q-chip
+                            square
+                            dense
+                            class="col-3 text-white"
+                            color="primary"
+                          >
+                            {{ person }}</q-chip
+                          >
+                          <span class="col">
+                            {{ person_list_map.get(person) }}
+                          </span>
+                        </span>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </div>
               </q-card-section>
-              </q-card-section>
+            </q-card-section>
           </q-card>
         </q-expansion-item>
       </q-list>
     </q-card-section>
     <q-card-actions align="right">
-      <q-btn flat label="Cancel" color="primary" v-close-popup/>
+      <q-btn flat label="Cancel" color="primary" v-close-popup />
       <q-btn
         flat
         label="Save"
@@ -130,16 +138,17 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 import {
   defaultNotice,
-  noticeProps, personProps,
+  noticeProps,
+  personProps,
   projectProps,
 } from "src/composables/comInterface";
-import {api} from "boot/axios";
-import {useQuasar} from "quasar";
-import {useUserStore} from "src/composables/useUserStore";
-import {computed, watchEffect} from "vue-demi";
+import { api } from "boot/axios";
+import { useQuasar } from "quasar";
+import { useUserStore } from "src/composables/useUserStore";
+import { computed, watchEffect } from "vue-demi";
 
 const $q = useQuasar();
 const noticeProps = ref<noticeProps>(defaultNotice);
@@ -150,28 +159,36 @@ const props = defineProps<{
 // 可见性和内容的初始化
 const projectOptions = ref<projectProps[]>([]),
   project = ref<projectProps>(),
+  isGetStuView = ref(false),
   isLoadingProject = ref(false);
 
-const {userid} = useUserStore();
+const { userid } = useUserStore();
 onMounted(() => {
-  watchEffect(() => {
-    if (userid.value !== -1 && !isLoadingProject.value) {
-      isLoadingProject.value = true;
-      api.get(`/project-list/0/100/${userid.value}`).then((res) => {
-        projectOptions.value = res.data.body;
-        isLoadingProject.value = false;
-      });
-    }
-  });
   if (props.edit) {
     noticeProps.value = props.notice!;
   } else {
     noticeProps.value.stuView = [];
     noticeProps.value.toAll = true;
   }
+  watchEffect(() => {
+    if (userid.value !== -1 && !isLoadingProject.value) {
+      isLoadingProject.value = true;
+      api.get(`/project-list/0/100/${userid.value}`).then((res) => {
+        projectOptions.value = res.data.body;
+        project.value = projectOptions.value.find(project => project.projectId === noticeProps.value.projectId);
+        if (noticeProps.value.stuView === null) noticeProps.value.stuView = [];
+        else {
+          selectedPeople.value = noticeProps.value.stuView;
+          isGetStuView.value = true;
+        }
+      });
+    }
+  });
+
 });
 // 响应式获取project中的人数
-const person_id_list = ref<number[]>([]), person_name_list = ref<string[]>([]),
+const person_id_list = ref<number[]>([]),
+  person_name_list = ref<string[]>([]),
   person_list_map = ref<Map<number, string>>(new Map<number, string>());
 watchEffect(async () => {
   if (project.value?.projectId) {
@@ -181,29 +198,36 @@ watchEffect(async () => {
       person_id_list.value.forEach((v, i) => {
         person_list_map.value.set(v, person_name_list.value[i]);
       });
+      if (isGetStuView.value){
+        isGetStuView.value = false;
+        if (person_id_list.value.length === selectedPeople.value.length)
+          noticeProps.value.toAll = true;
+      }
     });
   }
-})
+});
 // 选择可见的人
-const filter = ref<string>(''), selectedPeople = ref<number[]>([]);
+const filter = ref<string>(""),
+  selectedPeople = ref<number[]>([]);
 const filteredPeople = computed(() => {
   // const num = Number(filter.value);
   return person_id_list.value.filter(
-    person => (person.toString().includes(filter.value) ||
-      (person_list_map.value.get(person)?.includes(filter.value) ?? false)) &&
-      !selectedPeople.value.some(selected => selected === person
-    ));
+    (person) =>
+      (person.toString().includes(filter.value) ||
+        (person_list_map.value.get(person)?.includes(filter.value) ?? false)) &&
+      !selectedPeople.value.some((selected) => selected === person)
+  );
 });
 
 const moveToRight = (userId: number) => {
-  const person = person_id_list.value.find(p => p === userId);
-  if (person && !selectedPeople.value.some(p => p === userId)) {
+  const person = person_id_list.value.find((p) => p === userId);
+  if (person && !selectedPeople.value.some((p) => p === userId)) {
     selectedPeople.value.push(person);
   }
 };
 
 const moveToLeft = (userId: number) => {
-  const index = selectedPeople.value.findIndex(p => p === userId);
+  const index = selectedPeople.value.findIndex((p) => p === userId);
   if (index !== -1) {
     selectedPeople.value.splice(index, 1);
   }
@@ -235,35 +259,35 @@ function saveInfo() {
     console.log("save");
     console.log(props);
     api
-    .put("/tea/modify_notice", props)
-    .then((res) => {
-      console.log(res);
-      $q.notify({
-        position: "top",
-        message: "save success",
-        color: "positive",
+      .put("/tea/modify_notice", noticeProps.value)
+      .then((res) => {
+        console.log(res);
+        $q.notify({
+          position: "top",
+          message: "save success",
+          color: "positive",
+        });
+      })
+      .catch((err) => {
+        console.log(err);
       });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
   } else {
     api
-    .post("/tea/post_notice", {
-      title: noticeProps.value.title,
-      content: noticeProps.value.content,
-      projectId: project.value?.projectId,
-      toAll: noticeProps.value.toAll,
-      stuView: selectedPeople.value,
-    })
-    .then((res) => {
-      $q.notify({
-        position: "top",
-        message: "release success",
-        color: "positive",
+      .post("/tea/post_notice", {
+        title: noticeProps.value.title,
+        content: noticeProps.value.content,
+        projectId: project.value?.projectId,
+        toAll: noticeProps.value.toAll,
+        stuView: selectedPeople.value,
+      })
+      .then((res) => {
+        $q.notify({
+          position: "top",
+          message: "release success",
+          color: "positive",
+        });
+        console.log(res.data);
       });
-      console.log(res.data);
-    });
   }
   emit("save");
 }

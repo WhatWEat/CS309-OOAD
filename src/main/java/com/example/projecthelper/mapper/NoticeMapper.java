@@ -12,6 +12,16 @@ import java.util.List;
 @Mapper
 public interface NoticeMapper extends BaseMapper<Notice> {
 
+    @Select("select count(*) from notice n join stuviewnotice s on s.noticeid = n.noticeid where s.stuid = #{stuId};")
+    int getNtcCntByStu(Long stuId);
+    @Select("select count(*) from notice where creatorId = #{taId};")
+    int getNtcCntByTa(Long taId);
+    @Select("select count(*) " +
+        "from notice n join public.project p on n.projectid = p.projectid where teacherid = #{teaId} and n.type != 0;")
+    int getNtcCntByTea(Long teaId);
+    @Select("select count(*) from notice")
+    int getNtcCntByAdm();
+
     @Select("select * from notice where noticeId = #{noticeId};")
     Notice findNoticeById(Long noticeId);
 

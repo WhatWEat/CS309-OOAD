@@ -32,16 +32,20 @@ public class ProjectService {
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
-    public List<Project> getProjectList(KeyValueWrapper<Long, Integer> idIdentityWrapper, int page, int page_size){
-        return switch (idIdentityWrapper.getValue()) {
+    public List<Project> getProjectList(Long userId, int page, int page_size){
+        User user = usersMapper.findUserById(userId);
+        if(user == null)
+            throw new InvalidFormException("无效的id");
+
+        return switch (user.getIdentity()) {
             case 0 ->
                 projectMapper.getProjByAdm(page_size, page * page_size);
             case 1 ->
-                projectMapper.getProjByTea(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByTea(userId, page_size, page * page_size);
             case 2 ->
-                projectMapper.getProjByTa(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByTa(userId, page_size, page * page_size);
             case 3 ->
-                projectMapper.getProjByStu(idIdentityWrapper.getKey(), page_size, page * page_size);
+                projectMapper.getProjByStu(userId, page_size, page * page_size);
             default -> null;
         };
     }
@@ -76,6 +80,19 @@ public class ProjectService {
             }
     }
 
+    public KeyValueWrapper<List<Long>, List<String>> getStuList(Long pjId, Long userId){
+        if(!Objects.equals(userId, projectMapper.findTeacherByProject(pjId)))
+            throw new AccessDeniedException("无权修改查看别人的proj");
+        List<Long> stuIds = projectMapper.findStuIdsByProject(pjId);
+        List<String> names;
+        if(stuIds != null && !stuIds.isEmpty())
+             names = usersMapper.findUsernamesById(stuIds);
+        else
+            names = new ArrayList<>();
+        return new KeyValueWrapper<>(stuIds, names);
+
+    }
+
     public Long findTeacherByProject(Long projectId){
         return projectMapper.findTeacherByProject(projectId);
     }
@@ -100,7 +117,7 @@ public class ProjectService {
             throw new InvalidFormException("你不在proj中");
         // TODO: 进行异步处理
         System.err.println(intendedTeammates.getClass()+" "+intendedTeammate);
-//        intendedTeammates = new ArrayList<>(intendedTeammates);
+        intendedTeammates = new ArrayList<>(intendedTeammates);
         intendedTeammates.add(intendedTeammate);
         projectMapper.setIntendedTeammates(projectId, stuId, intendedTeammates);
     }

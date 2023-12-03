@@ -129,6 +129,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--        aliyun oss-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.2</version>
+        </dependency>
+
         <!--数据连接池 druid-->
         <dependency>
             <groupId>com.alibaba</groupId>

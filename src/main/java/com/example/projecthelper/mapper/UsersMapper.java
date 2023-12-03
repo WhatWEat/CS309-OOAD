@@ -17,7 +17,16 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     User findUserById(Long userId);
 
-
+    @Select({
+        "<script>",
+        "SELECT u.name FROM users u",
+        "WHERE userId IN",
+        "<foreach item='id' index='index' collection='userIds' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    List<String> findUsernamesById(List<Long> userIds);
 
     @Select("select * from users where identity = #{identity};")
     @Results({
@@ -74,8 +83,6 @@ public interface UsersMapper extends BaseMapper<User> {
 
 
     @Update("UPDATE users SET " +
-            "phone = #{phone},"+
-            "email = #{email},"+
             "name = #{name},"+
             "gender = #{gender},"+
             "birthday = #{birthday},"+

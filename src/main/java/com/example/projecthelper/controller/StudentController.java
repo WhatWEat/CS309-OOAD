@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -112,13 +113,7 @@ public class StudentController {
 //            .body(rec);
 //    }
 
-    @GetMapping("/intend_teammates/{project_id}")
-    public ResponseResult<List<String>> getIntendTeammates(HttpServletRequest request, @PathVariable Long project_id){
 
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        return ResponseResult.ok(projectService.getIntendedTeammates(project_id, userId), "success", JWTUtil.updateJWT(jwt));
-    }
 
     @PostMapping("/add_intend_teammates")
     public ResponseResult<Object> addIntendTeammates(
@@ -131,14 +126,16 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/delete_intend_teammates")
+    @PostMapping("/delete_intend_teammates/{projId}/{value}")
     public ResponseResult<Object> deleteIntendTeammates(
         HttpServletRequest request,
-        @RequestBody KeyValueWrapper<Long, String> kvw){
+        @PathVariable Long projId,
+        @PathVariable String value
+    ){
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        projectService.deleteIntendedTeammates(kvw.getKey(), userId, kvw.getValue());
+        projectService.deleteIntendedTeammates(projId, userId, value);
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 

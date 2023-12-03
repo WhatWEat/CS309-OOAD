@@ -5,6 +5,7 @@ import com.example.projecthelper.entity.Assignment;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
 import com.example.projecthelper.entity.Project;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.service.AssignmentService;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
@@ -51,19 +52,39 @@ public class UserController {
         this.noticeService = noticeService;
     }
 
-    @GetMapping("/project-list/{page}/{page_size}")
+    @GetMapping("/get_pj_ntc_ass_cnt")
+    public ResponseResult<List<Integer>> getCnt(
+        HttpServletRequest request
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        List<Integer> cnt = userService.getCnt(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt)));
+        return ResponseResult.ok(cnt, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @GetMapping("/project-list/{page}/{page_size}/{user_id}")
     public ResponseResult<List<Project>> getProjectList(
-        HttpServletRequest request, @PathVariable int page, @PathVariable int page_size){
+        HttpServletRequest request,
+        @PathVariable int page,
+        @PathVariable int page_size,
+        @PathVariable Long user_id
+    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<Project> projects = projectService.getProjectList(
-            new KeyValueWrapper<>(
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
-            ),
+            user_id,
             page, page_size
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/intend_teammates/{project_id}/{user_id}")
+    public ResponseResult<List<String>> getIntendTeammates(
+        HttpServletRequest request,
+        @PathVariable Long project_id,
+        @PathVariable Long user_id
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(projectService.getIntendedTeammates(project_id, user_id), "success", JWTUtil.updateJWT(jwt));
+    }
+
 
     @GetMapping("/getGroupInfo/{group_id}")
     public ResponseResult<Group> getGroupById(
@@ -95,6 +116,15 @@ public class UserController {
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("ass/{ass_id}")
+    public ResponseResult<KeyValueWrapper<Assignment, SubmittedAssignment>> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        int identity = Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt));
+        KeyValueWrapper<Assignment, SubmittedAssignment> assignment = assignmentService.getAssById(ass_id, userId, identity);
+
+        return ResponseResult.ok(assignment, "success", JWTUtil.updateJWT(jwt));
+    }
     @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
     public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
                                                            @PathVariable("page") long page,

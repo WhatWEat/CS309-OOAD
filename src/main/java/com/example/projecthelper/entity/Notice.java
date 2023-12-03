@@ -37,7 +37,11 @@ public class Notice {
     protected List<Long> stuView;
 
     @TableField(exist = false)
+    protected List<String> stuViewName;
+
+    @TableField(exist = false)
     protected Boolean toAll = false;
+
 
     public Notice(Long noticeId, Long projectId, String title, String content, Long creatorId) {
         this.noticeId = noticeId;

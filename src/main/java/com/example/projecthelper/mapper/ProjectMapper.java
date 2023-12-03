@@ -19,6 +19,20 @@ import org.postgresql.util.PSQLException;
 
 @Mapper
 public interface ProjectMapper extends BaseMapper<Project> {
+
+    @Select("select count(*) from project p join stuinproject s on s.projectid = p.projectid where stuid = #{stuId};")
+    int getProjCntByStu(Long stuId);
+
+    @Select("select count(*) from project p join taofproject s on s.projectid = p.projectid where taid = #{taId};")
+    int getProjCntByTa(Long taId);
+
+
+    @Select("select count(*) from project p where teacherid= #{teaId};")
+    int getProjCntByTea(Long teaId);
+
+    @Select("select count(*) from project;")
+    int getProjCntByAdm();
+
     @Select("select p.*, u.name teacherName " +
         "from project p join users u on p.teacherid = u.userid limit #{limit} offset #{offset};")
     List<Project> getProjByAdm(int limit, int offset);

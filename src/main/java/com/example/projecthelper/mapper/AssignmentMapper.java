@@ -2,6 +2,7 @@ package com.example.projecthelper.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.projecthelper.entity.Assignment;
+import com.example.projecthelper.entity.SubmittedAssignment;
 import com.example.projecthelper.util.StringListArrayTypeHandler;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
@@ -16,6 +17,28 @@ import org.postgresql.util.PSQLException;
 
 @Mapper
 public interface AssignmentMapper extends BaseMapper<Assignment> {
+
+    @Select("select count(*) " +
+        "from project p join stuinproject s on s.projectid = p.projectid " +
+        "join assignment a on a.projectid = p.projectid " +
+        "                where stuid = #{stuId};")
+    int getAssCntByStu(Long stuId);
+
+    @Select("select count(*) " +
+        "    from project p join taofproject t on t.projectid = p.projectid " +
+        "    join assignment a on a.projectid = p.projectid " +
+        "    where taid = #{taId};")
+    int getAssCntByTa(Long taId);
+
+    @Select("select count(*) " +
+        "from project p join assignment a on a.projectid = p.projectid " +
+        "where p.teacherid = #{teaId};")
+    int getAssCntByTea(Long teaId);
+
+    @Select("select count(*) " +
+        "from assignment;")
+    int getAssCntByAdm();
+
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -34,6 +57,15 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     List<Assignment> getAssByProj(Long projectId, Long limit, Long offset);
+
+    @Select("select a.*, p.name projectName, u.name creatorName " +
+        "from assignment a " +
+        "join project p on a.projectid = p.projectid " +
+        "join users u on a.creatorid = u.userid where p.projectid = #{projectId} order by a.releaseTime desc limit #{limit} offset #{offset};")
+    @Results({
+        @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<Assignment> getAssByProjWithoutLimit(Long projectId);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -86,6 +118,11 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     Assignment findAssById(long assignmentId);
 
 
+    @Select("select * from submittedAssignment where assignmentid =#{assignmentId} and submitterId = #{submitterId};")
+    @Results({
+        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    SubmittedAssignment findSubAssById(long assignmentId, long submitterId);
 
 
 }

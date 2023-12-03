@@ -78,6 +78,20 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
+    @GetMapping("/stu-list/{project_id}")
+    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
+        HttpServletRequest request, @PathVariable("project_id") Long pjId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(
+            projectService.getStuList(
+                pjId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+            ),
+            "Success", JWTUtil.updateJWT(jwt)
+        );
+    }
+
 //    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
 //    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
 //                                                   @PathVariable("page") long page,
@@ -121,15 +135,19 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @DeleteMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody Long noticeId) {
+
+    @PostMapping("/delete_notice")
+    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         noticeService.deleteNotice(
-                noticeId,
-                ntId -> Objects.equals(
-                        noticeService.findNoticeById(ntId).getCreatorId(),
-                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                )
+            noticeIds,
+            ntId -> {
+                Notice ntc = noticeService.findNoticeById(ntId);
+                return Objects.equals(
+                    projectService.findTeacherByProject(ntc.getProjectId()),
+                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                ) && ntc.getType() == 0;
+            }
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -280,12 +298,15 @@ public class TeacherController {
 
     }
 
-    @DeleteMapping("delete_ass")
-    public ResponseResult<Object> deleteAss(@RequestBody Long assId, HttpServletRequest request) {
+
+    @DeleteMapping("delete_ass/{ass_id}")
+    public ResponseResult<Object> deleteAss(HttpServletRequest request,
+                                            @PathVariable Long ass_id){
+
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), assId);
-        assignmentService.deleteAss(assId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        fileService.removeFilesOfAss(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), ass_id);
+        assignmentService.deleteAss(ass_id, Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

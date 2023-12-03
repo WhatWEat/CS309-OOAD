@@ -14,6 +14,7 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
+import org.aspectj.weaver.ast.Not;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +51,13 @@ public class NoticeService {
         } else {
             List<Long> ids = notice.getStuView();
             //FUNC: 筛选掉identity不等于3的
-            toIds = usersMapper
+            if(ids!= null && !ids.isEmpty())
+                toIds = usersMapper
                     .findUsersById(ids)
                     .stream()
                     .filter(user -> Objects.equals(user.getIdentity(), 3))
                     .map(User::getUserId).collect(Collectors.toSet());
+            else toIds = new HashSet<>();
         }
 
         return toIds;
@@ -66,7 +69,12 @@ public class NoticeService {
         else
             key = "%"+key+"%";
 
-        return noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
+        List<Notice> result = noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+            e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+        });
+        return result;
     }
 
     public List<Notice> getNoticesByTeacher(Long userId, Long projId, Long page, Long pageSize, String key) {
@@ -74,9 +82,21 @@ public class NoticeService {
             key = "%";
         else
             key = "%"+key+"%";
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTea(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfTeaAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, projectMapper.findTeacherByProject(e.getProjectId())) && e.getType() == 0){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                if(e.getStuView() != null && !e.getStuView().isEmpty())
+                    e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                else
+                    e.setStuViewName(new ArrayList<>());
+            }
+        });
+        return result;
     }
 
     public List<Notice> getNoticesByTa(Long userId, Long projId, Long page, Long pageSize, String key) {
@@ -84,9 +104,19 @@ public class NoticeService {
             key = "%";
         else
             key = "%"+key+"%";
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfTa(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfTaAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, e.getCreatorId()) && e.getType() == 0){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            }
+        });
+        return result;
+
     }
 
 
@@ -99,9 +129,20 @@ public class NoticeService {
         if (checker == null && projId != -1) {
             throw new AccessDeniedException("无权访问该project");
         }
+
+        List<Notice> result = null;
         if (projId == -1)
-            return noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
-        return noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
+            result =  noticeMapper.findNoticeOfStu(userId, pageSize, page * pageSize, key);
+        else
+            result = noticeMapper.findNoticeOfStuAndProj(userId, projId, pageSize, page * pageSize, key);
+        result.forEach(e -> {
+            if(Objects.equals(userId, e.getCreatorId())){
+                e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            }
+        });
+        return result;
+
     }
 
     //PROC：get Notice --> get creator of Project --> compare the id in JWT --> set creatorId of Notice --> insert
@@ -339,17 +380,20 @@ public class NoticeService {
             if (!toIds.isEmpty())
                 noticeMapper.insertStuView(toIds, notice.getNoticeId());
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new InvalidFormException("title or content is null");
         }
     }
 
     //PROC：get noticeId --> compare creatorId and id in JWT --> delete --> deleteStuView
-    public void deleteNotice(Long noticeId, Predicate<Long> accessNotice) {
-        if (accessNotice.test(noticeId)) {
-            noticeMapper.deleteNotice(noticeId);
-            noticeMapper.deleteStuViewNoticeByNotice(noticeId);
-        } else
-            throw new AccessDeniedException("您没有权限删除该公告");
+    public void deleteNotice(List<Long> noticeIds, Predicate<Long> accessNotice) {
+        noticeIds.forEach(noticeId -> {
+            if (accessNotice.test(noticeId)) {
+                noticeMapper.deleteNotice(noticeId);
+                noticeMapper.deleteStuViewNoticeByNotice(noticeId);
+            }
+        });
+
     }
 
     public Notice findNoticeById(Long noticeId) {

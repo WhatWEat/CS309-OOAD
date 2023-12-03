@@ -28,7 +28,7 @@ public class Assignment {
     @TableField(exist = false)
     private List<MultipartFile> files;
     @TableField(exist = false)
-    private boolean state;
+    private int state;
 
 
     public Assignment(Long assignmentId,Long projectId, String title, int fullMark, String description, String type, Long creatorId) {
@@ -42,5 +42,30 @@ public class Assignment {
     }
 
     public Assignment() {
+    }
+
+    @Getter
+    public enum AssignmentState {
+        IN_PROGRESS(0),
+        SUBMITTED(1),
+        RETURNED(2),
+        OVERDUE(3),
+        UNDEFINED(4);
+        private int value;
+        AssignmentState(int i){
+            value = i;
+        }
+        public static AssignmentState getState(Assignment assignment, SubmittedAssignment submittedAssignment){
+            if(assignment == null)
+                return UNDEFINED;
+            else if(submittedAssignment == null && assignment.getDeadline().isAfter(LocalDateTime.now()))
+                return IN_PROGRESS;
+            else if(submittedAssignment == null)
+                return OVERDUE;
+            else if(submittedAssignment.getGrade() == null)
+                return SUBMITTED;
+            else
+                return RETURNED;
+        }
     }
 }

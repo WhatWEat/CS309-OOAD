@@ -61,6 +61,38 @@
             </q-input>
           </q-toolbar>
         </template>
+        <!--        表格内容插槽-->
+        <template v-slot:item="props">
+          <div
+            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
+            :style="props.selected ? 'transform: scale(0.95);' : ''"
+          >
+            <q-card :class="props.selected ? 'bg-grey-2' : ''">
+              <q-card-section>
+                <q-checkbox dense v-model="props.selected" :label="props.row.name" />
+                <q-btn size="sm" align="right" round flat @click="handleEditClick(props.row)">
+                  <q-avatar icon="edit" size="20px">
+                  </q-avatar>
+                </q-btn>
+                <q-btn size="sm" align="right" round flat @click="handleDeleClick(props.row)">
+                  <q-avatar icon="delete" size="20px">
+                  </q-avatar>
+                </q-btn>
+              </q-card-section>
+              <q-separator />
+              <q-list dense>
+                <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name">
+                  <q-item-section>
+                    <q-item-label>{{ col.label }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption>{{ col.value }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+        </template>
       </q-table>
     </div>
 
@@ -154,8 +186,8 @@
   <div>
     <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
-      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick(undefined)"/>
+      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick(undefined)"/>
     </q-btn-group>
   </div>
   <div>
@@ -173,7 +205,7 @@
                       :instructor="card_data.instructor"
                       :leader="card_data.leader" :max-size="card_data.groupMaxSize" :members="card_data.members"
                       :presentation-time="card_data.presentationTime"
-                      :style="{width: '50%' , 'border-radius': '20px'}">
+                      :style="{width: '100%' , 'border-radius': '20px'}">
         >
       </directory-card>
     </q-dialog>
@@ -270,7 +302,13 @@
 import {defineAsyncComponent, ref} from "vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
-import {formatDateString, formatDateStringPro, getUserData, merger} from "src/composables/usefulFunction";
+import {
+  formatDateString,
+  formatDateStringPro,
+  getAvatarUrlById,
+  getUserData,
+  merger
+} from "src/composables/usefulFunction";
 import {useQuasar} from "quasar";
 //import {api} from 'boot/axios';
 //import {defineAsyncComponent, ref} from 'vue';
@@ -520,8 +558,11 @@ export default {
         this.show_button_student = false;
       });
     },
-    handleEditClick() {
+    handleEditClick(row) {
       this.show_edit_form = true;
+      if (row !== undefined) {
+        this.selected_row.row = row;
+      }
       let groupId = this.selected_row.row.groupId;
       api.get('/getGroupInfo/' + groupId).then(
         async (response) => {
@@ -563,7 +604,11 @@ export default {
         console.log(error);
       });
     },
-    handleDeleClick() {
+    handleDeleClick(row) {
+      if (row !== undefined) {
+        this.selected_row.row = row;
+      }
+      console.log(row,'rows');
       this.show_warning = true;
     },
     // 用来学生申请加入小组
@@ -655,9 +700,10 @@ export default {
     // 获取指定小组的详细信息
     getGroupDetail(groupId) {
       api.get('/getGroupInfo/' + groupId).then(
-        (response) => {
+        async (response) => {
+          let avatarUrl = await getAvatarUrlById(response.data.body.leaderId)
           let tmp = {
-            avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+            avatar: avatarUrl,
             groupId: response.data.body.groupId,
             groupSize: response.data.body.members.length,
             groupMaxSize: response.data.body.maxsize,

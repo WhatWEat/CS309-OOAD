@@ -25,21 +25,20 @@
       :filter="filter"
       row-key="name"
       v-model:pagination="pagination"
-      :loading="loading"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td key="homework" :props="props">
             <span>{{ props.row.name }}</span>
           </q-td>
-          <q-td key="grade" :props="props" v-if="identity ==3">
+          <q-td key="studentID" :props="props">
+            <span>{{ props.row.studentID }}</span>
+          </q-td>
+          <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
             <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0">
               <q-input type="number" v-model="scope.value" dense autofocus />
             </q-popup-edit>
-          </q-td>
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
           </q-td>
           <q-td key="comment" :props="props">
             <span>{{ props.row.comment }}</span>
@@ -86,11 +85,10 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDateString, usePersonId, useProjectId} from "src/composables/usefulFunction";
+import {formatDateString, useProjectId} from "src/composables/usefulFunction";
 import {onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
-import {useQuasar} from "quasar";
 import { useRouter } from 'vue-router'
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
@@ -99,11 +97,10 @@ import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
 const  router = useRouter()
-const projectID = ref(router.currentRoute.value.params.projectID)
+const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([defaultGrade]);
-const loading = ref(true)
-const person_id = ref(1);
 const filter = ref('')
+const model = ref(null),isShowDialog = ref(false), avatar_preview = ref('')
 const columns = [
   {
     name: "homework",
@@ -172,34 +169,39 @@ watch(pagination, (newVal, oldVal)=>{
   }
 })
 
-
-
-onMounted(() => {
-  person_id.value = usePersonId();
-  watchEffect(() => {
-    personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
-    if (identity.value !== -1 && isFresh.value) {
-      api.get(`/grade_list/${projectID.value}/${person_id.value}`).then((res) => {
-        console.log(res.data)
-        data.value = res.data.body
-      })
-    } else {
-      api.get(`/get_personal_info/${projectID.value}`).then((res) => {
-        console.log(res.data)
-        data.value = res.data.body
-      })
-    }
-  })
-})
 async function onRefresh() {
-  loading.value = true
-  api.get(`/grade-list/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
-    data.value = res.data.body;
-    loading.value = false
-
-  }).catch((err) => {
-    console.log('err', err)
-  })
+  if (identity.value == 3) {
+    api
+      .get(
+        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+        }`
+      )
+      .then((res) => {
+        data.value = res.data;
+        console.log(data.value)
+      }).catch((err) => {
+      console.log('err', err)
+      console.log('cuowu')
+    });
+  }else {
+    api
+      .get(
+        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+        }`
+      )
+      .then((res) => {
+        const hashmap = res.data;
+        for (const [studentID, grades] of Object.entries(hashmap)) {
+          data.value.studentID = studentID;
+          data.value = grades
+        }
+      })
+      .catch((err) => {
+        console.log("err", err);
+      });
+  }
 }
 async function created() {
   await onRefresh();
@@ -239,7 +241,7 @@ function onFileChange(){
 }
 
 onMounted(() => {
-  projectID.value = useProjectId();
+  project_id.value = useProjectId();
   onRefresh();
 });
 

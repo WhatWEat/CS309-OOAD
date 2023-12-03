@@ -31,7 +31,7 @@ public class TeacherAccess implements Access {
 
     @Override
     public boolean accessProject(Long userId, Project project) {
-        return false;
+        return Objects.equals(project.getTeacherId(), userId);
     }
 
     @Override

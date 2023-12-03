@@ -11,6 +11,7 @@ import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.security.rbac.AdministratorAccess;
 import com.example.projecthelper.security.rbac.TaAccess;
 import com.example.projecthelper.security.rbac.TeacherAccess;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
@@ -43,18 +44,20 @@ public class NoticeService {
 
     private final TeacherAccess teacherAccess;
     private final TaAccess taAccess;
+    private final AdministratorAccess administratorAccess;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
     public NoticeService(NoticeMapper noticeMapper, ProjectMapper projectMapper,
                          UsersMapper usersMapper, GroupMapper groupMapper, TeacherAccess teacherAccess,
-                         TaAccess taAccess) {
+                         TaAccess taAccess, AdministratorAccess administratorAccess) {
         this.noticeMapper = noticeMapper;
         this.projectMapper = projectMapper;
         this.usersMapper = usersMapper;
         this.groupMapper = groupMapper;
         this.teacherAccess = teacherAccess;
         this.taAccess = taAccess;
+        this.administratorAccess = administratorAccess;
     }
 
     private Set<Long> toStu(Notice notice) {
@@ -410,27 +413,31 @@ public class NoticeService {
 
 
     //PROC：get Notice --> get noticeId --> compare creatorId and id in JWT --> update
-    public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice) {
-        try {
-            if (!accessNotice.test(notice.getNoticeId()))
-                throw new AccessDeniedException("您没有权限修改该公告");
-            notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
-            noticeMapper.updateNotice(notice);
-            Set<Long> toIds = toStu(notice);
-            noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
-            System.err.println("toIds" + toIds);
-            if (!toIds.isEmpty())
-                noticeMapper.insertStuView(toIds, notice.getNoticeId());
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            throw new InvalidFormException("title or content is null");
-        }
-    }
+//    public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice) {
+//        try {
+//            if (!accessNotice.test(notice.getNoticeId()))
+//                throw new AccessDeniedException("您没有权限修改该公告");
+//            notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+//            noticeMapper.updateNotice(notice);
+//            Set<Long> toIds = toStu(notice);
+//            noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
+//            System.err.println("toIds" + toIds);
+//            if (!toIds.isEmpty())
+//                noticeMapper.insertStuView(toIds, notice.getNoticeId());
+//        } catch (Exception e) {
+//            System.err.println(e.getMessage());
+//            throw new InvalidFormException("title or content is null");
+//        }
+//    }
 
     public void modifyNotice(Notice notice, Long userId, int identity) {
         notice.setType(0);
         notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
         switch (identity){
+            case 0:
+                if(!administratorAccess.accessNotice(userId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
             case 1:
                 if(!teacherAccess.accessNotice(userId, notice))
                     throw new AccessDeniedException("您没有权限发布该公告");

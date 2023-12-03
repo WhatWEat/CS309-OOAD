@@ -115,33 +115,57 @@ public class UserService {
         }
     }
 
-    public List<Integer> getCnt(Long userId, Long identity){
+    public List<Integer> getCnt(Long project_id, Long userId, Long identity){
         int projCnt;
         int ntcCnt;
         int assCnt;
-        switch (identity.intValue()){
-            case 0:
-                projCnt = projectMapper.getProjCntByAdm();
-                ntcCnt = noticeMapper.getNtcCntByAdm();
-                assCnt = assignmentMapper.getAssCntByAdm();
-                break;
-            case 1:
-                projCnt = projectMapper.getProjCntByTea(userId);
-                ntcCnt = noticeMapper.getNtcCntByTea(userId);
-                assCnt = assignmentMapper.getAssCntByTea(userId);
-                break;
-            case 2:
-                projCnt = projectMapper.getProjCntByTa(userId);
-                ntcCnt = noticeMapper.getNtcCntByTa(userId);
-                assCnt = assignmentMapper.getAssCntByTa(userId);
-                break;
-            case 3:
-                projCnt = projectMapper.getProjCntByStu(userId);
-                ntcCnt = noticeMapper.getNtcCntByStu(userId);
-                assCnt = assignmentMapper.getAssCntByStu(userId);
-                break;
-            default:
-                return null;
+        if(project_id == -1)
+            switch (identity.intValue()){
+                case 0:
+                    projCnt = projectMapper.getProjCntByAdm();
+                    ntcCnt = noticeMapper.getNtcCntByAdm();
+                    assCnt = assignmentMapper.getAssCntByAdm();
+                    break;
+                case 1:
+                    projCnt = projectMapper.getProjCntByTea(userId);
+                    ntcCnt = noticeMapper.getNtcCntByTea(userId);
+                    assCnt = assignmentMapper.getAssCntByTea(userId);
+                    break;
+                case 2:
+                    projCnt = projectMapper.getProjCntByTa(userId);
+                    ntcCnt = noticeMapper.getNtcCntByTa(userId);
+                    assCnt = assignmentMapper.getAssCntByTa(userId);
+                    break;
+                case 3:
+                    projCnt = projectMapper.getProjCntByStu(userId);
+                    ntcCnt = noticeMapper.getNtcCntByStu(userId);
+                    assCnt = assignmentMapper.getAssCntByStu(userId);
+                    break;
+                default:
+                    return null;
+            }
+        else {
+            projCnt = 0;
+            switch (identity.intValue()){
+                case 0:
+                    ntcCnt = noticeMapper.getNtcCntByAdmAndProj(project_id);
+                    assCnt = assignmentMapper.getAssCntByAdmAndProj(project_id);
+                    break;
+                case 1:
+                    ntcCnt = noticeMapper.getNtcCntByTeaAndProj(userId, project_id);
+                    assCnt = assignmentMapper.getAssCntByTeaAndProj(userId, project_id);
+                    break;
+                case 2:
+                    ntcCnt = noticeMapper.getNtcCntByTaAndProj(userId, project_id);
+                    assCnt = assignmentMapper.getAssCntByTaAndProj(userId, project_id);
+                    break;
+                case 3:
+                    ntcCnt = noticeMapper.getNtcCntByStuAndProj(userId, project_id);
+                    assCnt = assignmentMapper.getAssCntByStuAndProj(userId, project_id);
+                    break;
+                default:
+                    return null;
+            }
         }
         List<Integer> cnt = new ArrayList<>();
         cnt.add(projCnt);

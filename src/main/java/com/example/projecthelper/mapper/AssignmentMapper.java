@@ -23,21 +23,38 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         "join assignment a on a.projectid = p.projectid " +
         "                where stuid = #{stuId};")
     int getAssCntByStu(Long stuId);
+    @Select("select count(*) " +
+        "from project p join stuinproject s on s.projectid = p.projectid " +
+        "join assignment a on a.projectid = p.projectid " +
+        "                where stuid = #{stuId} and s.projectId = #{projId};")
+    int getAssCntByStuAndProj(Long stuId, Long projId);
 
     @Select("select count(*) " +
         "    from project p join taofproject t on t.projectid = p.projectid " +
         "    join assignment a on a.projectid = p.projectid " +
         "    where taid = #{taId};")
     int getAssCntByTa(Long taId);
+    @Select("select count(*) " +
+        "    from project p join taofproject t on t.projectid = p.projectid " +
+        "    join assignment a on a.projectid = p.projectid " +
+        "    where taid = #{taId} and a.projectId = #{projId};")
+    int getAssCntByTaAndProj(Long taId, Long projId);
 
     @Select("select count(*) " +
         "from project p join assignment a on a.projectid = p.projectid " +
         "where p.teacherid = #{teaId};")
     int getAssCntByTea(Long teaId);
+    @Select("select count(*) " +
+        "from project p join assignment a on a.projectid = p.projectid " +
+        "where p.teacherid = #{teaId} and a.projectId = #{projId};")
+    int getAssCntByTeaAndProj(Long teaId, Long projId);
 
     @Select("select count(*) " +
         "from assignment;")
     int getAssCntByAdm();
+    @Select("select count(*) " +
+        "from assignment where projectId = #{projId};")
+    int getAssCntByAdmAndProj(Long projId);
 
 
     @Select("select a.*, p.name projectName, u.name creatorName " +

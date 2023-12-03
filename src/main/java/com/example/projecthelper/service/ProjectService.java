@@ -6,6 +6,9 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.security.rbac.AdministratorAccess;
+import com.example.projecthelper.security.rbac.TaAccess;
+import com.example.projecthelper.security.rbac.TeacherAccess;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,21 +19,32 @@ import java.util.stream.Collectors;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProjectService {
-    @Autowired
-    private ProjectMapper projectMapper;
-    @Autowired
-    private UsersMapper usersMapper;
-    @Autowired
-    private NoticeMapper noticeMapper;
+
+    private final ProjectMapper projectMapper;
+    private final UsersMapper usersMapper;
+    private final NoticeMapper noticeMapper;
+    private final TeacherAccess teacherAccess;
+    private final TaAccess taAccess;
+    private final AdministratorAccess administratorAccess;
 
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
+    public ProjectService(ProjectMapper projectMapper, UsersMapper usersMapper,
+                          NoticeMapper noticeMapper, TeacherAccess teacherAccess, TaAccess taAccess,
+                          AdministratorAccess administratorAccess) {
+        this.projectMapper = projectMapper;
+        this.usersMapper = usersMapper;
+        this.noticeMapper = noticeMapper;
+        this.teacherAccess = teacherAccess;
+        this.taAccess = taAccess;
+        this.administratorAccess = administratorAccess;
+    }
 
     public List<Project> getProjectList(Long userId, int page, int page_size){
         User user = usersMapper.findUserById(userId);
@@ -80,9 +94,22 @@ public class ProjectService {
             }
     }
 
-    public KeyValueWrapper<List<Long>, List<String>> getStuList(Long pjId, Long userId){
-        if(!Objects.equals(userId, projectMapper.findTeacherByProject(pjId)))
-            throw new AccessDeniedException("无权修改查看别人的proj");
+    public KeyValueWrapper<List<Long>, List<String>> getStuList(Long pjId, Long userId, int identity){
+        Project project = projectMapper.findProjById(pjId);
+        switch (identity){
+            case 0:
+                if(!administratorAccess.accessProject(userId, project))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+            case 1:
+                if(!teacherAccess.accessProject(userId, project))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+            case 2:
+                if(!taAccess.accessProject(userId, project))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+        }
         List<Long> stuIds = projectMapper.findStuIdsByProject(pjId);
         List<String> names;
         if(stuIds != null && !stuIds.isEmpty())

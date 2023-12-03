@@ -56,14 +56,21 @@ public class UserController {
         this.noticeService = noticeService;
     }
 
-    @GetMapping("/get_pj_ntc_ass_cnt")
+    @GetMapping("/get-list/{project_id}")
     public ResponseResult<List<Integer>> getCnt(
-        HttpServletRequest request
+        HttpServletRequest request,
+        @PathVariable Long project_id
     ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<Integer> cnt = userService.getCnt(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt)));
+        List<Integer> cnt = userService.getCnt(
+            project_id,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt))
+        );
         return ResponseResult.ok(cnt, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    //PART I: project
     @GetMapping("/project-list/{page}/{page_size}/{user_id}")
     public ResponseResult<List<Project>> getProjectList(
         HttpServletRequest request,
@@ -78,6 +85,22 @@ public class UserController {
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/stu-list/{project_id}")
+    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
+        HttpServletRequest request, @PathVariable("project_id") Long pjId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(
+            projectService.getStuList(
+                pjId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+            ),
+            "Success", JWTUtil.updateJWT(jwt)
+        );
+    }
+
 
     @GetMapping("/intend_teammates/{project_id}/{user_id}")
     public ResponseResult<List<String>> getIntendTeammates(
@@ -200,5 +223,7 @@ public class UserController {
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
+
+
 
 }

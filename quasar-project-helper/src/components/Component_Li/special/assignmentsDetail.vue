@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md" style="">
     <div class="row justify-between">
-      <div class="col-6">
+      <div class="col-sm-12 col-xs-12 col-md-7 q-pa-md">
         <q-card ref="card1" :style="{'min-height':minHeight}" class="my-card">
           <q-item :style="{'height':'80px'}" clickable>
             <q-item-section avatar>
@@ -86,7 +86,7 @@
         </q-card>
       </div>
 
-      <div class="col-5">
+      <div class="col-sm-12 col-xs-12 col-md-5 q-pa-md">
         <q-card ref="card2" :style="{'min-height':minHeight}" class="my-card">
           <q-item :style="{'height':'80px'}" clickable>
             <q-item-section>
@@ -117,6 +117,12 @@
           </div>
 
           <!--      虚拟的分割线部分-->
+
+
+
+
+
+
           <!--      下半部分-->
           <q-separator color="white" size="35px"/>
           <!--      学生提交作业-->
@@ -264,7 +270,7 @@ export default defineComponent({
       fileName:'',
 
       width: '32%',
-      minHeight: '690px',
+      minHeight: '500px',
       formData: new FormData(),
 
       showPDF: ref(false),
@@ -304,7 +310,6 @@ export default defineComponent({
 
     handleFileClick(filePaths) {
       this.getAssFile(filePaths);
-
     },
 
     //**********************************POST***************************************

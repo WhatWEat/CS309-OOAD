@@ -1,12 +1,11 @@
 package com.example.projecthelper.controller;
 
-import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
+import com.example.projecthelper.service.SMSService;
 import com.example.projecthelper.service.UserService;
-import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
@@ -17,11 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,15 +32,17 @@ public class SecurityController {
     private final AuthService authService;
     private final UserService userService;
     private final FileService fileService;
+    private final SMSService smsService;
 
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
     public SecurityController(AuthService authService, UserService userService,
-                              FileService fileService) {
+                              FileService fileService, SMSService smsService) {
         this.authService = authService;
         this.userService = userService;
         this.fileService = fileService;
+        this.smsService = smsService;
     }
 
 
@@ -70,8 +67,13 @@ public class SecurityController {
     }
 
     @GetMapping("/signup")
-    public String signup_test(){
-        log.info("test, log successful");
+    public String signup_test() throws Exception {
+        try{
+            smsService.send_code();
+
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
         return "signup";
     }
 

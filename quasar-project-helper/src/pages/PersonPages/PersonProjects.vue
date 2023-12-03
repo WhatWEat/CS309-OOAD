@@ -6,7 +6,7 @@
       <q-separator></q-separator>
       <q-skeleton type="text" v-if="!isLoading">
       </q-skeleton>
-      <q-card-section v-else>
+      <q-card-section v-else-if="project_list?.length ?? false">
         <q-list v-if="identity===3">
           <project-exten v-for="project in project_list" :key="project.projectId"
                          :project="project"></project-exten>
@@ -17,6 +17,11 @@
                              :project="project" :ta_list_all="ta_list" :identity="identity"
                              :user_id="userid" :person_id="person_id"></project-exten-tea>
         </q-list>
+      </q-card-section>
+      <q-card-section v-else>
+        <q-item class="text-h3">
+          There is no project
+        </q-item>
       </q-card-section>
     </q-card>
   </div>
@@ -68,8 +73,8 @@ onMounted(() => {
   watchEffect(() => {
     if (identity.value !== -1 && !isLoading.value) {
       isLoading.value = true
-      api.get(`/project-list/0/10`).then(res => {
-        // api.get(`/project-list/0/10/${person_id}`).then(res => {
+      // api.get(`/project-list/0/10`).then(res => {
+        api.get(`/project-list/0/10/${person_id.value}`).then(res => {
         origin_project_list.value = res.data.body;
         project_list.value = origin_project_list.value
         isLoading.value = true

@@ -79,7 +79,7 @@
               <q-checkbox v-model="props.selected"/>
             </q-td>
             <q-td key="title" :props="props">
-              <span>{{ props.row.title }}</span>
+              <span>{{ truncate(props.row.title,10) }}</span>
               <q-popup-edit
                 v-model="props.row.title"
                 title="Update title"
@@ -138,8 +138,8 @@
                       {{ props.row.creatorName }}
                     </q-item-label>
                   </q-item-section>
-                  <q-item-section avatar>
-                    <q-btn round flat size="md" icon="edit">
+                  <q-item-section avatar v-if="identity <= 1 && identity >= 0 || props.row.creatorId === userid">
+                    <q-btn @click="openEdit(props.row)" round flat size="md" icon="edit">
                     </q-btn>
                   </q-item-section>
                 </q-item>
@@ -163,6 +163,9 @@
     <q-dialog v-model="isNewDialogOpen">
       <AddAnnouncement @save="onRefresh" :edit="false"/>
     </q-dialog>
+    <q-dialog v-model="isEditDialogOpen">
+      <AddAnnouncement @save="onRefresh" :edit="true" :notice="selectedNotice"/>
+    </q-dialog>
   </div>
 </template>
 
@@ -177,12 +180,9 @@ import {onMounted, ref, watch} from "vue";
 import {defaultNotice, noticeProps} from "src/composables/comInterface";
 import {api} from "boot/axios";
 import {useQuasar} from "quasar";
-import {useRouter} from "vue-router";
 import {useUserStore} from "src/composables/useUserStore";
-import {computed} from "vue-demi";
 import AddAnnouncement from "components/AnnouncementsList/addAnnouncement.vue";
 
-const router = useRouter();
 const $q = useQuasar();
 const data = ref<noticeProps[]>([defaultNotice]);
 const loading = ref(true),
@@ -278,7 +278,7 @@ function clickRejectGroup(notice: noticeProps) {
 
 // 保存
 function save(notice: noticeProps){
-  api.put('/tea/modify_notice', notice).then(res => {
+  api.put('/tea/modify_notice', notice).then(() => {
     $q.notify({
       position: 'top',
       message: 'save success',
@@ -292,7 +292,7 @@ function save(notice: noticeProps){
 // 删除操作
 function removeRow() {
   const selectedRows = [...selected.value.map((row) => row.noticeId)];
-  api.post('/tea/delete_notice', selectedRows).then(res => {
+  api.post('/tea/delete_notice', selectedRows).then(() => {
     $q.notify({
       position: 'top',
       message: 'delete success',
@@ -305,19 +305,10 @@ function removeRow() {
   selected.value = [];
 }
 
-async function created() {
-  await onRefresh();
-}
-
 function handleRowDbclick() {
   show_detail.value = true;
 }
 
-async function beforeRouteUpdate(to, from, next) {
-  console.info("beforeRouteUpdate");
-  await onRefresh();
-  next();
-}
 
 const projectID = ref(-1);
 onMounted(() => {
@@ -367,30 +358,20 @@ async function onRefresh() {
   }
 }
 
-function onRequestAction(value) {
-  console.info("onRequestAction");
-  console.info(value);
-  tablePagination.rowsPerPage = value.rowsPerPage;
-}
-
-// function getQuery() {
-//   let query = {};
-//   for (let i = 0; i < this.queryColumns.length; i++) {
-//     const queryColumn = this.queryColumns[i];
-//     if (queryColumn.value && queryColumn.value.trim() !== "") {
-//       query[queryColumn.name] = queryColumn.value;
-//     }
-//   }
-//   console.info(query);
-//   return query;
-// }
+// 打开新建框
 const isNewDialogOpen = ref(false);
 
 function onNewClickAction() {
   isNewDialogOpen.value = true;
   console.log('open dialog', isNewDialogOpen.value)
 }
-
+// 打开编辑框
+const isEditDialogOpen = ref(false);
+const selectedNotice = ref<noticeProps>();
+function openEdit(notice: noticeProps) {
+  selectedNotice.value = JSON.parse(JSON.stringify(notice));
+  isEditDialogOpen.value = true;
+}
 
 const tags = ref<Set<string>>(new Set());
 const currentInput = ref<string>("");

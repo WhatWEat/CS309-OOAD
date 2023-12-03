@@ -10,7 +10,7 @@
           {{ project.teacherName }}
         </q-item-label>
       </q-item-section>
-      <q-item-section side v-if="identity<=1 && identity >= 0 && person_id == user_id">
+      <q-item-section side v-if="identity==1 && person_id == user_id || identity==0">
         <q-btn flat @click.stop="clickEdit" label="Edit"></q-btn>
       </q-item-section>
       <q-dialog v-model="isEdit" persistent>

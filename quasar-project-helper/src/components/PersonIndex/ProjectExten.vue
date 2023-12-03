@@ -190,7 +190,7 @@ const person_id = ref(), {userid} = useUserStore();
 onMounted(() => {
   // todo 改成不同人看的不一样
   person_id.value = usePersonId();
-  api.get(`/stu/intend_teammates/${props.project.projectId}`).then(res => {
+  api.get(`/intend_teammates/${person_id.value}/${props.project.projectId}/`).then(res => {
     TeammateRequire.value = res.data.body
     console.log('teammates', res.data.body)
   }).catch(err => {

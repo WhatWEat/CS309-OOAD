@@ -231,18 +231,23 @@
         </q-card>
       </div>
     </div>
+    <div>测试事实上
+      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">
+      </PDFViewer>
+    </div>
   </div>
 
 
 <!--  作业预览部分-->
-  <div>
-      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">
-      </PDFViewer>
-  </div>
+<!--  <div>-->
+<!--      <q-btn @click></q-btn>-->
+<!--      <PDFViewer getApiUrl="/tea/get_submitted_ass_file/1/12110003/Week8-Transport1(1).pdf" fileName="name.pdf">-->
+<!--      </PDFViewer>-->
+<!--  </div>-->
 </template>
 
 <script>
-import {defineComponent,ref} from 'vue';
+import {defineAsyncComponent, defineComponent, ref} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import {getDownloadBlob} from "src/composables/usefulFunction";
@@ -250,7 +255,7 @@ import {getDownloadBlob} from "src/composables/usefulFunction";
 export default defineComponent({
   name: "AssignmentDetail",
   components: {
-    PDFViewer: () => import('src/components/ViewComponent/PDFViewer.vue'),
+    PDFViewer: defineAsyncComponent(() => import('src/components/ViewComponent/PDFViewer.vue')),
   },
   data() {
     return {
@@ -259,7 +264,6 @@ export default defineComponent({
       editorInput: '',
       grade: '',
       fileName:'',
-      getApiUrl:'',
 
       width: '32%',
       minHeight: '690px',
@@ -267,6 +271,9 @@ export default defineComponent({
 
       showPDF: ref(false),
     }
+  },
+  mounted() {
+    console.log('detail 加载');
   },
   methods: {
     onFilesAdded(files) {

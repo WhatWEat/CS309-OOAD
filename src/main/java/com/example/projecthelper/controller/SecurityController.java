@@ -4,7 +4,6 @@ import com.example.projecthelper.entity.User;
 import com.example.projecthelper.security.CustomJwtAuthenticationTokenFilter;
 import com.example.projecthelper.service.AuthService;
 import com.example.projecthelper.service.FileService;
-import com.example.projecthelper.service.SMSService;
 import com.example.projecthelper.service.UserService;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
@@ -32,17 +31,15 @@ public class SecurityController {
     private final AuthService authService;
     private final UserService userService;
     private final FileService fileService;
-    private final SMSService smsService;
 
     private final static Logger log = LoggerFactory.getLogger(SecurityController.class);
 
     @Autowired
     public SecurityController(AuthService authService, UserService userService,
-                              FileService fileService, SMSService smsService) {
+                              FileService fileService) {
         this.authService = authService;
         this.userService = userService;
         this.fileService = fileService;
-        this.smsService = smsService;
     }
 
 
@@ -68,12 +65,6 @@ public class SecurityController {
 
     @GetMapping("/signup")
     public String signup_test() throws Exception {
-        try{
-            smsService.send_code();
-
-        }catch (Exception e){
-            System.err.println(e.getMessage());
-        }
         return "signup";
     }
 

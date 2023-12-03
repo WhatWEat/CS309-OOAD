@@ -203,7 +203,8 @@ public class NoticeService {
     public void createRecruitmentNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
-        if(group == null || !Objects.equals(
+        if(group == null || groupMapper.findGroupOfStuInProject(userId, group.getProjectId()) == null
+            ||!Objects.equals(
             groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
             group.getGroupId())){
             throw new InvalidFormException("无效的groupId");

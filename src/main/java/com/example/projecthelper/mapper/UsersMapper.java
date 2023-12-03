@@ -31,6 +31,12 @@ public interface UsersMapper extends BaseMapper<User> {
     })
     List<User> findTaByProj(Long projId);
 
+    @Select("select * from users u join stuinproject t on u.userId = t.stuid where t.projectId = #{projId};")
+    @Results({
+            @Result(property = "programmingSkills", column = "programmingskills", typeHandler = StringListArrayTypeHandler.class)
+    })
+    List<User> findStuByProj(Long projId);
+
     @Select({
         "<script>",
         "SELECT * FROM users",

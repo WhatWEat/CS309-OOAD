@@ -56,19 +56,21 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 //    void removeGroupAss(long assignmentId, long groupId);
 
     @Select("""
-            SELECT sa.submitId, sa.assignmentId, sa.grade, sa.projectId, sa.text, sa.comment, sa.filepath, sa.review
+            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup
             FROM submittedAssignment sa
-            JOIN stuSubmit ss ON sa.submitId = ss.submitId
-            WHERE sa.projectId = #{projectId} AND ss.stuId = #{stuId};
+            join assignment a on sa.assignmentid = a.assignmentid
+            WHERE type = 'i' and projectId = #{projectId} AND submitterid = #{stuId};
             """)
+
     List<SubmittedAssignment> findStuSubByProject(long projectId, long stuId);
 
     @Select("""
-            SELECT sa.submitId, sa.assignmentId, sa.grade, sa.projectId, sa.text, sa.comment, sa.filepath, sa.review
+            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup
             FROM submittedAssignment sa
-            JOIN groupSubmit gs ON sa.submitId = gs.submitId
-            WHERE sa.projectId = #{projectId} AND gs.groupId = #{groupId};
+            join assignment a on sa.assignmentid = a.assignmentid
+            WHERE type = 'g' and projectId = #{projectId} AND submitterid = #{groupId};
             """)
+
     List<SubmittedAssignment> findGroupSubByProject(long projectId, long groupId);
 
     @Select("""
@@ -77,6 +79,9 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
             JOIN stuSubmit ss ON sa.submitId = ss.submitId
             WHERE sa.assignmentid = #{assignmentId} AND ss.stuId = #{stuId};
             """)
+    @Results({
+            @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
     SubmittedAssignment findStuSubByAss(long assignmentId, long stuId);
 
     @Select("""
@@ -182,5 +187,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     @Select("SELECT AVG(grade) FROM evaluation WHERE commentedgroup = #{commentedgroup};")
     float avgGrade(long commentedgroup);
 
+    @Select("select * from evaluation where projectid = #{projectid} and commentgroup = #{commentgroup}")
+    List<Evaluation> selectCommented(long projectid,long commentgroup);
 
 }

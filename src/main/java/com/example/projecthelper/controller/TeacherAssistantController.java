@@ -76,46 +76,46 @@ public class TeacherAssistantController {
 //        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
 //    }
 
-    @PostMapping("/post_notice")
-    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        System.err.println(notice);
-        noticeService.postNotice(
-            notice,
-            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-            pjId -> Objects.equals(
-                projectService.checkTaInProj(pjId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PostMapping("/post_notice")
+//    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        System.err.println(notice);
+//        noticeService.postNotice(
+//            notice,
+//            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+//            pjId -> Objects.equals(
+//                projectService.checkTaInProj(pjId, Long.parseLong(JWTUtil.getUserIdByToken(jwt))),
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//            )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
-    @PutMapping("/modify_notice")
-    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.modifyNoticeWithUser(
-            notice,
-            ntId -> Objects.equals(
-                noticeService.findNoticeById(ntId).getCreatorId(),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
-
-    @PostMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeId){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.deleteNotice(
-            noticeId,
-            ntId -> Objects.equals(
-                noticeService.findNoticeById(ntId).getCreatorId(),
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            )
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PutMapping("/modify_notice")
+//    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.modifyNoticeWithUser(
+//            notice,
+//            ntId -> Objects.equals(
+//                noticeService.findNoticeById(ntId).getCreatorId(),
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//            )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
+//
+//    @PostMapping("/delete_notice")
+//    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeId){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.deleteNotice(
+//            noticeId,
+//            ntId -> Objects.equals(
+//                noticeService.findNoticeById(ntId).getCreatorId(),
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//            )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
 //    @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")

@@ -19,11 +19,15 @@ import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -164,6 +168,37 @@ public class UserController {
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
 
+    @PostMapping("/post_notice")
+    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        System.err.println(notice);
+        noticeService.postNotice(
+            notice,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
+    @PutMapping("/modify_notice")
+    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        noticeService.modifyNotice(
+            notice,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/delete_notice")
+    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        noticeService.deleteNotice(
+            noticeIds,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
 
 }

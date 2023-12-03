@@ -104,53 +104,53 @@ public class TeacherController {
 //        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
 //    }
 
-    @PostMapping("/post_notice")
-    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        System.err.println(notice);
-        noticeService.postNotice(
-                notice,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                pjId -> Objects.equals(
-                        projectService.findTeacherByProject(pjId),
-                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                )
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PostMapping("/post_notice")
+//    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        System.err.println(notice);
+//        noticeService.postNotice(
+//                notice,
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+//                pjId -> Objects.equals(
+//                        projectService.findTeacherByProject(pjId),
+//                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
-    @PutMapping("/modify_notice")
-    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.modifyNoticeWithUser(
-                notice,
-                ntId -> {
-                    Notice ntc = noticeService.findNoticeById(ntId);
-                    return Objects.equals(
-                            projectService.findTeacherByProject(ntc.getProjectId()),
-                            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                    ) && ntc.getType() == 0;
-                }
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PutMapping("/modify_notice")
+//    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.modifyNoticeWithUser(
+//                notice,
+//                ntId -> {
+//                    Notice ntc = noticeService.findNoticeById(ntId);
+//                    return Objects.equals(
+//                            projectService.findTeacherByProject(ntc.getProjectId()),
+//                            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                    ) && ntc.getType() == 0;
+//                }
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
-    @PostMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.deleteNotice(
-            noticeIds,
-            ntId -> {
-                Notice ntc = noticeService.findNoticeById(ntId);
-                return Objects.equals(
-                    projectService.findTeacherByProject(ntc.getProjectId()),
-                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                ) && ntc.getType() == 0;
-            }
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PostMapping("/delete_notice")
+//    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.deleteNotice(
+//            noticeIds,
+//            ntId -> {
+//                Notice ntc = noticeService.findNoticeById(ntId);
+//                return Objects.equals(
+//                    projectService.findTeacherByProject(ntc.getProjectId()),
+//                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                ) && ntc.getType() == 0;
+//            }
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
     @GetMapping("/get_ta_list_of_proj/{proj_id}")

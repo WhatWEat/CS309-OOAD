@@ -10,6 +10,7 @@
         :rows="rows"
         :selected="selected"
         :separator="separator"
+        :grid="$q.screen.lt.sm"
         card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
@@ -270,6 +271,7 @@ import {defineAsyncComponent, ref} from "vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import {formatDateString, formatDateStringPro, getUserData, merger} from "src/composables/usefulFunction";
+import {useQuasar} from "quasar";
 //import {api} from 'boot/axios';
 //import {defineAsyncComponent, ref} from 'vue';
 //import {useUserStore} from 'src/composables/useUserStore';
@@ -283,7 +285,7 @@ export default {
       projectId: '',
 
       groupId: '-1',
-
+      $q: useQuasar(),
       disableList: {
         members: true,
         creationTime: true,

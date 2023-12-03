@@ -360,6 +360,7 @@ watch(pagination, (newVal, oldVal) => {
   }
 });
 // 获取身份,avatar
+// TODO TA无法发消息,改端点
 const {userid, identity} = useUserStore(),
   avatarMap = ref<Map<number, string | null>>(new Map<number, string | null>());
 

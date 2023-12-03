@@ -19,11 +19,15 @@ import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -52,14 +56,21 @@ public class UserController {
         this.noticeService = noticeService;
     }
 
-    @GetMapping("/get_pj_ntc_ass_cnt")
+    @GetMapping("/get-list/{project_id}")
     public ResponseResult<List<Integer>> getCnt(
-        HttpServletRequest request
+        HttpServletRequest request,
+        @PathVariable Long project_id
     ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<Integer> cnt = userService.getCnt(Long.parseLong(JWTUtil.getUserIdByToken(jwt)), Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt)));
+        List<Integer> cnt = userService.getCnt(
+            project_id,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Long.parseLong(JWTUtil.getIdentityCodeByToken(jwt))
+        );
         return ResponseResult.ok(cnt, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    //PART I: project
     @GetMapping("/project-list/{page}/{page_size}/{user_id}")
     public ResponseResult<List<Project>> getProjectList(
         HttpServletRequest request,
@@ -74,6 +85,22 @@ public class UserController {
         );
         return ResponseResult.ok(projects, "Success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping("/stu-list/{project_id}")
+    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
+        HttpServletRequest request, @PathVariable("project_id") Long pjId
+    ){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        return ResponseResult.ok(
+            projectService.getStuList(
+                pjId,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+            ),
+            "Success", JWTUtil.updateJWT(jwt)
+        );
+    }
+
 
     @GetMapping("/intend_teammates/{project_id}/{user_id}")
     public ResponseResult<List<String>> getIntendTeammates(
@@ -162,6 +189,39 @@ public class UserController {
             default -> throw new InvalidFormException("不合法的身份");
         };
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/post_notice")
+    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        System.err.println(notice);
+        noticeService.postNotice(
+            notice,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PutMapping("/modify_notice")
+    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        noticeService.modifyNotice(
+            notice,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/delete_notice")
+    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        noticeService.deleteNotice(
+            noticeIds,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
 

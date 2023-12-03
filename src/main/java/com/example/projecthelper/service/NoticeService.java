@@ -11,14 +11,15 @@ import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
 import com.example.projecthelper.mapper.ProjectMapper;
 import com.example.projecthelper.mapper.UsersMapper;
+import com.example.projecthelper.security.rbac.AdministratorAccess;
+import com.example.projecthelper.security.rbac.TaAccess;
+import com.example.projecthelper.security.rbac.TeacherAccess;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.aspectj.weaver.ast.Not;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -32,16 +33,32 @@ import java.util.stream.Collectors;
 
 @Service
 public class NoticeService {
-    @Autowired
-    private NoticeMapper noticeMapper;
-    @Autowired
-    private ProjectMapper projectMapper;
-    @Autowired
-    private UsersMapper usersMapper;
-    @Autowired
-    private GroupMapper groupMapper;
+
+    private final NoticeMapper noticeMapper;
+
+    private final ProjectMapper projectMapper;
+
+    private final UsersMapper usersMapper;
+
+    private final GroupMapper groupMapper;
+
+    private final TeacherAccess teacherAccess;
+    private final TaAccess taAccess;
+    private final AdministratorAccess administratorAccess;
 
     private final Logger logger = LoggerFactory.getLogger(GroupService.class);
+
+    public NoticeService(NoticeMapper noticeMapper, ProjectMapper projectMapper,
+                         UsersMapper usersMapper, GroupMapper groupMapper, TeacherAccess teacherAccess,
+                         TaAccess taAccess, AdministratorAccess administratorAccess) {
+        this.noticeMapper = noticeMapper;
+        this.projectMapper = projectMapper;
+        this.usersMapper = usersMapper;
+        this.groupMapper = groupMapper;
+        this.teacherAccess = teacherAccess;
+        this.taAccess = taAccess;
+        this.administratorAccess = administratorAccess;
+    }
 
     private Set<Long> toStu(Notice notice) {
         Set<Long> toIds = null;
@@ -164,6 +181,33 @@ public class NoticeService {
         }
     }
 
+    public void postNotice(Notice notice, Long creatorId, int identity) {
+        notice.setCreatorId(creatorId);
+        notice.setType(0);
+        notice.setCreateTime(LocalDateTime.now());
+        switch (identity){
+            case 1:
+                if(!teacherAccess.accessNotice(creatorId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+            case 2:
+                if(!taAccess.accessNotice(creatorId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+        }
+        if(projectMapper.findProjById(notice.getProjectId()) == null)
+            throw new InvalidFormException("project 不存在");
+        try {
+            noticeMapper.createNotice(notice);
+            System.err.println(notice.getNoticeId());
+            Set<Long> toIds = toStu(notice);
+            if (!toIds.isEmpty())
+                noticeMapper.insertStuView(toIds, notice.getNoticeId());
+        } catch (Exception e) {
+            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+        }
+    }
+
     public static final int APPLICATION = 0;
     public static final int INVITATION = 1;
     public static final int REMOVE = 2;
@@ -203,7 +247,8 @@ public class NoticeService {
     public void createRecruitmentNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
-        if(group == null || !Objects.equals(
+        if(group == null || groupMapper.findGroupOfStuInProject(userId, group.getProjectId()) == null
+            ||!Objects.equals(
             groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
             group.getGroupId())){
             throw new InvalidFormException("无效的groupId");
@@ -368,11 +413,41 @@ public class NoticeService {
 
 
     //PROC：get Notice --> get noticeId --> compare creatorId and id in JWT --> update
-    public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice) {
+//    public void modifyNoticeWithUser(Notice notice, Predicate<Long> accessNotice) {
+//        try {
+//            if (!accessNotice.test(notice.getNoticeId()))
+//                throw new AccessDeniedException("您没有权限修改该公告");
+//            notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+//            noticeMapper.updateNotice(notice);
+//            Set<Long> toIds = toStu(notice);
+//            noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
+//            System.err.println("toIds" + toIds);
+//            if (!toIds.isEmpty())
+//                noticeMapper.insertStuView(toIds, notice.getNoticeId());
+//        } catch (Exception e) {
+//            System.err.println(e.getMessage());
+//            throw new InvalidFormException("title or content is null");
+//        }
+//    }
+
+    public void modifyNotice(Notice notice, Long userId, int identity) {
+        notice.setType(0);
+        notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+        switch (identity){
+            case 0:
+                if(!administratorAccess.accessNotice(userId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+            case 1:
+                if(!teacherAccess.accessNotice(userId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+            case 2:
+                if(!taAccess.accessNotice(userId, notice))
+                    throw new AccessDeniedException("您没有权限发布该公告");
+                break;
+        }
         try {
-            if (!accessNotice.test(notice.getNoticeId()))
-                throw new AccessDeniedException("您没有权限修改该公告");
-            notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
             noticeMapper.updateNotice(notice);
             Set<Long> toIds = toStu(notice);
             noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());
@@ -386,12 +461,31 @@ public class NoticeService {
     }
 
     //PROC：get noticeId --> compare creatorId and id in JWT --> delete --> deleteStuView
-    public void deleteNotice(List<Long> noticeIds, Predicate<Long> accessNotice) {
+//    public void deleteNotice(List<Long> noticeIds, Predicate<Long> accessNotice) {
+//        noticeIds.forEach(noticeId -> {
+//            if (accessNotice.test(noticeId)) {
+//                noticeMapper.deleteNotice(noticeId);
+//                noticeMapper.deleteStuViewNoticeByNotice(noticeId);
+//            }
+//        });
+//
+//    }
+
+    public void deleteNotice(List<Long> noticeIds, Long userId, int identity) {
         noticeIds.forEach(noticeId -> {
-            if (accessNotice.test(noticeId)) {
-                noticeMapper.deleteNotice(noticeId);
-                noticeMapper.deleteStuViewNoticeByNotice(noticeId);
+            Notice notice = noticeMapper.findNoticeById(noticeId);
+            switch (identity){
+                case 1:
+                    if(!teacherAccess.accessNotice(userId, notice))
+                        throw new AccessDeniedException("您没有权限发布该公告");
+                    break;
+                case 2:
+                    if(!taAccess.accessNotice(userId, notice))
+                        throw new AccessDeniedException("您没有权限发布该公告");
+                    break;
             }
+            noticeMapper.deleteNotice(noticeId);
+            noticeMapper.deleteStuViewNoticeByNotice(noticeId);
         });
 
     }

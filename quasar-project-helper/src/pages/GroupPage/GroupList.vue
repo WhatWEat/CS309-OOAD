@@ -63,19 +63,73 @@
       </q-table>
     </div>
 
+    <!--  这里是本小组信息部分-->
+    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== '-1'">
+      <div class="col-12 justify-between">
+        <DirectoryCard_Input :disable-list="disableList"
+                             :group-data=formData_user_self
+                             :isGroupLeader="isGroupLeader"
+                             :style="{width: '100%' , 'border-radius': '20px'}"
+                             avatar="https://i.postimg.cc/P5HTzptm/img.png">
+          <template v-slot:members_btn>
 
-    <!--    这里是表格之下的其他内容-->
-    <div class="q-mt-md">
-      Dev :
-      Selected {{ JSON.stringify(selected) }}
+          </template>
+          <template v-slot:invite_detail_input>
+            <!--          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"-->
+            <!--                   outlined>-->
+            <!--            <template v-slot:append>-->
+            <!--              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>-->
+            <!--            </template>-->
+            <!--            <template v-slot:hint>-->
+            <!--              Length hint-->
+            <!--            </template>-->
+            <!--            <template v-slot:after>-->
+            <!--              <q-btn dense flat icon="send" round @click="handleSendInvite"/>-->
+            <!--            </template>-->
+            <!--          </q-input>-->
+          </template>
+          <template v-slot:right_btn>
+            <q-item-label>
+              <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
+                     @click="show_invite_member=!show_invite_member"/>
+            </q-item-label>
+            <q-item-label v-if="!isGroupLeader">
+              <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
+            </q-item-label>
+            <q-item-label v-else>
+              <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
+            </q-item-label>
+          </template>
+        </DirectoryCard_Input>
+      </div>
+      <div class="q-pa-lg q-gutter-md">
+        <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
+          <q-card>
+            <q-card-section>
+              <div class="align-middle">
+                <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
+                          outlined @keyup.enter.stop="handleSendInvite">
+                  <template v-slot:append>
+                    <q-btn dense rounded flat v-show="invite_member_id !== ''">
+                      <q-icon name="close" @click="invite_member_id = ''"/>
+                    </q-btn>
+                  </template>
+                  <template v-slot:hint>
+                    Length hint
+                  </template>
+                  <template v-slot:after>
+                    <q-btn dense flat icon="send" round @click="handleSendInvite" />
+                  </template>
+                </q-input>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-dialog>
+      </div>
     </div>
   </div>
 
   <!--  这里是本组信息部分-->
-
-
-  <div>{{ this.card_data.moreInfo }}</div>
-
 
   <!--  这里是弹窗部分-->
 
@@ -208,73 +262,6 @@
         </template>
       </confirm-dialog>
     </q-dialog>
-  </div>
-
-
-  <!--  这里是本小组信息部分-->
-  <div class="row wrap justify-center items-start">
-    <div class="col-11 justify-between">
-      {{ groupId }}
-      <DirectoryCard_Input :disable-list="disableList"
-                           :group-data=formData_user_self
-                           :isGroupLeader="isGroupLeader"
-                           :style="{width: '100%' , 'border-radius': '20px'}"
-                           avatar="https://i.postimg.cc/P5HTzptm/img.png">
-        <template v-slot:members_btn>
-
-        </template>
-        <template v-slot:invite_detail_input>
-<!--          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"-->
-<!--                   outlined>-->
-<!--            <template v-slot:append>-->
-<!--              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>-->
-<!--            </template>-->
-<!--            <template v-slot:hint>-->
-<!--              Length hint-->
-<!--            </template>-->
-<!--            <template v-slot:after>-->
-<!--              <q-btn dense flat icon="send" round @click="handleSendInvite"/>-->
-<!--            </template>-->
-<!--          </q-input>-->
-        </template>
-        <template v-slot:right_btn>
-          <q-item-label>
-            <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
-                   @click="show_invite_member=!show_invite_member"/>
-          </q-item-label>
-          <q-item-label v-if="!isGroupLeader">
-            <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
-          </q-item-label>
-          <q-item-label v-else>
-            <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
-          </q-item-label>
-        </template>
-      </DirectoryCard_Input>
-    </div>
-    <div class="q-pa-lg q-gutter-md">
-      <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
-        <q-card>
-          <q-card-section>
-            <div class="align-middle">
-              <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
-                       outlined @keyup.enter.stop="handleSendInvite">
-                <template v-slot:append>
-                  <q-btn dense rounded flat v-show="invite_member_id !== ''">
-                    <q-icon name="close" @click="invite_member_id = ''"/>
-                  </q-btn>
-                </template>
-                <template v-slot:hint>
-                  Length hint
-                </template>
-                <template v-slot:after>
-                  <q-btn dense flat icon="send" round @click="handleSendInvite" />
-                </template>
-              </q-input>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-dialog>
-    </div>
   </div>
 </template>
 

@@ -20,9 +20,9 @@
       <template v-slot:top-right>
         <q-toolbar class="bg-grey-5 text-white rounded-borders">
           <!--            这里是下拉框-->
-          <q-btn-dropdown color="grey-5" icon="menu">
+          <q-btn-dropdown v-if="this.userData.identity!==3" color="grey-5" icon="menu">
             <q-list>
-              <q-item v-close-popup clickable @click="show_create_ass_table = true">
+              <q-item  v-close-popup clickable @click="show_create_ass_table = true">
                 <q-item-section>
                   <q-item-label class="text-weight-bold">Create Assignment</q-item-label>
                 </q-item-section>
@@ -57,15 +57,16 @@
   </div>
   <div v-show="show_button_teacher & true">
     <q-dialog v-model="show_deleteDialog_teacher">
-      <confirm-dialog text="Are you sure to delete?" icon_name="warning" icon_color="red" icon_text_color="white"></confirm-dialog>
+      <confirm-dialog icon_color="red" icon_name="warning" icon_text_color="white"
+                      text="Are you sure to delete?"></confirm-dialog>
     </q-dialog>
   </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail  :project-id="projectId"
-                        :group-id="groupId"
-                        :AssignmentAttachment="AssignmentAttachment"
-                        :AssignmentDetail="AssignmentDetail"></AssignmentsDetail>
+    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
+                       :AssignmentDetail="AssignmentDetail"
+                       :group-id="groupId"
+                       :project-id="projectId"></AssignmentsDetail>
   </div>
   <!--  右键弹窗部分-->
   <div>
@@ -87,7 +88,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
-      <assignment-form @unfold="this.show_create_ass_table = false"></assignment-form>
+      <assignment-form @unfold="this.show_create_ass_table = false" :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
     </el-dialog>
   </div>
   <!--  修改作业表单部分-->
@@ -96,7 +97,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Assignment</div>
       </template>
-      <assignment-form></assignment-form>
+      <assignment-form :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
     </el-dialog>
   </div>
 </template>
@@ -179,6 +180,8 @@ export default defineComponent({
       },
 
       userData: useUserStore(),
+      projectId_temp: this.projectId,
+      groupId_temp:this.groupId,
 
       columns_temp: cloneDeep(this.columns),
       rows_temp: cloneDeep(this.rows),
@@ -214,8 +217,8 @@ export default defineComponent({
           '\n' +
           'No late submission is allowed.',
         filePaths: null,
-        files:null,
-        type:null,
+        files: null,
+        type: null,
       },
       AssignmentAttachment: [
         {
@@ -237,8 +240,8 @@ export default defineComponent({
       this.$q.notify({
         type: 'positive',
         message: 'Switch assignment Success',
-        position:'top',
-        progress:true,
+        position: 'top',
+        progress: true,
         timeout: 1000,
       })
     },
@@ -266,13 +269,15 @@ export default defineComponent({
     //获取指定作业的详细信息
     getSelectedAssignment(assignmentsId) {
       api.get('/ass/' + assignmentsId).then((res) => {
-        console.log('获取作业的详细返回值在这里' + res)
-        console.log (res)
-        let  res_body = res.data.body.key;
+        // console.log('获取作业的详细返回值在这里' + res)
+        // console.log(res)
+        let res_body = res.data.body.key;
+        let res_value = res.data.body.value;
+
         this.AssignmentDetail.assignmentId = assignmentsId;
         this.AssignmentDetail.AssignmentName = res_body.title;
-        this.AssignmentDetail.deadLine = res_body.deadline.slice(0,19).replace('T',' ');
-        this.AssignmentDetail.grade = (res_body.grade === -1) ? 'Not Graded' : res_body.grade;
+        this.AssignmentDetail.deadLine = res_body.deadline.slice(0, 19).replace('T', ' ');
+        this.AssignmentDetail.grade = (res_value === null) ? 'Not Graded' : res_value.grade;
         this.AssignmentDetail.state = res_body.state;
         this.AssignmentDetail.moreInfo = res_body.description;
         this.AssignmentDetail.instructor = res_body.creatorName;
@@ -285,19 +290,19 @@ export default defineComponent({
             return 'Returned'
           }
         }
-        this.AssignmentDetail.state =  res_body.state;
+        this.AssignmentDetail.state = res_body.state;
         this.AssignmentDetail.matGrade = res_body.fullMark;
         this.AssignmentDetail.studentName = this.userData.username;
         // 这里把releaseTime当作submitTime
-        this.AssignmentDetail.submitTime = res_body.releaseTime.slice(0,19).replace('T',' ');
+        this.AssignmentDetail.submitTime = (res_value === null) ? 'Not Submitted' : res_value.submittedTime.slice(0, 19).replace('T', ' ');
         this.AssignmentDetail.files = res_body.files;
         this.AssignmentDetail.filePaths = res_body.filePaths;
-        this.AssignmentDetail.type =  res_body.type;
+        this.AssignmentDetail.type = res_body.type;
 
-        console.log ("AssignmentDetail: ")
-        console.log (this.AssignmentDetail)
-        console.log ("res.data: ")
-        console.log (res.data)
+        // console.log ("AssignmentDetail: ")
+        // console.log (this.AssignmentDetail)
+        // console.log ("res.data: ")
+        // console.log (res.data)
       }).catch((err) => {
         console.log(err);
       })
@@ -315,6 +320,18 @@ export default defineComponent({
       },
       deep: true
     },
+    projectId:{
+      handler: function (newVal, oldVal) {
+        this.projectId_temp = cloneDeep(newVal);
+      },
+      deep: true
+    },
+    groupId:{
+      handler: function (newVal, oldVal) {
+        this.groupId_temp = cloneDeep(newVal);
+      },
+      deep: true
+    }
   }
 })
 </script>

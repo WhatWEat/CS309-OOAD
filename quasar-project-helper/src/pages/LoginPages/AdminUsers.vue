@@ -15,23 +15,34 @@
   <div class="q-pa-md">
 
 <!--    此处是创建-->
-    <q-file color="purple-12" v-model="model1" label="upload file to create">
+    <q-file
+      color="purple-12"
+      v-model="model1"
+      label="upload file to create"
+      @change="showDialog1"
+    >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
       </template>
     </q-file>
+    <q-dialog v-model="isShowDialog1" >
+      <p>Are you sure to save this file</p>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar1"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar1"/>
+      </q-card-actions>
+    </q-dialog>
     <q-table
       title="Create"
       :rows="data1"
       :columns="columns"
       :filter="filter1"
       row-key="name"
-      v-model:pagination="pagination1"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
+          <q-td key="userId" :props="props">
+            <span>{{ props.row.userId }}</span>
           </q-td>
           <q-td key="password" :props="props">
             <span>{{ props.row.password }}</span>
@@ -55,32 +66,37 @@
     <q-separator v-if="data1.length > 0"/>
 
 <!--    此处是重置-->
-    <q-file color="purple-12" v-model="model2" label="upload file to reset">
+    <q-file
+      color="purple-12"
+      v-model="model2"
+      label="upload file to reset"
+      @change="showDialog2"
+    >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
       </template>
     </q-file>
+    <q-dialog v-model="isShowDialog2" >
+      <p>Are you sure to save this file</p>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar2"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar2"/>
+      </q-card-actions>
+    </q-dialog>
     <q-table
       title="Reset"
       :rows="data2"
       :columns="columns"
       :filter="filter2"
       row-key="name"
-      v-model:pagination="pagination2"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
+          <q-td key="userId" :props="props">
+            <span>{{ props.row.userId }}</span>
           </q-td>
           <q-td key="password" :props="props">
             <span>{{ props.row.password }}</span>
-          </q-td>
-          <q-td key="email" :props="props">
-            <span>{{ props.row.email }}</span>
-          </q-td>
-          <q-td key="phone" :props="props">
-            <span>{{ props.row.phone }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -96,32 +112,34 @@
 
 
 <!--    此处是冻结-->
-    <q-file color="purple-12" v-model="model3" label="upload file to freeze">
+    <q-file
+      color="purple-12"
+      v-model="model3"
+      label="upload file to freeze"
+      @change="showDialog3"
+    >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
       </template>
     </q-file>
+    <q-dialog v-model="isShowDialog3" >
+      <p>Are you sure to save this file</p>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar3"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar3"/>
+      </q-card-actions>
+    </q-dialog>
     <q-table
       title="Freeze"
       :rows="data3"
-      :columns="columns"
+      :columns="columns1"
       :filter="filter3"
       row-key="name"
-      v-model:pagination="pagination3"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
-          </q-td>
-          <q-td key="password" :props="props">
-            <span>{{ props.row.password }}</span>
-          </q-td>
-          <q-td key="email" :props="props">
-            <span>{{ props.row.email }}</span>
-          </q-td>
-          <q-td key="phone" :props="props">
-            <span>{{ props.row.phone }}</span>
+          <q-td key="userId" :props="props">
+            <span>{{ props.row.userID }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -136,32 +154,34 @@
     <q-separator v-if="data3.length > 0"/>
 
 <!--    此处是解冻-->
-    <q-file color="purple-12" v-model="model4" label="upload file to unfreeze">
+    <q-file
+      color="purple-12"
+      v-model="model4"
+      label="upload file to unfreeze"
+      @change="showDialog4"
+    >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
       </template>
     </q-file>
+    <q-dialog v-model="isShowDialog4" >
+      <p>Are you sure to save this file</p>
+      <q-card-actions class="q-px-md">
+        <q-btn label="Upload" color='green' @click="saveUploadAvatar4"/>
+        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar4"/>
+      </q-card-actions>
+    </q-dialog>
     <q-table
       title="Unfreeze"
       :rows="data4"
-      :columns="columns"
+      :columns="columns1"
       :filter="filter4"
       row-key="name"
-      v-model:pagination="pagination4"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
-          </q-td>
-          <q-td key="password" :props="props">
-            <span>{{ props.row.password }}</span>
-          </q-td>
-          <q-td key="email" :props="props">
-            <span>{{ props.row.email }}</span>
-          </q-td>
-          <q-td key="phone" :props="props">
-            <span>{{ props.row.phone }}</span>
+          <q-td key="userId" :props="props">
+            <span>{{ props.row.userId }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -180,22 +200,18 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDateString} from "src/composables/usefulFunction";
 import { ref, watch} from 'vue';
 import {
   defaultCreate,
   defaultFreeze,
   defaultReset,
   defaultUnfreeze,
-  gradeProps
 } from "src/composables/comInterface";
 import {api} from "boot/axios"
-import {useQuasar} from "quasar";
 import { useRouter } from 'vue-router'
 import PersonBar from "components/Layout/PersonBar.vue";
 
 const  router = useRouter()
-const projectID = ref(router.currentRoute.value.params.projectID)
 const data1 = ref<createProps[]>([defaultCreate]);
 const data2 = ref<resetProps[]>([defaultReset]);
 const data3 = ref<freezeProps[]>([defaultFreeze]);
@@ -204,11 +220,11 @@ const filter1 = ref(''), filter2 = ref(''), filter3 = ref(''), filter4 = ref('')
 const model1 = ref(null), model2 = ref(null), model3 = ref(null), model4 = ref(null)
 const columns = [
   {
-    name: "studentID",
+    name: "userId",
     required: true,
     label: "studentID",
     align: "left",
-    field: row => row.studentID,
+    field: row => row.userId,
     format: val => `${val}`,
     sortable: true
   },
@@ -238,77 +254,125 @@ const columns = [
   },
 ]
 
-const pagination1 = ref({
-  page: 1,
-  rowsPerPage: 10,
-})
+const columns1 = [
+  {
+    name: "userId",
+    required: true,
+    label: "studentID",
+    align: "left",
+    field: row => row.userId,
+    format: val => `${val}`,
+    sortable: true
+  },
+]
 
-const pagination2 = ref({
-  page: 1,
-  rowsPerPage: 10,
-})
 
-const pagination3 = ref({
-  page: 1,
-  rowsPerPage: 10,
-})
+const isShowDialog1 = ref(false);
+const excel_file1 = ref();
 
-const pagination4 = ref({
-  page: 1,
-  rowsPerPage: 10,
-})
-watch(pagination1, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
-    onRefresh1();
-  }
-})
-
-watch(pagination2, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
-    onRefresh2();
-  }
-})
-
-watch(pagination3, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
-    onRefresh3();
-  }
-})
-
-watch(pagination4, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
-    onRefresh4();
-  }
-})
-async function onRefresh1() {
-  api.post(`/adm/create_multiple_users_with_file`).then((res) => {
-    data1.value = res.data.body;
-  }).catch((err) => {
-    console.log('err', err)
-  })
+function showDialog1() {
+  isShowDialog1.value = true;
 }
-async function onRefresh2() {
-  api.get(`/batch-reset/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
-    data2.value = res.data2.body;
 
-  }).catch((err) => {
-    console.log('err', err)
-  })
+function saveUploadAvatar1() {
+  isShowDialog1.value = false;
+  if(model1.value){
+    excel_file1.value = model1.value;
+    let formdata = new FormData();
+    formdata.append('file',excel_file1.value);
+    api.post('/adm/create_multiple_users_with_file',formdata).then((res)=>{
+      data1.value = res.data.body;
+      console.log('data1',data1.value)
+    }).catch((err)=>{
+      console.log('err', err)
+    })
+  }
 }
-async function onRefresh3() {
-  api.get(`/batch-freeze/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
-    data3.value = res.data3.body;
 
-  }).catch((err) => {
-    console.log('err', err)
-  })
+function cancelUploadAvatar1() {
+  isShowDialog1.value = false;
+  model1.value = null;
 }
-async function onRefresh4() {
-  api.get(`/batch-unfreeze/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
-    data4.value = res.data4.body;
 
-  }).catch((err) => {
-    console.log('err', err)
-  })
+const isShowDialog2 = ref(false);
+const excel_file2 = ref();
+
+function showDialog2() {
+  isShowDialog2.value = true;
+}
+
+function saveUploadAvatar2() {
+  isShowDialog2.value = false;
+  if(model2.value){
+    excel_file2.value = model2.value;
+    let formdata = new FormData();
+    formdata.append('file',excel_file2.value);
+    api.post('/adm/reset_pass_for_multiple_users',formdata).then((res)=>{
+      data2.value = res.data.body;
+      console.log('data2',data2.value);
+    }).catch((err)=>{
+      console.log('err', err);
+    })
+  }
+}
+
+function cancelUploadAvatar2() {
+  isShowDialog2.value = false;
+  model2.value = null;
+}
+
+const isShowDialog3 = ref(false);
+const excel_file3 = ref();
+
+function showDialog3() {
+  isShowDialog3.value = true;
+}
+
+function saveUploadAvatar3() {
+  isShowDialog3.value = false;
+  if(model3.value){
+    excel_file3.value = model3.value;
+    let formdata = new FormData();
+    formdata.append('file',excel_file3.value);
+    api.post('/adm/freeze_multiple_users',formdata).then((res)=>{
+      data3.value = res.data.body;
+      console.log('data3',data3.value);
+    }).catch((err)=>{
+      console.log('err', err);
+    })
+  }
+}
+
+function cancelUploadAvatar3() {
+  isShowDialog3.value = false;
+  model3.value = null;
+}
+
+
+const isShowDialog4 = ref(false);
+const excel_file4 = ref();
+
+function showDialog4() {
+  isShowDialog4.value = true;
+}
+
+function saveUploadAvatar4() {
+  isShowDialog4.value = false;
+  if(model4.value){
+    excel_file4.value = model4.value;
+    let formdata = new FormData();
+    formdata.append('file',excel_file4.value);
+    api.post('/adm/unfreeze_multiple_users',formdata).then((res)=>{
+      data4.value = res.data.body;
+      console.log('data4',data4.value);
+    }).catch((err)=>{
+      console.log('err', err);
+    })
+  }
+}
+
+function cancelUploadAvatar4() {
+  isShowDialog4.value = false;
+  model4.value = null;
 }
 </script>

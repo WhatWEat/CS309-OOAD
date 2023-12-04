@@ -28,12 +28,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import("pages/IndexPages/IndexProjectPage.vue"),
       },
       {
-        path: "sgrade",
+        path: "grade",
         component: () => import("pages/Grades/StudentGrade.vue"),
-      },
-      {
-        path: "tgrade",
-        component: () => import("pages/Grades/TeacherGrade.vue"),
       },
       {
         path: "group-list",

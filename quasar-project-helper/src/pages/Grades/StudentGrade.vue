@@ -5,7 +5,7 @@
       color="purple-12"
       v-model="model"
       label="upload file to grade"
-      @update:model-value="onFileChange"
+      @change = "showDialog"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -20,6 +20,7 @@
     </q-dialog>
     <q-table
       title="Grades"
+      :grid="$q.screen.lt.sm"
       :rows="data"
       :columns="columns"
       :filter="filter"
@@ -27,13 +28,52 @@
       v-model:pagination="pagination"
       :loading="isLoadingGrade"
       flat>
+      <template v-slot:item="props">
+        <div
+          class="q-py-xs col-12 grid-style-transition"
+          :style="props.selected ? 'transform: scale(0.95);' : ''"
+        >
+          <q-card :class="props.selected ? 'bg-grey-2' : ''">
+            <q-card-section class="row items-center">
+              <q-checkbox dense v-model="props.selected" :label="props.row.name"/>
+              <q-space>
+              </q-space>
+            </q-card-section>
+            <q-separator/>
+            <q-list dense>
+              <q-item v-for="col in props.cols.filter(col => col.name !== 'submittedTime')"
+                      :key="col.name">
+                <q-item-section>
+                  <q-item-label>{{ col.label }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label caption>
+                    <div v-html="truncate(col.value,20)">
+                    </div>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label> submittedTime</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label caption>
+                    {{ formatDateString(props.row.submittedTime) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
+      </template>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="homework" :props="props">
-            <span>{{ props.row.name }}</span>
+          <q-td key="assignmentId" :props="props">
+            <span>{{ props.row.assignmentId }}</span>
           </q-td>
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
+          <q-td key="submitterId" :props="props">
+            <span>{{ props.row.submitterId }}</span>
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
@@ -57,11 +97,8 @@
               />
             </q-popup-edit>
           </q-td>
-          <q-td key="reviewerName" :props="props">
-            <span>{{ props.row.reviewerName }}</span>
-          </q-td>
-          <q-td key="createTime" :props="props">
-            <span>{{ formatDateString(props.row.createTime) }}</span>
+          <q-td key="submittedTime" :props="props">
+            <span>{{ formatDateString(props.row.submittedTime) }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -75,49 +112,49 @@
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
-  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-      <bar-chart></bar-chart>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-      <line-chart></line-chart>
-    </div>
-  </div>
+<!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
+<!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--      <bar-chart></bar-chart>-->
+<!--    </div>-->
+<!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--      <line-chart></line-chart>-->
+<!--    </div>-->
+<!--  </div>-->
 </template>
 
 <script lang="ts" setup>
-import {formatDateString, useProjectId} from "src/composables/usefulFunction";
+import {formatDateString, truncate, useProjectId} from "src/composables/usefulFunction";
 import {onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
 import { useRouter } from 'vue-router'
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
-import BarChart from "components/Chart/BarChart.vue";
-import LineChart from "components/Chart/LineChart.vue";
+//import BarChart from "components/Chart/BarChart.vue";
+//import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
 const  router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
-const data = ref<gradeProps[]>([defaultGrade]);
+const data = ref<gradeProps[]>([]);
 const filter = ref('')
-const model = ref(null),isShowDialog = ref(false), avatar_preview = ref('')
+
 const columns = [
   {
-    name: "homework",
+    name: "assignmentId",
     required: true,
-    label: "homework",
+    label: "assignmentId",
     align: "left",
-    field: row => row.name,
+    field: row => row.assignmentId,
     format: val => `${val}`,
     sortable: true
   },
   {
-    name: "studentID",
+    name: "submitterId",
     required: true,
-    label: "studentID",
+    label: "submitterId",
     align: "left",
-    field: row => row.studentID,
+    field: row => row.submitterId,
     format: val => `${val}`,
     sortable: true
   },
@@ -140,20 +177,11 @@ const columns = [
     sortable: true
   },
   {
-    name: "reviewerName",
+    name: "submittedTime",
     required: true,
-    label: "reviewer",
-    align: "center",
-    field: row => row.reviewerName,
-    format: val => `${val}`,
-    sortable: true
-  },
-  {
-    name: "createTime",
-    required: true,
-    label: "create time",
+    label: "submitted time",
     align: "left",
-    field: row => row.createTime,
+    field: row => row.submittedTime,
     format: val => `${val}`,
     sortable: true
   },
@@ -184,35 +212,29 @@ async function onRefresh() {
   isLoadingGrade.value = true;
   if (identity.value == 3) {
     // TODO 增加分页
-    console.log('shouji ')
     api
       .get(
         `/stu/GradeBook/${project_id.value}`
       )
       .then((res) => {
         data.value = res.data.body;
-        console.log(data.value)
-        console.log('success')
         isLoadingGrade.value = false;
       }).catch((err) => {
       console.log('err', err)
-      console.log('cuowu')
     });
   }else if(identity.value !== -1) {
     api
       .get(
-        `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
-          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
-        }`
+        `/tea/allGradeBook/${project_id.value}`
       )
       .then((res) => {
-        console.log('identity',identity.value)
-        console.log('res',res)
-        const hashmap = res.data;
+        let hashmap = res.data.body;
+        let saveData = []
         for (const [studentID, grades] of Object.entries(hashmap)) {
-          data.value.studentID = studentID;
-          data.value = grades
+          saveData = saveData.concat(grades);
         }
+        data.value = saveData;
+        console.log(data.value);
         isLoadingGrade.value = false;
       })
       .catch((err) => {
@@ -229,19 +251,32 @@ async function onRefresh() {
 //   await onRefresh();
 //   next();
 // }
-
+const model = ref(null),isShowDialog = ref(false);
+const excel_file = ref();
 function saveUploadAvatar() {
   isShowDialog.value = false;
-  if(model.value){
-    data.value.name = model.value.name;
-    model.value = null;
-  }
+  // if(model.value){
+  //   excel_file.value = model.value;
+  //   let formdata = new FormData();
+  //   formdata.append('file',excel_file.value);
+  //   api.post('/usr',formdata).then((res)=>{
+  //   }).catch((err)=>{
+  //
+  //   })
+  // }
+}
+
+
+function showDialog() {
+  isShowDialog.value = true;
+  console.log('isShowDialog', isShowDialog.value)
 }
 
 function cancelUploadAvatar() {
   isShowDialog.value = false;
   model.value = null;
 }
+
 function onFileChange(){
   const file = model.value
   if(file){

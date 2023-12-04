@@ -95,8 +95,16 @@ public interface UsersMapper extends BaseMapper<User> {
     //identity, password, name, gender均不为空，identity为整数
     void updateStuInformation(User user)throws PSQLException;
 
+    @Update("update users set email = #{email} where userId = #{userId};")
+    void updateEmail(Long userId, String email);
+    @Update("update users set phone = #{phone} where userId = #{userId};")
+    void updatePhone(Long userId, String phone);
+
     @Update("update users set password = #{password} where userId = #{userId};")
     void changePass(Long userId, String password);
+
+    @Update("update users set password = #{password} where email = #{email};")
+    void changePassByEmail(String email, String password);
 
     @Update({
         "<script>",

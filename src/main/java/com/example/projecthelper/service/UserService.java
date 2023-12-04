@@ -1,5 +1,6 @@
 package com.example.projecthelper.service;
 
+import com.aliyun.tea.TeaException;
 import com.example.projecthelper.Exceptions.AccountFrozenException;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.config.RedisConfig;
@@ -290,7 +291,17 @@ public class UserService {
             return null;
         }
     }
+    public String checkCodeMassage(String code,String phone){
+        User user = usersMapper.findUserByPhone(phone);
+        String value = stringRedisTemplate.opsForValue().get(phone);
 
+        if (value == null || !value.equals(code)){
+            throw new InvalidFormException("验证码错误");
+        }else {
+            stringRedisTemplate.delete(phone);
+            return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+        }
+    }
 
     //发送带有验证码的邮件
     public void sendMail(String to, FUNCTION function, boolean mustExist) {
@@ -303,7 +314,6 @@ public class UserService {
         }
 
         Random random = new Random();
-        StringBuilder sb = new StringBuilder();
 
         Long remainingTime = stringRedisTemplate.getExpire(getRedisKey(to, function));
         System.err.println(remainingTime);
@@ -311,7 +321,7 @@ public class UserService {
         if (remainingTime > 8*60){
             throw new InvalidFormException("发送过于频繁");
         }
-
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 6; i++) {
             sb.append(random.nextInt(10));
         }
@@ -352,10 +362,74 @@ public class UserService {
         __MODIFY_NUMBER_
     }
 
+    public static com.aliyun.dysmsapi20170525.Client createClient() throws Exception {
+        com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config()
+                // 必填，您的 AccessKey ID
+                .setAccessKeyId("LTAI5t9Ai1hwm7VcXdFYh8AE")
+                // 必填，您的 AccessKey Secret
+                .setAccessKeySecret("KTnYB2D6IcfL7jthDlw8wp0o5EGTSl");
+        // Endpoint 请参考 https://api.aliyun.com/product/Dysmsapi
+        config.endpoint = "dysmsapi.aliyuncs.com";
+        return new com.aliyun.dysmsapi20170525.Client(config);
+    }
 
 
-    
-    // 数据库功能测试
+    public void sendMassage(String to) throws Exception {
+//        User user = usersMapper.findUserByPhone(to);
+//        if(user == null)
+//            throw new InvalidFormException("手机号错误");
+//        if(user.isFrozen())
+//            throw new AccountFrozenException("账户已冻结");
+
+        Random random = new Random();
+
+        long remainingTime = stringRedisTemplate.getExpire(to);
+
+        //发送后两分钟内不允许再次发送
+        if (remainingTime > 8*60){
+            throw new InvalidFormException("发送过于频繁");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            sb.append(random.nextInt(10));
+        }
+        String code = sb.toString();
+
+
+//        java.util.List<String> args = java.util.Arrays.asList(args_);
+        // 请确保代码运行环境设置了环境变量 ALIBABA_CLOUD_ACCESS_KEY_ID 和 ALIBABA_CLOUD_ACCESS_KEY_SECRET。
+        // 工程代码泄露可能会导致 AccessKey 泄露，并威胁账号下所有资源的安全性。以下代码示例使用环境变量获取 AccessKey 的方式进行调用，仅供参考，建议使用更安全的 STS 方式，更多鉴权访问方式请参见：https://help.aliyun.com/document_detail/378657.html
+        com.aliyun.dysmsapi20170525.Client client = createClient();
+        com.aliyun.dysmsapi20170525.models.SendSmsRequest sendSmsRequest = new com.aliyun.dysmsapi20170525.models.SendSmsRequest()
+                .setSignName("张未硕的博客")
+                .setTemplateCode("SMS_464081183")
+                .setPhoneNumbers(to)
+                .setTemplateParam("{\"code\":\""+code+"\"}");
+        System.out.println("{\"code\":\""+code+"\"}");
+        com.aliyun.teautil.models.RuntimeOptions runtime = new com.aliyun.teautil.models.RuntimeOptions();
+        try {
+            // 复制代码运行请自行打印 API 的返回值
+            client.sendSmsWithOptions(sendSmsRequest, runtime);
+        } catch (TeaException error) {
+            // 错误 message
+            System.out.println(error.getMessage());
+            // 诊断地址
+            System.out.println(error.getData().get("Recommend"));
+            com.aliyun.teautil.Common.assertAsString(error.message);
+        } catch (Exception _error) {
+            TeaException error = new TeaException(_error.getMessage(), _error);
+            // 错误 message
+            System.out.println(error.getMessage());
+            // 诊断地址
+            System.out.println(error.getData().get("Recommend"));
+            com.aliyun.teautil.Common.assertAsString(error.message);
+        }
+
+        //发送邮件后开始计时,有效时间十分钟
+        stringRedisTemplate.opsForValue().set(to, code, Duration.ofMinutes(10));
+    }
+
+            // 数据库功能测试
 
 
 }

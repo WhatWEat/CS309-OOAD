@@ -200,21 +200,27 @@ const phone_code = ref("");
 
 function sendPhoneCode() {
   // TODO 发送手机验证码
-  // api.get()
-  $q.notify({
-    color: "green",
-    textColor: "white",
-    icon: "mail",
-    message: "Code has been sent",
-  });
-  // 开始倒计时
-  countdown_phone.value = 60;
-  const interval = setInterval(() => {
-    countdown_phone.value--;
-    if (countdown_phone.value === 0) {
-      clearInterval(interval);
-    }
-  }, 1000);
+  api.post(`/request_code`, loginPhone.value,{
+    headers: {
+      'Content-Type': 'text/plain'
+    }}).then(res => {
+    console.log('合成',email)
+    $q.notify({
+      color: "green",
+      textColor: "white",
+      icon: "mail",
+      message: "Code has been sent",
+    });
+    countdown.value = 60;
+    const interval = setInterval(() => {
+      countdown.value--;
+      if (countdown.value === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }).catch(err => {
+    console.log(err)
+  })
 }
 
 function getLoginValueRules() {

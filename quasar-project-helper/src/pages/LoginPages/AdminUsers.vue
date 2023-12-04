@@ -27,7 +27,6 @@
       :filter="filter1"
       row-key="name"
       v-model:pagination="pagination1"
-      :loading="loading"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -68,7 +67,6 @@
       :filter="filter2"
       row-key="name"
       v-model:pagination="pagination2"
-      :loading="loading"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -110,7 +108,6 @@
       :filter="filter3"
       row-key="name"
       v-model:pagination="pagination3"
-      :loading="loading"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -151,7 +148,6 @@
       :filter="filter4"
       row-key="name"
       v-model:pagination="pagination4"
-      :loading="loading"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
@@ -204,7 +200,6 @@ const data1 = ref<createProps[]>([defaultCreate]);
 const data2 = ref<resetProps[]>([defaultReset]);
 const data3 = ref<freezeProps[]>([defaultFreeze]);
 const data4 = ref<unfreezeProps[]>([defaultUnfreeze]);
-const loading = ref(true)
 const filter1 = ref(''), filter2 = ref(''), filter3 = ref(''), filter4 = ref('')
 const model1 = ref(null), model2 = ref(null), model3 = ref(null), model4 = ref(null)
 const columns = [
@@ -286,40 +281,31 @@ watch(pagination4, (newVal, oldVal)=>{
   }
 })
 async function onRefresh1() {
-  loading.value = true
-  api.get(`/batch-create/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
-    data1.value = res.data1.body;
-    loading.value = false
-
+  api.post(`/adm/create_multiple_users_with_file`).then((res) => {
+    data1.value = res.data.body;
   }).catch((err) => {
     console.log('err', err)
   })
 }
 async function onRefresh2() {
-  loading.value = true
   api.get(`/batch-reset/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
     data2.value = res.data2.body;
-    loading.value = false
 
   }).catch((err) => {
     console.log('err', err)
   })
 }
 async function onRefresh3() {
-  loading.value = true
   api.get(`/batch-freeze/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
     data3.value = res.data3.body;
-    loading.value = false
 
   }).catch((err) => {
     console.log('err', err)
   })
 }
 async function onRefresh4() {
-  loading.value = true
   api.get(`/batch-unfreeze/${pagination.value.page-1}/${pagination.value.rowsPerPage}`).then((res) => {
     data4.value = res.data4.body;
-    loading.value = false
 
   }).catch((err) => {
     console.log('err', err)

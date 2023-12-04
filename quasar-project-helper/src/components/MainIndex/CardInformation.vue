@@ -99,9 +99,9 @@
                   <q-item v-for="msg in messages" :key="msg.noticeId" clickable v-ripple>
                     <q-item-section>
                       <q-item-label>{{ msg.title }}</q-item-label>
-                      <q-item-label caption lines="1" class="ellipsis">{{
-                          truncate(msg.content)
-                        }}
+                      <q-item-label caption lines="1" class="ellipsis">
+                        <div v-html="truncate(msg.content)">
+                        </div>
                       </q-item-label>
                     </q-item-section>
                     <q-item-section side>

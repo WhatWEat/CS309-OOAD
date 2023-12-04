@@ -1,34 +1,67 @@
 <template>
-  <div class="app-header">
-    <span v-if="showAllPages">
+  <!--  Edited By Li Weihao-->
+  <q-header elevated >
+    <q-bar>
+      <q-icon name="description"/>
+      <span v-if="showAllPages">
         {{ pageCount }} page(s)
     </span>
-    <span v-else>
+      <span v-else>
         <button :disabled="page <= 1" @click="page--">❮</button>
         {{ page }} / {{ pageCount }}
         <button :disabled="page >= pageCount" @click="page++">❯</button>
     </span>
-    <q-btn flat size="sm" square icon="file_download" @click="downloadBase64File(pdfSource, props.fileName)">
-    </q-btn>
-    <label class="right">
-      <input v-model="showAllPages" type="checkbox">
-      Show all pages
-    </label>
-  </div>
+      <q-btn dense flat icon="file_download" size="sm" square @click="downloadBase64File(pdfSource, props.fileName)">
+        <q-tooltip class="bg-white text-primary">DownLoad</q-tooltip>
+      </q-btn>
+
+
+      <q-space></q-space>
+      <div>PDF Viewer</div>
+
+      <q-space/>
+      <div>Show All</div>
+      <q-checkbox v-model="showAllPages" :color="'grey-7'" dense>
+        <q-tooltip class="bg-white text-primary"> Show all pages
+        </q-tooltip>
+      </q-checkbox>
+      <q-btn v-close-popup dense flat icon="close">
+        <q-tooltip class="bg-white text-primary">Close</q-tooltip>
+      </q-btn>
+    </q-bar>
+  </q-header>
+  <!--  顶部部分-->
+  <!--  <div class="app-header">-->
+  <!--    <span v-if="showAllPages">-->
+  <!--        {{ pageCount }} page(s)-->
+  <!--    </span>-->
+  <!--    <span v-else>-->
+  <!--        <button :disabled="page <= 1" @click="page&#45;&#45;">❮</button>-->
+  <!--        {{ page }} / {{ pageCount }}-->
+  <!--        <button :disabled="page >= pageCount" @click="page++">❯</button>-->
+  <!--    </span>-->
+  <!--    <q-btn flat icon="file_download" size="sm" square @click="downloadBase64File(pdfSource, props.fileName)">-->
+  <!--    </q-btn>-->
+  <!--    <label class="right">-->
+  <!--      <input v-model="showAllPages" type="checkbox">-->
+  <!--      Show all pages-->
+  <!--    </label>-->
+  <!--  </div>-->
+  <!-- 下面挂载的内容-->
   <div class="app-content">
-    <q-skeleton height="100vh" v-if="!isLoading"></q-skeleton>
+    <q-skeleton v-if="!isLoading" height="100vh"></q-skeleton>
     <vue-pdf-embed
-      ref="pdfRef"
       v-else
-      @loaded="handleLoaded"
-      :source="pdfSource"
+      ref="pdfRef"
       :page="page"
+      :source="pdfSource"
+      @loaded="handleLoaded"
       @rendered="handleDocumentRender"
     />
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {onMounted, ref, watch} from 'vue'
 import VuePdfEmbed from 'vue-pdf-embed'
 import {api} from "boot/axios";
@@ -43,15 +76,15 @@ const props = defineProps<{
   getApiUrl: string
   fileName: string
 }>();
-onMounted(()=>{
-  console.log("mounte PDF界面")
-  api.get(props.getApiUrl,{responseType: 'blob'}).then(res=>{
-    console.log("成功api")
-    blobToBase64(res.data).then(base64 =>{
+onMounted(() => {
+  // console.log("mounte PDF界面")
+  api.get(props.getApiUrl, {responseType: 'blob'}).then(res => {
+    // console.log("成功api")
+    blobToBase64(res.data).then(base64 => {
       pdfSource.value = base64;
       isLoading.value = true;
     })
-  }).catch(err=>{
+  }).catch(err => {
     console.log(err)
   })
 })
@@ -65,11 +98,13 @@ watch(showAllPages, (value) => {
     page.value = 1
   }
 })
+
 // loading
 function handleLoaded() {
 
-  console.log('loaded')
+  // console.log('loaded')
 }
+
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -82,6 +117,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
     };
   });
 };
+
 function downloadBase64File(base64Data: string, fileName: string) {
   const byteCharacters = atob(base64Data.split(',')[1]);
   const byteNumbers = new Array(byteCharacters.length);
@@ -89,7 +125,7 @@ function downloadBase64File(base64Data: string, fileName: string) {
     byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
   const byteArray = new Uint8Array(byteNumbers);
-  const fileBlob = new Blob([byteArray], { type: 'application/octet-stream' });
+  const fileBlob = new Blob([byteArray], {type: 'application/octet-stream'});
 
   const blobUrl = URL.createObjectURL(fileBlob);
 

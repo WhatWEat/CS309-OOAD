@@ -80,6 +80,9 @@
     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
       <line-chart></line-chart>
     </div>
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+      <pie-chart-chart></pie-chart-chart>
+    </div>
   </div>
 </template>
 
@@ -93,6 +96,7 @@ import LineChart from "components/Chart/LineChart.vue"
 import BarChart from "components/Chart/BarChart.vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
+import PieChart from "components/Chart/PieChart.vue";
 
 const {identity} = useUserStore();
 const  router = useRouter()

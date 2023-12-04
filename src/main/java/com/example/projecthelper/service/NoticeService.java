@@ -3,9 +3,7 @@ package com.example.projecthelper.service;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.Group;
 import com.example.projecthelper.entity.Notice;
-import com.example.projecthelper.entity.NoticeFactory.AbstractNoticeFactory;
-import com.example.projecthelper.entity.NoticeFactory.ApplicationFactory;
-import com.example.projecthelper.entity.NoticeFactory.InvitationFactory;
+import com.example.projecthelper.entity.NoticeFactory.*;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.GroupMapper;
 import com.example.projecthelper.mapper.NoticeMapper;
@@ -353,13 +351,13 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory anf = new ApplicationFactory();
+            AbstractNoticeFactory rmf = new TransferFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
 
-            notice = anf.createNotice(notice);
+            notice = rmf.createNotice(notice);
             for(Long stuId: stuIds){
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.REMOVE.getValue());
                 if(previous != null){
@@ -398,13 +396,13 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory anf = new ApplicationFactory();
+            AbstractNoticeFactory rmf = new RemoveFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
 
-            notice = anf.createNotice(notice);
+            notice = rmf.createNotice(notice);
             for(Long stuId: stuIds){
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.TRANSFER.getValue());
                 if(previous != null){

@@ -117,7 +117,8 @@ export function merger(key: any, value: any): object {
     // 处理 key 为字符串的情况
     obj[key] = value;
   } else {
-    throw new Error("Invalid argument types");
+    return {};
+    // throw new Error("Invalid argument types");
   }
 
   return obj;

@@ -212,7 +212,7 @@ public class FileUtil {
     }
 
     public static boolean hasExtension(MultipartFile file, String extension){
-        return Objects.requireNonNull(file.getOriginalFilename()).endsWith(extension);
+        return Objects.requireNonNull(file.getOriginalFilename()).endsWith(extension) || ".*".equals(extension);
     }
 
     public static String toPdfExtension(String filename){

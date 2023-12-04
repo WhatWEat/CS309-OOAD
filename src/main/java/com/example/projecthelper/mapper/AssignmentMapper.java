@@ -141,6 +141,12 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     })
     SubmittedAssignment findSubAssById(long assignmentId, long submitterId);
 
+    @Select("select * from submittedAssignment where assignmentid =#{assignmentId} order by submittedTime limit 1;")
+    @Results({
+        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    SubmittedAssignment findLatestSubAssByAssId(long assignmentId);
+
 
 }
 

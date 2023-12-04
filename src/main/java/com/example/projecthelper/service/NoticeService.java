@@ -342,7 +342,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory tsf = new TransferFactory();
+            AbstractNoticeFactory rmf = new TransferFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
@@ -393,7 +393,7 @@ public class NoticeService {
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
 
-            notice = tsf.createNotice(notice);
+            notice = rmf.createNotice(notice);
             for(Long stuId: stuIds){
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.TRANSFER.getValue());
                 if(previous != null){

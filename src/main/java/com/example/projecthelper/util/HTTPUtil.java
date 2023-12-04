@@ -9,9 +9,10 @@ import java.util.HashSet;
 
 public class HTTPUtil {
     public static final String TOKEN_HEADER = "Token";
-    public static final String [] IGNORE_PATTERN = {"/login", "/logout", "/signup", "/request_code", "/login_with_email_code"};
+    public static final String [] IGNORE_PATTERN = {"/login", "/logout", "/signup", "/request_code","/request_massage",
+            "/login_with_email_code","/login_with_message_code"};
 
-    public static final String [] REQUEST_CODE = {"/request_code"};
+    public static final String [] REQUEST_CODE = {"/request_code","/request_massage"};
 
     public static String getHeader(jakarta.servlet.http.HttpServletRequest request, String HeaderName) {
         return request.getHeader(HeaderName);

@@ -260,6 +260,21 @@ public class GroupService {
             throw new AccessDeniedException("无权修改小组信息");
     }
 
+    public void updateGroupForLeader(Group group, long userId) {
+        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+
+        if (group.getLeaderId() == userId) {
+            group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
+            try {
+                groupMapper.updateGroupForTea(group);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else
+            throw new AccessDeniedException("无权修改小组信息");
+    }
+
     public void deleteGroupForTea(Long groupId, Long userId){
         if(!Objects.equals(userId, groupMapper.findCreatorByGroup(groupId))){
             throw new AccessDeniedException("无权删除小组");
@@ -442,18 +457,18 @@ public class GroupService {
         }
     }
 
-    public void updateGroupForLeader(Group group, long user_id) {
-        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
-        long leader_id;
-        leader_id = groupMapper.findLeaderByGroup(group.getGroupId());
-        if (leader_id == user_id) {
-            try {
-                groupMapper.updateGroupForLeader(group);
-            } catch (PSQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+//    public void updateGroupForLeader(Group group, long user_id) {
+//        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+//        long leader_id;
+//        leader_id = groupMapper.findLeaderByGroup(group.getGroupId());
+//        if (leader_id == user_id) {
+//            try {
+//                groupMapper.updateGroupForLeader(group);
+//            } catch (PSQLException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
 
 //    public void updateGroupInstructor(long instructor_id, long group_id) {
 //        try {

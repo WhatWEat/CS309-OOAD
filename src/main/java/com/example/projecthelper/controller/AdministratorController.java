@@ -45,49 +45,48 @@ public class AdministratorController {
     @PostMapping("/create_multiple_users_with_file")
     public ResponseResult<Object> createMultipleUsersWithFile(
         HttpServletRequest request,
-        @RequestParam("password") String password,
         @RequestParam("file") MultipartFile file){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        authService.createMultipleUsersWithFile(
-            file,
-            new KeyValueWrapper<>(JWTUtil.getUserIdByToken(jwt), password)
+        List<User> result = authService.createMultipleUsersWithFile(
+            file
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/reset_pass_for_multiple_users")
-    public ResponseResult<Object> resetPassForMultiUsers(@RequestBody
-                                                      KeyValueWrapper<String, KeyValueWrapper<String, List<Long>>> multiUsersIdAndPass, HttpServletRequest request){
+    public ResponseResult<List<User>> resetPassForMultiUsers(
+        @RequestParam("file") MultipartFile file,
+        HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        authService.resetPassForMultiUsers(
-            multiUsersIdAndPass.getValue(),
-            new KeyValueWrapper<>(JWTUtil.getUserIdByToken(jwt), multiUsersIdAndPass.getKey())
+        List<User> result = authService.resetPassForMultiUsers(
+            file
         );
 
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/freeze_multiple_users")
-    public ResponseResult<Object> freezeMultiUsers(@RequestBody
-                                                        KeyValueWrapper<List<Long>, String> multiUsersIdAndPass, HttpServletRequest request){
+    public ResponseResult<Object> freezeMultiUsers(
+        @RequestParam("file") MultipartFile file,
+        HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        authService.freezeMultiUsers(
-            multiUsersIdAndPass.getKey(),
-            new KeyValueWrapper<>(JWTUtil.getUserIdByToken(jwt), multiUsersIdAndPass.getValue())
+        List<Long> result = authService.freezeMultiUsers(
+            file
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PutMapping("/unfreeze_multiple_users")
-    public ResponseResult<Object> unfreezeMultiUsers(@RequestBody
-                                                        KeyValueWrapper<List<Long>, String> multiUsersIdAndPass, HttpServletRequest request){
+    public ResponseResult<Object> unfreezeMultiUsers(
+        @RequestParam("file") MultipartFile file,
+        HttpServletRequest request
+    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
 
-        authService.unfreezeMultiUsers(
-            multiUsersIdAndPass.getKey(),
-            new KeyValueWrapper<>(JWTUtil.getUserIdByToken(jwt), multiUsersIdAndPass.getValue())
+        List<Long> result = authService.unfreezeMultiUsers(
+            file
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
 
 

@@ -73,12 +73,16 @@ public class SecurityController {
     public ResponseResult<Object> editPersonalInfo(
         HttpServletRequest request,
         @RequestParam("name") String name,
+        @RequestParam("email") String email,
+        @RequestParam("phone") String phone,
         @RequestParam("gender") String gender,
         @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
         @RequestParam(value = "programmingSkills", required = false) List<String> programmingSkills,
         @RequestParam(value = "avatar", required = false) MultipartFile avatar){
         User user = new User();
         user.setName(name);
+        user.setEmail(email);
+        user.setPhone(phone);
         user.setGender(gender);
         user.setBirthday(birthday);
         user.setProgrammingSkills(programmingSkills);

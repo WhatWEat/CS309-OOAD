@@ -197,7 +197,7 @@ function sendEmailCode() {
 const countdown_phone = ref(0);
 const loginPhone = ref("");
 const phone_code = ref("");
-
+// TODO 没有清理上次登录的jwt
 function sendPhoneCode() {
   // TODO 发送手机验证码
   api.post(`/request_code`, loginPhone.value,{

@@ -13,6 +13,7 @@ import com.example.projecthelper.service.GroupService;
 import com.example.projecthelper.service.NoticeService;
 import com.example.projecthelper.service.ProjectService;
 import com.example.projecthelper.service.UserService;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
@@ -23,6 +24,10 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -152,10 +157,28 @@ public class UserController {
 
         return ResponseResult.ok(assignment, "success", JWTUtil.updateJWT(jwt));
     }
+
+    @GetMapping(value = "/get_submitted_ass_file/{assignment_id}/{submitter_id}/{filename}")
+    public ResponseEntity<Resource> getSubmittedAssFile(
+        @PathVariable("assignment_id") Long assignmentId,
+        @PathVariable("submitter_id") Long submitter_id,
+        @PathVariable("filename") String filename,
+        HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfSubmittedAss(userId, submitter_id, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
     @GetMapping(value = "/ass-list/{project_id}/{page}/{page_size}")
     public ResponseResult<List<Assignment>> getAssignments(@PathVariable("project_id") Long projectId,
-                                                           @PathVariable("page") long page,
-                                                           @PathVariable("page_size") long pageSize,
+                                                           @PathVariable("page") int page,
+                                                           @PathVariable("page_size") int pageSize,
                                                            HttpServletRequest request) {
         // Use the projectId, page, and pageSize in your method
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
@@ -170,6 +193,8 @@ public class UserController {
 
         return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
     }
+
+
 
     @GetMapping(value = {"/notice-list/{project_id}/{page}/{page_size}", "/notice-list/{project_id}/{page}/{page_size}/{search_key}"})
     public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,

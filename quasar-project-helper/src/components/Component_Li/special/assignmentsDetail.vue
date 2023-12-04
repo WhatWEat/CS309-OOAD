@@ -2,7 +2,7 @@
   <div class="" style="">
     <div class="row justify-between">
       <div class="col-sm-12 col-xs-12 col-md-7 q-pa-md">
-        <q-card ref="card1" :style="{'min-height':minHeight}" class="my-card">
+        <q-card ref="card1" :style="{'min-height':minHeight}" class="my-card rounded-xl">
           <q-item :style="{'height':'80px'}" clickable>
             <q-item-section avatar>
               <q-btn flat round size="lg">
@@ -99,7 +99,7 @@
       </div>
 
       <div class="col-sm-12 col-xs-12 col-md-5 q-pa-md">
-        <q-card ref="card2" :style="{'min-height':minHeight}" class="my-card">
+        <q-card ref="card2" :style="{'min-height':minHeight}" class="my-card rounded-xl">
           <q-item :style="{'height':'80px'}" clickable>
             <q-item-section>
               <q-item-label class="text-h5 text-weight-bold">Assignment attachment</q-item-label>
@@ -217,6 +217,7 @@
                   style="width: 100%"
                   @added="onFilesAdded"
                   @removed="onFilesRemoved"
+                  class="rounded-lg"
                 ></q-uploader>
               </q-item-section>
             </q-item>
@@ -225,7 +226,8 @@
               <q-item-section>
                 <q-editor
                   v-model="editorInput" :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
-                  placeholder="Type your description here...">
+                  placeholder="Type your description here..."
+                  class="rounded-lg">
                 </q-editor>
               </q-item-section>
             </q-item>

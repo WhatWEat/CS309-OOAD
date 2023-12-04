@@ -106,6 +106,9 @@ public interface UsersMapper extends BaseMapper<User> {
     @Update("update users set password = #{password} where email = #{email};")
     void changePassByEmail(String email, String password);
 
+    @Update("update users set password = #{password} where phone = #{phone};")
+    void changePassByPhone(String phone, String password);
+
     @Update({
         "<script>",
         "  <foreach collection='users' item='user' separator=';'>",

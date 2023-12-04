@@ -206,7 +206,6 @@ public class UserService {
     }
     public String checkCodeMassage(String code,String phone){
         User user = usersMapper.findUserByPhone(phone);
-
         String value = stringRedisTemplate.opsForValue().get(phone);
 
         if (value == null || !value.equals(code)){

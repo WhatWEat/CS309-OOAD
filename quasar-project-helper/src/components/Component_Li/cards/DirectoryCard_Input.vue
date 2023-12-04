@@ -1,5 +1,5 @@
 <template>
-  <q-card bordered class="rounded-xl" >
+  <q-card bordered class="rounded-xl">
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
@@ -230,13 +230,14 @@
         </q-item-section>
         <q-item-section avatar>
           <q-item-label lines="1">Member Administer</q-item-label>
-          <q-btn  flat :style="{'min-width':'130px'}">
+          <q-btn :style="{'min-width':'130px'}" flat>
             <div v-for="(value,index) in this.groupData_temp.members" :key="value">
               <q-item-label v-if="value!== this.groupData_temp.leaderId" caption lines="2">
-            <q-chip  removable color="primary" text-color="white" icon="people"  @remove="delete this.groupData_temp.members[index]">
-              {{index}}
-            </q-chip>
-          </q-item-label>
+                <q-chip color="primary" icon="people" removable text-color="white"
+                        @remove="delete this.groupData_temp.members[index]">
+                  {{ index }}
+                </q-chip>
+              </q-item-label>
             </div>
           </q-btn>
         </q-item-section>
@@ -263,7 +264,7 @@
       <!--   最终的按钮部分 -->
       <!--    <slot name="button"></slot>-->
       <q-card-actions align="around">
-        <q-btn-group :style="{'width':'100%'}" spread class="rounded-xl">
+        <q-btn-group :style="{'width':'100%'}" class="rounded-xl" spread>
           <!--   点击后使该组件刷新回最初的状态-->
           <q-btn color="green" icon="" label="Reset" rounded @click="reset"/>
           <q-btn color="red" label="Submit Change" rounded @click="submitChange()"/>
@@ -272,10 +273,10 @@
     </div>
   </q-card>
 
-  {{this.groupData_temp}}<br/>
-  Members:{{ this.groupData_temp.members}}<br/>
-  Member:{{Object.keys(this.groupData_temp.members)[0]}}
-  MemberID:{{Object.values(this.groupData_temp.members)}}
+  {{ this.groupData_temp }}<br/>
+  Members:{{ this.groupData_temp.members }}<br/>
+  Member:{{ Object.keys(this.groupData_temp.members)[0] }}
+  MemberID:{{ Object.values(this.groupData_temp.members) }}
 </template>
 
 <script>
@@ -420,23 +421,34 @@ export default defineComponent({
       this.groupData_temp = cloneDeep(this.groupData)
     },
     submitChange() {
+      // console.clear();
+      // console.log("这里是提交修改部分")
+      // console.log({
+      //   "groupId": this.groupData_temp.groupId,
+      //   "projectId": this.groupData_temp.projectId,
+      //   "groupName": this.groupData_temp.groupName,
+      //   "visibility": this.groupData_temp.visibility,
+      //   "technicalStack": this.groupData_temp.technicalStack,
+      //   "description": this.groupData_temp.description
+      // })
+      // console.log({
+      //   "groupId": typeof this.groupData_temp.groupId,
+      //   "projectId":typeof this.groupData_temp.projectId,
+      //   "groupName":typeof this.groupData_temp.groupName,
+      //   "visibility":typeof this.groupData_temp.visibility,
+      //   "technicalStack":typeof this.groupData_temp.technicalStack,
+      //   "description":typeof this.groupData_temp.description
+      // })
       api.post('/stu/modify_group_info',
         {
-          "maxsize": this.groupData_temp.maxsize,
+          "groupId": this.groupData_temp.groupId,
+          "projectId": this.groupData_temp.projectId,
           "groupName": this.groupData_temp.groupName,
-          "instructorId": this.groupData_temp.instructorId,
-          "reportTime": this.groupData.reportTime,
-          "memberIds": Object.values(this.groupData_temp.members)
+          "visibility": this.groupData_temp.visibility,
+          "technicalStack": this.groupData_temp.technicalStack,
+          "description": this.groupData_temp.description
         }
       ).then((res) => {
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'cloud_done',
-          message: 'Success',
-          position: 'top',
-          timeout: 3000,
-        })
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -461,8 +473,7 @@ export default defineComponent({
           "instructorId": this.groupData_temp.instructorId,
           "reportTime": this.groupData.reportTime,
           "memberIds":
-            this.groupData_temp.memberIds
-
+          this.groupData_temp.memberIds
         })
       })
     },

@@ -152,7 +152,7 @@
             </div>
             <div class="row">
               <div class="q-pa-md col-12">
-                <q-card :style="{width:'100%'}" >
+                <q-card :style="{width:'100%'}"  class="rounded-xl">
                   <q-card-section>
                     <q-item>
                       <q-item-section :style="{'width':this.width}" avatar>
@@ -208,7 +208,7 @@
             <q-item>
               <q-item-section>
                 <q-uploader
-                  ref="uploader"
+                  ref="uploader_stu"
                   :auto-upload="false"
                   :hide-upload-btn="true"
                   label="Max number of files (3)"
@@ -225,6 +225,7 @@
             <q-item>
               <q-item-section>
                 <q-editor
+                  ref="editor_stu"
                   v-model="editorInput" :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
                   placeholder="Type your description here..."
                   class="rounded-lg">
@@ -317,7 +318,7 @@
   </div>
 
   <div>
-    <q-dialog v-model="this.showMD" :full-heigh="true" :full-width="true" :persistent="true" transition-duration="1000">
+    <q-dialog v-model="this.showMD" :full-heigh="true" :full-width="true"  transition-duration="1000">
       <q-card :bordered="true" :square=false>
         <MDViewer :get-content-url='this.getApiUrl'>
         </MDViewer>
@@ -425,11 +426,13 @@ export default defineComponent({
         this.$q.notify({
           color: 'positive',
           position: 'top',
-          message: 'Submit successfully!',
+          message: res.data.msg,
           icon: 'check',
           timeout: 3000,
         })
-        this.$emit('update')
+        this.$refs.uploader_stu.reset()
+        this.editorInput = ''
+        this.$emit('updateAssList')
       }).catch((err) => {
         console.log(err)
         this.$q.notify({
@@ -500,11 +503,25 @@ export default defineComponent({
           timeout: 3000,
         })
       })
+
     },
 
     //**********************************GET***************************************
     async getAssFile(filePaths) {
-      let identity = this.userData.identity === 3 ? 'stu' : 'tea';
+      let identity = null;
+      if (this.userData.identity === 3 ){
+        identity = 'stu'
+      }
+      else if (this.userData.identity === 2){
+        identity = 'ta'
+      }
+      else if (this.userData.identity === 1){
+        identity = 'tea'
+      }
+      else {
+        identity = 'adm'
+      }
+
       let isSuccess = false;
       await api.get(('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths), {responseType: 'blob'}).then((res) => {
         getDownloadBlob(res.data, filePaths)
@@ -647,6 +664,7 @@ export default defineComponent({
       deep: true
     },
   },
+  emits: ['updateAssList']
 })
 </script>
 

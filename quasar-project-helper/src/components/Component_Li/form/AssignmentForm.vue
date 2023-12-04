@@ -93,7 +93,6 @@ import {api} from "boot/axios";
 import cloneDeep from "lodash/cloneDeep";
 import {ref} from "vue";
 
-
 export default {
   data() {
     return {
@@ -174,6 +173,7 @@ export default {
         });
       })
       this.$emit('unfold');
+      this.$emit('updateAssList');
     }
   },
   props: {
@@ -211,7 +211,7 @@ export default {
       default: -1,
     },
   },
-  emits: ['unfold'],
+  emits: ['unfold','updateAssList'],
   watch: {
     projectId: {
       handler: function (newVal, oldVal) {

@@ -302,13 +302,27 @@ export default defineComponent({
           ).then((res) => {
             console.log("提交成功了");
             console.log(res);
-            this.successMessage.text = res.data.msg;
-            this.$emit("successDialog", this.successMessage);
+            // this.successMessage.text = res.data.msg;
+            // this.$emit("successDialog", this.successMessage);
+            this.$q.notify(
+              {
+                message: res.data.msg,
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'done',
+                position: 'top',
+                timeout: 3000,
+              }
+            )
           }).catch((err) => {
             console.log("提交失败了");
             console.log(err)
-            this.errorMessage.text = err.response.data.msg;
-            this.$emit("errorDialog", this.errorMessage);
+            // this.errorMessage.text = err.response.data.msg;
+            // this.$emit("errorDialog", this.errorMessage);
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.msg
+            })
             console.log({
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,

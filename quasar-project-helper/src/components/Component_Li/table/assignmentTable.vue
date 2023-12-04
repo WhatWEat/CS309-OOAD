@@ -63,7 +63,8 @@
   </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
+    <AssignmentsDetail @updateAssList="this.$emit('updateAssList')"
+                       :AssignmentAttachment="AssignmentAttachment"
                        :AssignmentDetail="AssignmentDetail"
                        :group-id="groupId"
                        :project-id="projectId"></AssignmentsDetail>
@@ -88,7 +89,7 @@
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
-      <assignment-form @unfold="this.show_create_ass_table = false" :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
+      <assignment-form @updateAssList="this.$emit('updateAssList')" @unfold="this.show_create_ass_table = false" :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
     </el-dialog>
   </div>
   <!--  修改作业表单部分-->
@@ -395,7 +396,8 @@ export default defineComponent({
       },
       deep: true
     }
-  }
+  },
+  emits: ['updateAssList']
 })
 </script>
 

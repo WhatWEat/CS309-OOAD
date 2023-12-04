@@ -1,5 +1,5 @@
 <template>
-  <q-card bordered class="" >
+  <q-card bordered class="rounded-xl" >
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
@@ -263,7 +263,7 @@
       <!--   最终的按钮部分 -->
       <!--    <slot name="button"></slot>-->
       <q-card-actions align="around">
-        <q-btn-group :style="{'width':'100%'}" spread>
+        <q-btn-group :style="{'width':'100%'}" spread class="rounded-xl">
           <!--   点击后使该组件刷新回最初的状态-->
           <q-btn color="green" icon="" label="Reset" rounded @click="reset"/>
           <q-btn color="red" label="Submit Change" rounded @click="submitChange()"/>

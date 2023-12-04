@@ -2,17 +2,17 @@
   <div id="q-app" style="min-height: 0vh;">
 
     <!--这里是表格部分-->
-    <div class="q-pa-md ">
+    <div class="q-pa-md">
       <q-table
         v-model:selected="selected"
         :columns="columns"
         :filter="search"
+        :grid="$q.screen.lt.sm"
         :rows="rows"
         :selected="selected"
         :separator="separator"
-        :grid="$q.screen.lt.sm"
         card-class="bg-grey-2"
-        class="my-sticky-header-column-table"
+        class="my-sticky-header-column-table rounded-xl"
         row-key="groupId"
         selection="multiple"
         title="Groups List"
@@ -64,26 +64,29 @@
         <!--        表格内容插槽-->
         <template v-slot:item="props">
           <div
-            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
             :style="props.selected ? 'transform: scale(0.95);' : ''"
+            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
           >
             <q-card :class="props.selected ? 'bg-grey-2' : ''">
               <q-card-section>
-                <q-checkbox dense v-model="props.selected" :label="props.row.name" />
-                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleEditClick(props.row)">
+                <q-checkbox v-model="props.selected" :label="props.row.name" dense/>
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" align="right" flat round size="sm"
+                       @click="handleEditClick(props.row)">
                   <q-avatar icon="edit" size="20px">
                   </q-avatar>
                 </q-btn>
-                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleDeleClick(props.row)">
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" align="right" flat round size="sm"
+                       @click="handleDeleClick(props.row)">
                   <q-avatar icon="delete" size="20px">
                   </q-avatar>
                 </q-btn>
-                <q-btn v-if="userData.identity === 3" size="sm" align="right" round flat @click="handleAddClick(props.row)">
+                <q-btn v-if="userData.identity === 3" align="right" flat round size="sm"
+                       @click="handleAddClick(props.row)">
                   <q-avatar icon="group_add" size="20px">
                   </q-avatar>
                 </q-btn>
               </q-card-section>
-              <q-separator />
+              <q-separator/>
               <q-list dense>
                 <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name">
                   <q-item-section>
@@ -100,16 +103,8 @@
       </q-table>
     </div>
 
-<!--    GroupId：{{this.groupId}} <br>-->
-<!--    {{this.formData_user_self}}-->
-
-<!--    <q-card >-->
-<!--      <q-card-section>sdf</q-card-section>-->
-<!--      <q-btn :style="styleStatic">sdf sdf</q-btn>-->
-<!--    </q-card>-->
-
     <!--  这里是本小组信息部分-->
-    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== -1">
+    <div v-if="this.groupId!== -1" class="q-pa-md row wrap justify-center items-start">
       <div class="col-12 justify-between">
         <DirectoryCard_Input :disable-list="disableList"
                              :group-data=formData_user_self
@@ -139,23 +134,24 @@
                      @click="show_invite_member=!show_invite_member"/>
             </q-item-label>
             <q-item-label v-if="!isGroupLeader">
-              <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
+              <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm"
+                     @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
             </q-item-label>
             <q-item-label v-else>
-              <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
+              <q-btn class="bg-indigo-7 text-white" icon="manage_accounts" round size="sm"/>
             </q-item-label>
           </template>
         </DirectoryCard_Input>
       </div>
       <div class="q-pa-lg q-gutter-md">
-        <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
+        <q-dialog v-model="show_invite_member" v-close-popup position="top">
           <q-card>
             <q-card-section>
               <div class="align-middle">
-                <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
-                          outlined @keyup.enter.stop="handleSendInvite">
+                <q-input v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
+                         outlined @keyup.enter.stop="handleSendInvite">
                   <template v-slot:append>
-                    <q-btn dense rounded flat v-show="invite_member_id !== ''">
+                    <q-btn v-show="invite_member_id !== ''" dense flat rounded>
                       <q-icon name="close" @click="invite_member_id = ''"/>
                     </q-btn>
                   </template>
@@ -163,7 +159,7 @@
                     Length hint
                   </template>
                   <template v-slot:after>
-                    <q-btn dense flat icon="send" round @click="handleSendInvite" />
+                    <q-btn dense flat icon="send" round @click="handleSendInvite"/>
                   </template>
                 </q-input>
               </div>
@@ -173,6 +169,19 @@
       </div>
     </div>
   </div>
+
+
+  <div class="row justify-center">
+    <div class="col-6">
+      <q-card >
+        <q-card-section>sdf</q-card-section>
+        <q-btn >sdf sdf</q-btn>
+      </q-card>
+    </div>
+  </div>
+
+
+
 
   <!--  这里是本组信息部分-->
 
@@ -387,9 +396,9 @@ export default {
         "groupName": "Dev group1",
         "creatorId": 99999999,
         "instructorId": 99999999,
-        "instructor": {'Andy':99999999},
+        "instructor": {'Andy': 99999999},
         "instructorName": "Andy",
-        'leader': {'stu0':99999999},
+        'leader': {'stu0': 99999999},
         "leaderId": 99999999,
         "leaderName": "stu0",
         "maxsize": 99999999,
@@ -628,13 +637,13 @@ export default {
       if (row !== undefined) {
         this.selected_row.row = row;
       }
-      console.log(row,'rows');
+      console.log(row, 'rows');
       this.show_warning = true;
     },
     // 用来学生申请加入小组
     handleAddClick(row) {
       // 更新弹窗显示, 隐藏弹窗
-      if (row !== undefined){
+      if (row !== undefined) {
         this.selected_row.row = row;
       }
       this.show_button_student = false;
@@ -862,7 +871,7 @@ export default {
         this.show_confirm_dialog = true;
       });
     },
-    postInvite(){
+    postInvite() {
       api.post('/stu/recruit_mem', {
         "key": this.groupId,
         "value": {
@@ -980,18 +989,18 @@ export default {
     getUserData();
 
   },
-  watch : {
+  watch: {
     groupId: function (newVal, oldVal) {
       console.log("groupId changed");
       this.getGroupUserSelfDetail();
     }
   },
-  computed:{
-    styleStatic(){
-        return {
-          color:'red',
-          width:'200px',
-        }
+  computed: {
+    styleStatic() {
+      return {
+        color: 'red',
+        width: '200px',
+      }
     },
     roundedStyle() {
       const radius = Math.min(this.width, this.height) / 10;

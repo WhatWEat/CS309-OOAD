@@ -24,7 +24,7 @@ public class TaAccess implements Access{
 
     @Override
     public boolean accessNotice(Long userId, Notice notice) {
-        return Objects.equals(
+        return notice != null && Objects.equals(
             userId,
             projectMapper.checkTaInProj(notice.getProjectId(), userId)
         ) && notice.getType() == 0;

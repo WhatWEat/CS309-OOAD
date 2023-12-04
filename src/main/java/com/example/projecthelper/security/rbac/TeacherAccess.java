@@ -24,7 +24,7 @@ public class TeacherAccess implements Access {
     }
 
     public boolean accessNotice(Long teaId, Notice notice){
-        return Objects.equals(
+        return notice != null && Objects.equals(
             teaId, projectMapper.findTeacherByProject(notice.getProjectId())
         ) && notice.getType() == 0;
     }

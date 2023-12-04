@@ -1,6 +1,7 @@
 import {api} from "boot/axios";
 import {useRoute} from 'vue-router';
 import {isArray} from "util";
+import Vue, { ComponentOptions } from 'vue'
 
 export function truncate(str: string, num = 15, endSymbol = '...'): string {
   // 超过多少长度就截断字符串，截断和面加上什么符号
@@ -150,6 +151,22 @@ export async function getUserData() {
     return userDate;
   }
 }
+
+// interface RoundedComponent {
+//   width: number;
+//   height: number;
+// }
+
+// export const roundedMixin: ComponentOptions<RoundedComponent> = {
+//   computed: {
+//     roundedStyle() {
+//       const radius = Math.min(this.width, this.height) / 10;
+//       return {
+//         borderRadius: `${radius}px`,
+//       };
+//     },
+//   },
+// };
 
 
 

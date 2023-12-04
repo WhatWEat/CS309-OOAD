@@ -259,7 +259,7 @@ function saveInfo() {
     console.log("save");
     console.log(props);
     api
-      .put("/tea/modify_notice", noticeProps.value)
+      .put("/modify_notice", noticeProps.value)
       .then((res) => {
         console.log(res);
         $q.notify({
@@ -273,7 +273,7 @@ function saveInfo() {
       });
   } else {
     api
-      .post("/tea/post_notice", {
+      .post("/post_notice", {
         title: noticeProps.value.title,
         content: noticeProps.value.content,
         projectId: project.value?.projectId,

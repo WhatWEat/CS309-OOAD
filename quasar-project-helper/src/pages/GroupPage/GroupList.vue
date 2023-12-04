@@ -70,12 +70,16 @@
             <q-card :class="props.selected ? 'bg-grey-2' : ''">
               <q-card-section>
                 <q-checkbox dense v-model="props.selected" :label="props.row.name" />
-                <q-btn size="sm" align="right" round flat @click="handleEditClick(props.row)">
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleEditClick(props.row)">
                   <q-avatar icon="edit" size="20px">
                   </q-avatar>
                 </q-btn>
-                <q-btn size="sm" align="right" round flat @click="handleDeleClick(props.row)">
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleDeleClick(props.row)">
                   <q-avatar icon="delete" size="20px">
+                  </q-avatar>
+                </q-btn>
+                <q-btn v-if="userData.identity === 3" size="sm" align="right" round flat @click="handleAddClick(props.row)">
+                  <q-avatar icon="group_add" size="20px">
                   </q-avatar>
                 </q-btn>
               </q-card-section>
@@ -201,7 +205,7 @@
   <div>
     <q-btn-group v-show="show_button_student"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
+      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" @click="handleAddClick(undefined)"/>
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
@@ -322,7 +326,7 @@ import {useQuasar} from "quasar";
 //import {defineAsyncComponent, ref} from 'vue';
 //import {useUserStore} from 'src/composables/useUserStore';
 //import {formatDateString, merger} from "src/composables/usefulFunction";
-
+// TODO 权限管理，学生可以浏览，老师可以编辑 handleAddClick
 export default {
   name: 'GroupTeacherPage',
   userStore: useUserStore(),
@@ -628,8 +632,11 @@ export default {
       this.show_warning = true;
     },
     // 用来学生申请加入小组
-    handleAddClick() {
+    handleAddClick(row) {
       // 更新弹窗显示, 隐藏弹窗
+      if (row !== undefined){
+        this.selected_row.row = row;
+      }
       this.show_button_student = false;
       this.postJoinGroup();
     },

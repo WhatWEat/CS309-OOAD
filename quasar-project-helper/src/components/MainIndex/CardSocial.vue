@@ -68,8 +68,7 @@ async function handleItemList(newIdentity){
 
   if (props.icon_position === 'left') {
     // project_id.value = useProjectId();
-    const noticeResponse = await api.get(`/notice-list/${project_id.value}/0/1000`)
-    const assignmentResponse = await api.get(`/ass-list/${project_id.value}/0/1000`)
+    const listResponse = (await api.get(`/get-list/${project_id.value}`)).data.body
     const groupResponse = ref(0), groupDis = ref('Group Member');
     if(newIdentity === 3){
       let group = (await api.get(`/stu/group_members/${project_id.value}`)).data.body;
@@ -99,7 +98,7 @@ async function handleItemList(newIdentity){
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        value: `${assignmentResponse.data.body === undefined ? 0 : assignmentResponse.data.body.length}`,
+        value: `${listResponse[2]}`,
         // value: `1`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
@@ -107,15 +106,13 @@ async function handleItemList(newIdentity){
       {
         title: 'Announcements',
         icon: 'fa-solid fa-comments',
-        value: `${noticeResponse.data.body === undefined ? 0 : noticeResponse.data.body.length}`,
+        value: `${listResponse[1]}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }
     ]
   } else {
-    const noticeResponse = await api.get(`/notice-list/-1/0/1000`)
-    const assignmentResponse = await api.get(`/ass-list/-1/0/1000`)
-    const projectResponse = await api.get(`/project-list/0/1000/${userid.value}`)
+    const listResponse = (await api.get(`/get-list/-1`)).data.body;
     items.value = [
       {
         title: 'Profile',
@@ -127,21 +124,21 @@ async function handleItemList(newIdentity){
       {
         title: 'Projects',
         icon: 'fa-solid fa-person-digging',
-        value: `${projectResponse.data.body === undefined ? 0 : projectResponse.data.body.length}`,
+        value: `${listResponse[0]}`,
         color1: '#f37169',
         color2: '#f34636'
       },
       {
         title: 'Announcements',
         icon: 'fa-solid fa-envelope',
-        value: `${noticeResponse.data.body === undefined ? 0 : noticeResponse.data.body.length}`,
+        value: `${listResponse[1]}`,
         color1: '#ea6a7f',
         color2: '#ea4b64'
       },
       {
         title: 'Assignment',
         icon: 'fa-solid fa-file',
-        value: `${assignmentResponse.data.body === undefined ? 0 : assignmentResponse.data.body.length}`,
+        value: `${listResponse[2]}`,
         color1: '#f8a261',
         color2: '#f76b1c'
       }

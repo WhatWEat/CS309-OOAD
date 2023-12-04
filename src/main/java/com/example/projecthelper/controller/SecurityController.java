@@ -180,7 +180,7 @@ public class SecurityController {
     }
 
     @PostMapping("/request_massage")
-    public ResponseResult<Object> testPhone(@RequestParam("phone") String phone) {
+    public ResponseResult<Object> testPhone(@RequestBody String phone) {
 
         System.out.println(phone);
 
@@ -198,6 +198,14 @@ public class SecurityController {
         @RequestBody KeyValueWrapper<String, String> address_code
     ) {
         String jwt = userService.checkCode(address_code.getValue(), address_code.getKey());
+        return ResponseResult.ok(null, "Success", jwt);
+    }
+
+    @PostMapping("/login_with_message_code")
+    public ResponseResult<Object> testMassageCode(
+            @RequestBody KeyValueWrapper<String, String> phone_code
+    ) {
+        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
         return ResponseResult.ok(null, "Success", jwt);
     }
 }

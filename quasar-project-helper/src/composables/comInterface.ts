@@ -35,7 +35,7 @@ export interface gradeProps {
   submitterId: string;
   grade: number;
   comment: string;
-  reviewerId: number;
+  review: string;
   submittedTime?: string;
 }
 withDefaults(defineProps<gradeProps>(), {
@@ -45,7 +45,7 @@ withDefaults(defineProps<gradeProps>(), {
   submitterId:'12110000',
   grade: 90,
   comment: "excellent",
-  reviewerId: 0,
+  review: 'wang',
   submittedTime: "2021-06-01 00:00:00",
 })
 
@@ -56,7 +56,7 @@ export interface tgradeProps {
   submitterId: string;
   grade: number;
   comment: string;
-  reviewerId: number;
+  review: string;
   submittedTime?: string;
 }
 withDefaults(defineProps<tgradeProps>(), {
@@ -66,7 +66,7 @@ withDefaults(defineProps<tgradeProps>(), {
   submitterId: "12110000",
   grade: 90,
   comment: "excellent",
-  reviewerId: 0,
+  review: 'wang',
   submittedTime: "2021-06-01 00:00:00",
 })
 
@@ -90,33 +90,33 @@ export interface resetProps {
   phone: string;
 }
 withDefaults(defineProps<resetProps>(), {
-  studentID: "12110002",
+  userId: "12110002",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
 })
 
 export interface freezeProps {
-  studentID: string;
-  password: string;
-  email: string;
-  phone: string;
+  userId: string;
+  password?: string;
+  email?: string;
+  phone?: string;
 }
 withDefaults(defineProps<freezeProps>(), {
-  studentID: "12110003",
+  userId: "12110003",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
 })
 
 export interface unfreezeProps {
-  studentID: string;
+  userId: string;
   password: string;
   email: string;
   phone: string;
 }
 withDefaults(defineProps<unfreezeProps>(), {
-  studentID: "12110004",
+  userId: "12110004",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -139,7 +139,7 @@ export const defaultGrade: gradeProps = {
   submitterId:'12110000',
   grade: 90,
   comment: 'excellent',
-  reviewerId: 0,
+  review: 'wang',
 }
 
 export const defaultTGrade: tgradeProps = {
@@ -149,7 +149,7 @@ export const defaultTGrade: tgradeProps = {
   submitterId:'12110000',
   grade: 90,
   comment: 'excellent',
-  reviewerId: 0,
+  review: 'wang',
 }
 export const defaultCreate: createProps = {
   userId: "12110001",
@@ -160,7 +160,7 @@ export const defaultCreate: createProps = {
 
 
 export const defaultReset: resetProps = {
-  studentID: "12110002",
+  userId: "12110002",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -168,7 +168,7 @@ export const defaultReset: resetProps = {
 
 
 export const defaultFreeze: freezeProps = {
-  studentID: "12110003",
+  userId: "12110003",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -176,7 +176,7 @@ export const defaultFreeze: freezeProps = {
 
 
 export const defaultUnfreeze: unfreezeProps = {
-  studentID: "12110004",
+  userId: "12110004",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",

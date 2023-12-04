@@ -19,7 +19,7 @@
       color="purple-12"
       v-model="model1"
       label="upload file to create"
-      @change="showDialog1"
+      @update:model-value="showDialog1"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -70,7 +70,7 @@
       color="purple-12"
       v-model="model2"
       label="upload file to reset"
-      @change="showDialog2"
+      @update:model-value ="showDialog2"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -86,7 +86,7 @@
     <q-table
       title="Reset"
       :rows="data2"
-      :columns="columns"
+      :columns="columns2"
       :filter="filter2"
       row-key="name"
       flat>
@@ -116,7 +116,7 @@
       color="purple-12"
       v-model="model3"
       label="upload file to freeze"
-      @change="showDialog3"
+      @update:model-value="showDialog3"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -132,14 +132,14 @@
     <q-table
       title="Freeze"
       :rows="data3"
-      :columns="columns1"
+      :columns="columns3"
       :filter="filter3"
       row-key="name"
       flat>
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td key="userId" :props="props">
-            <span>{{ props.row.userID }}</span>
+            <span>{{ props.row.userId }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -158,7 +158,7 @@
       color="purple-12"
       v-model="model4"
       label="upload file to unfreeze"
-      @change="showDialog4"
+      @update:model-value="showDialog4"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -174,7 +174,7 @@
     <q-table
       title="Unfreeze"
       :rows="data4"
-      :columns="columns1"
+      :columns="columns4"
       :filter="filter4"
       row-key="name"
       flat>
@@ -200,12 +200,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch} from 'vue';
+import { ref} from 'vue';
 import {
+  createProps,
   defaultCreate,
   defaultFreeze,
   defaultReset,
-  defaultUnfreeze,
+  defaultUnfreeze, freezeProps, resetProps, unfreezeProps,
 } from "src/composables/comInterface";
 import {api} from "boot/axios"
 import { useRouter } from 'vue-router'
@@ -253,8 +254,26 @@ const columns = [
     format: val => `${val}`
   },
 ]
-
-const columns1 = [
+const columns2 = [
+  {
+    name: "userId",
+    required: true,
+    label: "studentID",
+    align: "left",
+    field: row => row.userId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "password",
+    required: true,
+    label: "password",
+    align: "left",
+    field: row => row.password,
+    format: val => `${val}`
+  },
+]
+const columns3 = [
   {
     name: "userId",
     required: true,
@@ -266,6 +285,18 @@ const columns1 = [
   },
 ]
 
+
+const columns4 = [
+  {
+    name: "userId",
+    required: true,
+    label: "studentID",
+    align: "left",
+    field: row => row.userId,
+    format: val => `${val}`,
+    sortable: true
+  },
+]
 
 const isShowDialog1 = ref(false);
 const excel_file1 = ref();
@@ -307,7 +338,7 @@ function saveUploadAvatar2() {
     excel_file2.value = model2.value;
     let formdata = new FormData();
     formdata.append('file',excel_file2.value);
-    api.post('/adm/reset_pass_for_multiple_users',formdata).then((res)=>{
+    api.put('/adm/reset_pass_for_multiple_users',formdata).then((res)=>{
       data2.value = res.data.body;
       console.log('data2',data2.value);
     }).catch((err)=>{
@@ -334,8 +365,12 @@ function saveUploadAvatar3() {
     excel_file3.value = model3.value;
     let formdata = new FormData();
     formdata.append('file',excel_file3.value);
-    api.post('/adm/freeze_multiple_users',formdata).then((res)=>{
-      data3.value = res.data.body;
+    api.put('/adm/freeze_multiple_users',formdata).then((res)=>{
+      for(const i of res.data.body){
+        data3.value.push({
+          userId: i
+        })
+      }
       console.log('data3',data3.value);
     }).catch((err)=>{
       console.log('err', err);
@@ -362,8 +397,12 @@ function saveUploadAvatar4() {
     excel_file4.value = model4.value;
     let formdata = new FormData();
     formdata.append('file',excel_file4.value);
-    api.post('/adm/unfreeze_multiple_users',formdata).then((res)=>{
-      data4.value = res.data.body;
+    api.put('/adm/unfreeze_multiple_users',formdata).then((res)=>{
+      for(const i of res.data.body){
+        data4.value.push({
+          userId: i
+        })
+      }
       console.log('data4',data4.value);
     }).catch((err)=>{
       console.log('err', err);

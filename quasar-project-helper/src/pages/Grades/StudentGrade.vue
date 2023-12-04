@@ -5,7 +5,7 @@
       color="purple-12"
       v-model="model"
       label="upload file to grade"
-      @change = "showDialog"
+      @update:model-value="showDialog"
     >
       <template v-slot:prepend>
         <q-icon name="attach_file" />
@@ -77,7 +77,7 @@
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
-            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0">
+            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0" @save="save(props.row)">
               <q-input type="number" v-model="scope.value" dense autofocus />
             </q-popup-edit>
           </q-td>
@@ -87,6 +87,7 @@
               buttons
               v-model="props.row.comment"
               v-slot="scope"
+              @save="save(props.row)"
               v-if="identity<=2 && identity>=0"
             >
               <q-editor
@@ -117,20 +118,22 @@
 <!--      <bar-chart></bar-chart>-->
 <!--    </div>-->
 <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
-<!--      <line-chart></line-chart>-->
+<!--      <pie-chart></pie-chart>-->
 <!--    </div>-->
 <!--  </div>-->
 </template>
 
 <script lang="ts" setup>
 import {formatDateString, truncate, useProjectId} from "src/composables/usefulFunction";
-import {onMounted, ref, watch} from 'vue';
+import {nextTick,onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
 import { useRouter } from 'vue-router'
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
-//import BarChart from "components/Chart/BarChart.vue";
+import {useQuasar} from "quasar";
+import BarChart from "components/Chart/BarChart.vue";
+import PieChart from "components/Chart/PieChart.vue";
 //import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
@@ -138,6 +141,7 @@ const  router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([]);
 const filter = ref('')
+const $q = useQuasar();
 
 const columns = [
   {
@@ -218,6 +222,7 @@ async function onRefresh() {
       )
       .then((res) => {
         data.value = res.data.body;
+        console.log('dddddd' ,data.value)
         isLoadingGrade.value = false;
       }).catch((err) => {
       console.log('err', err)
@@ -234,7 +239,7 @@ async function onRefresh() {
           saveData = saveData.concat(grades);
         }
         data.value = saveData;
-        console.log(data.value);
+        console.log('datadezhi',data.value);
         isLoadingGrade.value = false;
       })
       .catch((err) => {
@@ -251,19 +256,46 @@ async function onRefresh() {
 //   await onRefresh();
 //   next();
 // }
+
+// 保存
+async function save(grade: gradeProps) {
+  console.log('edit', grade)
+  await nextTick()
+  console.log('comment', grade.comment)
+  api.post('/tea/grade_ass', {
+    grade: grade.grade,
+    assignmentId: grade.assignmentId,
+    submitterId: grade.submitterId,
+    comment: grade.comment,
+    review: grade.review
+  }).then((res) => {
+    console.log('comment in api', grade.comment)
+    console.log(res)
+    $q.notify({
+      position: 'top',
+      message: 'save success',
+      color: 'positive'
+    })
+    onRefresh();
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 const model = ref(null),isShowDialog = ref(false);
 const excel_file = ref();
 function saveUploadAvatar() {
   isShowDialog.value = false;
-  // if(model.value){
-  //   excel_file.value = model.value;
-  //   let formdata = new FormData();
-  //   formdata.append('file',excel_file.value);
-  //   api.post('/usr',formdata).then((res)=>{
-  //   }).catch((err)=>{
-  //
-  //   })
-  // }
+  if(model.value){
+    excel_file.value = model.value;
+    let formdata = new FormData();
+    formdata.append('file',excel_file.value);
+    api.post('/tea/grade_ass_with_file',formdata).then((res)=>{
+      data.value = res.data.body;
+    }).catch((err)=>{
+      console.log(err)
+    })
+  }
 }
 
 

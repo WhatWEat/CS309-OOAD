@@ -46,9 +46,20 @@ export default {
         {
           name: 'AssignmentName',
           required: true,
-          label: 'AssignmentId',
+          label: 'ID',
           align: 'left',
           field: row => row.AssignmentName,
+          format: val => `${val}`,
+          sortable: false,
+          position: 'left',
+          style: 'max-width: 15px',
+        },
+        {
+          name: 'AssignmentNamePro',
+          required: true,
+          label: 'AssignmentName',
+          align: 'left',
+          field: row => row.AssignmentNamePro,
           format: val => `${val}`,
           sortable: false,
           position: 'left'
@@ -78,6 +89,16 @@ export default {
           label: 'AssignmentId',
           align: 'left',
           field: row => row.AssignmentName,
+          format: val => `${val}`,
+          sortable: false,
+          position: 'left'
+        },
+        {
+          name: 'AssignmentNamePro',
+          required: true,
+          label: 'AssignmentName',
+          align: 'left',
+          field: row => row.AssignmentNamePro,
           format: val => `${val}`,
           sortable: false,
           position: 'left'
@@ -157,6 +178,7 @@ export default {
         for (let i = 0; i < res.data.body.length; i++) {
             let tmp ={};
             if (res.data.body[i].type ==='i'){
+              tmp['AssignmentNamePro'] = res.data.body[i].title;
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
               tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;
@@ -168,6 +190,7 @@ export default {
               // console.log(tmp)
             }
             else {
+              tmp['AssignmentNamePro'] = res.data.body[i].title;
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
               tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;

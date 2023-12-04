@@ -33,6 +33,9 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("select count(*) from project;")
     int getProjCntByAdm();
 
+    @Select("select * from project where projectId = #{pjId}")
+    Project findProjById(Long pjId);
+
     @Select("select p.*, u.name teacherName " +
         "from project p join users u on p.teacherid = u.userid limit #{limit} offset #{offset};")
     List<Project> getProjByAdm(int limit, int offset);

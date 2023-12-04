@@ -4,7 +4,13 @@
     <q-item>
       <q-item-section avatar>
         <q-avatar class="shadow-10" size="60px">
-          <q-img :src="avatar"/>
+          <q-img :src="avatar"
+                 spinner-color="primary"
+                 loading="lazy">
+            <template v-slot:loading>
+              <q-spinner-gears size="40px" />
+            </template>
+          </q-img>
         </q-avatar>
       </q-item-section>
 

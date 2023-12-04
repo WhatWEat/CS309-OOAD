@@ -103,7 +103,7 @@ export function getDownloadBlob(blobFile: Blob, fileName: string) {
   URL.revokeObjectURL(blobUrl);
 }
 //******************Li weihao******************//
-export function merger(key: [], value: []): object;
+export function merger(key: object, value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {
   const obj: Record<string, any> = {};
@@ -117,7 +117,8 @@ export function merger(key: any, value: any): object {
     // 处理 key 为字符串的情况
     obj[key] = value;
   } else {
-    throw new Error("Invalid argument types");
+    return {};
+    // throw new Error("Invalid argument types");
   }
 
   return obj;

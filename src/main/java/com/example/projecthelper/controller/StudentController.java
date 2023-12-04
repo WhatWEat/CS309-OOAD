@@ -12,6 +12,7 @@ import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
+import com.example.projecthelper.util.Wrappers.ObjectWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.*;
@@ -126,7 +127,7 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/delete_intend_teammates/{projId}/{value}")
+    @DeleteMapping("/delete_intend_teammates/{projId}/{value}")
     public ResponseResult<Object> deleteIntendTeammates(
         HttpServletRequest request,
         @PathVariable Long projId,
@@ -206,21 +207,22 @@ public class StudentController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/ack_invitation")
-    public ResponseResult<Object> ackInvitation(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> ackInvitation(HttpServletRequest request, @RequestBody
+    ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.ackInvitation(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.ackInvitation(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/ack_application")
-    public ResponseResult<Object> ackApplication(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> ackApplication(HttpServletRequest request, @RequestBody ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.ackApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.ackApplication(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
     @PostMapping("/nak_invitation_or_application")
-    public ResponseResult<Object> nakInvitationOrApplication(HttpServletRequest request, @RequestBody Long noticeId){
+    public ResponseResult<Object> nakInvitationOrApplication(HttpServletRequest request, @RequestBody ObjectWrapper<Long> noticeId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.nakInvitationOrApplication(noticeId, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.nakInvitationOrApplication(noticeId.getObject(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
@@ -244,7 +246,22 @@ public class StudentController {
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename);
+        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename, false);
+        System.err.println(rec.getFilename());
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+    }
+
+    @GetMapping(value = "/get_ass_file_pdf_version/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssPdfFile(@PathVariable("assignment_id") Long assignmentId,
+                                               @PathVariable("filename") String filename,
+                                               HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByStu(userId, assignmentId, filename, true);
         System.err.println(rec.getFilename());
         return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
@@ -322,9 +339,9 @@ public class StudentController {
     }
 
     @GetMapping("/view_eva/{assignment_id}")
-    public ResponseResult<Float> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<Double> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        float eva = assignmentService.viewEvaByStu(
+        Double eva = assignmentService.viewEvaByStu(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
@@ -332,9 +349,9 @@ public class StudentController {
     }
 
     @GetMapping("/to_comment/{assignment_id}")
-    public ResponseResult<List<Group>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<List<Long>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<Group> groups = assignmentService.selectToCommented(
+        List<Long> groups = assignmentService.selectToCommented(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );

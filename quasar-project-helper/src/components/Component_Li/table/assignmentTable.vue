@@ -55,7 +55,7 @@
       ></q-chat-message>
     </q-dialog>
   </div>
-  <div v-show="show_button_teacher & true">
+  <div v-if="show_button_teacher & false">
     <q-dialog v-model="show_deleteDialog_teacher">
       <confirm-dialog icon_color="red" icon_name="warning" icon_text_color="white"
                       text="Are you sure to delete?"></confirm-dialog>
@@ -73,7 +73,7 @@
     <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
       <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="show_edit_ass_table = true"/>
-      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="show_deleteDialog_teacher = true"/>
+      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click=" show_delete_notify"/>
     </q-btn-group>
   </div>
   <div>
@@ -219,6 +219,13 @@ export default defineComponent({
         filePaths: null,
         files: null,
         type: null,
+        requireExtension: '',
+        filesSubmit: null,
+        filePathsSubmit: null,
+        comment:null,
+        text:null,
+        review:null,
+        submitterId: null,
       },
       AssignmentAttachment: [
         {
@@ -264,20 +271,36 @@ export default defineComponent({
         this.show_button_student = false;
       });
     },
+    show_delete_notify() {
+      let assignmentId = this.selected_row.row.AssignmentName;
+      console.log(this.selected_row)
+      this.$q.notify({
+        message: 'Are you sure to Delete it?',
+        avatar: 'https://i.postimg.cc/2SKPXCTn/ikun.jpg',
+        iconSize: '40px',
+        position: 'top',
+        progress: true,
+        timeout: 3000,
+        actions: [
+          { label: 'Cancel', color: 'green', handler: () => { /* ... */ } },
+          { label: 'Confirm', color: 'red', handler: ()=>{this.deleteAssignment(assignmentId)}}
+        ]
+      })
+    },
 
     //*************************************GET*************************************
     //获取指定作业的详细信息
     getSelectedAssignment(assignmentsId) {
       api.get('/ass/' + assignmentsId).then((res) => {
-        // console.log('获取作业的详细返回值在这里' + res)
-        // console.log(res)
+        console.log('获取作业的详细返回值在这里' + res)
+        console.log(res)
         let res_body = res.data.body.key;
         let res_value = res.data.body.value;
 
         this.AssignmentDetail.assignmentId = assignmentsId;
         this.AssignmentDetail.AssignmentName = res_body.title;
         this.AssignmentDetail.deadLine = res_body.deadline.slice(0, 19).replace('T', ' ');
-        this.AssignmentDetail.grade = (res_value === null) ? 'Not Graded' : res_value.grade;
+        this.AssignmentDetail.grade = (res_value === null || res_value.grade===null) ? 'Not Graded' : res_value.grade;
         this.AssignmentDetail.state = res_body.state;
         this.AssignmentDetail.moreInfo = res_body.description;
         this.AssignmentDetail.instructor = res_body.creatorName;
@@ -290,14 +313,19 @@ export default defineComponent({
             return 'Returned'
           }
         }
-        this.AssignmentDetail.state = res_body.state;
         this.AssignmentDetail.matGrade = res_body.fullMark;
         this.AssignmentDetail.studentName = this.userData.username;
-        // 这里把releaseTime当作submitTime
         this.AssignmentDetail.submitTime = (res_value === null) ? 'Not Submitted' : res_value.submittedTime.slice(0, 19).replace('T', ' ');
         this.AssignmentDetail.files = res_body.files;
         this.AssignmentDetail.filePaths = res_body.filePaths;
+        this.AssignmentDetail.requireExtension = res_body.requireExtension;
         this.AssignmentDetail.type = res_body.type;
+        this.AssignmentDetail.filesSubmit = res_value.files;
+        this.AssignmentDetail.filePathsSubmit = res_value.filepaths;
+        this.AssignmentDetail.comment = res_value.comment;
+        this.AssignmentDetail.text = res_value.text;
+        this.AssignmentDetail.review = res_value.review;
+        this.AssignmentDetail.submitterId = res_value.submitterId;
 
         // console.log ("AssignmentDetail: ")
         // console.log (this.AssignmentDetail)
@@ -307,6 +335,41 @@ export default defineComponent({
         console.log(err);
       })
     },
+
+
+    //*************************************DELETE*************************************
+    //删除指定作业
+    deleteAssignment(assignmentId){
+      console.log(assignmentId)
+      api.delete('/tea/delete_ass/' + assignmentId) .then(
+        (res)=>{
+          console.log(res)
+          console.log(res.data)
+          console.log(res.data.statusCode)
+          console.log(res.data.msg)
+
+          if (res.data.statusCode === 200){
+           this.$q.notify({
+              type: 'positive',
+              message: 'Deleted successfully'
+            })
+          }
+          else {
+            this.$q.notify({
+              type: 'negative',
+              message: res.data.msg
+            })
+          }
+        }
+        )
+        .catch((err)=>{
+          this.$q.notify({
+            type: 'negative',
+            message: err
+          })
+          }
+        )
+    }
   },
   components: {
     AssignmentsDetail: defineAsyncComponent(() => import('src/components/Component_Li/special/assignmentsDetail.vue')),

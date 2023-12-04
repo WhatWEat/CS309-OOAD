@@ -215,6 +215,16 @@ public class FileUtil {
         return Objects.requireNonNull(file.getOriginalFilename()).endsWith(extension);
     }
 
+    public static String toPdfExtension(String filename){
+        int index = filename.lastIndexOf(".");
+        if(index >= 0){
+            return filename.substring(0, index)+".pdf";
+        }
+        else{
+            return filename+".pdf";
+        }
+    }
+
     //这个方法用于生成文件路径
     public String getFilePath(String permission, int id, String fileName) {
         StringBuilder sb = new StringBuilder();
@@ -258,7 +268,11 @@ public class FileUtil {
 
     public static String getFilenameFromPath(String path){
         int dotIndex = path.lastIndexOf('\\');
-        if (dotIndex > 0) {
+        int dotIndex2 = path.lastIndexOf("/");
+        if (dotIndex2 > 0) {
+            return path.substring(dotIndex2+1);
+        }
+        else if(dotIndex > 0){
             return path.substring(dotIndex+1);
         }
         return path;
@@ -272,6 +286,7 @@ public class FileUtil {
         }
         return type;
     }
+
 
 
 }

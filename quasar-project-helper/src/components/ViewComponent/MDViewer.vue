@@ -18,6 +18,7 @@ onMounted(()=>{
     content.value = res.data;
   }).catch((err)=>{
     console.log('error in md', err)
+    console.log(contentUrl.value)
   })
 })
 </script>

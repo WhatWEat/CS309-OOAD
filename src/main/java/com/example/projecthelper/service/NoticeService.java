@@ -327,6 +327,7 @@ public class NoticeService {
     }
 
     public void createRemoveNotice(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
+
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
         Long stuId = gpId_notice.getValue().getKey();

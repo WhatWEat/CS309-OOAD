@@ -327,6 +327,7 @@ public class NoticeService {
     }
 
     public void createRemoveNotice(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
+
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
         Long stuId = gpId_notice.getValue().getKey();
@@ -351,16 +352,13 @@ public class NoticeService {
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
             notice = rmf.createNotice(notice);
-
-//            for(Long stuId: stuIds){
                 groupMapper.removeMember(group.getGroupId(), stuId);
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, gpId_notice.getValue().getKey(), Notice.Type.REMOVE.getValue());
                 if(previous != null) {
                     previous.setCreateTime(LocalDateTime.now());
                     noticeMapper.createNotice(notice);
                     noticeMapper.insertStuView(Collections.singleton(gpId_notice.getValue().getKey()), notice.getNoticeId());
-//            }
-//
+
                 }else {
                         noticeMapper.createNotice(notice);
                         noticeMapper.stuViewNotice(notice.getNoticeId(),stuId);

@@ -7,6 +7,7 @@ export const useUser = defineStore('user', {
     username: null,
     userid: -1,
     identity: -1,
+    identity_char: '',
     jwt_token: null,
   }),
   actions: {
@@ -22,6 +23,21 @@ export const useUser = defineStore('user', {
           this.identity = response.data.body.identity
           this.username = response.data.body.name;
           this.jwt_token = response.data.jwt_token;
+          switch (this.identity) {
+            case 3:
+              this.identity_char = 'stu';
+              break;
+            case 2:
+              this.identity_char = 'ta';
+              break;
+            case 1:
+              this.identity_char = 'tea';
+              break;
+            case 0:
+              this.identity_char = 'adm'
+            default:
+              this.identity_char = 'stu';
+          }
         }
       } catch (error) {
         localStorage.setItem('Token', '');

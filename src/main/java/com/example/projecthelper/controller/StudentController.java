@@ -299,7 +299,7 @@ public class StudentController {
     public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
                                                    @RequestParam("assignmentId") Long assignmentId,
                                                    @RequestParam("content") String content,
-                                                   @RequestParam("grade") Float grade,
+                                                   @RequestParam("grade") Double grade,
                                                    @RequestParam("commentedGroup") Long commentedGroup
                                                    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

@@ -144,6 +144,42 @@ public class FileService {
         }
     }
 
+    public Resource getFilesOfSubmittedAss(Long userId, Long submitterId, Long assId, String fileName, Integer identity){
+        Assignment ass = assignmentMapper.findAssById(assId);
+        if(ass == null)
+            throw new AccessDeniedException("无效的作业id");
+        switch (identity){
+            case 1: {
+                Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
+                if(!Objects.equals(teaId, userId))
+                    throw new AccessDeniedException("无权查看别人发布的作业");
+                break;
+            }
+            case 2:
+                Long taId = projectMapper.checkTaInProj(ass.getProjectId(),userId);
+                if(taId == null)
+                    throw new AccessDeniedException("无权查看别人发布的作业");
+                break;
+            case 3:
+                if(ass.getType().equals("i") && !Objects.equals(userId, submitterId) ||
+                    ass.getType().equals("g") &&
+                        !Objects.equals(groupMapper.findGroupIdOfUserInAProj(userId, ass.getProjectId()), submitterId)
+                )
+                    throw new AccessDeniedException("无权查看别人提交的作业");
+                break;
+        }
+        Path fp = Paths.get(FileUtil.generateSubmittedAssPath(ass, submitterId)).resolve(fileName).normalize();
+        try{
+            Resource rec = new UrlResource(fp.toUri());
+            if(rec.exists()){
+                return rec;
+            }
+            else
+                throw new FileProcessingException("找不到文件");
+        }catch (MalformedURLException | FileProcessingException e){
+            throw new FileProcessingException("找不到文件");
+        }
+    }
     public Resource getFilesOfSubmittedAssByTeaOrTa(Long userId, Long stuId, Long assId, String fileName, Integer identity){
         Assignment ass = assignmentMapper.findAssById(assId);
         if(ass == null)

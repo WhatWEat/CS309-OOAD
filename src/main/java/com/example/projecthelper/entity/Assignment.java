@@ -1,6 +1,8 @@
 package com.example.projecthelper.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -25,6 +27,7 @@ public class Assignment {
     private String projectName;
     @TableField(exist = false)
     private String creatorName;
+    @JsonIgnore
     @TableField(exist = false)
     private List<MultipartFile> files;
     @TableField(exist = false)

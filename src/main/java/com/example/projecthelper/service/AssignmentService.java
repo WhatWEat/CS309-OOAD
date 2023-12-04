@@ -2,11 +2,11 @@ package com.example.projecthelper.service;
 
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.Exceptions.OverdueException;
+import com.example.projecthelper.cache.AssignmentCache;
 import com.example.projecthelper.entity.*;
 import com.example.projecthelper.mapper.*;
 import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
-import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -24,20 +24,23 @@ public class AssignmentService {
     private final UsersMapper usersMapper;
     private final GroupMapper groupMapper;
     private final FileService fileService;
+    private final AssignmentCache assignmentCache;
 
     @Autowired
     public AssignmentService(ProjectMapper projectMapper, AssignmentMapper assignmentMapper,
                              SubmittedAssMapper submittedAssMapper, UsersMapper usersMapper,
-                             GroupMapper groupMapper, FileService fileService) {
+                             GroupMapper groupMapper, FileService fileService,
+                             AssignmentCache assignmentCache) {
         this.projectMapper = projectMapper;
         this.assignmentMapper = assignmentMapper;
         this.submittedAssMapper = submittedAssMapper;
         this.usersMapper = usersMapper;
         this.groupMapper = groupMapper;
         this.fileService = fileService;
+        this.assignmentCache = assignmentCache;
     }
 
-    public List<Assignment> getAssignmentsByAdm(Long page, Long pageSize) {
+    public List<Assignment> getAssignmentsByAdm(int page, int pageSize) {
         List<Assignment> results = assignmentMapper.getAssByAdm(pageSize, page * pageSize);
 
         results.forEach(a ->
@@ -47,7 +50,7 @@ public class AssignmentService {
     }
 
 
-    public List<Assignment> getAssignmentsByTea(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Assignment> getAssignmentsByTea(Long userId, Long projId, int page, int pageSize) {
         List<Assignment> results;
         if (projId == -1) {
             results = assignmentMapper.getAssByTea(userId, pageSize, page * pageSize);
@@ -56,7 +59,7 @@ public class AssignmentService {
             if (!Objects.equals(teaOfProj, userId)) {
                 throw new AccessDeniedException("无权访问该project");
             }
-            results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+            results = assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
         results.forEach(a -> {
                     if (a.getFilePaths() != null)
@@ -69,7 +72,7 @@ public class AssignmentService {
         return results;
     }
 
-    public List<Assignment> getAssignmentsByTa(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Assignment> getAssignmentsByTa(Long userId, Long projId, int page, int pageSize) {
         List<Assignment> results;
         if (projId == -1) {
             results = assignmentMapper.getAssByTa(userId, pageSize, page * pageSize);
@@ -79,7 +82,7 @@ public class AssignmentService {
                 throw new AccessDeniedException("无权访问该project");
             }
             results =
-                    assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+                    assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
         results.forEach(a ->
                 a.setFilePaths(a.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList())
@@ -87,7 +90,7 @@ public class AssignmentService {
         return results;
     }
 
-    public List<Assignment> getAssignmentsByStu(Long userId, Long projId, Long page, Long pageSize) {
+    public List<Assignment> getAssignmentsByStu(Long userId, Long projId, int page, int pageSize) {
         List<Assignment> results;
         if (projId == -1) {
             results = assignmentMapper.getAssByStu(userId, pageSize, page * pageSize);
@@ -171,25 +174,21 @@ public class AssignmentService {
             throw new InvalidFormException("发布作业类型无效");
         if (!assignment.getDeadline().isAfter(LocalDateTime.now()))
             throw new InvalidFormException("ddl必须晚于现在的时间");
-        try {
-            assignment.setReleaseTime(LocalDateTime.now());
-            assignment.setCreatorId(creatorId);
-            assignmentMapper.createAss(assignment);
-            System.err.println(assignment.getAssignmentId());
-            // FUNC: 创建文件目录
-            if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
-                assignment.setFilePaths(new ArrayList<>());
-                for (MultipartFile file : assignment.getFiles()) {
 
-                    String pth = FileUtil.generateAssPath(assignment);
-                    String fp = FileUtil.saveFile(pth, file.getOriginalFilename(), file);
-                    assignment.getFilePaths().add(fp);
-                }
-                assignmentMapper.updateFilePathOfAss(assignment.getFilePaths(), assignment.getAssignmentId());
+        assignment.setReleaseTime(LocalDateTime.now());
+        assignment.setCreatorId(creatorId);
+        assignmentCache.createAss(assignment);
+        System.err.println(assignment.getAssignmentId());
+        // FUNC: 创建文件目录
+        if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
+            assignment.setFilePaths(new ArrayList<>());
+            for (MultipartFile file : assignment.getFiles()) {
+
+                String pth = FileUtil.generateAssPath(assignment);
+                String fp = FileUtil.saveFile(pth, file.getOriginalFilename(), file);
+                assignment.getFilePaths().add(fp);
             }
-        } catch (PSQLException e) {
-            System.err.println(e.getMessage());
-            throw new InvalidFormException("title, description不能为空");
+            assignmentMapper.updateFilePathOfAss(assignment.getFilePaths(), assignment.getAssignmentId());
         }
     }
 
@@ -206,7 +205,7 @@ public class AssignmentService {
             if (taId == null)
                 throw new AccessDeniedException("无权查看别人发布的作业");
         }
-        assignmentMapper.deleteAss(assignmentId);
+        assignmentCache.deleteAss(ass.getProjectId(), assignmentId);
         submittedAssMapper.deleteSubmittedAssByAssId(assignmentId);
     }
 
@@ -539,7 +538,7 @@ public class AssignmentService {
     }
 
     //这个方法是读取文件批量更新成绩
-    public void gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
+    public List<SubmittedAssignment> gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
         Assignment ass = assignmentMapper.findAssById(assignmentId);
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
@@ -556,6 +555,7 @@ public class AssignmentService {
         List<SubmittedAssignment> result = FileUtil.tableToSubmittedAssList(file);
         result.forEach(System.err::println);
         submittedAssMapper.updateGrades(result, assignmentId);
+        return result;
     }
 
 

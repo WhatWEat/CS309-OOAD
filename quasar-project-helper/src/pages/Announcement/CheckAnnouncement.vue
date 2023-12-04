@@ -290,7 +290,7 @@ import {
   truncate,
   useProjectId
 } from "src/composables/usefulFunction";
-import {onMounted, ref, watch} from "vue";
+import {nextTick, onMounted, ref, watch} from "vue";
 import {defaultNotice, noticeProps} from "src/composables/comInterface";
 import {api} from "boot/axios";
 import {useQuasar} from "quasar";
@@ -434,13 +434,26 @@ function clickRejectGroup(notice: noticeProps) {
 }
 
 // 保存
-function save(notice: noticeProps) {
-  api.put('/tea/modify_notice', notice).then(() => {
+async function save(notice: noticeProps) {
+  // let noticeSave = JSON.parse(JSON.stringify(notice));
+  console.log('edit', notice)
+  await nextTick()
+  console.log('content', notice.content)
+  api.put('/modify_notice', {
+    noticeId: notice.noticeId,
+    title: notice.title,
+    content: notice.content,
+    stuView: notice.stuView,
+    toAll: notice.toAll
+  }).then((res) => {
+    console.log('content in api', notice.content)
+    console.log(res)
     $q.notify({
       position: 'top',
       message: 'save success',
       color: 'positive'
     })
+    onRefresh();
   }).catch(err => {
     console.log(err)
   })
@@ -449,7 +462,7 @@ function save(notice: noticeProps) {
 // 删除操作
 function removeRow() {
   const selectedRows = [...selected.value.map((row) => row.noticeId)];
-  api.post('/tea/delete_notice', selectedRows).then(() => {
+  api.post('/delete_notice', selectedRows).then(() => {
     $q.notify({
       position: 'top',
       message: 'delete success',

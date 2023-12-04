@@ -1,12 +1,12 @@
 <template>
-  <q-card bordered class="">
+  <q-card bordered class="" >
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
         <q-btn :flat="true" round>
           <q-avatar class="shadow-10" size="80px">
             <!--            <img :src=avatar>-->
-            <q-img :src="avatar"
+            <q-img :src="groupData_temp.avatar"
                    loading="lazy"
                    spinner-color="primary">
               <template v-slot:loading>
@@ -475,10 +475,15 @@ export default defineComponent({
       isGroupLeader_temp: this.isGroupLeader,
     }
   },
+  async mounted() {
+    this.groupData_temp.avatar = await getAvatarUrlById(this.groupData_temp.leaderId)
+  },
   watch: {
     groupData: {
-      handler: function (val, oldVal) {
+      handler: async function (val, oldVal) {
         this.groupData_temp = cloneDeep(val)
+        console.log('group_data变化了')
+        this.groupData_temp.avatar = await getAvatarUrlById(this.groupData_temp.leaderId)
       },
       deep: true
     },

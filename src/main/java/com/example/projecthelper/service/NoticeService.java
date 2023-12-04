@@ -352,7 +352,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory rmf = new TransferFactory();
+            AbstractNoticeFactory rmf = new RemoveFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
@@ -360,6 +360,7 @@ public class NoticeService {
 
             notice = rmf.createNotice(notice);
             for(Long stuId: stuIds){
+                groupMapper.removeMember(group.getGroupId(), stuId);
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.REMOVE.getValue());
                 if(previous != null){
                     previous.setCreateTime(LocalDateTime.now());
@@ -397,7 +398,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory rmf = new RemoveFactory();
+            AbstractNoticeFactory rmf = new TransferFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
@@ -405,6 +406,7 @@ public class NoticeService {
 
             notice = rmf.createNotice(notice);
             for(Long stuId: stuIds){
+                groupMapper.updateLeader(stuId, group.getGroupId());
                 Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.TRANSFER.getValue());
                 if(previous != null){
                     previous.setCreateTime(LocalDateTime.now());
@@ -514,37 +516,37 @@ public class NoticeService {
 //    }
 
 
-//    public boolean stuViewNotice(long notice_id, long[] stu_id, long user_id) {
-//        //多个学生看到通知
-//        long creator_id;
-//        creator_id = noticeMapper.findCreatorByNotice(notice_id);
-//        if (user_id == creator_id) {
-//            for (long stuId : stu_id) {
-//                try {
-//                    noticeMapper.stuViewNotice(notice_id, stuId);
-//                } catch (PSQLException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//            return true;
-//        }
-//        return false;
-//    }
+    public boolean stuViewNotice(long notice_id, long[] stu_id, long user_id) {
+        //多个学生看到通知
+        long creator_id;
+        creator_id = noticeMapper.findCreatorByNotice(notice_id);
+        if (user_id == creator_id) {
+            for (long stuId : stu_id) {
+                try {
+                    noticeMapper.stuViewNotice(notice_id, stuId);
+                } catch (PSQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 
-//    public boolean stu1ViewNotice(long notice_id, long stu_id, long user_id) {
-//        //一个学生
-//        long creator_id;
-//        creator_id = noticeMapper.findCreatorByNotice(notice_id);
-//        if (user_id == creator_id) {
-//            try {
-//                noticeMapper.stuViewNotice(notice_id, stu_id);
-//            } catch (PSQLException e) {
-//                throw new RuntimeException(e);
-//            }
-//            return true;
-//        }
-//        return false;
-//    }
+    public boolean stu1ViewNotice(long notice_id, long stu_id, long user_id) {
+        //一个学生
+        long creator_id;
+        creator_id = noticeMapper.findCreatorByNotice(notice_id);
+        if (user_id == creator_id) {
+            try {
+                noticeMapper.stuViewNotice(notice_id, stu_id);
+            } catch (PSQLException e) {
+                throw new RuntimeException(e);
+            }
+            return true;
+        }
+        return false;
+    }
 
     public boolean deleteStuViewNotice(long notice_id, long stu_id, long user_id) {
         long creator_id;

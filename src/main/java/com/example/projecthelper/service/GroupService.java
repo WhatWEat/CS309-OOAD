@@ -371,11 +371,11 @@ public class GroupService {
         noticeService.createApplicationNotice(gpId_notice, userId);
     }
 
-    public void removeMen(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
-        noticeService.createRemoveNotice( gpId_notice,  userId);
+    public void removeMen(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_memId_notice, Long userId){
+        noticeService.createRemoveNotice(gpId_memId_notice, userId);
     }
 
-    public void transferLeader(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+    public void transferLeader(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
         noticeService.createTransferNotice( gpId_notice,  userId);
     }
 

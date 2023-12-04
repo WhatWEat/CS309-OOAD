@@ -778,6 +778,7 @@ export default {
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
       console.log("尝试获取GroupUserSelfDetail...\n")
+      if(this.groupId === -1) return;
       api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body

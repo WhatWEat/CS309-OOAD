@@ -13,13 +13,13 @@ public class Evaluation {
     private Long projectId;
     private  Long commentGroup;
     private  Long commentedGroup;
-    private  Float grade;
+    private  Double grade;
     private  Timestamp commentTime;
     private  String content;
     private Long assignmentId;
 
     public Evaluation(long evaluationId, long projectId, long commentGroup, long commentedGroup,
-                      float grade, Timestamp commentTime, String content, long assignmentId) {
+                      Double grade, Timestamp commentTime, String content, long assignmentId) {
         this.evaluationId = evaluationId;
         this.projectId = projectId;
         this.commentGroup = commentGroup;

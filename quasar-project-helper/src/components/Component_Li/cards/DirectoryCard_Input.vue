@@ -1,16 +1,16 @@
 <template>
-  <q-card bordered class="" >
+  <q-card bordered class="">
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
         <q-btn :flat="true" round>
           <q-avatar class="shadow-10" size="80px">
-<!--            <img :src=avatar>-->
+            <!--            <img :src=avatar>-->
             <q-img :src="avatar"
-                   spinner-color="primary"
-                   loading="lazy">
+                   loading="lazy"
+                   spinner-color="primary">
               <template v-slot:loading>
-                <q-spinner size="40px" />
+                <q-spinner size="40px"/>
               </template>
             </q-img>
           </q-avatar>
@@ -39,7 +39,7 @@
             Max size :
           </span>
           <span style="font-weight: normal;">
-            {{ groupData_temp.maxSize }}
+            {{ groupData_temp.maxsize }}
           </span>
         </q-item-label>
       </q-item-section>
@@ -198,7 +198,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">Max Size</q-item-label>
           <q-item-label caption lines="2">
-            <q-input :disable="disableList_temp.maxSize" :model-value="groupData_temp.maxSize" dense></q-input>
+            <q-input :disable="disableList_temp.maxSize" :model-value="groupData_temp.maxsize" dense></q-input>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -213,13 +213,34 @@
           <q-item-label lines="1">Visibility</q-item-label>
           <q-item-label caption lines="2">
             <q-btn>
-            <q-checkbox keep-color v-model="teal" label="Teal" color="teal" />
-            <q-checkbox keep-color v-model="orange" label="Orange" color="orange" />
-            <q-checkbox keep-color v-model="red" label="Red" color="red" />
-            <q-checkbox keep-color v-model="cyan" label="Cyan" color="cyan" />
+              <q-checkbox v-model="this.groupData_temp.visibility[0]" color="teal" keep-color label="GroupMember"/>
+              <q-checkbox v-model="this.groupData_temp.visibility[1]" color="orange" keep-color label="Leader"/>
+              <q-checkbox v-model="this.groupData_temp.visibility[2]" color="red" keep-color label="CreationTime"/>
+              <q-checkbox v-model="this.groupData_temp.visibility[3]" color="cyan" keep-color label="Recruitment"/>
             </q-btn>
           </q-item-label>
         </q-item-section>
+      </q-item>
+
+      <q-item clickable>
+        <q-item-section avatar>
+          <q-item-label lines="1">
+            <q-avatar icon="check_box"></q-avatar>
+          </q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
+          <q-item-label lines="1">Member Administer</q-item-label>
+          <q-btn  flat :style="{'min-width':'130px'}">
+            <div v-for="(value,index) in this.groupData_temp.members" :key="value">
+              <q-item-label v-if="value!== this.groupData_temp.leaderId" caption lines="2">
+            <q-chip  removable color="primary" text-color="white" icon="people"  @remove="delete this.groupData_temp.members[index]">
+              {{index}}
+            </q-chip>
+          </q-item-label>
+            </div>
+          </q-btn>
+        </q-item-section>
+
       </q-item>
 
       <q-item clickable>
@@ -231,7 +252,7 @@
         <q-item-section avatar>
           <q-item-label lines="1">More Information</q-item-label>
           <q-item-label caption lines="2">
-            <q-input v-model="groupData_temp.desc" :disable="disableList_temp.moreInformation" dense></q-input>
+            <q-input v-model="groupData_temp.description" :disable="disableList_temp.moreInformation" dense></q-input>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -245,17 +266,23 @@
         <q-btn-group :style="{'width':'100%'}" spread>
           <!--   点击后使该组件刷新回最初的状态-->
           <q-btn color="green" icon="" label="Reset" rounded @click="reset"/>
-          <q-btn color="red" label="Submit Change" rounded @click="submitChang()"/>
+          <q-btn color="red" label="Submit Change" rounded @click="submitChange()"/>
         </q-btn-group>
       </q-card-actions>
     </div>
   </q-card>
+
+  {{this.groupData_temp}}<br/>
+  Members:{{ this.groupData_temp.members}}<br/>
+  Member:{{Object.keys(this.groupData_temp.members)[0]}}
+  MemberID:{{Object.values(this.groupData_temp.members)}}
 </template>
 
 <script>
 import {defineComponent} from 'vue'
 import {useUserStore} from 'src/composables/useUserStore';
 import cloneDeep from 'lodash/cloneDeep';
+import {api} from "boot/axios";
 
 export default defineComponent({
   name: "DirectoryCard",
@@ -278,26 +305,66 @@ export default defineComponent({
         //   technicalStack: [],
         //   desc: 'Dev Team des',
         // }
+        // return {
+        //   "groupId": 1,
+        //   "groupName": "group1",
+        //   "creatorId": 30002000,
+        //   "instructorId": 30002000,
+        //   "instructorName": "Andy",
+        //   "leaderId": 12110000,
+        //   "leaderName": "stu0",
+        //   "maxsize": 10,
+        //   "projectId": 1,
+        //   "teamTime": "2023-11-06T23:47:18.995108",
+        //   "deadline": "2024-03-10T10:00:00",
+        //   "reportTime": "2024-10-10T10:00:00",
+        //   "description": null,
+        //   "technicalStack": null,
+        //   "visibility": [
+        //     true,
+        //     true,
+        //     true,
+        //     true
+        //   ],
+        //   "recruitment": null,
+        //   "memberIds": [
+        //     12110002,
+        //     12110004,
+        //     12110001,
+        //     12110003,
+        //     12110000
+        //   ],
+        //   "members": [
+        //     "stu2",
+        //     "stu4",
+        //     "stu1",
+        //     "stu0",
+        //     "stu0"
+        //   ],
+        //   "memCnt": 5
+        // }
         return {
-          "groupId": 1,
-          "groupName": "group1",
-          "creatorId": 30002000,
-          "instructorId": 30002000,
+          "groupId": 77777777,
+          "groupName": "Dev group1",
+          "creatorId": 77777777,
+          "instructorId": 77777777,
+          "instructor": {'Andy': 77777777},
           "instructorName": "Andy",
-          "leaderId": 12110000,
+          'leader': {'stu0': 77777777},
+          "leaderId": 77777777,
           "leaderName": "stu0",
-          "maxsize": 10,
-          "projectId": 1,
-          "teamTime": "2023-11-06T23:47:18.995108",
-          "deadline": "2024-03-10T10:00:00",
-          "reportTime": "2024-10-10T10:00:00",
+          "maxsize": 77777777,
+          "projectId": 77777777,
+          "teamTime": "2077-11-06T23:47:18.995108",
+          "deadline": "2077-03-10T10:00:00",
+          "reportTime": "2077-10-10T10:00:00",
           "description": null,
           "technicalStack": null,
           "visibility": [
             true,
+            false,
             true,
-            true,
-            true
+            false
           ],
           "recruitment": null,
           "memberIds": [
@@ -314,7 +381,11 @@ export default defineComponent({
             "stu0",
             "stu0"
           ],
-          "memCnt": 5
+          "memCnt": 5,
+          'date1_deadline': '2077-03-10',
+          'date2_deadline': '10:00:00',
+          'data1_presentation': '2099-10-10',
+          'data2_presentation': '10:00:00',
         }
       }
     },
@@ -348,8 +419,52 @@ export default defineComponent({
     reset() {
       this.groupData_temp = cloneDeep(this.groupData)
     },
-    submitChang() {
-      //将更改直接提交到服务器
+    submitChange() {
+      api.post('/stu/modify_group_info',
+        {
+          "maxsize": this.groupData_temp.maxsize,
+          "groupName": this.groupData_temp.groupName,
+          "instructorId": this.groupData_temp.instructorId,
+          "reportTime": this.groupData.reportTime,
+          "memberIds": Object.values(this.groupData_temp.members)
+        }
+      ).then((res) => {
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Success',
+          position: 'top',
+          timeout: 3000,
+        })
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: res.data.msg,
+          position: 'top',
+          timeout: 3000,
+        })
+      }).catch((err) => {
+        this.$q.notify({
+          color: 'red-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: err.response.data.msg,
+          position: 'top',
+          timeout: 3000,
+        })
+        console.log(err)
+        console.log({
+          "maxsize": this.groupData_temp.maxsize,
+          "groupName": this.groupData_temp.groupName,
+          "instructorId": this.groupData_temp.instructorId,
+          "reportTime": this.groupData.reportTime,
+          "memberIds":
+            this.groupData_temp.memberIds
+
+        })
+      })
     },
   },
   data() {
@@ -363,11 +478,11 @@ export default defineComponent({
   watch: {
     groupData: {
       handler: function (val, oldVal) {
-        this.groupData_temp = val
+        this.groupData_temp = cloneDeep(val)
       },
       deep: true
     },
-    isGroupLeader:{
+    isGroupLeader: {
       handler: function (val, oldVal) {
         this.isGroupLeader_temp = val
       },

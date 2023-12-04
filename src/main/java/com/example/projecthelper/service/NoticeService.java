@@ -310,7 +310,6 @@ public class NoticeService {
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
-
             notice = anf.createNotice(notice);
             Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.getValue());
             if(previous != null){
@@ -327,9 +326,11 @@ public class NoticeService {
         }
     }
 
-    public void createRemoveNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+    public void createRemoveNotice(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
+
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
+        Long stuId = gpId_notice.getValue().getKey();
         if(group == null || !Objects.equals(
                 groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
                 group.getGroupId())){
@@ -338,37 +339,30 @@ public class NoticeService {
         if (!userId.equals(group.getLeaderId())){
             throw new InvalidFormException("无权将他人移出小组");
         }
-
-        Set<Long> stuIds = gpId_notice.getValue().getStuView().stream()
-                .filter(
-                        e -> projectMapper.checkStuInProj(e, group.getProjectId()) != null
-                )
-                .collect(Collectors.toSet());
-        stuIds.retainAll(
-                groupMapper.findStuNotInGpOfAProj(group.getProjectId()).stream()
-                        .map(User::getUserId)
-                        .collect(Collectors.toSet())
-        );
+        if (groupMapper.findGroupOfStuInProject(stuId, group.getProjectId()) == null||
+            !Objects.equals(groupMapper.findGroupOfStuInProject(stuId, group.getProjectId()).getGroupId(),
+                group.getGroupId())){
+            throw new InvalidFormException("所选成员不在组中");
+        }
 
         try {
-            AbstractNoticeFactory rmf = new TransferFactory();
-            Notice notice = gpId_notice.getValue();
+            AbstractNoticeFactory rmf = new RemoveFactory();
+            Notice notice = gpId_notice.getValue().getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
             notice.setProjectId(group.getProjectId());
-
             notice = rmf.createNotice(notice);
-            for(Long stuId: stuIds){
                 groupMapper.removeMember(group.getGroupId(), stuId);
-                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, stuId, Notice.Type.REMOVE.getValue());
-                if(previous != null){
+                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, gpId_notice.getValue().getKey(), Notice.Type.REMOVE.getValue());
+                if(previous != null) {
                     previous.setCreateTime(LocalDateTime.now());
-                    noticeMapper.updateNoticeTime(previous);
-                    continue;
-                }
-                noticeMapper.createNotice(notice);
-                noticeMapper.insertStuView(Collections.singleton(stuId), notice.getNoticeId());
-            }
+                    noticeMapper.createNotice(notice);
+                    noticeMapper.insertStuView(Collections.singleton(gpId_notice.getValue().getKey()), notice.getNoticeId());
+
+                }else {
+                        noticeMapper.createNotice(notice);
+                        noticeMapper.stuViewNotice(notice.getNoticeId(),stuId);
+                    }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
@@ -397,7 +391,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory rmf = new RemoveFactory();
+            AbstractNoticeFactory rmf = new TransferFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());

@@ -179,9 +179,9 @@ public class StudentController {
     }
 
     @PostMapping("/remove_member")
-    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_memId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.removeMen(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.removeMen(gpId_memId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 

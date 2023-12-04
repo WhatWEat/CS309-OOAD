@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class TransferFactory extends AbstractNoticeFactory{
     @Override
     public Notice createNotice(Notice notice) {
-        Notice nt = new ApplicationNotice();
+        Notice nt = new TransferNotice();
         nt.setTitle(notice.getTitle());
         nt.setContent(notice.getContent());
         nt.setCreatorId(notice.getCreatorId());

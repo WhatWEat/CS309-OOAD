@@ -22,7 +22,7 @@ public class AssignmentCache {
     private AssignmentMapper assignmentMapper; // 假设你有一个与数据库交互的Repository
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Assignment> redisTemplate;
 
     private final ConcurrentHashMap<Long, Lock> redisLock = new ConcurrentHashMap<>();
 
@@ -33,12 +33,12 @@ public class AssignmentCache {
         String key = ASS_CACHE_KEY+pjId;
         Long listSize = redisTemplate.opsForList().size(key);
         if(listSize != null){
-            List<Object> assignments = redisTemplate.opsForList().range(key, offset, Math.min(offset+limit, listSize-1));
+            List<Assignment> assignments = redisTemplate.opsForList().range(key, offset, Math.min(offset+limit, listSize-1));
             if (assignments == null) {
                 System.err.println("assignments == null");
                 return null;
             }
-            return assignments.stream().map(a -> (Assignment) a).toList();
+            return assignments;
         }
         else {
             // 缓存中没有，从数据库中加载

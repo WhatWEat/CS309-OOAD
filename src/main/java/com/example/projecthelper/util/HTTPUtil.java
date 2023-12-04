@@ -9,6 +9,7 @@ import java.util.HashSet;
 
 public class HTTPUtil {
     public static final String TOKEN_HEADER = "Token";
+    public static final String ALTERNATE_TOKEN_HEADER = "token";
 
     public static final String [] IGNORE_PATTERN = {
         "/login", "/logout", "/signup",

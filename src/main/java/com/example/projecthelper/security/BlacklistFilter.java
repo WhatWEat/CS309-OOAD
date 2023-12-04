@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -29,7 +30,18 @@ public class BlacklistFilter extends OncePerRequestFilter {
         }
         System.err.println("blk");
         // 如果token无效，直接进行下一环
-        String token = request.getHeader(CustomJwtAuthenticationTokenFilter.AUTH_HEADER);
+        String token = request.getHeader(HTTPUtil.TOKEN_HEADER);
+        if(token == null)
+            token = request.getHeader(HTTPUtil.ALTERNATE_TOKEN_HEADER);
+//        Enumeration<String> headerNames = request.getHeaderNames();
+//        while (headerNames.hasMoreElements()) {
+//            String headerName = headerNames.nextElement();
+//            Enumeration<String> headers = request.getHeaders(headerName);
+//            while (headers.hasMoreElements()) {
+//                String headerValue = headers.nextElement();
+//                System.err.println(headerName + ": " + headerValue);
+//            }
+//        }
         if (Objects.isNull(token)){
             System.err.println("blk1");
             filterChain.doFilter(request,response);

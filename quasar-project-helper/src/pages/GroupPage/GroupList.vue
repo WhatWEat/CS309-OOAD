@@ -100,8 +100,14 @@
       </q-table>
     </div>
 
-    GroupId：{{this.groupId}} <br>
-    {{this.formData_user_self}}
+<!--    GroupId：{{this.groupId}} <br>-->
+<!--    {{this.formData_user_self}}-->
+
+<!--    <q-card >-->
+<!--      <q-card-section>sdf</q-card-section>-->
+<!--      <q-btn :style="styleStatic">sdf sdf</q-btn>-->
+<!--    </q-card>-->
+
     <!--  这里是本小组信息部分-->
     <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== -1">
       <div class="col-12 justify-between">
@@ -980,6 +986,21 @@ export default {
       this.getGroupUserSelfDetail();
     }
   },
+  computed:{
+    styleStatic(){
+        return {
+          color:'red',
+          width:'200px',
+        }
+    },
+    roundedStyle() {
+      const radius = Math.min(this.width, this.height) / 10;
+      return {
+        borderRadius: `${radius}px`,
+        height: '200px',
+      };
+    },
+  }
 }
 </script>
 

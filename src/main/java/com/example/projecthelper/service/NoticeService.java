@@ -351,7 +351,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory rmf = new TransferFactory();
+            AbstractNoticeFactory rmf = new RemoveFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());
@@ -397,7 +397,7 @@ public class NoticeService {
         );
 
         try {
-            AbstractNoticeFactory rmf = new RemoveFactory();
+            AbstractNoticeFactory rmf = new TransferFactory();
             Notice notice = gpId_notice.getValue();
             notice.setCreatorId(userId);
             notice.setGroupId(group.getGroupId());

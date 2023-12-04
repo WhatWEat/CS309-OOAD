@@ -118,7 +118,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Update("update groups set " +
             "groupName =#{groupName}, " +
             "description =#{description}, " +
-            "technicalStack =#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler}, " +
+            "technicalStack =#{technicalStack, jdbcType=ARRAY, typeHandler=com.example.projecthelper.util.StringListArrayTypeHandler} " +
             "where groupId = #{groupId};")
         //max_size、group_name、instructor_id, groupId不能为空
     void updateGroupForLeader(Group group) throws PSQLException;

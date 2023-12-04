@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia';
 import {api} from 'boot/axios';
+import {useRouter} from "vue-router";
 
 export const useUser = defineStore('user', {
   state: () => ({
@@ -23,11 +24,13 @@ export const useUser = defineStore('user', {
           this.jwt_token = response.data.jwt_token;
         }
       } catch (error) {
-        localStorage.clear();
+        localStorage.setItem('Token', '');
         this.userid = -1;
         this.username = null;
         this.identity = -1;
         this.jwt_token = null;
+        const router = useRouter();
+        await router.push('/login');
         console.log('该部分在pinaia的user-store.ts中');
         console.log(error);
       }

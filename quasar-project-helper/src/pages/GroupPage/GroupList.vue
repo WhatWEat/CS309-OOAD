@@ -96,8 +96,10 @@
       </q-table>
     </div>
 
+    GroupId：{{this.groupId}} <br>
+    {{this.formData_user_self}}
     <!--  这里是本小组信息部分-->
-    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== '-1'">
+    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== -1">
       <div class="col-12 justify-between">
         <DirectoryCard_Input :disable-list="disableList"
                              :group-data=formData_user_self
@@ -322,7 +324,7 @@ export default {
     return {
       projectId: '',
 
-      groupId: '-1',
+      groupId: -1,
       $q: useQuasar(),
       disableList: {
         members: true,
@@ -354,58 +356,66 @@ export default {
         desc: '',
       },
 
-      formData_user_self: {
-        groupId: '',
-        maxSize: '',
-        groupName: '',
-        date1_deadline: '',
-        date2_deadline: '',
-        data1_presentation: '',
-        data2_presentation: '',
-        instructor: '',
-        leader: '',
-        members: [],
-        technicalStack: [],
-        desc: '',
-      },
       // formData_user_self: {
-      //   "groupId": 1,
-      //   "groupName": "group1",
-      //   "creatorId": 30002000,
-      //   "instructorId": 30002000,
-      //   "instructorName": "Andy",
-      //   "leaderId": 12110000,
-      //   "leaderName": "stu0",
-      //   "maxsize": 10,
-      //   "projectId": 1,
-      //   "teamTime": "2023-11-06T23:47:18.995108",
-      //   "deadline": "2024-03-10T10:00:00",
-      //   "reportTime": "2024-10-10T10:00:00",
-      //   "description": null,
-      //   "technicalStack": null,
-      //   "visibility": [
-      //     true,
-      //     true,
-      //     true,
-      //     true
-      //   ],
-      //   "recruitment": null,
-      //   "memberIds": [
-      //     12110002,
-      //     12110004,
-      //     12110001,
-      //     12110003,
-      //     12110000
-      //   ],
-      //   "members": [
-      //     "stu2",
-      //     "stu4",
-      //     "stu1",
-      //     "stu0",
-      //     "stu0"
-      //   ],
-      //   "memCnt": 5
+      //   groupId: '',
+      //   maxSize: '',
+      //   groupName: '',
+      //   date1_deadline: '',
+      //   date2_deadline: '',
+      //   data1_presentation: '',
+      //   data2_presentation: '',
+      //   instructor: '',
+      //   leader: '',
+      //   members: [],
+      //   technicalStack: [],
+      //   desc: '',
+      //   visibility:[], // 用来控制表单的可见性
       // },
+
+      formData_user_self: {
+        "groupId": 99999999,
+        "groupName": "Dev group1",
+        "creatorId": 99999999,
+        "instructorId": 99999999,
+        "instructor": {'Andy':99999999},
+        "instructorName": "Andy",
+        'leader': {'stu0':99999999},
+        "leaderId": 99999999,
+        "leaderName": "stu0",
+        "maxsize": 99999999,
+        "projectId": 99999999,
+        "teamTime": "2099-11-06T23:47:18.995108",
+        "deadline": "2099-03-10T10:00:00",
+        "reportTime": "2099-10-10T10:00:00",
+        "description": null,
+        "technicalStack": null,
+        "visibility": [
+          true,
+          false,
+          true,
+          false
+        ],
+        "recruitment": null,
+        "memberIds": [
+          12110002,
+          12110004,
+          12110001,
+          12110003,
+          12110000
+        ],
+        "members": [
+          "stu2",
+          "stu4",
+          "stu1",
+          "stu0",
+          "stu0"
+        ],
+        "memCnt": 5,
+        'date1_deadline': '2099-03-10',
+        'date2_deadline': '10:00:00',
+        'data1_presentation': '2099-10-10',
+        'data2_presentation': '10:00:00',
+      },
 
       columns: [
         {
@@ -745,26 +755,30 @@ export default {
     },
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
-      api.get('/getGroupInfo/' + 2).then(
+      console.log("尝试获取GroupUserSelfDetail...\n")
+      api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body
+
           tmp.members = merger(tmp.members, tmp.memberIds)
-          delete tmp.memberIds
+          // delete tmp.memberIds
           tmp.instructor = merger(tmp.instructorName, tmp.instructorId)
-          delete tmp.instructorName
-          delete tmp.instructorId
+          // delete tmp.instructorName
+          // delete tmp.instructorId
           tmp.leader = merger(tmp.leaderName, tmp.leaderId)
-          delete tmp.leaderName
-          delete tmp.leaderId
+          // delete tmp.leaderName
+          // delete tmp.leaderId
           tmp.creationTime = formatDateStringPro(tmp.teamTime)
           tmp.deadline = formatDateStringPro(tmp.deadline)
           tmp.presentationTime = formatDateStringPro(tmp.reportTime)
+          tmp.visibility = tmp.visibility
+          // tmp.visibility = [true, true, true, false]
 
-          tmp['maxSize'] = tmp.maxsize
-          delete tmp.maxsize
+          // tmp['maxSize'] = tmp.maxsize
+          // delete tmp.maxsize
 
-          tmp['desc'] = tmp.description
-          delete tmp.description
+          // tmp['desc'] = tmp.description
+          // delete tmp.description
 
           tmp['date1_deadline'] = tmp.deadline.slice(0, 10)
           tmp['date2_deadline'] = tmp.deadline.slice(11, 19)
@@ -773,9 +787,9 @@ export default {
           tmp['date1_creationTime'] = tmp.creationTime.slice(0, 10)
           tmp['date2_creationTime'] = tmp.creationTime.slice(11, 19)
 
-          delete tmp.memberIds
-          delete tmp.instructorId
-          delete tmp.instructorName
+          // delete tmp.memberIds
+          // delete tmp.instructorId
+          // delete tmp.instructorName
 
           // tmp = {
           //     groupId: '9999',
@@ -799,6 +813,7 @@ export default {
       ).catch((error) => {
         console.log(error);
       });
+      console.log("获取到的GroupUserSelfDetail为：" + this.formData_user_self + "，类型为：" + typeof (this.formData_user_self) + "。\n");
     },
 
     //**********************************Post信息部分**********************************//
@@ -897,7 +912,6 @@ export default {
         console.log(error);
         console.log('group_id');
         console.log(this.selected_row.row.groupId);
-
       });
     },
     deleteLeaveGroup() {
@@ -952,6 +966,12 @@ export default {
     console.log("created");
     getUserData();
 
+  },
+  watch : {
+    groupId: function (newVal, oldVal) {
+      console.log("groupId changed");
+      this.getGroupUserSelfDetail();
+    }
   },
 }
 </script>

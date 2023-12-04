@@ -200,21 +200,30 @@ public class UserService {
         String jwt = null;
         switch (type_num_code.getKey()){
             case 1 -> {
-                break;
+                jwt = checkCode(type_num_code.getValue().getValue(),type_num_code.getValue().getKey(),FUNCTION.__MODIFY_PHONE_,false);
+                if (Objects.equals(
+                        stringRedisTemplate.opsForValue().get(
+                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_NUMBER_)
+                        ),type_num_code.getValue().getKey())
+                ){
+                    stringRedisTemplate.delete(getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_));
+                    usersMapper.updateEmail(userId,type_num_code.getValue().getKey());
+                }
+                else
+                    throw new AccountFrozenException("无法修改手机号");
             }
             case 2 -> {
                 jwt =  checkCode(type_num_code.getValue().getValue(), type_num_code.getValue().getKey(), FUNCTION.__MODIFY_NUMBER_, false);
                 if(Objects.equals(
                     stringRedisTemplate.opsForValue().get(
                         getRedisKey(String.valueOf(userId), FUNCTION.__MODIFY_NUMBER_)
-                    ), type_num_code.getValue().getKey()
-                    )
+                    ), type_num_code.getValue().getKey())
                 ){
                     stringRedisTemplate.delete(getRedisKey(String.valueOf(userId), FUNCTION.__MODIFY_NUMBER_));
                     usersMapper.updateEmail(userId, type_num_code.getValue().getKey());
                 }
                 else
-                    throw new AccountFrozenException("无法修改改邮箱");
+                    throw new AccountFrozenException("无法修改邮箱");
             }
 
         }
@@ -224,7 +233,18 @@ public class UserService {
     public void sendCodeToChangeNumber(KeyValueWrapper<Integer, String> typeNum, Long userId){
         switch (typeNum.getKey()){
             case 1 -> {
-                break;
+                User user = usersMapper.findUserByPhone(typeNum.getKey().toString());
+                if (user != null)
+                    throw new InvalidFormException("手机号已被注册");
+                try {
+                    sendMassage(typeNum.getKey().toString(), FUNCTION.__MODIFY_PHONE_,false);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                stringRedisTemplate.opsForValue().set(
+                        getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_),
+                        typeNum.getValue(),Duration.ofMinutes(10)
+                );
             }
             case 2 -> {
                 User user = usersMapper.findUserByMail(typeNum.getValue());
@@ -242,7 +262,11 @@ public class UserService {
         String jwt = null;
         switch (type_pass_num_code.getKey().getKey()){
             case 1 -> {
-                break;
+                jwt = checkCode(type_pass_num_code.getValue().getValue(),type_pass_num_code.getValue().getKey(),FUNCTION.__FORGET_PASS__,true);
+                usersMapper.changePassByPhone(
+                        type_pass_num_code.getValue().getKey(),
+                        passwordEncoder.encode(type_pass_num_code.getKey().getValue())
+                );
             }
             case 2 -> {
                 jwt =  checkCode(type_pass_num_code.getValue().getValue(), type_pass_num_code.getValue().getKey(), FUNCTION.__FORGET_PASS__, true);
@@ -259,7 +283,11 @@ public class UserService {
     public void getForgetPassCode(KeyValueWrapper<Integer, String> typeNum){
         switch (typeNum.getKey()){
             case 1 -> {
-                break;
+                try {
+                    sendMassage(typeNum.getValue(),FUNCTION.__FORGET_PASS__,true);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             case 2 -> {
                 sendMail(typeNum.getValue(), FUNCTION.__FORGET_PASS__, true);
@@ -273,7 +301,16 @@ public class UserService {
     public void request_code(String to){
         sendMail(to, FUNCTION.__LOGIN__, true);
     }
-
+    public String login_with_phone(String code,String address){
+        return checkCodeMassage(code, address, FUNCTION.__LOGIN__, true);
+    }
+    public void request_phone(String to){
+        try {
+            sendMassage(to, FUNCTION.__LOGIN__, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     //检查验证码,返回ture为验证码正确，false为错误
     public String checkCode(String code,String address, FUNCTION function, boolean needJwt){
 
@@ -291,15 +328,20 @@ public class UserService {
             return null;
         }
     }
-    public String checkCodeMassage(String code,String phone){
-        User user = usersMapper.findUserByPhone(phone);
-        String value = stringRedisTemplate.opsForValue().get(phone);
+    public String checkCodeMassage(String code,String phone, FUNCTION function, boolean needJwt){
+
+        String value = stringRedisTemplate.opsForValue().get(getRedisKey(phone, function));
 
         if (value == null || !value.equals(code)){
             throw new InvalidFormException("验证码错误");
         }else {
-            stringRedisTemplate.delete(phone);
-            return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+            stringRedisTemplate.delete(getRedisKey(phone,function));
+            User user;
+            if (needJwt) {
+                user = usersMapper.findUserByMail(phone);
+                return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
+            }
+            return null;
         }
     }
 
@@ -351,39 +393,19 @@ public class UserService {
         //发送邮件后开始计时,有效时间十分钟
         stringRedisTemplate.opsForValue().set(getRedisKey(to, function), code, Duration.ofMinutes(10));
     }
-
-    private String getRedisKey(String number, FUNCTION function){
-        return function.name()+number;
-    }
-
-    public enum FUNCTION{
-        __FORGET_PASS__,
-        __LOGIN__,
-        __MODIFY_NUMBER_
-    }
-
-    public static com.aliyun.dysmsapi20170525.Client createClient() throws Exception {
-        com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config()
-                // 必填，您的 AccessKey ID
-                .setAccessKeyId("LTAI5t9Ai1hwm7VcXdFYh8AE")
-                // 必填，您的 AccessKey Secret
-                .setAccessKeySecret("KTnYB2D6IcfL7jthDlw8wp0o5EGTSl");
-        // Endpoint 请参考 https://api.aliyun.com/product/Dysmsapi
-        config.endpoint = "dysmsapi.aliyuncs.com";
-        return new com.aliyun.dysmsapi20170525.Client(config);
-    }
-
-
-    public void sendMassage(String to) throws Exception {
-//        User user = usersMapper.findUserByPhone(to);
-//        if(user == null)
-//            throw new InvalidFormException("手机号错误");
-//        if(user.isFrozen())
-//            throw new AccountFrozenException("账户已冻结");
+    public void sendMassage(String to, FUNCTION function, boolean mustExist) throws Exception {
+        if(mustExist){
+            User user = usersMapper.findUserByPhone(to);
+            if(user == null)
+                throw new InvalidFormException("手机号错误");
+            if(user.isFrozen())
+                throw new AccountFrozenException("账户已冻结");
+        }
 
         Random random = new Random();
 
-        long remainingTime = stringRedisTemplate.getExpire(to);
+        Long remainingTime = stringRedisTemplate.getExpire(getRedisKey(to, function));
+        System.err.println(remainingTime);
 
         //发送后两分钟内不允许再次发送
         if (remainingTime > 8*60){
@@ -426,8 +448,32 @@ public class UserService {
         }
 
         //发送邮件后开始计时,有效时间十分钟
-        stringRedisTemplate.opsForValue().set(to, code, Duration.ofMinutes(10));
+        stringRedisTemplate.opsForValue().set(getRedisKey(to, function), code, Duration.ofMinutes(10));
     }
+
+    private String getRedisKey(String number, FUNCTION function){
+        return function.name()+number;
+    }
+
+    public enum FUNCTION{
+        __FORGET_PASS__,
+        __LOGIN__,
+        __MODIFY_NUMBER_,
+        __MODIFY_PHONE_
+    }
+
+    public static com.aliyun.dysmsapi20170525.Client createClient() throws Exception {
+        com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config()
+                // 必填，您的 AccessKey ID
+                .setAccessKeyId("LTAI5t9Ai1hwm7VcXdFYh8AE")
+                // 必填，您的 AccessKey Secret
+                .setAccessKeySecret("KTnYB2D6IcfL7jthDlw8wp0o5EGTSl");
+        // Endpoint 请参考 https://api.aliyun.com/product/Dysmsapi
+        config.endpoint = "dysmsapi.aliyuncs.com";
+        return new com.aliyun.dysmsapi20170525.Client(config);
+    }
+
+
 
             // 数据库功能测试
 

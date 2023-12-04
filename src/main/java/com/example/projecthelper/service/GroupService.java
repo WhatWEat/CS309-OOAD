@@ -252,6 +252,7 @@ public class GroupService {
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -266,7 +267,8 @@ public class GroupService {
         if (group.getLeaderId() == userId) {
             group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
             try {
-                groupMapper.updateGroupForTea(group);
+                groupMapper.updateGroupForLeader(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

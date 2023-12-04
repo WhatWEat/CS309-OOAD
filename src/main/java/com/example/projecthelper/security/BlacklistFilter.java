@@ -31,14 +31,17 @@ public class BlacklistFilter extends OncePerRequestFilter {
         // 如果token无效，直接进行下一环
         String token = request.getHeader(CustomJwtAuthenticationTokenFilter.AUTH_HEADER);
         if (Objects.isNull(token)){
+            System.err.println("blk1");
             filterChain.doFilter(request,response);
             return;
         }
+        System.err.println("blk1");
         if (!JWTUtil.verifyToken(token)) {
             LogUtil.log("invalid token" , LogUtil.WARN);
             filterChain.doFilter(request,response);
             return;
         }
+        System.err.println("blk2");
         // 检查是否在黑名单中
         if (isBlacklisted(JWTUtil.getUserIdByToken(token))) {
 

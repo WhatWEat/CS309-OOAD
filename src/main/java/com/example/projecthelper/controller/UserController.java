@@ -181,6 +181,7 @@ public class UserController {
                                                            @PathVariable("page_size") int pageSize,
                                                            HttpServletRequest request) {
         // Use the projectId, page, and pageSize in your method
+        System.err.println("here");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Assignment> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))) {

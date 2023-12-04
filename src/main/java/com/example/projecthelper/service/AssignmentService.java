@@ -100,7 +100,7 @@ public class AssignmentService {
             if (Objects.equals(checker, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
-            results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
+            results = assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
         try {
             results.forEach(a ->
@@ -471,6 +471,7 @@ public class AssignmentService {
         Assignment ass = assignmentMapper.findAssById(sub.getAssignmentId());
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
+        System.err.println(identity);
         if (identity == 1) {
             Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
             if (!Objects.equals(teaId, userId))

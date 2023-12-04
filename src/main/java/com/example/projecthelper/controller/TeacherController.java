@@ -314,7 +314,7 @@ public class TeacherController {
         assignmentService.gradeAss(
                 submittedAssignment,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }

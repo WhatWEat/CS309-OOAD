@@ -6,9 +6,13 @@
       label="Assignments"
     ></q-btn>
     <q-toolbar-title></q-toolbar-title>
-    <q-btn-group push>
-      <q-btn text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
-      <q-btn text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
+    <q-btn-group push v-if="this.$q.screen.gt.md">
+      <q-btn  text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
+      <q-btn  text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
+    </q-btn-group>
+    <q-btn-group push v-else>
+      <q-btn dense text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
+      <q-btn dense text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
     </q-btn-group>
   </q-toolbar>
   </div>
@@ -17,7 +21,7 @@
     </assignment-table>
   </div>
   <div v-show="isGroup">
-    <assignment-table  :columns="columns_group" :rows="rows_group" table-title="Group">
+    <assignment-table  :columns="columns_group" :rows="rows_group" :project-id="projectId" :group-id="groupId" table-title="Group">
     </assignment-table>
   </div>
 </template>
@@ -42,9 +46,20 @@ export default {
         {
           name: 'AssignmentName',
           required: true,
-          label: 'AssignmentId',
+          label: 'ID',
           align: 'left',
           field: row => row.AssignmentName,
+          format: val => `${val}`,
+          sortable: false,
+          position: 'left',
+          style: 'max-width: 15px',
+        },
+        {
+          name: 'AssignmentNamePro',
+          required: true,
+          label: 'AssignmentName',
+          align: 'left',
+          field: row => row.AssignmentNamePro,
           format: val => `${val}`,
           sortable: false,
           position: 'left'
@@ -74,6 +89,16 @@ export default {
           label: 'AssignmentId',
           align: 'left',
           field: row => row.AssignmentName,
+          format: val => `${val}`,
+          sortable: false,
+          position: 'left'
+        },
+        {
+          name: 'AssignmentNamePro',
+          required: true,
+          label: 'AssignmentName',
+          align: 'left',
+          field: row => row.AssignmentNamePro,
           format: val => `${val}`,
           sortable: false,
           position: 'left'
@@ -146,24 +171,35 @@ export default {
       api.get('/ass-list/'+ this.projectId +'/0/10000').then((res) => {
         this.rows_group = []
         this.rows_personal = []
-        // console.log("res:");
+        // console.clear()
+        // console.log("获取所有学生的作业列表");
+        // console.log("res:")
         // console.log(res);
         for (let i = 0; i < res.data.body.length; i++) {
             let tmp ={};
-            if (res.data.body.type ==='i'){
+            if (res.data.body[i].type ==='i'){
+              tmp['AssignmentNamePro'] = res.data.body[i].title;
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
-              //2023-12-02T15:45:30, 把T换成空格
               tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;
               tmp['moreInfo'] = res.data.body[i].moreInfo;
               this.rows_personal.push(tmp)
+              // console.log("个人作业 序号i值为:" + i)
+              // console.log("res.data.body[i].type:"+ res.data.body[i].type)
+              // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
+              // console.log(tmp)
             }
             else {
+              tmp['AssignmentNamePro'] = res.data.body[i].title;
               tmp['AssignmentName'] = res.data.body[i].assignmentId;
               tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
               tmp['instructor'] = res.data.body[i].creatorName;
               tmp['moreInfo'] = res.data.body[i].moreInfo;
               this.rows_group.push(tmp)
+              // console.log("小组作业 序号i值为:" + i)
+              // console.log("res.data.body[i].type:"+ res.data.body[i].type)
+              // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
+              // console.log(tmp)
             }
         }
         // console.log()
@@ -189,36 +225,4 @@ export default {
 <style scoped>
 
 </style>
-
-
-
-
-
-
-
-
-
-
-
-<!--<template>-->
-<!--    <q-toolbar class="bg-grey-4 text-black rounded-borders">-->
-<!--      <q-btn-->
-<!--        flat-->
-<!--        label="Assignments"-->
-<!--      ></q-btn>-->
-<!--      <q-toolbar-title></q-toolbar-title>-->
-<!--      <q-btn-group push>-->
-<!--        <q-btn :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle"></q-btn>-->
-<!--        <q-btn :color="color_group" icon="groups" label="Group" push @click="buttonHandle"></q-btn>-->
-<!--      </q-btn-group>-->
-<!--    </q-toolbar>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--import {defineAsyncComponent, ref} from 'vue';-->
-<!--import {useUserStore} from "src/composables/useUserStore";-->
-<!--import {api} from "boot/axios";-->
-<!--import {getUserData, formatDateString, merger} from "src/composables/usefulFunction";-->
-<!--</script>-->
-
 

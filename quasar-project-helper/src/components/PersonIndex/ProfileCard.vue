@@ -214,7 +214,7 @@
             v-else
             color="green"
             type="submit"
-            @click="saveProfile"
+            @click="beforeSaveVerify"
           />
           <q-btn
             class="text-capitalize"
@@ -225,6 +225,49 @@
         </div>
 
       </q-card-section>
+      <q-dialog v-model="isOpenVerify" persistent transition-show="scale" transition-hide="scale" >
+        <q-card style="width: 400px;" class="row">
+          <q-item class="col-12">
+            <q-item-section>
+              <q-item-label class="text-h5">Verify</q-item-label>
+              <q-item-label caption>
+                We will send a verification code and please check it.
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-separator/>
+          <q-card-section class="col-12 row">
+            <q-input v-model="phone_code" dense outline class="col-12" label="Phone Code" v-if="saveVerifyType == 1 || saveVerifyType == 3">
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="send"
+                  @click="sendCode"
+                  v-if="countdown_phone === 0"
+                />
+                <div v-else>{{ countdown_phone }}s</div>
+              </template>
+            </q-input>
+            <q-input v-model="email_code" dense outline class="col-12" label="Email Code" v-if="saveVerifyType == 2 || saveVerifyType == 3">
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="send"
+                  @click="sendCode"
+                  v-if="countdown_email === 0"
+                />
+                <div v-else>{{ countdown_email }}s</div>
+              </template>
+            </q-input>
+          </q-card-section>
+          <q-card-actions>
+            <q-btn label="Cancel" color="red" @click="isOpenVerify = false"/>
+            <q-btn label="Save" color="green" @click="checkCode"/>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </q-card>
   </div>
 </template>
@@ -277,6 +320,7 @@ onMounted(() => {
       api.get(`/get_personal_info/${person_id.value}`).then((res) => {
         console.log(res.data)
         personInfo.value = res.data.body
+        personInfo.value.gender = personInfo.value.gender.toLowerCase()
         copyPersonInfo()
         username.value = personInfo.value.name
         avatar_preview.value = personInfo.value.avatarPath
@@ -312,6 +356,139 @@ function copyPersonInfo(){
   } else {
     email.value = person_id.value.toString()
     selectedEmailDomain.value = 'sustech.edu.cn'
+  }
+}
+// 校验手机号/邮箱有没有改，改的话需要验证
+const saveVerifyType = ref(0), isOpenVerify = ref(false);
+function beforeSaveVerify(){
+  saveVerifyType.value = 0;
+  if (phone.value !== personInfo.value.phone){
+    saveVerifyType.value = 1;
+  }
+  if (email.value + '@' + selectedEmailDomain.value !== personInfo.value.email){
+    saveVerifyType.value += 2;
+  }
+  if (saveVerifyType.value !== 0){
+    isOpenVerify.value = true;
+    sendCode();
+  } else {
+    saveProfile();
+  }
+}
+// 发送验证码
+const countdown_phone = ref(0), countdown_email = ref(0);
+function sendCode(){
+  if (countdown_phone.value == 0 && (saveVerifyType.value == 1 || saveVerifyType.value == 3)){
+    // TODO 发送手机验证码
+    api.post('/get_edit_code',{
+      key: 1,
+      value: phone.value
+    })
+    $q.notify({
+      color: "green",
+      textColor: "white",
+      icon: "mail",
+      message: "Code has been sent to your phone",
+    });
+    // 开始倒计时
+    countdown_phone.value = 60;
+    const interval = setInterval(() => {
+      countdown_phone.value--;
+      if (countdown_phone.value === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+  if (countdown_email.value == 0 &&(saveVerifyType.value == 2 || saveVerifyType.value == 3)){
+    // TODO 发送邮箱验证码
+    api.post('/get_edit_code',{
+      key: 2,
+      value: email.value+'@'+selectedEmailDomain.value
+    })
+    $q.notify({
+      color: "green",
+      textColor: "white",
+      icon: "mail",
+      message: "Code has been sent to your email",
+    });
+    // 开始倒计时
+    countdown_email.value = 60;
+    const interval = setInterval(() => {
+      countdown_email.value--;
+      if (countdown_email.value === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+}
+const email_code = ref(''), phone_code = ref('')
+function checkCode(){
+  // TODO 检查验证码
+  let flag = saveVerifyType.value;
+  if (saveVerifyType.value == 1 || saveVerifyType.value == 3){
+    api.post('/verify_edit_code',{
+      key: 1,
+      value: phone_code.value,
+    }).then(res => {
+      if (res.data.statusCode == 200){
+        flag -= 1;
+        $q.notify({
+          color: "green",
+          textColor: "white",
+          icon: "mail",
+          message: "Phone code verified",
+        });
+      } else {
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Wrong phone code",
+        });
+      }
+    }).catch(err => {
+      $q.notify({
+        color: "red",
+        textColor: "white",
+        icon: "mail",
+        message: "Please try again",
+      });
+      console.log(err)
+    })
+  }
+  if (saveVerifyType.value == 2 || saveVerifyType.value == 3){
+    api.post('/verify_edit_code',{
+      key: 2,
+      value: email_code.value,
+    }).then(res => {
+      if (res.data.statusCode == 200){
+        flag -= 2;
+        $q.notify({
+          color: "green",
+          textColor: "white",
+          icon: "mail",
+          message: "Email code verified",
+        });
+      } else {
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Wrong email code",
+        });
+      }
+    }).catch(err => {
+      $q.notify({
+        color: "red",
+        textColor: "white",
+        icon: "mail",
+        message: "Please try again",
+      });
+      console.log(err)
+    })
+  }
+  if (flag == 0){
+    saveProfile();
   }
 }
 function saveProfile() {

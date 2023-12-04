@@ -140,7 +140,15 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-
+    @PostMapping("/modify_group_info")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateGroupForLeader(
+                group,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
     @GetMapping("/get_stu_not_in_group/{project_id}")
     public ResponseResult<List<User>> getStuNotInGroup(HttpServletRequest request,
                                                    @PathVariable("project_id") Long pjId){
@@ -339,9 +347,9 @@ public class StudentController {
     }
 
     @GetMapping("/view_eva/{assignment_id}")
-    public ResponseResult<Float> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<Double> viewEva(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        float eva = assignmentService.viewEvaByStu(
+        Double eva = assignmentService.viewEvaByStu(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
@@ -349,9 +357,9 @@ public class StudentController {
     }
 
     @GetMapping("/to_comment/{assignment_id}")
-    public ResponseResult<List<Group>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
+    public ResponseResult<List<Long>> selectToComment(HttpServletRequest request, @PathVariable("assignment_id") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<Group> groups = assignmentService.selectToCommented(
+        List<Long> groups = assignmentService.selectToCommented(
                 assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
@@ -383,13 +391,16 @@ public class StudentController {
     }
 
 
-    @GetMapping("/GradeBook/{project_id}")
+    @GetMapping("/GradeBook/{project_id}/{page}/{pageSize}")
     public ResponseResult<List<SubmittedAssignment>> GradeBook(
             @PathVariable("project_id") Long projId,
+            @PathVariable("page") Integer page,
+            @PathVariable("pageSize") Integer pageSize,
             HttpServletRequest request) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         List<SubmittedAssignment> out = assignmentService.getStuAllSub(projId,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+                page,pageSize
                 );
         return ResponseResult.ok(out, "Success", JWTUtil.updateJWT(jwt));
     }

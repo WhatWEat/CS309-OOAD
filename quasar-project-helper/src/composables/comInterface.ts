@@ -12,6 +12,7 @@ export interface noticeProps {
   stuView: null | number[];
   toAll: boolean;
   type?: number;
+  status?: number;
   projectName?: string;
   groupId?: number;
 }
@@ -31,8 +32,8 @@ export interface gradeProps {
   homeworkId: number;
   projectId: number;
   name: string;
+  studentID: string;
   grade: number;
-  contribution: string;
   comment: string;
   reviewerId: number;
   reviewerName?: string;
@@ -42,8 +43,8 @@ withDefaults(defineProps<gradeProps>(), {
   homeworkId: 0,
   projectId: 0,
   name: "assignment1",
+  studentID:'12110000',
   grade: 90,
-  contribution: "40%",
   comment: "excellent",
   reviewerId: 0,
   reviewerName: "wang",
@@ -139,8 +140,8 @@ export const defaultGrade: gradeProps = {
   homeworkId: 0,
   projectId: 0,
   name: 'assignment1',
+  studentID:'12110000',
   grade: 90,
-  contribution: '40%',
   comment: 'excellent',
   reviewerName: 'wang',
   reviewerId: 0,

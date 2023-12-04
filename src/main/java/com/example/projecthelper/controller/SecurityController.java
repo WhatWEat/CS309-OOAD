@@ -174,6 +174,21 @@ public class SecurityController {
 
         userService.request_code(address);
 
+
+        return ResponseResult.ok(null, "Success", null);
+    }
+
+    @PostMapping("/request_massage")
+    public ResponseResult<Object> testPhone(@RequestBody String phone) {
+
+        System.out.println(phone);
+
+        try {
+            userService.sendMassage(phone);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         return ResponseResult.ok(null, "Success", null);
     }
 
@@ -184,6 +199,7 @@ public class SecurityController {
         String jwt = userService.login_with_email(address_code.getValue(), address_code.getKey());
         return ResponseResult.ok(null, "Success", jwt);
     }
+
     //FUNC: 重置密码
     @PostMapping("/get_forget_password_code")
     public ResponseResult<Object> get_forget_password_code(
@@ -220,6 +236,16 @@ public class SecurityController {
             type_num_code,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt))
         );
+        return ResponseResult.ok(null, "Success", jwt);
+    }
+
+
+
+    @PostMapping("/login_with_message_code")
+    public ResponseResult<Object> testMassageCode(
+            @RequestBody KeyValueWrapper<String, String> phone_code
+    ) {
+        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
         return ResponseResult.ok(null, "Success", jwt);
     }
 

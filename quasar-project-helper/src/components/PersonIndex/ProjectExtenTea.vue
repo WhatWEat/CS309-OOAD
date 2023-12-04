@@ -10,7 +10,7 @@
           {{ project.teacherName }}
         </q-item-label>
       </q-item-section>
-      <q-item-section side v-if="identity<=1 && identity >= 0 && person_id == user_id">
+      <q-item-section side v-if="identity==1 && person_id == user_id || identity==0">
         <q-btn flat @click.stop="clickEdit" label="Edit"></q-btn>
       </q-item-section>
       <q-dialog v-model="isEdit" persistent>
@@ -249,7 +249,6 @@ function saveInfo() {
     console.log('change')
   }
 
-  // TODO TAs
   if (selectedPeople.value.length === 0 && _.isEqual(ta_list.value, selectedPeople.value)) {
     console.log('no change')
   } else {
@@ -297,7 +296,7 @@ function saveGroup() {
   project_show.value = JSON.parse(JSON.stringify(project_edit.value));
   ta_list.value = JSON.parse(JSON.stringify(selectedPeople.value));
 
-  // TODO
+  // TODO 暂时不做了
   // use api to submit
   console.log(project_edit.value)
 }

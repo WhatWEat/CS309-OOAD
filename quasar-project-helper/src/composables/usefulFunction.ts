@@ -1,6 +1,7 @@
 import {api} from "boot/axios";
 import {useRoute} from 'vue-router';
 import {isArray} from "util";
+import Vue, { ComponentOptions } from 'vue'
 
 export function truncate(str: string, num = 15, endSymbol = '...'): string {
   // 超过多少长度就截断字符串，截断和面加上什么符号
@@ -103,7 +104,7 @@ export function getDownloadBlob(blobFile: Blob, fileName: string) {
   URL.revokeObjectURL(blobUrl);
 }
 //******************Li weihao******************//
-export function merger(key: [], value: []): object;
+export function merger(key: object, value: []): object;
 export function merger(key: string, value: string): object;
 export function merger(key: any, value: any): object {
   const obj: Record<string, any> = {};
@@ -117,7 +118,8 @@ export function merger(key: any, value: any): object {
     // 处理 key 为字符串的情况
     obj[key] = value;
   } else {
-    throw new Error("Invalid argument types");
+    return {};
+    // throw new Error("Invalid argument types");
   }
 
   return obj;
@@ -149,6 +151,22 @@ export async function getUserData() {
     return userDate;
   }
 }
+
+// interface RoundedComponent {
+//   width: number;
+//   height: number;
+// }
+
+// export const roundedMixin: ComponentOptions<RoundedComponent> = {
+//   computed: {
+//     roundedStyle() {
+//       const radius = Math.min(this.width, this.height) / 10;
+//       return {
+//         borderRadius: `${radius}px`,
+//       };
+//     },
+//   },
+// };
 
 
 

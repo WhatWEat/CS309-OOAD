@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -390,16 +389,18 @@ public class TeacherController {
 //        boolean sub = assignmentService.ifStuSub()
 //        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
 //    }
-    @GetMapping("/allGradeBook/{project_id}")
-    public ResponseResult<HashMap<Long,List<SubmittedAssignment>>> allGradeBook(
+    @GetMapping("/allGradeBook/{project_id}/{page}/{pageSize}")
+    public ResponseResult<List<KeyValueWrapper<Long, List<SubmittedAssignment>>>> allGradeBook(
             @PathVariable("project_id") Long projId,
+            @PathVariable("page") Integer page,
+            @PathVariable("pageSize") Integer pageSize,
             HttpServletRequest request) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        HashMap<Long,List<SubmittedAssignment>> out = assignmentService.getProAllSub(projId,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+        List<KeyValueWrapper<Long,List<SubmittedAssignment>>> out = assignmentService.getProAllSub(projId,
                 pjId -> Objects.equals(
                         projectService.findTeacherByProject(pjId),
-                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))));
+                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))),
+                page,pageSize);
         return ResponseResult.ok(out, "Success", JWTUtil.updateJWT(jwt));
     }
 

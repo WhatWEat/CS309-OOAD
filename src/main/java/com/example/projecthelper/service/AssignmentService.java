@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 @Service
@@ -355,8 +352,6 @@ public class AssignmentService {
             return;
         }
         throw new AccessDeniedException("你不在小组中");
-
-
     }
 
     public SubmittedAssignment viewSubByStu(long assignmentId, long stuId) {
@@ -379,19 +374,23 @@ public class AssignmentService {
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public float viewEvaByStu(long assignmentId, long stuId) {
+    public Double viewEvaByStu(long assignmentId, long stuId) {
         Assignment assignment = assignmentMapper.findAssById(assignmentId);
-
+        System.out.println(assignment.getProjectId());
         Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
+
+        System.out.println(gpId);
         if (gpId != null) {
-            return submittedAssMapper.avgGrade(gpId);
+            if (submittedAssMapper.avgGrade(gpId)!=null){
+                return submittedAssMapper.avgGrade(gpId);
+            }else return -1d;
+
         }
         throw new AccessDeniedException("无权查看作业");
     }
 
-    public List<Group> selectToCommented(long assignmentId, long stuId) {
+    public List<Long> selectToCommented(long assignmentId, long stuId) {
         Assignment assignment = assignmentMapper.findAssById(assignmentId);
-
         Long gpId = groupMapper.findGroupIdOfUserInAProj(stuId, assignment.getProjectId());
         if (gpId != null) {
             List<Evaluation> commented = submittedAssMapper.selectCommented(assignment.getProjectId(),gpId);
@@ -400,7 +399,16 @@ public class AssignmentService {
             for (Evaluation commented1 : commented){
                 groups.removeIf(group -> group.getGroupId().equals(commented1.getCommentedGroup()));
             }
-            return groups;
+            List<Long> out = new ArrayList<>();
+            Random random = new Random();
+            for ( int i = 0; i< 3-commented.size();i++){
+                Group group = groups.get(random.nextInt(groups.size()));
+                while (out.contains(group.getGroupId())){
+                    group = groups.get(random.nextInt(groups.size()));
+                }
+                out.add(group.getGroupId());
+            }
+            return out;
         }
         throw new AccessDeniedException("无权查看作业");
     }
@@ -480,7 +488,7 @@ public class AssignmentService {
 
     }
 
-    public List<SubmittedAssignment> getStuAllSub(Long projectId, Long userId ){
+    public List<SubmittedAssignment> getStuAllSub(Long projectId, Long userId,int page ,int pageSize){
         if(projectMapper.checkStuInProj(userId,projectId) == null){
             throw new AccessDeniedException("您不在project中");
         }
@@ -489,22 +497,44 @@ public class AssignmentService {
         if (group!=null){
             submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
         }
+
+        if (submittedAssignments.size()>=(page+1)*pageSize){
+            return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
+        }
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+            return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
+        }
+        else return new ArrayList<>();
+    }
+    public List<SubmittedAssignment> allSub(Long projectId, Long userId){
+        Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
+        List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
+        if (group!=null){
+            submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
+        }
         return submittedAssignments;
     }
-
-    public HashMap<Long,List<SubmittedAssignment>>getProAllSub(Long projectId,Long userId,Predicate<Long> accessProject){
+    public List<KeyValueWrapper<Long,List<SubmittedAssignment>>>getProAllSub(Long projectId, Predicate<Long> accessProject,
+                                                                             int page, int pageSize){
         if (!accessProject.test(projectId)) {
             System.err.println(projectId);
             throw new AccessDeniedException("无权查看作业");
         }
         List<User> stus = usersMapper.findStuByProj(projectId);
-        HashMap<Long,List<SubmittedAssignment>> map = new HashMap<>();
+        List<KeyValueWrapper<Long,List<SubmittedAssignment>>> submittedAssignments = new ArrayList<>();
 
         for (User stu : stus){
-            map.put(stu.getUserId(),getStuAllSub(projectId,stu.getUserId()));
+            submittedAssignments.add(new KeyValueWrapper<>(stu.getUserId(),allSub(projectId,stu.getUserId())));
         }
 
-        return map;
+
+        if (submittedAssignments.size()>=(page+1)*pageSize){
+            return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
+        }
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+            return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
+        }
+        else return new ArrayList<>();
     }
 
     //这个方法是读取文件批量更新成绩

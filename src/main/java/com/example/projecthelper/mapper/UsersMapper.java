@@ -142,6 +142,7 @@ public interface UsersMapper extends BaseMapper<User> {
     @Select("select * from users where email = #{email};")
     User findUserByMail(String email);
 
-
+    @Select("select * from users where phone = #{phone};")
+    User findUserByPhone(String phone);
 
 }

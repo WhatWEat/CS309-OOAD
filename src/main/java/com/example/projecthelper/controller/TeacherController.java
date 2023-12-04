@@ -218,6 +218,7 @@ public class TeacherController {
                                                  @RequestParam("requireExtension") String requireExtension,
                                                  @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Assignment assignment = new Assignment();
+        System.err.println(type);
         assignment.setTitle(title);
         assignment.setDescription(description);
         assignment.setProjectId(projectId);

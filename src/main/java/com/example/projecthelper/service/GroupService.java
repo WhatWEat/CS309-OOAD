@@ -252,7 +252,7 @@ public class GroupService {
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
-                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
+//                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

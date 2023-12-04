@@ -17,9 +17,6 @@ public class HTTPUtil {
         "/get_forget_password_code", "/change_forget_password"
     };
 
-    public static final String [] IGNORE_PATTERN = {"/login", "/logout", "/signup", "/request_code","/request_massage",
-            "/login_with_email_code","/login_with_message_code"};
-
 
     public static final String [] REQUEST_CODE = {"/request_code","/request_massage"};
 

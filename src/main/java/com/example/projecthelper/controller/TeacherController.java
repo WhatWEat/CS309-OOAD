@@ -1,5 +1,6 @@
 package com.example.projecthelper.controller;
 
+import com.example.projecthelper.cache.AssignmentCache;
 import com.example.projecthelper.entity.*;
 import com.example.projecthelper.service.*;
 import com.example.projecthelper.util.*;
@@ -28,6 +29,7 @@ public class TeacherController {
     private final GroupService groupService;
     private final AssignmentService assignmentService;
     private final FileService fileService;
+    private final AssignmentCache assignmentCache;
 
     @Autowired
     private UserService userService;
@@ -38,12 +40,13 @@ public class TeacherController {
     @Autowired
     public TeacherController(AuthService authService, NoticeService noticeService,
                              GroupService groupService, AssignmentService assignmentService,
-                             FileService fileService) {
+                             FileService fileService, AssignmentCache assignmentCache) {
         this.authService = authService;
         this.noticeService = noticeService;
         this.groupService = groupService;
         this.assignmentService = assignmentService;
         this.fileService = fileService;
+        this.assignmentCache = assignmentCache;
     }
 
     @PostMapping("/create_multiple_users")
@@ -76,80 +79,6 @@ public class TeacherController {
         projectService.editProject(project, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
-
-//    @GetMapping("/stu-list/{project_id}")
-//    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
-//        HttpServletRequest request, @PathVariable("project_id") Long pjId
-//    ){
-//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-//        return ResponseResult.ok(
-//            projectService.getStuList(
-//                pjId,
-//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-//            ),
-//            "Success", JWTUtil.updateJWT(jwt)
-//        );
-//    }
-
-//    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
-//    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
-//                                                   @PathVariable("page") long page,
-//                                                   @PathVariable("page_size") long pageSize,
-//                                                   HttpServletRequest request) {
-//        // Use the projectId, page, and pageSize in your method
-//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-//        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-//        List<Notice> result = noticeService.getNoticesByTeacher(userId, projectId, page, pageSize);
-//        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
-//    }
-
-//    @PostMapping("/post_notice")
-//    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
-//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-//        System.err.println(notice);
-//        noticeService.postNotice(
-//                notice,
-//                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-//                pjId -> Objects.equals(
-//                        projectService.findTeacherByProject(pjId),
-//                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-//                )
-//        );
-//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-//    }
-
-//    @PutMapping("/modify_notice")
-//    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
-//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-//        noticeService.modifyNoticeWithUser(
-//                notice,
-//                ntId -> {
-//                    Notice ntc = noticeService.findNoticeById(ntId);
-//                    return Objects.equals(
-//                            projectService.findTeacherByProject(ntc.getProjectId()),
-//                            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-//                    ) && ntc.getType() == 0;
-//                }
-//        );
-//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-//    }
-
-
-//    @PostMapping("/delete_notice")
-//    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
-//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-//        noticeService.deleteNotice(
-//            noticeIds,
-//            ntId -> {
-//                Notice ntc = noticeService.findNoticeById(ntId);
-//                return Objects.equals(
-//                    projectService.findTeacherByProject(ntc.getProjectId()),
-//                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-//                ) && ntc.getType() == 0;
-//            }
-//        );
-//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-//    }
 
 
     @GetMapping("/get_ta_list_of_proj/{proj_id}")
@@ -391,17 +320,17 @@ public class TeacherController {
     }
 
     @PostMapping("/grade_ass_with_file")
-    public ResponseResult<Object> gradeAssWithFile(
+    public ResponseResult<List<SubmittedAssignment>> gradeAssWithFile(
             HttpServletRequest request,
             @RequestParam("file") MultipartFile file,
             @RequestParam("assignmentId") Long assignmentId) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        assignmentService.gradeAssWithFile(
+        List<SubmittedAssignment> result = assignmentService.gradeAssWithFile(
                 file, assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
                 Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
 
     }
 

@@ -183,11 +183,7 @@ public class SecurityController {
 
         System.out.println(phone);
 
-        try {
-            userService.sendMassage(phone);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        userService.request_phone(phone);
 
         return ResponseResult.ok(null, "Success", null);
     }
@@ -200,6 +196,14 @@ public class SecurityController {
         return ResponseResult.ok(null, "Success", jwt);
     }
 
+    @PostMapping("/login_with_phone_code")
+    public ResponseResult<Object> testPhone(
+            @RequestBody KeyValueWrapper<String, String> pone_code
+    ) {
+        String jwt = userService.login_with_phone(pone_code.getValue(), pone_code.getKey());
+        return ResponseResult.ok(null, "Success", jwt);
+    }
+
     //FUNC: 重置密码
     @PostMapping("/get_forget_password_code")
     public ResponseResult<Object> get_forget_password_code(
@@ -208,6 +212,14 @@ public class SecurityController {
         userService.getForgetPassCode(type_number);
         return ResponseResult.ok(null, "Success", null);
     }
+
+//    @PostMapping("/login_with_message_code")
+//    public ResponseResult<Object> testMassageCode(
+//            @RequestBody KeyValueWrapper<String, String> phone_code
+//    ) {
+//        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
+//        return ResponseResult.ok(null, "Success", jwt);
+//    }
 
     @PostMapping("/change_forget_password")
     public ResponseResult<Object> change_forget_password(
@@ -241,12 +253,6 @@ public class SecurityController {
 
 
 
-    @PostMapping("/login_with_message_code")
-    public ResponseResult<Object> testMassageCode(
-            @RequestBody KeyValueWrapper<String, String> phone_code
-    ) {
-        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
-        return ResponseResult.ok(null, "Success", jwt);
-    }
+
 
 }

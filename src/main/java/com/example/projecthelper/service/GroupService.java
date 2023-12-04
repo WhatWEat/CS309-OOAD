@@ -252,6 +252,7 @@ public class GroupService {
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -262,11 +263,12 @@ public class GroupService {
 
     public void updateGroupForLeader(Group group, long userId) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
-
-        if (group.getLeaderId() == userId) {
+        Group group1 = groupMapper.findGroupOfStuInProject(userId,group.getProjectId());
+        if (group1.getLeaderId() == userId) {
             group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
             try {
-                groupMapper.updateGroupForTea(group);
+                groupMapper.updateGroupForLeader(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

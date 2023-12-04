@@ -96,8 +96,9 @@
       </q-table>
     </div>
 
+    {{this.formData_user_self}}
     <!--  这里是本小组信息部分-->
-    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== '-1'">
+    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== -1">
       <div class="col-12 justify-between">
         <DirectoryCard_Input :disable-list="disableList"
                              :group-data=formData_user_self
@@ -322,7 +323,7 @@ export default {
     return {
       projectId: '',
 
-      groupId: '-1',
+      groupId: -1,
       $q: useQuasar(),
       disableList: {
         members: true,
@@ -367,6 +368,7 @@ export default {
         members: [],
         technicalStack: [],
         desc: '',
+        visibility:[], // 用来控制表单的可见性
       },
       // formData_user_self: {
       //   "groupId": 1,
@@ -759,6 +761,8 @@ export default {
           tmp.creationTime = formatDateStringPro(tmp.teamTime)
           tmp.deadline = formatDateStringPro(tmp.deadline)
           tmp.presentationTime = formatDateStringPro(tmp.reportTime)
+          // tmp.visibility = tmp.visibility
+          tmp.visibility = [true, true, true, false]
 
           tmp['maxSize'] = tmp.maxsize
           delete tmp.maxsize
@@ -897,7 +901,6 @@ export default {
         console.log(error);
         console.log('group_id');
         console.log(this.selected_row.row.groupId);
-
       });
     },
     deleteLeaveGroup() {

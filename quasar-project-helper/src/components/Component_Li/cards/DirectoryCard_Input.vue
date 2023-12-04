@@ -5,7 +5,14 @@
       <q-item-section avatar>
         <q-btn :flat="true" round>
           <q-avatar class="shadow-10" size="80px">
-            <img :src=avatar>
+<!--            <img :src=avatar>-->
+            <q-img :src="avatar"
+                   spinner-color="primary"
+                   loading="lazy">
+              <template v-slot:loading>
+                <q-spinner size="40px" />
+              </template>
+            </q-img>
           </q-avatar>
         </q-btn>
       </q-item-section>
@@ -192,6 +199,25 @@
           <q-item-label lines="1">Max Size</q-item-label>
           <q-item-label caption lines="2">
             <q-input :disable="disableList_temp.maxSize" :model-value="groupData_temp.maxSize" dense></q-input>
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <q-item clickable>
+        <q-item-section avatar>
+          <q-item-label lines="1">
+            <q-avatar icon="check_box"></q-avatar>
+          </q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
+          <q-item-label lines="1">Visibility</q-item-label>
+          <q-item-label caption lines="2">
+            <q-btn>
+            <q-checkbox keep-color v-model="teal" label="Teal" color="teal" />
+            <q-checkbox keep-color v-model="orange" label="Orange" color="orange" />
+            <q-checkbox keep-color v-model="red" label="Red" color="red" />
+            <q-checkbox keep-color v-model="cyan" label="Cyan" color="cyan" />
+            </q-btn>
           </q-item-label>
         </q-item-section>
       </q-item>

@@ -172,7 +172,7 @@ public class StudentController {
     }
 
     @PostMapping("/group_leader_transfer")
-    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.transferLeader(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
@@ -299,7 +299,7 @@ public class StudentController {
     public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
                                                    @RequestParam("assignmentId") Long assignmentId,
                                                    @RequestParam("content") String content,
-                                                   @RequestParam("grade") Float grade,
+                                                   @RequestParam("grade") Double grade,
                                                    @RequestParam("commentedGroup") Long commentedGroup
                                                    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

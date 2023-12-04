@@ -5,6 +5,6 @@ import com.example.projecthelper.entity.Notice;
 public class TransferNotice extends Notice {
     public TransferNotice(){
         super();
-        this.type = Type.REMOVE.getValue();
+        this.type = Type.TRANSFER.getValue();
     }
 }

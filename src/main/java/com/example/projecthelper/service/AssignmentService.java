@@ -309,12 +309,13 @@ public class AssignmentService {
         if (!userId.equals(group.getLeaderId())) {
             throw new AccessDeniedException("您不是组长");
         }
-        try {// FUNC: 对原本的作业进行一个覆盖
+
+//        try {// FUNC: 对原本的作业进行一个覆盖
             submittedAssMapper.deleteOriginalEva(evaluation);
             submittedAssMapper.submitEva(evaluation);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+//        } catch (Exception e) {
+//            System.err.println(e.getMessage());
+//        }
     }
 
     public void removeSubmittedAss(Long assignmentId, Long userId) {

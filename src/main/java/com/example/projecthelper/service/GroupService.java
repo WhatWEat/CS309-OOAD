@@ -375,7 +375,7 @@ public class GroupService {
         noticeService.createRemoveNotice(gpId_memId_notice, userId);
     }
 
-    public void transferLeader(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+    public void transferLeader(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
         noticeService.createTransferNotice( gpId_notice,  userId);
     }
 

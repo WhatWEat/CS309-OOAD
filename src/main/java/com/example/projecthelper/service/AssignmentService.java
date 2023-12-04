@@ -135,8 +135,11 @@ public class AssignmentService {
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
             if(type.equals("g")){
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(user_id, assignment.getProjectId());
-                submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+                submittedAssignment = assignmentMapper.findSubAssById(ass_id, gpId);
             }
+        }
+        else {
+            submittedAssignment = assignmentMapper.findLatestSubAssByAssId(ass_id);
         }
         assignment.setState(
             Assignment.AssignmentState.getState(assignment, submittedAssignment).getValue()
@@ -145,6 +148,10 @@ public class AssignmentService {
             assignment.setFilePaths(
                 assignment.getFilePaths().stream().map(FileUtil::getFilenameFromPath).toList()
             );
+        }catch (NullPointerException ignored){
+
+        }
+        try {
             submittedAssignment.setFilepaths(
                 submittedAssignment.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList()
             );

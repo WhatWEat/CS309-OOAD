@@ -87,7 +87,10 @@ public class NoticeService {
         List<Notice> result = noticeMapper.findNoticeOfAdm(pageSize, page * pageSize, key);
         result.forEach(e -> {
             e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
-            e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            if(e.getStuView() != null && !e.getStuView().isEmpty())
+                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+            else
+                e.setStuViewName(new ArrayList<>());
         });
         return result;
     }
@@ -127,7 +130,10 @@ public class NoticeService {
         result.forEach(e -> {
             if(Objects.equals(userId, e.getCreatorId()) && e.getType() == 0){
                 e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
-                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                if(e.getStuView() != null && !e.getStuView().isEmpty())
+                    e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                else
+                    e.setStuViewName(new ArrayList<>());
             }
         });
         return result;
@@ -153,7 +159,10 @@ public class NoticeService {
         result.forEach(e -> {
             if(Objects.equals(userId, e.getCreatorId())){
                 e.setStuView(noticeMapper.findStuOfNotice(e.getNoticeId()));
-                e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                if(e.getStuView() != null && !e.getStuView().isEmpty())
+                    e.setStuViewName(usersMapper.findUsernamesById(e.getStuView()));
+                else
+                    e.setStuViewName(new ArrayList<>());
             }
         });
         return result;
@@ -429,23 +438,26 @@ public class NoticeService {
 //    }
 
     public void modifyNotice(Notice notice, Long userId, int identity) {
-        notice.setType(0);
-        notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+//        notice.setType(0);
+//        notice.setProjectId(noticeMapper.findNoticeById(notice.getNoticeId()).getProjectId());
+        Notice ntc = noticeMapper.findNoticeById(notice.getNoticeId());
         switch (identity){
             case 0:
-                if(!administratorAccess.accessNotice(userId, notice))
+                if(!administratorAccess.accessNotice(userId, ntc))
                     throw new AccessDeniedException("您没有权限发布该公告");
                 break;
             case 1:
-                if(!teacherAccess.accessNotice(userId, notice))
+                if(!teacherAccess.accessNotice(userId, ntc))
                     throw new AccessDeniedException("您没有权限发布该公告");
                 break;
             case 2:
-                if(!taAccess.accessNotice(userId, notice))
+                if(!taAccess.accessNotice(userId, ntc))
                     throw new AccessDeniedException("您没有权限发布该公告");
                 break;
         }
         try {
+            ntc.setTitle(notice.getTitle());
+            ntc.setContent(notice.getContent());
             noticeMapper.updateNotice(notice);
             Set<Long> toIds = toStu(notice);
             noticeMapper.deleteStuViewNoticeByNotice(notice.getNoticeId());

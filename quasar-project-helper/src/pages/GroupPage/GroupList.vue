@@ -10,6 +10,7 @@
         :rows="rows"
         :selected="selected"
         :separator="separator"
+        :grid="$q.screen.lt.sm"
         card-class="bg-grey-2"
         class="my-sticky-header-column-table"
         row-key="groupId"
@@ -60,22 +61,114 @@
             </q-input>
           </q-toolbar>
         </template>
+        <!--        表格内容插槽-->
+        <template v-slot:item="props">
+          <div
+            class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
+            :style="props.selected ? 'transform: scale(0.95);' : ''"
+          >
+            <q-card :class="props.selected ? 'bg-grey-2' : ''">
+              <q-card-section>
+                <q-checkbox dense v-model="props.selected" :label="props.row.name" />
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleEditClick(props.row)">
+                  <q-avatar icon="edit" size="20px">
+                  </q-avatar>
+                </q-btn>
+                <q-btn v-if="userData.identity <= 2 && userData.identity >= 0" size="sm" align="right" round flat @click="handleDeleClick(props.row)">
+                  <q-avatar icon="delete" size="20px">
+                  </q-avatar>
+                </q-btn>
+                <q-btn v-if="userData.identity === 3" size="sm" align="right" round flat @click="handleAddClick(props.row)">
+                  <q-avatar icon="group_add" size="20px">
+                  </q-avatar>
+                </q-btn>
+              </q-card-section>
+              <q-separator />
+              <q-list dense>
+                <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name">
+                  <q-item-section>
+                    <q-item-label>{{ col.label }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-item-label caption>{{ col.value }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card>
+          </div>
+        </template>
       </q-table>
     </div>
 
+    GroupId：{{this.groupId}} <br>
+    {{this.formData_user_self}}
+    <!--  这里是本小组信息部分-->
+    <div class="q-pa-md row wrap justify-center items-start" v-if="this.groupId!== -1">
+      <div class="col-12 justify-between">
+        <DirectoryCard_Input :disable-list="disableList"
+                             :group-data=formData_user_self
+                             :isGroupLeader="isGroupLeader"
+                             :style="{width: '100%' , 'border-radius': '20px'}"
+                             avatar="https://i.postimg.cc/P5HTzptm/img.png">
+          <template v-slot:members_btn>
 
-    <!--    这里是表格之下的其他内容-->
-    <div class="q-mt-md">
-      Dev :
-      Selected {{ JSON.stringify(selected) }}
+          </template>
+          <template v-slot:invite_detail_input>
+            <!--          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"-->
+            <!--                   outlined>-->
+            <!--            <template v-slot:append>-->
+            <!--              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>-->
+            <!--            </template>-->
+            <!--            <template v-slot:hint>-->
+            <!--              Length hint-->
+            <!--            </template>-->
+            <!--            <template v-slot:after>-->
+            <!--              <q-btn dense flat icon="send" round @click="handleSendInvite"/>-->
+            <!--            </template>-->
+            <!--          </q-input>-->
+          </template>
+          <template v-slot:right_btn>
+            <q-item-label>
+              <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
+                     @click="show_invite_member=!show_invite_member"/>
+            </q-item-label>
+            <q-item-label v-if="!isGroupLeader">
+              <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
+            </q-item-label>
+            <q-item-label v-else>
+              <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
+            </q-item-label>
+          </template>
+        </DirectoryCard_Input>
+      </div>
+      <div class="q-pa-lg q-gutter-md">
+        <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
+          <q-card>
+            <q-card-section>
+              <div class="align-middle">
+                <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
+                          outlined @keyup.enter.stop="handleSendInvite">
+                  <template v-slot:append>
+                    <q-btn dense rounded flat v-show="invite_member_id !== ''">
+                      <q-icon name="close" @click="invite_member_id = ''"/>
+                    </q-btn>
+                  </template>
+                  <template v-slot:hint>
+                    Length hint
+                  </template>
+                  <template v-slot:after>
+                    <q-btn dense flat icon="send" round @click="handleSendInvite" />
+                  </template>
+                </q-input>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-dialog>
+      </div>
     </div>
   </div>
 
   <!--  这里是本组信息部分-->
-
-
-  <div>{{ this.card_data.moreInfo }}</div>
-
 
   <!--  这里是弹窗部分-->
 
@@ -99,14 +192,14 @@
   <div>
     <q-btn-group v-show="show_button_teacher"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick"/>
-      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick"/>
+      <q-btn color="grey-3" dense icon="edit" size="md" text-color="black" @click="handleEditClick(undefined)"/>
+      <q-btn color="grey-3" dense icon="delete" size="md" text-color="black" @click="handleDeleClick(undefined)"/>
     </q-btn-group>
   </div>
   <div>
     <q-btn-group v-show="show_button_student"
                  :style="{'border-radius':'10px','position':'absolute', 'top':p_x, 'left':p_y, 'opacity': '1'}">
-      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" @click="handleAddClick"/>
+      <q-btn color="grey-3" icon="group_add" size="md" text-color="black" @click="handleAddClick(undefined)"/>
     </q-btn-group>
   </div>
   <!--  这里是小组详情弹窗部分-->
@@ -118,7 +211,7 @@
                       :instructor="card_data.instructor"
                       :leader="card_data.leader" :max-size="card_data.groupMaxSize" :members="card_data.members"
                       :presentation-time="card_data.presentationTime"
-                      :style="{width: '50%' , 'border-radius': '20px'}">
+                      :style="{width: '100%' , 'border-radius': '20px'}">
         >
       </directory-card>
     </q-dialog>
@@ -209,85 +302,25 @@
       </confirm-dialog>
     </q-dialog>
   </div>
-
-
-  <!--  这里是本小组信息部分-->
-  <div class="row wrap justify-center items-start">
-    <div class="col-11 justify-between">
-      {{ groupId }}
-      <DirectoryCard_Input :disable-list="disableList"
-                           :group-data=formData_user_self
-                           :isGroupLeader="isGroupLeader"
-                           :style="{width: '100%' , 'border-radius': '20px'}"
-                           avatar="https://i.postimg.cc/P5HTzptm/img.png">
-        <template v-slot:members_btn>
-
-        </template>
-        <template v-slot:invite_detail_input>
-<!--          <q-input v-show="show_invite_member" v-model="invite_member_id" counter dense label="Student ID" maxlength="8"-->
-<!--                   outlined>-->
-<!--            <template v-slot:append>-->
-<!--              <q-icon v-show="invite_member_id !== ''" name="close" @click="invite_member_id = ''"/>-->
-<!--            </template>-->
-<!--            <template v-slot:hint>-->
-<!--              Length hint-->
-<!--            </template>-->
-<!--            <template v-slot:after>-->
-<!--              <q-btn dense flat icon="send" round @click="handleSendInvite"/>-->
-<!--            </template>-->
-<!--          </q-input>-->
-        </template>
-        <template v-slot:right_btn>
-          <q-item-label>
-            <q-btn class="bg-indigo-7" icon="group_add" round size="sm" text-color="white"
-                   @click="show_invite_member=!show_invite_member"/>
-          </q-item-label>
-          <q-item-label v-if="!isGroupLeader">
-            <q-btn class="bg-indigo-7 text-white" icon="exit_to_app" round size="sm" @click="warning_date.text='Are you sure you want to leave the group?',show_leave_warning = true"/>
-          </q-item-label>
-          <q-item-label v-else>
-            <q-btn class="bg-indigo-7 text-white"  icon="manage_accounts" round size="sm" />
-          </q-item-label>
-        </template>
-      </DirectoryCard_Input>
-    </div>
-    <div class="q-pa-lg q-gutter-md">
-      <q-dialog v-model="show_invite_member" position="top"  v-close-popup>
-        <q-card>
-          <q-card-section>
-            <div class="align-middle">
-              <q-input  v-model="invite_member_id" counter dense label="Invitee ID" maxlength="8"
-                       outlined @keyup.enter.stop="handleSendInvite">
-                <template v-slot:append>
-                  <q-btn dense rounded flat v-show="invite_member_id !== ''">
-                    <q-icon name="close" @click="invite_member_id = ''"/>
-                  </q-btn>
-                </template>
-                <template v-slot:hint>
-                  Length hint
-                </template>
-                <template v-slot:after>
-                  <q-btn dense flat icon="send" round @click="handleSendInvite" />
-                </template>
-              </q-input>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-dialog>
-    </div>
-  </div>
 </template>
 
 <script>
 import {defineAsyncComponent, ref} from "vue";
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
-import {formatDateString, formatDateStringPro, getUserData, merger} from "src/composables/usefulFunction";
+import {
+  formatDateString,
+  formatDateStringPro,
+  getAvatarUrlById,
+  getUserData,
+  merger
+} from "src/composables/usefulFunction";
+import {useQuasar} from "quasar";
 //import {api} from 'boot/axios';
 //import {defineAsyncComponent, ref} from 'vue';
 //import {useUserStore} from 'src/composables/useUserStore';
 //import {formatDateString, merger} from "src/composables/usefulFunction";
-
+// TODO 权限管理，学生可以浏览，老师可以编辑 handleAddClick
 export default {
   name: 'GroupTeacherPage',
   userStore: useUserStore(),
@@ -295,8 +328,8 @@ export default {
     return {
       projectId: '',
 
-      groupId: '-1',
-
+      groupId: -1,
+      $q: useQuasar(),
       disableList: {
         members: true,
         creationTime: true,
@@ -327,58 +360,66 @@ export default {
         desc: '',
       },
 
-      formData_user_self: {
-        groupId: '',
-        maxSize: '',
-        groupName: '',
-        date1_deadline: '',
-        date2_deadline: '',
-        data1_presentation: '',
-        data2_presentation: '',
-        instructor: '',
-        leader: '',
-        members: [],
-        technicalStack: [],
-        desc: '',
-      },
       // formData_user_self: {
-      //   "groupId": 1,
-      //   "groupName": "group1",
-      //   "creatorId": 30002000,
-      //   "instructorId": 30002000,
-      //   "instructorName": "Andy",
-      //   "leaderId": 12110000,
-      //   "leaderName": "stu0",
-      //   "maxsize": 10,
-      //   "projectId": 1,
-      //   "teamTime": "2023-11-06T23:47:18.995108",
-      //   "deadline": "2024-03-10T10:00:00",
-      //   "reportTime": "2024-10-10T10:00:00",
-      //   "description": null,
-      //   "technicalStack": null,
-      //   "visibility": [
-      //     true,
-      //     true,
-      //     true,
-      //     true
-      //   ],
-      //   "recruitment": null,
-      //   "memberIds": [
-      //     12110002,
-      //     12110004,
-      //     12110001,
-      //     12110003,
-      //     12110000
-      //   ],
-      //   "members": [
-      //     "stu2",
-      //     "stu4",
-      //     "stu1",
-      //     "stu0",
-      //     "stu0"
-      //   ],
-      //   "memCnt": 5
+      //   groupId: '',
+      //   maxSize: '',
+      //   groupName: '',
+      //   date1_deadline: '',
+      //   date2_deadline: '',
+      //   data1_presentation: '',
+      //   data2_presentation: '',
+      //   instructor: '',
+      //   leader: '',
+      //   members: [],
+      //   technicalStack: [],
+      //   desc: '',
+      //   visibility:[], // 用来控制表单的可见性
       // },
+
+      formData_user_self: {
+        "groupId": 99999999,
+        "groupName": "Dev group1",
+        "creatorId": 99999999,
+        "instructorId": 99999999,
+        "instructor": {'Andy':99999999},
+        "instructorName": "Andy",
+        'leader': {'stu0':99999999},
+        "leaderId": 99999999,
+        "leaderName": "stu0",
+        "maxsize": 99999999,
+        "projectId": 99999999,
+        "teamTime": "2099-11-06T23:47:18.995108",
+        "deadline": "2099-03-10T10:00:00",
+        "reportTime": "2099-10-10T10:00:00",
+        "description": null,
+        "technicalStack": null,
+        "visibility": [
+          true,
+          false,
+          true,
+          false
+        ],
+        "recruitment": null,
+        "memberIds": [
+          12110002,
+          12110004,
+          12110001,
+          12110003,
+          12110000
+        ],
+        "members": [
+          "stu2",
+          "stu4",
+          "stu1",
+          "stu0",
+          "stu0"
+        ],
+        "memCnt": 5,
+        'date1_deadline': '2099-03-10',
+        'date2_deadline': '10:00:00',
+        'data1_presentation': '2099-10-10',
+        'data2_presentation': '10:00:00',
+      },
 
       columns: [
         {
@@ -531,8 +572,11 @@ export default {
         this.show_button_student = false;
       });
     },
-    handleEditClick() {
+    handleEditClick(row) {
       this.show_edit_form = true;
+      if (row !== undefined) {
+        this.selected_row.row = row;
+      }
       let groupId = this.selected_row.row.groupId;
       api.get('/getGroupInfo/' + groupId).then(
         async (response) => {
@@ -574,12 +618,19 @@ export default {
         console.log(error);
       });
     },
-    handleDeleClick() {
+    handleDeleClick(row) {
+      if (row !== undefined) {
+        this.selected_row.row = row;
+      }
+      console.log(row,'rows');
       this.show_warning = true;
     },
     // 用来学生申请加入小组
-    handleAddClick() {
+    handleAddClick(row) {
       // 更新弹窗显示, 隐藏弹窗
+      if (row !== undefined){
+        this.selected_row.row = row;
+      }
       this.show_button_student = false;
       this.postJoinGroup();
     },
@@ -666,9 +717,10 @@ export default {
     // 获取指定小组的详细信息
     getGroupDetail(groupId) {
       api.get('/getGroupInfo/' + groupId).then(
-        (response) => {
+        async (response) => {
+          let avatarUrl = await getAvatarUrlById(response.data.body.leaderId)
           let tmp = {
-            avatar: 'https://avatars3.githubusercontent.com/u/34883558?s=400&u=09455019882ac53dc69b23df570629fd84d37dd1&v=4',
+            avatar: avatarUrl,
             groupId: response.data.body.groupId,
             groupSize: response.data.body.members.length,
             groupMaxSize: response.data.body.maxsize,
@@ -710,26 +762,30 @@ export default {
     },
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
-      api.get('/getGroupInfo/' + 2).then(
+      console.log("尝试获取GroupUserSelfDetail...\n")
+      api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body
+
           tmp.members = merger(tmp.members, tmp.memberIds)
-          delete tmp.memberIds
+          // delete tmp.memberIds
           tmp.instructor = merger(tmp.instructorName, tmp.instructorId)
-          delete tmp.instructorName
-          delete tmp.instructorId
+          // delete tmp.instructorName
+          // delete tmp.instructorId
           tmp.leader = merger(tmp.leaderName, tmp.leaderId)
-          delete tmp.leaderName
-          delete tmp.leaderId
+          // delete tmp.leaderName
+          // delete tmp.leaderId
           tmp.creationTime = formatDateStringPro(tmp.teamTime)
           tmp.deadline = formatDateStringPro(tmp.deadline)
           tmp.presentationTime = formatDateStringPro(tmp.reportTime)
+          tmp.visibility = tmp.visibility
+          // tmp.visibility = [true, true, true, false]
 
-          tmp['maxSize'] = tmp.maxsize
-          delete tmp.maxsize
+          // tmp['maxSize'] = tmp.maxsize
+          // delete tmp.maxsize
 
-          tmp['desc'] = tmp.description
-          delete tmp.description
+          // tmp['desc'] = tmp.description
+          // delete tmp.description
 
           tmp['date1_deadline'] = tmp.deadline.slice(0, 10)
           tmp['date2_deadline'] = tmp.deadline.slice(11, 19)
@@ -738,9 +794,9 @@ export default {
           tmp['date1_creationTime'] = tmp.creationTime.slice(0, 10)
           tmp['date2_creationTime'] = tmp.creationTime.slice(11, 19)
 
-          delete tmp.memberIds
-          delete tmp.instructorId
-          delete tmp.instructorName
+          // delete tmp.memberIds
+          // delete tmp.instructorId
+          // delete tmp.instructorName
 
           // tmp = {
           //     groupId: '9999',
@@ -764,6 +820,7 @@ export default {
       ).catch((error) => {
         console.log(error);
       });
+      console.log("获取到的GroupUserSelfDetail为：" + this.formData_user_self + "，类型为：" + typeof (this.formData_user_self) + "。\n");
     },
 
     //**********************************Post信息部分**********************************//
@@ -862,7 +919,6 @@ export default {
         console.log(error);
         console.log('group_id');
         console.log(this.selected_row.row.groupId);
-
       });
     },
     deleteLeaveGroup() {
@@ -917,6 +973,12 @@ export default {
     console.log("created");
     getUserData();
 
+  },
+  watch : {
+    groupId: function (newVal, oldVal) {
+      console.log("groupId changed");
+      this.getGroupUserSelfDetail();
+    }
   },
 }
 </script>

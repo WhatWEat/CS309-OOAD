@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(generateValidJWT("40001000", "2"));
+        System.out.println(generateValidJWT("12110012", "3"));
     }
 
     public static String generateValidJWT(String userId, String identityCode){

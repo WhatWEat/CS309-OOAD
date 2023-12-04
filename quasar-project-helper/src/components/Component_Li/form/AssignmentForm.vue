@@ -1,7 +1,7 @@
 <template>
   <el-form :model="form" label-position="right" label-width="70px">
     <el-form-item label="Title">
-      <el-input v-model="form_temp.title"/>
+      <el-input v-model="form_temp.title" />
     </el-form-item>
     <el-form-item label="Full Mark">
       <el-input v-model="form_temp.fullMark"/>
@@ -47,22 +47,22 @@
         />
       </el-col>
     </el-form-item>
-<!--    <el-form-item label="Instant delivery">-->
-<!--      <el-switch v-model="form.delivery"/>-->
-<!--    </el-form-item>-->
-<!--    <el-form-item label="Activity type">-->
-<!--      <el-checkbox-group v-model="form.type">-->
-<!--        <el-checkbox label="Online activities" name="type"/>-->
-<!--        <el-checkbox label="Promotion activities" name="type"/>-->
-<!--        <el-checkbox label="Offline activities" name="type"/>-->
-<!--        <el-checkbox label="Simple brand exposure" name="type"/>-->
-<!--      </el-checkbox-group>-->
-<!--    </el-form-item>-->
+    <!--    <el-form-item label="Instant delivery">-->
+    <!--      <el-switch v-model="form.delivery"/>-->
+    <!--    </el-form-item>-->
+    <!--    <el-form-item label="Activity type">-->
+    <!--      <el-checkbox-group v-model="form.type">-->
+    <!--        <el-checkbox label="Online activities" name="type"/>-->
+    <!--        <el-checkbox label="Promotion activities" name="type"/>-->
+    <!--        <el-checkbox label="Offline activities" name="type"/>-->
+    <!--        <el-checkbox label="Simple brand exposure" name="type"/>-->
+    <!--      </el-checkbox-group>-->
+    <!--    </el-form-item>-->
     <el-form-item label="Resources">
       <el-upload
-        v-model:file-list="fileList"
-        class="upload-demo"
+        v-model:file-list="this.form_temp.fileList"
         :auto-upload="false"
+        class="upload-demo"
       >
         <el-button type="primary">Click to upload</el-button>
         <template #tip>
@@ -89,14 +89,14 @@
 </template>
 
 <script>
-import {ref} from 'vue'
 import {api} from "boot/axios";
+import cloneDeep from "lodash/cloneDeep";
+import {ref} from "vue";
 
 
 export default {
   data() {
     return {
-      fileList: [],
       form_temp: {
         title: this.form.title,
         fullMark: this.form.fullMark,
@@ -107,7 +107,9 @@ export default {
         desc: this.form.desc,
         fileList: this.form.fileList,
       },
-      formDate : new FormData(),
+      formDate: new FormData(),
+      projectId_temp: this.projectId,
+      groupId_temp: this.groupId
     }
   },
   methods: {
@@ -123,31 +125,49 @@ export default {
       console.log("postCreateAssignment");
       this.formDate.append('title', this.form_temp.title);
       this.formDate.append('description', this.form_temp.desc);
-      this.formDate.append('projectId', this.form_temp.fullMark);
-      this.formDate.append('projectId', this.projectId);
+      this.formDate.append('projectId', this.projectId_temp);
       this.formDate.append('fullMark', this.form_temp.fullMark);
       this.formDate.append('type', this.form_temp.type);
       this.formDate.append('deadline', this.form_temp.deadline.data + 'T' + this.form_temp.deadline.time);
       this.formDate.append('requireExtension', this.form_temp.requireExtension);
-      for (let i = 0; i < this.form_temp.fileList.length; i++) {
-        this.formDate.append('file', this.form_temp.fileList[i].raw);
-      }
 
-      api.post('/tea/post_assignment', this.formDate).then((res) => {
-        if(res.data.msg==='success'){
+      // for (let i = 0; i < this.form_temp.fileList.length; i++) {
+      //   this.formDate.append('file', this.form_temp.fileList[i].raw);
+      // }
+      for (let i = 0; i < this.form_temp.fileList.length; i++) {
+        this.formDate.append('files', this.form_temp.fileList[i].raw)
+        // console.log("看看进来没有,文件如下:");
+        // console.log(this.fileList[i].raw.type);
+        // console.log(this.fileList[i].raw);
+        // console.log(this.fileList[i].raw);
+        // // const upToUploadFile = ref<File>(this.fileList[i].raw);
+        // // console.log("files,s", upToUploadFile.value)
+        // // console.log(upToUploadFile.value)
+      }
+      // console.clear()
+
+
+      api.post('/tea/post_assignment', this.formDate,{
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((res) => {
+        if (res.data.statusCode === 200) {
           this.$message({
             message: 'Create Assignment Success',
             type: 'success'
           });
-        }
-        else{
+        } else {
+          console.log("ERR 在创建作业时");
+          console.log(res);
           this.$message({
             message: res.data.msg,
             type: 'error'
           });
-
         }
       }).catch((err) => {
+        console.log("ERR 在创建作业时");
+        console.log(err);
         this.$message({
           message: err.message,
           type: 'error'
@@ -155,7 +175,6 @@ export default {
       })
       this.$emit('unfold');
     }
-
   },
   props: {
     form: {
@@ -193,5 +212,20 @@ export default {
     },
   },
   emits: ['unfold'],
+  watch: {
+    projectId: {
+      handler: function (newVal, oldVal) {
+        this.projectId_temp = cloneDeep(newVal);
+      },
+      deep: true
+    },
+    groupId: {
+      handler: function (newVal, oldVal) {
+        this.groupId_temp = cloneDeep(newVal);
+      },
+      deep: true
+    },
+
+  }
 }
 </script>

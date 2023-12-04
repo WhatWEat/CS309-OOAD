@@ -12,15 +12,28 @@ import java.util.List;
 @Mapper
 public interface NoticeMapper extends BaseMapper<Notice> {
 
-    @Select("select count(*) from notice n join stuviewnotice s on s.noticeid = n.noticeid where s.stuid = #{stuId};")
+    @Select("select count(*) from notice n join stuviewnotice s on s.noticeid = n.noticeid " +
+        "where s.stuid = #{stuId};")
     int getNtcCntByStu(Long stuId);
+    @Select("select count(*) from notice n join stuviewnotice s on s.noticeid = n.noticeid " +
+        "where s.stuid = #{stuId} and n.projectId = #{projId};")
+    int getNtcCntByStuAndProj(Long stuId, Long projId);
     @Select("select count(*) from notice where creatorId = #{taId};")
     int getNtcCntByTa(Long taId);
+    @Select("select count(*) from notice " +
+        "where creatorId = #{taId} and projectId = #{pjId};")
+    int getNtcCntByTaAndProj(Long taId, Long pjId);
     @Select("select count(*) " +
-        "from notice n join public.project p on n.projectid = p.projectid where teacherid = #{teaId} and n.type != 0;")
+        "from notice n join public.project p on n.projectid = p.projectid where teacherid = #{teaId} and n.type = 0;")
     int getNtcCntByTea(Long teaId);
-    @Select("select count(*) from notice")
+    @Select("select count(*) " +
+        "from notice n join public.project p on n.projectid = p.projectid " +
+        "where teacherid = #{teaId} and n.type = 0 and n.projectId = #{projId};")
+    int getNtcCntByTeaAndProj(Long teaId, Long projId);
+    @Select("select count(*) from notice where type = 0;")
     int getNtcCntByAdm();
+    @Select("select count(*) from notice where projectId = #{projId} and type = 0;")
+    int getNtcCntByAdmAndProj(Long projId);
 
     @Select("select * from notice where noticeId = #{noticeId};")
     Notice findNoticeById(Long noticeId);
@@ -31,7 +44,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
     @Select("select n.*, p.name projectName, u.name creatorName from notice n" +
         "    join project p on p.projectid= n.projectid" +
         "    join users u on u.userid = n.creatorid" +
-        " where " +
+        " where type = 0 and " +
         "(title ilike #{key} or u.name ilike #{key} or content ilike #{key}) order by createTime desc limit #{limit} offset #{offset};;")
     List<Notice> findNoticeOfAdm(Long limit, Long offset, String key);
 

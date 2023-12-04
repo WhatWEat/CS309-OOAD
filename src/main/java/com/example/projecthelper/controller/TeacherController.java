@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -78,19 +77,19 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("/stu-list/{project_id}")
-    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
-        HttpServletRequest request, @PathVariable("project_id") Long pjId
-    ){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        return ResponseResult.ok(
-            projectService.getStuList(
-                pjId,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-            ),
-            "Success", JWTUtil.updateJWT(jwt)
-        );
-    }
+//    @GetMapping("/stu-list/{project_id}")
+//    public ResponseResult<KeyValueWrapper<List<Long>, List<String>>> stuList(
+//        HttpServletRequest request, @PathVariable("project_id") Long pjId
+//    ){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        return ResponseResult.ok(
+//            projectService.getStuList(
+//                pjId,
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//            ),
+//            "Success", JWTUtil.updateJWT(jwt)
+//        );
+//    }
 
 //    @GetMapping(value = "/notice-list/{project_id}/{page}/{page_size}")
 //    public ResponseResult<List<Notice>> getNotices(@PathVariable("project_id") Long projectId,
@@ -104,53 +103,53 @@ public class TeacherController {
 //        return ResponseResult.ok(result, "success", JWTUtil.updateJWT(jwt));
 //    }
 
-    @PostMapping("/post_notice")
-    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        System.err.println(notice);
-        noticeService.postNotice(
-                notice,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                pjId -> Objects.equals(
-                        projectService.findTeacherByProject(pjId),
-                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                )
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PostMapping("/post_notice")
+//    public ResponseResult<Object> postNotice(@RequestBody Notice notice, HttpServletRequest request) {
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        System.err.println(notice);
+//        noticeService.postNotice(
+//                notice,
+//                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+//                pjId -> Objects.equals(
+//                        projectService.findTeacherByProject(pjId),
+//                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                )
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
-    @PutMapping("/modify_notice")
-    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.modifyNoticeWithUser(
-                notice,
-                ntId -> {
-                    Notice ntc = noticeService.findNoticeById(ntId);
-                    return Objects.equals(
-                            projectService.findTeacherByProject(ntc.getProjectId()),
-                            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                    ) && ntc.getType() == 0;
-                }
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PutMapping("/modify_notice")
+//    public ResponseResult<Object> modifyNotice(HttpServletRequest request, @RequestBody Notice notice) {
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.modifyNoticeWithUser(
+//                notice,
+//                ntId -> {
+//                    Notice ntc = noticeService.findNoticeById(ntId);
+//                    return Objects.equals(
+//                            projectService.findTeacherByProject(ntc.getProjectId()),
+//                            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                    ) && ntc.getType() == 0;
+//                }
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
-    @PostMapping("/delete_notice")
-    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
-        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        noticeService.deleteNotice(
-            noticeIds,
-            ntId -> {
-                Notice ntc = noticeService.findNoticeById(ntId);
-                return Objects.equals(
-                    projectService.findTeacherByProject(ntc.getProjectId()),
-                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
-                ) && ntc.getType() == 0;
-            }
-        );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
-    }
+//    @PostMapping("/delete_notice")
+//    public ResponseResult<Object> deleteNotice(HttpServletRequest request, @RequestBody List<Long> noticeIds){
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        noticeService.deleteNotice(
+//            noticeIds,
+//            ntId -> {
+//                Notice ntc = noticeService.findNoticeById(ntId);
+//                return Objects.equals(
+//                    projectService.findTeacherByProject(ntc.getProjectId()),
+//                    Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+//                ) && ntc.getType() == 0;
+//            }
+//        );
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
 
 
     @GetMapping("/get_ta_list_of_proj/{proj_id}")
@@ -254,12 +253,28 @@ public class TeacherController {
 
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
-        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)), false);
         System.err.println(rec.getFilename());
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
                 .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
                 .body(rec);
+    }
+
+    @GetMapping(value = "/get_ass_file_pdf_version/{assignment_id}/{filename}")
+    public ResponseEntity<Resource> getAssFilePdfVersion(@PathVariable("assignment_id") Long assignmentId,
+                                               @PathVariable("filename") String filename,
+                                               HttpServletRequest request) {
+
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
+        Resource rec = fileService.getFilesOfAssByTeaOrTa(userId, assignmentId, filename, Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt)), true);
+        System.err.println(rec.getFilename());
+        ResponseEntity<Resource> response = ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(FileUtil.getMIMEType(rec.getFilename())))
+            .header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtil.declareAttachment(rec.getFilename()))
+            .body(rec);
+        return response;
     }
 
     @PostMapping("/post_assignment")
@@ -445,16 +460,18 @@ public class TeacherController {
 //        boolean sub = assignmentService.ifStuSub()
 //        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
 //    }
-    @GetMapping("/allGradeBook/{project_id}")
-    public ResponseResult<HashMap<Long,List<SubmittedAssignment>>> allGradeBook(
+    @GetMapping("/allGradeBook/{project_id}/{page}/{pageSize}")
+    public ResponseResult<List<KeyValueWrapper<Long, List<SubmittedAssignment>>>> allGradeBook(
             @PathVariable("project_id") Long projId,
+            @PathVariable("page") Integer page,
+            @PathVariable("pageSize") Integer pageSize,
             HttpServletRequest request) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        HashMap<Long,List<SubmittedAssignment>> out = assignmentService.getProAllSub(projId,
-                Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+        List<KeyValueWrapper<Long,List<SubmittedAssignment>>> out = assignmentService.getProAllSub(projId,
                 pjId -> Objects.equals(
                         projectService.findTeacherByProject(pjId),
-                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))));
+                        Long.parseLong(JWTUtil.getUserIdByToken(jwt))),
+                page,pageSize);
         return ResponseResult.ok(out, "Success", JWTUtil.updateJWT(jwt));
     }
 

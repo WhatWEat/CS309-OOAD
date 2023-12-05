@@ -485,6 +485,9 @@ public class AssignmentService {
     }
 
     public void gradeAss(SubmittedAssignment submittedAssignment, Long userId, Integer identity) {
+        if (submittedAssignment.getAssignmentId() == null){
+            throw new InvalidFormException("学生尚未提交");
+        }
         SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getAssignmentId(),
                 submittedAssignment.getSubmitterId());
         if (sub == null) {

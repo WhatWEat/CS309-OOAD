@@ -12,7 +12,7 @@
       </template>
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
-      <p>Are you sure to save this file</p>
+      <q-input v-model="assignmentId" label="Assignment ID" type="number"/>
       <q-card-actions class="q-px-md">
         <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
         <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
@@ -142,7 +142,7 @@ const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([]);
 const filter = ref('')
 const $q = useQuasar();
-
+const assignmentId = ref(-1);
 const columns = [
   {
     name: "assignmentId",
@@ -218,7 +218,9 @@ async function onRefresh() {
     // TODO 增加分页
     api
       .get(
-        `/stu/GradeBook/${project_id.value}`
+        `/stu/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+        }`
       )
       .then((res) => {
         data.value = res.data.body;
@@ -230,16 +232,25 @@ async function onRefresh() {
   }else if(identity.value !== -1) {
     api
       .get(
-        `/tea/allGradeBook/${project_id.value}`
+        `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
+          pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
+        }`
       )
       .then((res) => {
         let hashmap = res.data.body;
-        let saveData = []
-        for (const [studentID, grades] of Object.entries(hashmap)) {
-          saveData = saveData.concat(grades);
-        }
+         console.log('ddddd',res.data.body)
+        // let saveData = []
+        // for (const [key, value] of Object.entries(hashmap)) {
+        //   saveData = saveData.concat(value);
+        // }
+        let saveData = res.data.body.map(item => item.value)
+          .reduce((acc, val) => acc.concat(val), []);
+
+        console.log('save' ,saveData)
         data.value = saveData;
-        console.log('datadezhi',data.value);
+        // // console.log('datadezhi',data.value);
+        // data.value = res.data.body.map(item => item.value);
+        // console.log('datadezhi',data.value);
         isLoadingGrade.value = false;
       })
       .catch((err) => {
@@ -290,7 +301,11 @@ function saveUploadAvatar() {
     excel_file.value = model.value;
     let formdata = new FormData();
     formdata.append('file',excel_file.value);
-    api.post('/tea/grade_ass_with_file',formdata).then((res)=>{
+    api.post('/tea/grade_ass_with_file',formdata,{
+      params: {
+        assignmentId: assignmentId
+      }
+    }).then((res)=>{
       data.value = res.data.body;
     }).catch((err)=>{
       console.log(err)

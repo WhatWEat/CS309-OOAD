@@ -366,6 +366,7 @@ function saveUploadAvatar3() {
     let formdata = new FormData();
     formdata.append('file',excel_file3.value);
     api.put('/adm/freeze_multiple_users',formdata).then((res)=>{
+      console.log('res',res.data.body)
       for(const i of res.data.body){
         data3.value.push({
           userId: i

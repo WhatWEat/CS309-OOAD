@@ -239,20 +239,18 @@
     </q-dialog>
   </div>
   <!--  这里是Edit表单弹窗部分-->
-  <div class="row">
-    <div class="col-11">
-      <el-dialog v-model="show_edit_form" :center=true>
+  <div>
+      <el-dialog  v-model="show_edit_form" :center=true  :width="formWidth" :style="{'min-width':'400px', 'border-radius': '25px'}">
         <template v-slot:header>
           <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
         </template>
         <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
-                    @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
+                    @successDialog="handleSuccess" @unfold="show_edit_form=false" ></group-form>
       </el-dialog>
-    </div>
   </div>
   <!--  这里是创建表单弹窗改部分-->
   <div class="row">
-    <el-dialog v-model="show_insert_form" :center=true >
+    <el-dialog v-model="show_insert_form" :center=true :width="formWidth" :style="{'min-width':'400px', 'border-radius': '25px'}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -332,6 +330,8 @@ export default {
   userStore: useUserStore(),
   data() {
     return {
+      formWidth:'50%',
+
       projectId: '',
 
       groupId: -1,
@@ -544,6 +544,17 @@ export default {
     }
   },
   methods: {
+    updateStatus() {
+      if(this.$q.screen.lt.sm){
+        this.formWidth = '95%'
+        console.log('小屏幕')
+      }
+      else{
+        this.formWidth = '50%'
+        console.log('大屏幕')
+      }
+    },
+
     // 导出GroupList表格
     exportTable() {
       this.$refs.table.exportCsv({
@@ -1026,6 +1037,12 @@ export default {
     groupId: function (newVal, oldVal) {
       console.log("groupId changed");
       this.getGroupUserSelfDetail();
+    },
+    '$q.screen.width': {
+      immediate: true,
+      handler(newVal, oldVal) {
+          this.updateStatus();
+      }
     }
   },
   computed: {

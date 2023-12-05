@@ -1,5 +1,5 @@
 <template>
-  <div class="" style="">
+  <div >
     <div class="row justify-between">
       <div class="col-sm-12 col-xs-12 col-md-7 q-pa-md">
         <q-card ref="card1" :style="{'min-height':minHeight}" class="my-card rounded-xl">
@@ -312,7 +312,6 @@
         </q-card>
       </div>
     </div>
-
   </div>
 
   <div>
@@ -334,7 +333,24 @@
       </q-card>
     </q-dialog>
   </div>
+
+
+
   {{ AssignmentDetail }}
+  ???
+
+  <div class="d-flex justify-space-around align-center bg-grey-lighten-4">
+    <div class="ma-4">
+      <div class="text-subtitle-2">Cover</div>
+      <v-img
+        class="bg-white rounded-xl"
+        width="300"
+        :aspect-ratio="1"
+        src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
+        cover
+      ></v-img>
+    </div>
+  </div>
 
 </template>
 

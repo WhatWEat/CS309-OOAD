@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" label-position="right" label-width="70px">
+  <el-form :model="form" label-position="right" label-width="70px" >
     <el-form-item label="Title">
       <el-input v-model="form_temp.title" />
     </el-form-item>

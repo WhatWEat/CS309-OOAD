@@ -453,10 +453,31 @@ public class AssignmentService {
                 throw new AccessDeniedException("无权查看别人发布的作业");
         }
         List<SubmittedAssignment> sas = submittedAssMapper.findAllSub(assignmentId, pageSize, page * pageSize);
+        if(ass.getType().equals("i")){
+            sas.forEach(sa -> {
+                sa.setSubmitterName(
+                    usersMapper.findUserById(
+                        sa.getSubmitterId()).getName()
+                );
+            });
+        }
+        else if(ass.getType().equals("g")){
+            sas.forEach(sa -> {
+                sa.setSubmitterName(
+                    groupMapper.findGroupById(
+                        sa.getSubmitterId()
+                    ).getGroupName()
+                );
+            });
+        }
         if (sas != null)
-            sas.forEach(
+            try{
+                sas.forEach(
                     sa -> sa.setFilepaths(sa.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList())
-            );
+                );
+            }catch (NullPointerException ignored){
+
+            }
         return sas;
     }
 
@@ -565,7 +586,7 @@ public class AssignmentService {
     }
 
     //这个方法是读取文件批量更新成绩
-    public List<SubmittedAssignment> gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
+    public KeyValueWrapper<Assignment, List<SubmittedAssignment>> gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
         Assignment ass = assignmentMapper.findAssById(assignmentId);
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
@@ -580,9 +601,9 @@ public class AssignmentService {
         }
 
         List<SubmittedAssignment> result = FileUtil.tableToSubmittedAssList(file);
-        result.forEach(System.err::println);
+//        result.forEach(System.err::println);
         submittedAssMapper.updateGrades(result, assignmentId);
-        return result;
+        return new KeyValueWrapper<>(ass, result);
     }
 
 

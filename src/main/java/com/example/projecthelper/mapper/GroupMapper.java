@@ -58,7 +58,7 @@ public interface GroupMapper extends BaseMapper<Group> {
     @Options(useGeneratedKeys = true, keyProperty = "groupId", keyColumn = "groupid")
     void createGroups(@Param("groupList") List<Group> groupList);
 
-    @Select("select creatorId from groups where groupId = #{groupId}")
+    @Select("select creatorId from groups where groupId = #{groupId};")
     Long findCreatorByGroup(Long groupId);
 
     @Select("select projectid from groups where groupid = #{groupId};")

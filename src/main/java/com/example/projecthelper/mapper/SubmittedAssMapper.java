@@ -54,7 +54,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 //    void removeGroupAss(long assignmentId, long groupId);
 
     @Select("""
-            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup
+            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup,title
             FROM submittedAssignment sa
             join assignment a on sa.assignmentid = a.assignmentid
             WHERE type = 'i' and projectId = #{projectId} AND submitterid = #{stuId};

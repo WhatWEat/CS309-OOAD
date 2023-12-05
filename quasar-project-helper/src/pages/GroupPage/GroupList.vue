@@ -1047,7 +1047,7 @@ export default {
       console.log("groupId changed");
       this.getGroupUserSelfDetail();
     },
-    '$q.screen.width': {
+    '$q.screen.lt.md': {
       immediate: true,
       handler(newVal, oldVal) {
           this.updateStatus();

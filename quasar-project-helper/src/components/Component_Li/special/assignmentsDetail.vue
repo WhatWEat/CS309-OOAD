@@ -870,7 +870,7 @@ export default defineComponent({
       },
       deep: true
     },
-    '$q.screen.width': {
+    '$q.screen.lt.md': {
       handler: function (val, oldVal) {
         if(this.$q.screen.lt.md){
           this.width = '50%'

@@ -15,6 +15,7 @@ import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.HTTPUtil;
 import com.example.projecthelper.util.JWTUtil;
 import com.example.projecthelper.util.ResponseResult;
+import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -263,12 +264,17 @@ public class TeacherAssistantController {
         @RequestParam("file") MultipartFile file,
         @RequestParam("assignmentId") Long assignmentId){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        assignmentService.gradeAssWithFile(
+//        assignmentService.gradeAssWithFile(
+//            file, assignmentId,
+//            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+//            Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
+//        );
+        KeyValueWrapper<Assignment, List<SubmittedAssignment>> result = assignmentService.gradeAssWithFile(
             file, assignmentId,
             Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
             Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
-        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
 
     }
 

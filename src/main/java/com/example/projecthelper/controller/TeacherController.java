@@ -65,11 +65,33 @@ public class TeacherController {
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @PostMapping("/add_stu_to_project")
-    public ResponseResult<Object> addStuToProject(HttpServletRequest request, @RequestBody
-    KeyValueWrapper<Long, List<Long>> pjId_stuId) {
+//    @PostMapping("/add_stu_to_project")
+//    public ResponseResult<Object> addStuToProject(HttpServletRequest request, @RequestBody
+//    KeyValueWrapper<Long, List<Long>> pjId_stuId) {
+//        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+//        projectService.addStuToProject(pjId_stuId.getKey(), pjId_stuId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+//        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+//    }
+    @GetMapping("/get_stu_of_all_proj/{page}/{page_size}")
+    public ResponseResult<List<Project>> get_stu_of_all_proj(
+        HttpServletRequest request,
+        @PathVariable("page") int page,
+        @PathVariable("page_size") int page_size) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        projectService.addStuToProject(pjId_stuId.getKey(), pjId_stuId.getValue(), Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        List<Project> result = projectService.get_stu_of_all_proj(
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
+            page, page_size
+        );
+        return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
+    }
+    @PostMapping("/add_stu_to_project")
+    public ResponseResult<Object> addStuToProject(
+        HttpServletRequest request,
+        @RequestParam("file") MultipartFile file) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        projectService.addStuToProject(
+            file, Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
@@ -133,6 +155,9 @@ public class TeacherController {
     @PostMapping("/modify_group_info")
     public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        System.err.println(Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        System.err.println(groupService.findCreatorByGroup(group.getGroupId()));
+        System.err.println(group.getGroupId());
         groupService.updateGroupForTea(
                 group,
                 gpId -> Objects.equals(
@@ -321,12 +346,12 @@ public class TeacherController {
     }
 
     @PostMapping("/grade_ass_with_file")
-    public ResponseResult<List<SubmittedAssignment>> gradeAssWithFile(
+    public ResponseResult<KeyValueWrapper<Assignment, List<SubmittedAssignment>>> gradeAssWithFile(
             HttpServletRequest request,
             @RequestParam("file") MultipartFile file,
             @RequestParam("assignmentId") Long assignmentId) {
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        List<SubmittedAssignment> result = assignmentService.gradeAssWithFile(
+        KeyValueWrapper<Assignment, List<SubmittedAssignment>> result = assignmentService.gradeAssWithFile(
                 file, assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
                 Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))

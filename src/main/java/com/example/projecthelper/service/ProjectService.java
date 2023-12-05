@@ -9,10 +9,13 @@ import com.example.projecthelper.mapper.UsersMapper;
 import com.example.projecthelper.security.rbac.AdministratorAccess;
 import com.example.projecthelper.security.rbac.TaAccess;
 import com.example.projecthelper.security.rbac.TeacherAccess;
+import com.example.projecthelper.util.FileUtil;
 import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.*;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProjectService {
@@ -92,6 +96,28 @@ public class ProjectService {
             }catch (Exception e){
                 throw new InvalidFormException("请勿重复拉人进入项目");
             }
+    }
+
+    public List<Project> get_stu_of_all_proj(Long userId, int page, int page_size){
+        List<Project> projects = projectMapper.getProjByTea(userId, page_size, page*page_size);
+        projects.forEach(p -> {
+            p.setStuIds(projectMapper.findStuIdsByProject(p.getProjectId()));
+        });
+        return projects;
+    }
+    public void addStuToProject(MultipartFile file, Long userId){
+        // 先验证身份
+        Set<Entry<Long, Set<Long>>> result =
+            FileUtil.getPjIdStuIds(file).entrySet().
+                stream().
+                filter(e -> Objects.equals(userId, projectMapper.findTeacherByProject(e.getKey()))).
+            collect(Collectors.toSet());
+        result.forEach(e -> {
+            projectMapper.findStuIdsByProject(e.getKey()).forEach(e.getValue()::remove);
+            if(e.getValue() != null && !e.getValue().isEmpty())
+                projectMapper.insertStuIds(e.getKey(), e.getValue());
+        });
+
     }
 
     public KeyValueWrapper<List<Long>, List<String>> getStuList(Long pjId, Long userId, int identity){

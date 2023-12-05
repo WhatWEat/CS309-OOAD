@@ -12,9 +12,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -205,6 +207,58 @@ public class FileUtil {
         }
     }
 
+    public static Map<Long, Set<Long>> getPjIdStuIds(MultipartFile file) {
+        try {
+            Workbook workbook;
+            if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".xls")) {
+                workbook = new HSSFWorkbook(file.getInputStream());
+            } else if (file.getOriginalFilename().endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(file.getInputStream());
+            }else {
+                throw new InvalidFormException("非法文件格式；仅支持.xls和.xlsx");
+            }
+            Sheet sheet = workbook.getSheetAt(0);
+            int projectIdColumn = -1;
+            int stuIdColumn = -1;
+
+            // 遍历第一行，查找“id”和“grade”列头所在的位置
+            Row headerRow = sheet.getRow(0);
+            for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+                Cell cell = headerRow.getCell(i);
+                if (cell == null)
+                    continue;
+                String cellValue = cell.getStringCellValue();
+                if(cellValue != null)
+                    cellValue = cellValue.trim();
+                else
+                    continue;
+                if (cellValue.equalsIgnoreCase("stuId")) {
+                    stuIdColumn = i;
+                }
+                if (cellValue.equalsIgnoreCase("projectId")) {
+                    projectIdColumn = i;
+                }
+            }
+
+            if (stuIdColumn == -1 || projectIdColumn == -1) {
+                throw new InvalidFormException("id列缺失");
+            }
+            // 遍历所有行（除第一行外），将每一行的name和grade值存入相应的数组
+            Map<Long, Set<Long>> result = new HashMap<>();
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row dataRow = sheet.getRow(i);
+                long pjId = (long) dataRow.getCell(projectIdColumn).getNumericCellValue();
+                long stuId = (long) dataRow.getCell(stuIdColumn).getNumericCellValue();
+                if(!result.containsKey(pjId))
+                    result.put(pjId, new HashSet<>());
+                result.get(pjId).add(stuId);
+            }
+            workbook.close();
+            return result;
+        } catch (IOException e) {
+            throw new FileProcessingException("文件处理异常");
+        }
+    }
     public static List<Long> tableToUserIdList(MultipartFile file) {
         try {
             Workbook workbook;

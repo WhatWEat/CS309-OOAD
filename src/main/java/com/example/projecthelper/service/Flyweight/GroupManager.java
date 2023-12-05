@@ -31,7 +31,9 @@ public class GroupManager {
     }
 
 
-    public synchronized void stuJoinGpSync(Long gpId, Long stuId, boolean needApp, Long noticeId){
+    public synchronized void stuJoinGpSync(
+        Long gpId, Long stuId, boolean needApp, Long noticeId
+    ){
         Group gp = groupMapper.findGroupById(gpId);
         Notice nt = noticeMapper.findNoticeById(noticeId);
         int cnt = groupMapper.findCntOfStuInGroup(gpId);

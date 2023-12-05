@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -126,8 +127,16 @@ public class FileUtil {
                 float grade =(float) dataRow.getCell(gradeColumn).getNumericCellValue();
                 String comment = null;
                 String review = null;
-                if (commentColumn != -1)
-                    comment = (String) dataRow.getCell(commentColumn).getStringCellValue();
+                if (commentColumn != -1){
+                    Cell cell = dataRow.getCell(commentColumn);
+                    if (cell.getCellType() == CellType.NUMERIC) {
+                        // If the cell is of type Numeric, convert the numeric value to String
+                        comment = String.valueOf(cell.getNumericCellValue());
+                    } else if (cell.getCellType() == CellType.STRING) {
+                        // If the cell is already a String, just get its value
+                        comment = cell.getStringCellValue();
+                    }
+                }
                 if (reviewColumn != -1)
                     review = (String) dataRow.getCell(commentColumn).getStringCellValue();
                 sas.add(new SubmittedAssignment(submitterId, grade, comment, review));

@@ -306,6 +306,7 @@ public class UserService {
     }
     public void request_phone(String to){
         try {
+
             sendMassage(to, FUNCTION.__LOGIN__, true);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -338,7 +339,7 @@ public class UserService {
             stringRedisTemplate.delete(getRedisKey(phone,function));
             User user;
             if (needJwt) {
-                user = usersMapper.findUserByMail(phone);
+                user = usersMapper.findUserByPhone(phone);
                 return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
             }
             return null;

@@ -27,7 +27,8 @@
                       @update:model-value="onFileChange"
                     ></q-file>
                     <div v-if="avatar_preview" class="q-mt-md">
-                      <q-img :src="avatar_preview" contain alt="Avatar Preview" class="avatar-preview"/>
+                      <q-img :src="avatar_preview" contain alt="Avatar Preview"
+                             class="avatar-preview"/>
                     </div>
                   </q-card-section>
                   <q-card-actions class="q-px-md">
@@ -160,8 +161,8 @@
                 v-model="email"
                 type="email"
                 v-if="isEditing"
-                color="white"
-                :suffix="selectedEmailDomain">
+                :suffix="$q.screen.lt.sm ? undefined : selectedEmailDomain"
+                :label="$q.screen.gt.xs ? undefined : selectedEmailDomain">
                 <template v-slot:append>
                   <q-btn-dropdown dense flat :disable="!isEditing">
                     <q-list>
@@ -190,7 +191,6 @@
               <q-input outlined dense
                        v-model="phone"
                        type="tel"
-                       color="white"
                        v-if="isEditing">
               </q-input>
               <q-item-label v-else>{{ phone }}</q-item-label>
@@ -225,7 +225,7 @@
         </div>
 
       </q-card-section>
-      <q-dialog v-model="isOpenVerify" persistent transition-show="scale" transition-hide="scale" >
+      <q-dialog v-model="isOpenVerify" persistent transition-show="scale" transition-hide="scale">
         <q-card style="width: 400px;" class="row">
           <q-item class="col-12">
             <q-item-section>
@@ -237,7 +237,13 @@
           </q-item>
           <q-separator/>
           <q-card-section class="col-12 row">
-            <q-input v-model="phone_code" dense outline class="col-12" label="Phone Code" v-if="saveVerifyType == 1 || saveVerifyType == 3">
+            <q-item v-if="saveVerifyType == 1 || saveVerifyType == 3">
+              <q-item-section>
+                <q-item-label>Your saved Phone: {{ phone }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-input v-model="phone_code" dense outline class="col-12" label="Phone Code"
+                     v-if="saveVerifyType == 1 || saveVerifyType == 3">
               <template v-slot:append>
                 <q-btn
                   dense
@@ -249,7 +255,13 @@
                 <div v-else>{{ countdown_phone }}s</div>
               </template>
             </q-input>
-            <q-input v-model="email_code" dense outline class="col-12" label="Email Code" v-if="saveVerifyType == 2 || saveVerifyType == 3">
+            <q-item v-if="saveVerifyType == 2 || saveVerifyType == 3">
+              <q-item-section>
+                <q-item-label>Your saved Email: {{ email }}{{ selectedEmailDomain }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-input v-model="email_code" dense outline class="col-12" label="Email Code"
+                     v-if="saveVerifyType == 2 || saveVerifyType == 3">
               <template v-slot:append>
                 <q-btn
                   dense
@@ -298,10 +310,11 @@ const {username, userid, identity} = useUserStore()
 const person_id = ref(1);
 const email = ref(''), gender = ref(4), phone = ref(''),
   skills = ref(['PHP', 'HTML', 'CSS', 'SQL', 'Go'])
-const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref<string|undefined>(''), avatar_clone = ref()
+const avatarUrl = ref(), avatar_file = ref(null), avatar_preview = ref<string | undefined>(''),
+  avatar_clone = ref()
 const newSkill = ref(), colorList = ref(['warning', 'teal', 'glossy', 'primary'])
 const isEditing = ref(false), isShowDialog = ref(false), isFresh = ref(true)
-const selectedEmailDomain = ref('gmail.com')
+const selectedEmailDomain = ref('@gmail.com')
 const emailDomains = ref(['@gmail.com', '@yahoo.com', '@outlook.com', '@qq.com', '@sustech.edu.cn',
   '@mail.sustech.edu.cn'])
 const personIdentity = ref('')
@@ -312,7 +325,7 @@ const genderList = ref([{label: 'male', value: 1}, {label: 'female', value: 2},
 const personInfo = ref<personProps>(defaultPerson)
 onMounted(() => {
   person_id.value = usePersonId();
-  console.log('person_id',person_id.value)
+  console.log('person_id', person_id.value)
   watchEffect(() => {
     personIdentity.value = (identity.value === 3) ? 'Student' : 'Teacher'
     if (identity.value !== -1 && isFresh.value) {
@@ -325,17 +338,17 @@ onMounted(() => {
         username.value = personInfo.value.name
         avatar_preview.value = personInfo.value.avatarPath
         avatar_clone.value = avatar_preview.value
-        console.log('init',personInfo.value)
+        console.log('init', personInfo.value)
       })
     }
   })
 })
 
-function copyPersonInfo(){
+function copyPersonInfo() {
   gender.value = Number(genderConvert(personInfo.value.gender))
   // console.log("gender",gender.value)
   // console.log("personInfo",personInfo.value)
-  if (personInfo.value.phone=='null'){
+  if (personInfo.value.phone == 'null') {
     phone.value = ''
   } else {
     phone.value = personInfo.value.phone
@@ -344,7 +357,7 @@ function copyPersonInfo(){
     skills.value = personInfo.value.programmingSkills.slice()
   else
     skills.value = []
-  if(personInfo.value.avatar){
+  if (personInfo.value.avatar) {
     avatarUrl.value = personInfo.value.avatar
   }
   avatar_preview.value = avatar_clone.value
@@ -358,79 +371,125 @@ function copyPersonInfo(){
     selectedEmailDomain.value = 'sustech.edu.cn'
   }
 }
+
 // 校验手机号/邮箱有没有改，改的话需要验证
 const saveVerifyType = ref(0), isOpenVerify = ref(false);
-function beforeSaveVerify(){
+
+function beforeSaveVerify() {
   saveVerifyType.value = 0;
-  if (phone.value !== personInfo.value.phone){
+  if (phone.value !== personInfo.value.phone) {
     saveVerifyType.value = 1;
   }
-  if (email.value + '@' + selectedEmailDomain.value !== personInfo.value.email){
+  if (email.value + '@' + selectedEmailDomain.value !== personInfo.value.email) {
     saveVerifyType.value += 2;
   }
-  if (saveVerifyType.value !== 0){
+  if (saveVerifyType.value !== 0) {
     isOpenVerify.value = true;
     sendCode();
   } else {
     saveProfile();
   }
 }
+
 // 发送验证码
 const countdown_phone = ref(0), countdown_email = ref(0);
-function sendCode(){
-  if (countdown_phone.value == 0 && (saveVerifyType.value == 1 || saveVerifyType.value == 3)){
+
+function sendCode() {
+  if (countdown_phone.value == 0 && (saveVerifyType.value == 1 || saveVerifyType.value == 3)) {
     // TODO 发送手机验证码
-    api.post('/get_edit_code',{
+    api.post('/get_edit_code', {
       key: 1,
       value: phone.value
-    })
-    $q.notify({
-      color: "green",
-      textColor: "white",
-      icon: "mail",
-      message: "Code has been sent to your phone",
-    });
-    // 开始倒计时
-    countdown_phone.value = 60;
-    const interval = setInterval(() => {
-      countdown_phone.value--;
-      if (countdown_phone.value === 0) {
-        clearInterval(interval);
+    }).then(() => {
+      $q.notify({
+        color: "green",
+        textColor: "white",
+        icon: "mail",
+        message: "Code has been sent to your phone",
+      });
+      // 开始倒计时
+      countdown_phone.value = 60;
+      const interval = setInterval(() => {
+        countdown_phone.value--;
+        if (countdown_phone.value === 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }).catch(err => {
+      if(err.response.data.statusCode === 405){
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Phone number has been registered",
+        });
+      } else {
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Please try again",
+        });
       }
-    }, 1000);
+      console.log(err)
+    })
+
   }
-  if (countdown_email.value == 0 &&(saveVerifyType.value == 2 || saveVerifyType.value == 3)){
+  if (countdown_email.value == 0 && (saveVerifyType.value == 2 || saveVerifyType.value == 3)) {
     // TODO 发送邮箱验证码
-    api.post('/get_edit_code',{
+    api.post('/get_edit_code', {
       key: 2,
-      value: email.value+'@'+selectedEmailDomain.value
-    })
-    $q.notify({
-      color: "green",
-      textColor: "white",
-      icon: "mail",
-      message: "Code has been sent to your email",
-    });
-    // 开始倒计时
-    countdown_email.value = 60;
-    const interval = setInterval(() => {
-      countdown_email.value--;
-      if (countdown_email.value === 0) {
-        clearInterval(interval);
+      value: email.value + selectedEmailDomain.value
+    }).then(()=>{
+      $q.notify({
+        color: "green",
+        textColor: "white",
+        icon: "mail",
+        message: "Code has been sent to your email",
+      });
+      // 开始倒计时
+      countdown_email.value = 60;
+      const interval = setInterval(() => {
+        countdown_email.value--;
+        if (countdown_email.value === 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }).catch(err => {
+      if(err.response.data.statusCode === 405){
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Email has been registered",
+        });
+      } else {
+        $q.notify({
+          color: "red",
+          textColor: "white",
+          icon: "mail",
+          message: "Please try again",
+        });
       }
-    }, 1000);
+      console.log(err)
+    })
   }
 }
+
 const email_code = ref(''), phone_code = ref('')
-function checkCode(){
+
+function checkCode() {
   // TODO 检查验证码
   let flag = saveVerifyType.value;
-  if (saveVerifyType.value == 1 || saveVerifyType.value == 3){
-    api.post('/verify_edit_code',{
+  if (saveVerifyType.value == 1 || saveVerifyType.value == 3) {
+    api.post('/verify_edit_code', {
       key: 1,
-      value: phone_code.value,
+      value: {
+        key: phone.value,
+        value: phone_code.value.toString()
+      },
     }).then(res => {
-      if (res.data.statusCode == 200){
+      if (res.data.statusCode == 200) {
         flag -= 1;
         $q.notify({
           color: "green",
@@ -456,12 +515,15 @@ function checkCode(){
       console.log(err)
     })
   }
-  if (saveVerifyType.value == 2 || saveVerifyType.value == 3){
-    api.post('/verify_edit_code',{
+  if (saveVerifyType.value == 2 || saveVerifyType.value == 3) {
+    api.post('/verify_edit_code', {
       key: 2,
-      value: email_code.value,
+      value: {
+        key: email.value+selectedEmailDomain.value,
+        value: email_code.value.toString()
+      },
     }).then(res => {
-      if (res.data.statusCode == 200){
+      if (res.data.statusCode == 200) {
         flag -= 2;
         $q.notify({
           color: "green",
@@ -487,10 +549,12 @@ function checkCode(){
       console.log(err)
     })
   }
-  if (flag == 0){
+  if (flag == 0) {
     saveProfile();
+    isOpenVerify.value = false;
   }
 }
+
 function saveProfile() {
   isEditing.value = false
   const formData = new FormData();
@@ -504,14 +568,14 @@ function saveProfile() {
   formData.append('email', personSubmit.email)
   formData.append('name', personSubmit.name)
   formData.append('gender', personSubmit.gender)
-  formData.append('birthday','2023-11-12')
+  formData.append('birthday', '2023-11-12')
   if (personSubmit.avatar)
     formData.append('avatar', personSubmit.avatar)
-  for (const i of personSubmit.programmingSkills){
+  for (const i of personSubmit.programmingSkills) {
     formData.append('programmingSkills', i)
   }
-  console.log('submit',personInfo.value)
-  api.post(`/edit_personal_info`,formData).then((res) => {
+  console.log('submit', personInfo.value)
+  api.post(`/edit_personal_info`, formData).then((res) => {
     console.log(res.data)
     $q.notify({
       type: 'positive',
@@ -539,7 +603,7 @@ function removeSkill(index: number) {
 }
 
 function addSkill() {
-  if(newSkill.value.trim()){
+  if (newSkill.value.trim()) {
     skills.value.push(newSkill.value.trim())
     newSkill.value = '';
   }
@@ -576,9 +640,9 @@ function clickAvatar() {
   }
 }
 
-function onFileChange(){
+function onFileChange() {
   const file = avatar_file.value
-  if(file){
+  if (file) {
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = () => {
@@ -589,19 +653,22 @@ function onFileChange(){
     }
   }
 }
+
 function cancelUploadAvatar() {
   isShowDialog.value = false;
   avatar_file.value = null;
   avatar_preview.value = avatar_clone.value;
 }
+
 function saveUploadAvatar() {
   isShowDialog.value = false;
-  if(avatar_file.value){
+  if (avatar_file.value) {
     personInfo.value.avatar = avatar_file.value;
     avatar_file.value = null;
   }
 }
-function onRejected (rejectedEntries: string | any[]) {
+
+function onRejected(rejectedEntries: string | any[]) {
   // Notify plugin needs to be installed
   // https://quasar.dev/quasar-plugins/notify#Installation
   $q.notify({

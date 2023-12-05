@@ -245,7 +245,7 @@
         <template v-slot:header>
           <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
         </template>
-        <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+        <group-form @renewGroupList="getGroupList" :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
                     @successDialog="handleSuccess" @unfold="show_edit_form=false" ></group-form>
       </el-dialog>
   </div>

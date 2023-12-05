@@ -105,7 +105,7 @@ onMounted(() => {
 })
 
 
-const leftDrawerOpen = ref(true)
+const leftDrawerOpen = ref(false)
 const miniState = ref(true)
 
 function toggleLeftDrawer() {

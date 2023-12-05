@@ -264,6 +264,7 @@ public class FileService {
 
     public void removeFilesOfSubmittedAss(Assignment assignment, Long submitterId){
         Path fp = Paths.get(FileUtil.generateSubmittedAssPath(assignment, submitterId));
+
         try (Stream<Path> walk = Files.walk(fp)) {
             // We sort the stream in reverse order.
             // This ensures that we delete the files first, then the directories.

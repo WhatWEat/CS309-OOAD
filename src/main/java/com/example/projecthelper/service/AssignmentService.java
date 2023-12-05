@@ -81,6 +81,7 @@ public class AssignmentService {
             if (Objects.equals(taOfProj, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
             results =
                     assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
@@ -95,11 +96,12 @@ public class AssignmentService {
         if (projId == -1) {
             results = assignmentMapper.getAssByStu(userId, pageSize, page * pageSize);
         } else {
-            System.err.println(userId + " " + projId);
             Long checker = projectMapper.checkStuInProj(userId, projId);
             if (Objects.equals(checker, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
+
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
         try {
@@ -134,15 +136,34 @@ public class AssignmentService {
         String type = assignment.getType();
         SubmittedAssignment submittedAssignment = null;
         if(identity == 3){
-            if(type.equals("i"))
+            if(type.equals("i")){
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+                if(submittedAssignment != null){
+                    User user = usersMapper.findUserById(user_id);
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+            }
             if(type.equals("g")){
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(user_id, assignment.getProjectId());
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, gpId);
+                if(submittedAssignment != null){
+                    Group gp = groupMapper.findGroupById(gpId);
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
             }
         }
         else {
             submittedAssignment = assignmentMapper.findLatestSubAssByAssId(ass_id);
+            if(submittedAssignment != null){
+                if(type.equals("i")){
+                    User user = usersMapper.findUserById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+                else if (type.equals("g")){
+                    Group gp = groupMapper.findGroupById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
+            }
         }
         assignment.setState(
             Assignment.AssignmentState.getState(assignment, submittedAssignment).getValue()
@@ -217,6 +238,8 @@ public class AssignmentService {
         //FUNC: 检查学生是否有权限提交作业, 即是否在proj中
         Assignment originAss = assignmentMapper.findAssById(submittedAss.getAssignmentId());
         if (originAss == null || projectMapper.checkStuInProj(userId, originAss.getProjectId()) == null) {
+            System.err.println(originAss);
+            System.err.println(userId);
             throw new AccessDeniedException("无权提交作业");
         }
         //PROC: 先判断这个是group assignment还是individual assignment
@@ -328,11 +351,13 @@ public class AssignmentService {
             case "g" -> {
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId());
                 if (gpId != null) {
-                    if (!Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
+                    if (Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
                         fileService.removeFilesOfSubmittedAss(assignment, gpId);
                         submittedAssMapper.removeAss(assignmentId, gpId);
                         return;
                     }
+                    else
+                        throw new AccessDeniedException("你不是小组长");
                 }
                 throw new AccessDeniedException("你不在小组中");
             }
@@ -428,10 +453,31 @@ public class AssignmentService {
                 throw new AccessDeniedException("无权查看别人发布的作业");
         }
         List<SubmittedAssignment> sas = submittedAssMapper.findAllSub(assignmentId, pageSize, page * pageSize);
+        if(ass.getType().equals("i")){
+            sas.forEach(sa -> {
+                sa.setSubmitterName(
+                    usersMapper.findUserById(
+                        sa.getSubmitterId()).getName()
+                );
+            });
+        }
+        else if(ass.getType().equals("g")){
+            sas.forEach(sa -> {
+                sa.setSubmitterName(
+                    groupMapper.findGroupById(
+                        sa.getSubmitterId()
+                    ).getGroupName()
+                );
+            });
+        }
         if (sas != null)
-            sas.forEach(
+            try{
+                sas.forEach(
                     sa -> sa.setFilepaths(sa.getFilepaths().stream().map(FileUtil::getFilenameFromPath).toList())
-            );
+                );
+            }catch (NullPointerException ignored){
+
+            }
         return sas;
     }
 
@@ -464,6 +510,9 @@ public class AssignmentService {
     }
 
     public void gradeAss(SubmittedAssignment submittedAssignment, Long userId, Integer identity) {
+        if (submittedAssignment.getAssignmentId() == null){
+            throw new InvalidFormException("学生尚未提交");
+        }
         SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getAssignmentId(),
                 submittedAssignment.getSubmitterId());
         if (sub == null) {
@@ -472,6 +521,7 @@ public class AssignmentService {
         Assignment ass = assignmentMapper.findAssById(sub.getAssignmentId());
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
+        System.err.println(identity);
         if (identity == 1) {
             Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
             if (!Objects.equals(teaId, userId))
@@ -480,6 +530,9 @@ public class AssignmentService {
             Long taId = projectMapper.checkTaInProj(ass.getProjectId(), userId);
             if (taId == null)
                 throw new AccessDeniedException("无权查看别人发布的作业");
+        }
+        if (submittedAssignment.getGrade()>ass.getFullMark()){
+            throw new AccessDeniedException("分数超出上限");
         }
         try {
             submittedAssMapper.gradeAss(submittedAssignment);
@@ -493,16 +546,11 @@ public class AssignmentService {
         if(projectMapper.checkStuInProj(userId,projectId) == null){
             throw new AccessDeniedException("您不在project中");
         }
-        Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
-        List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
-        if (group!=null){
-            submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
-        }
-
+        List<SubmittedAssignment> submittedAssignments = allSub(projectId,userId);
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();
@@ -510,8 +558,13 @@ public class AssignmentService {
     public List<SubmittedAssignment> allSub(Long projectId, Long userId){
         Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
         List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
+        User user = usersMapper.findUserById(userId);
         if (group!=null){
             submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
+        }
+        for (SubmittedAssignment submittedAssignment: submittedAssignments){
+            submittedAssignment.setSubmitterName(user.getName());
+            submittedAssignment.setTitle(assignmentMapper.findAssById(submittedAssignment.getAssignmentId()).getTitle());
         }
         return submittedAssignments;
     }
@@ -523,23 +576,20 @@ public class AssignmentService {
         }
         List<User> stus = usersMapper.findStuByProj(projectId);
         List<KeyValueWrapper<Long,List<SubmittedAssignment>>> submittedAssignments = new ArrayList<>();
-
         for (User stu : stus){
             submittedAssignments.add(new KeyValueWrapper<>(stu.getUserId(),allSub(projectId,stu.getUserId())));
         }
-
-
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();
     }
 
     //这个方法是读取文件批量更新成绩
-    public List<SubmittedAssignment> gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
+    public KeyValueWrapper<Assignment, List<SubmittedAssignment>> gradeAssWithFile(MultipartFile file, long assignmentId, Long userId, Integer identity) {
         Assignment ass = assignmentMapper.findAssById(assignmentId);
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
@@ -554,9 +604,9 @@ public class AssignmentService {
         }
 
         List<SubmittedAssignment> result = FileUtil.tableToSubmittedAssList(file);
-        result.forEach(System.err::println);
+//        result.forEach(System.err::println);
         submittedAssMapper.updateGrades(result, assignmentId);
-        return result;
+        return new KeyValueWrapper<>(ass, result);
     }
 
 

@@ -36,6 +36,18 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("select * from project where projectId = #{pjId}")
     Project findProjById(Long pjId);
 
+    @Select({
+        "<script>",
+        "SELECT * FROM project",
+        "WHERE projectId IN",
+        "<foreach item='projectId' index='index' collection='projectIds' open='(' separator=',' close=')'>",
+        "#{projectId}",
+        "</foreach>",
+        "</script>"
+    })
+    void findProjByIds(List<Long> projectIds);
+
+
     @Select("select p.*, u.name teacherName " +
         "from project p join users u on p.teacherid = u.userid limit #{limit} offset #{offset};")
     List<Project> getProjByAdm(int limit, int offset);

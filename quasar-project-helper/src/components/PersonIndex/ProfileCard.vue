@@ -177,7 +177,8 @@
                   </q-btn-dropdown>
                 </template>
               </q-input>
-              <q-item-label v-else>{{ email }}@{{ selectedEmailDomain }}</q-item-label>
+              <q-item-label v-else-if="email==null || email==''"></q-item-label>
+              <q-item-label v-else>{{ email }}{{ selectedEmailDomain }}</q-item-label>
             </q-item-section>
           </q-item>
           <q-item class="col-12">
@@ -365,10 +366,12 @@ function copyPersonInfo() {
   if (personInfo.value.email) {
     const emails = personInfo.value.email.split('@')
     email.value = emails[0]
-    selectedEmailDomain.value = emails[1]
+    selectedEmailDomain.value = '@'+emails[1]
+    console.log('email', email.value, selectedEmailDomain.value)
+    console.log('from personInfo', personInfo.value.email)
   } else {
-    email.value = person_id.value.toString()
-    selectedEmailDomain.value = 'sustech.edu.cn'
+    email.value = ''
+    selectedEmailDomain.value = '@sustech.edu.cn'
   }
 }
 
@@ -380,7 +383,7 @@ function beforeSaveVerify() {
   if (phone.value !== personInfo.value.phone) {
     saveVerifyType.value = 1;
   }
-  if (email.value + '@' + selectedEmailDomain.value !== personInfo.value.email) {
+  if (!(email.value == '' && personInfo.value.email == null )&& email.value + '@' + selectedEmailDomain.value !== personInfo.value.email) {
     saveVerifyType.value += 2;
   }
   if (saveVerifyType.value !== 0) {
@@ -478,17 +481,19 @@ function sendCode() {
 
 const email_code = ref(''), phone_code = ref('')
 
-function checkCode() {
+async function checkCode() {
   // TODO 检查验证码
   let flag = saveVerifyType.value;
+  console.log('开始flag', flag)
   if (saveVerifyType.value == 1 || saveVerifyType.value == 3) {
-    api.post('/verify_edit_code', {
+    await api.post('/verify_edit_code', {
       key: 1,
       value: {
         key: phone.value,
         value: phone_code.value.toString()
       },
     }).then(res => {
+      console.log('res phone', res.data)
       if (res.data.statusCode == 200) {
         flag -= 1;
         $q.notify({
@@ -516,13 +521,14 @@ function checkCode() {
     })
   }
   if (saveVerifyType.value == 2 || saveVerifyType.value == 3) {
-    api.post('/verify_edit_code', {
+    await api.post('/verify_edit_code', {
       key: 2,
       value: {
-        key: email.value+selectedEmailDomain.value,
+        key: email.value + selectedEmailDomain.value,
         value: email_code.value.toString()
       },
     }).then(res => {
+      console.log('res email', res.data)
       if (res.data.statusCode == 200) {
         flag -= 2;
         $q.notify({
@@ -549,9 +555,12 @@ function checkCode() {
       console.log(err)
     })
   }
+  console.log('最后flag', flag)
+  saveVerifyType.value = flag;
   if (flag == 0) {
-    saveProfile();
+    console.log('保存了')
     isOpenVerify.value = false;
+    saveProfile();
   }
 }
 
@@ -563,12 +572,13 @@ function saveProfile() {
   personSubmit.gender = String(genderConvert(gender.value));
   personSubmit.phone = phone.value;
   personSubmit.programmingSkills = skills.value.slice();
-  personSubmit.email = email.value + '@' + selectedEmailDomain.value;
+  personSubmit.email = email.value + selectedEmailDomain.value;
   formData.append('phone', personSubmit.phone)
   formData.append('email', personSubmit.email)
   formData.append('name', personSubmit.name)
   formData.append('gender', personSubmit.gender)
   formData.append('birthday', '2023-11-12')
+  console.log('sub的phone',personSubmit.phone);
   if (personSubmit.avatar)
     formData.append('avatar', personSubmit.avatar)
   for (const i of personSubmit.programmingSkills) {

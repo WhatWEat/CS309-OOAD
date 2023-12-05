@@ -148,7 +148,7 @@ public class UserController {
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("ass/{ass_id}")
+    @GetMapping("/ass/{ass_id}")
     public ResponseResult<KeyValueWrapper<Assignment, SubmittedAssignment>> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
@@ -181,6 +181,7 @@ public class UserController {
                                                            @PathVariable("page_size") int pageSize,
                                                            HttpServletRequest request) {
         // Use the projectId, page, and pageSize in your method
+        System.err.println("here");
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));
         List<Assignment> result = switch (Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))) {

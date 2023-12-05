@@ -111,7 +111,7 @@ public interface NoticeMapper extends BaseMapper<Notice> {
 
     @Insert("insert into stuviewnotice (noticeId, stuId) VALUES (#{noticeId}, #{stuId});")
     //二者同时不为空
-    void stuViewNotice(Long noticeId, Long stuId) throws PSQLException;
+    void stuViewNotice(Long noticeId, Long stuId);
 
     //FUNC: 一次性导入多个stuView
     @Insert({

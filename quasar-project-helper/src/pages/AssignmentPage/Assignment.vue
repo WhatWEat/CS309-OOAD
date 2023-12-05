@@ -26,7 +26,6 @@
     </assignment-table>
   </div>
   <div v-show="isGroup">
-
     <assignment-table
       @updateAssList="getAssignmentList"
       :columns="columns_group" :rows="rows_group" :project-id="projectId" :group-id="groupId" table-title="Group">
@@ -84,18 +83,18 @@ export default {
         {name: 'MoreInfo', align: 'left', label: 'More Info', field: 'moreInfo', sortable: false}
       ],
       rows_personal: [
-        {
-          AssignmentName: 'Assignment 1',
-          deadLine: '2020-10-10',
-          instructor: 'Qi-Kun Xue1',
-          moreInfo: 'View Details1'
-        },
-        {
-          AssignmentName: 'Assignment 2',
-          deadLine: '2020-10-11',
-          instructor: 'Qi-Kun Xue2',
-          moreInfo: 'View Details2'
-        },
+        // {
+        //   AssignmentName: 'Assignment 1',
+        //   deadLine: '2020-10-10',
+        //   instructor: 'Qi-Kun Xue1',
+        //   moreInfo: 'View Details1'
+        // },
+        // {
+        //   AssignmentName: 'Assignment 2',
+        //   deadLine: '2020-10-11',
+        //   instructor: 'Qi-Kun Xue2',
+        //   moreInfo: 'View Details2'
+        // },
       ],
       columns_group: [
         {
@@ -129,18 +128,18 @@ export default {
         {name: 'MoreInfo', align: 'left', label: 'More Info', field: 'moreInfo', sortable: false}
       ],
       rows_group: [
-        {
-          AssignmentName: 'Assignment 1',
-          deadLine: '2020-10-10',
-          instructor: 'Qi-Kun Xue1',
-          moreInfo: 'View Details1'
-        },
-        {
-          AssignmentName: 'Assignment 2',
-          deadLine: '2020-10-11',
-          instructor: 'Qi-Kun Xue2',
-          moreInfo: 'View Details2'
-        },
+        // {
+        //   AssignmentName: 'Assignment 1',
+        //   deadLine: '2020-10-10',
+        //   instructor: 'Qi-Kun Xue1',
+        //   moreInfo: 'View Details1'
+        // },
+        // {
+        //   AssignmentName: 'Assignment 2',
+        //   deadLine: '2020-10-11',
+        //   instructor: 'Qi-Kun Xue2',
+        //   moreInfo: 'View Details2'
+        // },
       ],
 
       groupId: -1,

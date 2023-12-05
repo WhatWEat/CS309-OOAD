@@ -213,10 +213,10 @@
           <q-item-label lines="1">Visibility</q-item-label>
           <q-item-label caption lines="2">
             <q-btn>
-              <q-checkbox v-model="this.groupData_temp.visibility[0]" color="teal" keep-color label="GroupMember"/>
-              <q-checkbox v-model="this.groupData_temp.visibility[1]" color="orange" keep-color label="Leader"/>
-              <q-checkbox v-model="this.groupData_temp.visibility[2]" color="red" keep-color label="CreationTime"/>
-              <q-checkbox v-model="this.groupData_temp.visibility[3]" color="cyan" keep-color label="Recruitment"/>
+              <q-checkbox :disable="this.disableList_temp.visibility" v-model="this.groupData_temp.visibility[0]" color="teal" keep-color label="GroupMember"/>
+              <q-checkbox :disable="this.disableList_temp.visibility" v-model="this.groupData_temp.visibility[1]" color="orange" keep-color label="Leader"/>
+              <q-checkbox :disable="this.disableList_temp.visibility" v-model="this.groupData_temp.visibility[2]" color="red" keep-color label="CreationTime"/>
+              <q-checkbox :disable="this.disableList_temp.visibility" v-model="this.groupData_temp.visibility[3]" color="cyan" keep-color label="Recruitment"/>
             </q-btn>
           </q-item-label>
         </q-item-section>
@@ -233,7 +233,7 @@
           <q-btn :style="{'min-width':'130px'}" flat>
             <div v-for="(value,index) in this.groupData_temp.members" :key="value">
               <q-item-label v-if="value!== this.groupData_temp.leaderId" caption lines="2">
-                <q-chip color="primary" icon="people" removable text-color="white"
+                <q-chip color="primary" icon="people" removable text-color="white" :disable="disableList_temp.memberAdminister"
                         @remove="delete this.groupData_temp.members[index]">
                   {{ index }}
                 </q-chip>
@@ -273,10 +273,10 @@
     </div>
   </q-card>
 
-  {{ this.groupData_temp }}<br/>
-  Members:{{ this.groupData_temp.members }}<br/>
-  Member:{{ Object.keys(this.groupData_temp.members)[0] }}
-  MemberID:{{ Object.values(this.groupData_temp.members) }}
+<!--  {{ this.groupData_temp }}<br/>-->
+<!--  Members:{{ this.groupData_temp.members }}<br/>-->
+<!--  Member:{{ Object.keys(this.groupData_temp.members)[0] }}-->
+<!--  MemberID:{{ Object.values(this.groupData_temp.members) }}-->
 </template>
 
 <script>
@@ -407,6 +407,8 @@ export default defineComponent({
           leader: true,
           maxSize: true,
           moreInformation: false,
+          visibility: true,
+          memberAdminister: true,
         }
       }
     },

@@ -1,5 +1,11 @@
 -- drop table if exists taOfProject,stuInProject,stuViewNotice,stuInGroup,stuAssignment,groupAssignment,stuSubmit,groupSubmit,
 --     project,users,notice,groups,assignment,submittedAssignment,evaluation,massage,chat;
+-- drop table if exists stusubmit;
+--
+-- drop table if exists groupsubmit;
+--
+
+
 drop table if exists project;
 create table if not exists project
 (

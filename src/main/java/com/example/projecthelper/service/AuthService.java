@@ -1,5 +1,6 @@
 package com.example.projecthelper.service;
 
+import com.example.projecthelper.Exceptions.AccountFrozenException;
 import com.example.projecthelper.Exceptions.InvalidFormException;
 import com.example.projecthelper.entity.User;
 import com.example.projecthelper.mapper.UsersMapper;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -106,8 +108,8 @@ public class AuthService {
         }
     }
 
-    public void createMultipleUsersWithFile(MultipartFile file, KeyValueWrapper<String, String> userPass){
-        authenticate(userPass);
+    public List<User> createMultipleUsersWithFile(MultipartFile file){
+//        authenticate(userPass);
         LocalDateTime p0 = LocalDateTime.now();
         System.err.println("p1: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);;
         List<User> users = FileUtil.tableToUsersList(file);
@@ -125,7 +127,13 @@ public class AuthService {
         System.err.println("p3: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);;
         System.err.println("p4: "+ Duration.between(p0, LocalDateTime.now()).toMillis() / (float)1000);
         try{
-            if (users.size() < 500){
+            if (users.size() < 100){
+                users.forEach(
+                    u -> {
+                        u.setOriginalPass(u.getPassword());
+                        u.setPassword(passwordEncoder.encode(u.getPassword()));
+                    }
+                );
                 usersMapper.registerUsers(users);
             }
             else {
@@ -139,7 +147,10 @@ public class AuthService {
                             try{
                                 System.err.println("hello1");
                                 users1.forEach(
-                                    u -> u.setPassword(passwordEncoder.encode(u.getPassword()))
+                                    u -> {
+                                        u.setOriginalPass(u.getPassword());
+                                        u.setPassword(passwordEncoder.encode(u.getPassword()));
+                                    }
                                 );
                                 usersMapper.registerUsers(users1);
                             }catch (Exception e){
@@ -156,7 +167,11 @@ public class AuthService {
             System.err.println(e.getMessage());
             throw new InvalidFormException("信息不完整或id已经存在");
         }
-
+        for (User user : users) {
+            user.setPassword(user.getOriginalPass());
+            user.setOriginalPass(null);
+        }
+        return users;
     }
 
     public void registerUserByTea(ObjectCountWrapper<User> multiUsers, KeyValueWrapper<String, String> userPass){
@@ -212,8 +227,12 @@ public class AuthService {
      * @return JWT
      */
     public String login(KeyValueWrapper<String, String> userPass){
+        try{
 
-        authenticate(userPass);
+            authenticate(userPass);
+        }catch (LockedException e){
+            throw new AccountFrozenException("账户被冻结");
+        }
 
         //上一步没有抛出异常说明认证成功，我们向用户颁发jwt令牌
         //NOTE: 拉出黑名单
@@ -242,24 +261,37 @@ public class AuthService {
         return null;
     }
 
-    public void resetPassForMultiUsers(KeyValueWrapper<String, List<Long>> newPassAndIds, KeyValueWrapper<String, String> userPass){
-        authenticate(userPass);
-        boolean strongPass = FormatUtil.match(newPassAndIds.getKey(), FormatUtil.strongPasswordPredicate());
-        if(!strongPass){
-            throw new InvalidFormException("密码太弱");
-        }
-        usersMapper.resetPass(newPassAndIds.getValue(), passwordEncoder.encode(newPassAndIds.getKey()));
+    public List<User> resetPassForMultiUsers(MultipartFile file){
+        List<User> users = FileUtil.tableToUserIdPassList(file);
+        users = users.stream().filter(
+            e -> FormatUtil.match(e.getPassword(), FormatUtil.strongPasswordPredicate())
+        ).toList();
+        users.forEach(
+            e -> {
+                e.setOriginalPass(e.getPassword());
+                e.setPassword(passwordEncoder.encode(e.getPassword()));
+            }
+        );
+        usersMapper.resetPass(users);
+        users.forEach(
+             e -> {
+                 e.setPassword(e.getOriginalPass());
+                 e.setOriginalPass(null);
+             }
+        );
+        return users;
     }
 
-    public void freezeMultiUsers(List<Long> ids, KeyValueWrapper<String, String> userPass){
-        authenticate(userPass);
-        usersMapper.freezeUsers(ids);
-
+    public List<Long> freezeMultiUsers(MultipartFile file){
+        List<Long> userIds = FileUtil.tableToUserIdList(file);
+        usersMapper.freezeUsers(userIds);
+        return userIds;
     }
 
-    public void unfreezeMultiUsers(List<Long> ids, KeyValueWrapper<String, String> userPass){
-        authenticate(userPass);
-        usersMapper.unfreezeUsers(ids);
+    public List<Long> unfreezeMultiUsers(MultipartFile file){
+        List<Long> userIds = FileUtil.tableToUserIdList(file);
+        usersMapper.unfreezeUsers(userIds);
+        return userIds;
     }
 
 

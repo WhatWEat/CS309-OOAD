@@ -252,6 +252,23 @@ public class GroupService {
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else
+            throw new AccessDeniedException("无权修改小组信息");
+    }
+
+    public void updateGroupForLeader(Group group, long userId) {
+        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+        Group group1 = groupMapper.findGroupOfStuInProject(userId,group.getProjectId());
+        if (group1.getLeaderId() == userId) {
+            group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
+            try {
+                groupMapper.updateGroupForLeader(group);
+                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -354,11 +371,11 @@ public class GroupService {
         noticeService.createApplicationNotice(gpId_notice, userId);
     }
 
-    public void removeMen(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
-        noticeService.createRemoveNotice( gpId_notice,  userId);
+    public void removeMen(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_memId_notice, Long userId){
+        noticeService.createRemoveNotice(gpId_memId_notice, userId);
     }
 
-    public void transferLeader(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+    public void transferLeader(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
         noticeService.createTransferNotice( gpId_notice,  userId);
     }
 
@@ -442,18 +459,18 @@ public class GroupService {
         }
     }
 
-    public void updateGroupForLeader(Group group, long user_id) {
-        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
-        long leader_id;
-        leader_id = groupMapper.findLeaderByGroup(group.getGroupId());
-        if (leader_id == user_id) {
-            try {
-                groupMapper.updateGroupForLeader(group);
-            } catch (PSQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+//    public void updateGroupForLeader(Group group, long user_id) {
+//        //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
+//        long leader_id;
+//        leader_id = groupMapper.findLeaderByGroup(group.getGroupId());
+//        if (leader_id == user_id) {
+//            try {
+//                groupMapper.updateGroupForLeader(group);
+//            } catch (PSQLException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
 
 //    public void updateGroupInstructor(long instructor_id, long group_id) {
 //        try {

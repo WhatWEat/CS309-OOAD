@@ -52,17 +52,6 @@
                   />
                 </div>
               </div>
-              <div style="display: flex; justify-content: space-between;">
-                <div>
-                  <q-btn
-                    label="forgot"
-                    type="button"
-                    color="primary"
-                    class="q-mr-sm"
-                    @click="goToForgotPassword"
-                  />
-                </div>
-              </div>
 
             </q-form>
           </q-card-section>
@@ -119,12 +108,10 @@ export default defineComponent({
       AvatarUrl.value = await getAvatarUrl()
     })
     function goToLogin() {
-      username.value = null;
+      api.delete('/logout')
+      localStorage.setItem('Token', '')
       router.push('/login')
     }
-
-    function goToForgotPassword() {
-      router.push('/ForgotPassword')    }
 
     return {
       password,
@@ -132,7 +119,6 @@ export default defineComponent({
       login,
       userid,
       goToLogin,
-      goToForgotPassword,
       AvatarUrl
     }
   }

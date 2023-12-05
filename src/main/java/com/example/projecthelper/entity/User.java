@@ -45,6 +45,8 @@ public class User implements Cloneable{
     private MultipartFile avatar;
     @TableField(exist = false)
     private List<String> intendedTeammates;
+    @TableField(exist = false)
+    private String originalPass;
 
 
     public User( Integer identity, String password, String name, String gender, Long userId) {

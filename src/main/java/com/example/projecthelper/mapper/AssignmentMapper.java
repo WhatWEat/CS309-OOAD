@@ -64,7 +64,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByAdm(Long limit, Long offset);
+    List<Assignment> getAssByAdm(int limit, int offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -73,7 +73,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByProj(Long projectId, Long limit, Long offset);
+    List<Assignment> getAssByProj(Long projectId, int limit, int offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -92,7 +92,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByStu(Long stuId, Long limit, Long offset);
+    List<Assignment> getAssByStu(Long stuId, int limit, int offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -102,7 +102,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByTa(Long taId, Long limit, Long offset);
+    List<Assignment> getAssByTa(Long taId, int limit, int offset);
 
     @Select("select a.*, p.name projectName, u.name creatorName " +
         "from assignment a " +
@@ -112,7 +112,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     @Results({
         @Result(property = "filePaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
-    List<Assignment> getAssByTea(Long teaId, Long limit, Long offset);
+    List<Assignment> getAssByTea(Long teaId, int limit, int offset);
 
 
     @Insert("insert into assignment (title, fullMark, projectId, description, type, creatorId, deadline, releaseTime, requireExtension)\n" +
@@ -120,7 +120,7 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
     /*此处所有变量均不为空，其中title长度200，description为2000
     type仅有i(individual)、g(group)两种模式*/
     @Options(useGeneratedKeys = true, keyProperty = "assignmentId", keyColumn = "assignmentid")
-    void createAss(Assignment assignment) throws PSQLException;
+    void createAss(Assignment assignment);
 
     @Delete("delete from assignment where assignmentid = #{assId};")
     void deleteAss(Long assId);
@@ -140,6 +140,12 @@ public interface AssignmentMapper extends BaseMapper<Assignment> {
         @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
     })
     SubmittedAssignment findSubAssById(long assignmentId, long submitterId);
+
+    @Select("select * from submittedAssignment where assignmentid =#{assignmentId} order by submittedTime limit 1;")
+    @Results({
+        @Result(property = "filepaths", column = "filepaths", typeHandler = StringListArrayTypeHandler.class)
+    })
+    SubmittedAssignment findLatestSubAssByAssId(long assignmentId);
 
 
 }

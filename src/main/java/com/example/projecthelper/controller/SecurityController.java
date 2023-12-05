@@ -73,12 +73,16 @@ public class SecurityController {
     public ResponseResult<Object> editPersonalInfo(
         HttpServletRequest request,
         @RequestParam("name") String name,
+        @RequestParam("email") String email,
+        @RequestParam("phone") String phone,
         @RequestParam("gender") String gender,
         @RequestParam("birthday") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE) Date birthday,
         @RequestParam(value = "programmingSkills", required = false) List<String> programmingSkills,
         @RequestParam(value = "avatar", required = false) MultipartFile avatar){
         User user = new User();
         user.setName(name);
+        user.setEmail(email);
+        user.setPhone(phone);
         user.setGender(gender);
         user.setBirthday(birthday);
         user.setProgrammingSkills(programmingSkills);
@@ -167,7 +171,9 @@ public class SecurityController {
 
         System.out.println(address);
 
-        userService.sendMail(address);
+
+        userService.request_code(address);
+
 
         return ResponseResult.ok(null, "Success", null);
     }
@@ -177,11 +183,7 @@ public class SecurityController {
 
         System.out.println(phone);
 
-        try {
-            userService.sendMassage(phone);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        userService.request_phone(phone);
 
         return ResponseResult.ok(null, "Success", null);
     }
@@ -190,15 +192,67 @@ public class SecurityController {
     public ResponseResult<Object> testCode(
         @RequestBody KeyValueWrapper<String, String> address_code
     ) {
-        String jwt = userService.checkCode(address_code.getValue(), address_code.getKey());
+        String jwt = userService.login_with_email(address_code.getValue(), address_code.getKey());
         return ResponseResult.ok(null, "Success", jwt);
     }
 
-    @PostMapping("/login_with_message_code")
-    public ResponseResult<Object> testMassageCode(
-            @RequestBody KeyValueWrapper<String, String> phone_code
+    @PostMapping("/login_with_phone_code")
+    public ResponseResult<Object> testPhone(
+            @RequestBody KeyValueWrapper<String, String> pone_code
     ) {
-        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
+        String jwt = userService.login_with_phone(pone_code.getValue(), pone_code.getKey());
         return ResponseResult.ok(null, "Success", jwt);
     }
+
+    //FUNC: 重置密码
+    @PostMapping("/get_forget_password_code")
+    public ResponseResult<Object> get_forget_password_code(
+        @RequestBody KeyValueWrapper<Integer, String> type_number
+    ) {
+        userService.getForgetPassCode(type_number);
+        return ResponseResult.ok(null, "Success", null);
+    }
+
+//    @PostMapping("/login_with_message_code")
+//    public ResponseResult<Object> testMassageCode(
+//            @RequestBody KeyValueWrapper<String, String> phone_code
+//    ) {
+//        String jwt = userService.checkCodeMassage(phone_code.getValue(), phone_code.getKey());
+//        return ResponseResult.ok(null, "Success", jwt);
+//    }
+
+    @PostMapping("/change_forget_password")
+    public ResponseResult<Object> change_forget_password(
+        @RequestBody KeyValueWrapper<KeyValueWrapper<Integer, String>, KeyValueWrapper<String, String>> type_pass_num_code
+    ) {
+        String jwt = userService.change_forget_password(type_pass_num_code);
+        return ResponseResult.ok(null, "Success", jwt);
+    }
+    //FUNC: 修改手机和邮箱
+    @PostMapping("/get_edit_code")
+    public ResponseResult<Object> get_edit_code(
+        @RequestBody KeyValueWrapper<Integer, String> type_number, HttpServletRequest request
+    ) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        userService.sendCodeToChangeNumber(type_number, Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
+
+    @PostMapping("/verify_edit_code")
+    public ResponseResult<Object> verify_edit_code (
+        @RequestBody KeyValueWrapper<Integer, KeyValueWrapper<String, String>> type_num_code,
+        HttpServletRequest request
+    ) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        userService.verify_modify_code(
+            type_num_code,
+            Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", jwt);
+    }
+
+
+
+
+
 }

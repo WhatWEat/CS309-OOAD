@@ -9,7 +9,7 @@
       :separator="separator"
       :title="tableTitle"
       card-class="bg-grey-2"
-      class="my-sticky-header-column-table"
+      class="rounded-xl"
       row-key="AssignmentName"
       selection="multiple"
       @row-dblclick="handleRowDbclick"

@@ -1,12 +1,12 @@
 <template>
-  <q-card bordered class="" >
+  <q-card bordered class="rounded-xl" >
     <!--   上方部分 -->
     <q-item>
       <q-item-section avatar>
         <q-btn :flat="true" round>
           <q-avatar class="shadow-10" size="80px">
             <!--            <img :src=avatar>-->
-            <q-img :src="groupData_temp.avatar"
+            <q-img :src="avatar_tmp"
                    loading="lazy"
                    spinner-color="primary">
               <template v-slot:loading>
@@ -263,7 +263,7 @@
       <!--   最终的按钮部分 -->
       <!--    <slot name="button"></slot>-->
       <q-card-actions align="around">
-        <q-btn-group :style="{'width':'100%'}" spread>
+        <q-btn-group :style="{'width':'100%'}" spread class="rounded-xl">
           <!--   点击后使该组件刷新回最初的状态-->
           <q-btn color="green" icon="" label="Reset" rounded @click="reset"/>
           <q-btn color="red" label="Submit Change" rounded @click="submitChange()"/>
@@ -283,6 +283,7 @@ import {defineComponent} from 'vue'
 import {useUserStore} from 'src/composables/useUserStore';
 import cloneDeep from 'lodash/cloneDeep';
 import {api} from "boot/axios";
+import {getAvatarUrlById} from "src/composables/usefulFunction";
 
 export default defineComponent({
   name: "DirectoryCard",
@@ -473,17 +474,16 @@ export default defineComponent({
       disableList_temp: cloneDeep(this.disableList),
       groupData_temp: cloneDeep(this.groupData),
       isGroupLeader_temp: this.isGroupLeader,
+      avatar_tmp: '',
     }
-  },
-  async mounted() {
-    this.groupData_temp.avatar = await getAvatarUrlById(this.groupData_temp.leaderId)
   },
   watch: {
     groupData: {
       handler: async function (val, oldVal) {
         this.groupData_temp = cloneDeep(val)
         console.log('group_data变化了')
-        this.groupData_temp.avatar = await getAvatarUrlById(this.groupData_temp.leaderId)
+        if(this.groupData_temp.leaderId===99999999) return
+        this.avatar_tmp = await getAvatarUrlById(this.groupData.leaderId)
       },
       deep: true
     },

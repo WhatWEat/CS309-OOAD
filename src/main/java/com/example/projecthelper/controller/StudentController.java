@@ -140,7 +140,15 @@ public class StudentController {
         return ResponseResult.ok(null, "success", JWTUtil.updateJWT(jwt));
     }
 
-
+    @PostMapping("/modify_group_info")
+    public ResponseResult<Object> modifyGroupInfo(HttpServletRequest request, @RequestBody Group group) {
+        String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
+        groupService.updateGroupForLeader(
+                group,
+                Long.parseLong(JWTUtil.getUserIdByToken(jwt))
+        );
+        return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
+    }
     @GetMapping("/get_stu_not_in_group/{project_id}")
     public ResponseResult<List<User>> getStuNotInGroup(HttpServletRequest request,
                                                    @PathVariable("project_id") Long pjId){
@@ -164,16 +172,16 @@ public class StudentController {
     }
 
     @PostMapping("/group_leader_transfer")
-    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+    public ResponseResult<Object> groupLeaderTransfer(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         groupService.transferLeader(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
     @PostMapping("/remove_member")
-    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, Notice> gpId_notice){
+    public ResponseResult<Object> removeMember(HttpServletRequest request, @RequestBody KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_memId_notice){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
-        groupService.removeMen(gpId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
+        groupService.removeMen(gpId_memId_notice,Long.parseLong(JWTUtil.getUserIdByToken(jwt)));
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
 
@@ -291,7 +299,7 @@ public class StudentController {
     public ResponseResult<Object> submitEvaluation(HttpServletRequest request,
                                                    @RequestParam("assignmentId") Long assignmentId,
                                                    @RequestParam("content") String content,
-                                                   @RequestParam("grade") Float grade,
+                                                   @RequestParam("grade") Double grade,
                                                    @RequestParam("commentedGroup") Long commentedGroup
                                                    ){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);

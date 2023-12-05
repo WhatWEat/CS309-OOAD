@@ -38,6 +38,7 @@
           </q-input>
         </q-toolbar>
       </template>
+
     </q-table>
   </div>
 

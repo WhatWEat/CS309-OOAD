@@ -177,21 +177,11 @@ watch(pagination, (newVal, oldVal)=>{
 onMounted(() => {
   person_id.value = usePersonId();
   console.log('person_id',person_id.value)
-  watchEffect(() => {
-    if (identity.value == 3) {
-      api.get(`/grade_list/${person_id.value}`).then((res) => {
-        console.log(res.data)
-        personInfo.value = res.data.body
-        copyPersonInfo()
-        username.value = personInfo.value.name
-      })
-      api.get(`/get_avatar/${person_id.value}`, { responseType: 'arraybuffer' }).then((res) => {
-        const blob = new Blob([res.data], { type: 'image/jpeg' });
-        avatar_preview.value = URL.createObjectURL(blob);
-        avatar_clone.value = avatar_preview.value;
-      })
-    }
-  })
+  // watchEffect(() => {
+  //   if (identity.value == 3) {
+  //     onRefresh();
+  //   }
+  // })
 })
 
 

@@ -263,8 +263,8 @@ public class GroupService {
 
     public void updateGroupForLeader(Group group, long userId) {
         //此处存疑，前端能在group里装多少信息，是否能包括group的创建者（是否需要查询数据库获取创建者
-
-        if (group.getLeaderId() == userId) {
+        Group group1 = groupMapper.findGroupOfStuInProject(userId,group.getProjectId());
+        if (group1.getLeaderId() == userId) {
             group.setTechnicalStack(group.getTechnicalStack() != null ? group.getTechnicalStack(): new ArrayList<>());
             try {
                 groupMapper.updateGroupForLeader(group);
@@ -371,11 +371,11 @@ public class GroupService {
         noticeService.createApplicationNotice(gpId_notice, userId);
     }
 
-    public void removeMen(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
-        noticeService.createRemoveNotice( gpId_notice,  userId);
+    public void removeMen(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_memId_notice, Long userId){
+        noticeService.createRemoveNotice(gpId_memId_notice, userId);
     }
 
-    public void transferLeader(KeyValueWrapper<Long, Notice> gpId_notice, Long userId){
+    public void transferLeader(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
         noticeService.createTransferNotice( gpId_notice,  userId);
     }
 

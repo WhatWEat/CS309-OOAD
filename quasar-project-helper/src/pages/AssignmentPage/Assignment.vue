@@ -1,29 +1,36 @@
 <template>
   <div>
-  <q-toolbar class="bg-grey-4 text-black rounded-borders">
-    <q-btn
-      flat
-      label="Assignments"
-    ></q-btn>
-    <q-toolbar-title></q-toolbar-title>
-    <q-btn-group push v-if="this.$q.screen.gt.md">
-      <q-btn  text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
-      <q-btn  text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
-    </q-btn-group>
-    <q-btn-group push v-else>
-      <q-btn dense text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push @click="buttonHandle('Personal')"></q-btn>
-      <q-btn dense text-color="white" :color="color_group" icon="groups" label="Group" push @click="buttonHandle('Group')"></q-btn>
-    </q-btn-group>
-  </q-toolbar>
+    <q-toolbar class="bg-grey-4 text-black rounded-borders">
+      <q-btn
+        flat
+        label="Assignments"
+      ></q-btn>
+      <q-toolbar-title></q-toolbar-title>
+      <q-btn-group push v-if="this.$q.screen.gt.md">
+        <q-btn text-color="white" :color="color_personal" icon="perm_identity" label="Personal" push
+               @click="buttonHandle('Personal')"></q-btn>
+        <q-btn text-color="white" :color="color_group" icon="groups" label="Group" push
+               @click="buttonHandle('Group')"></q-btn>
+      </q-btn-group>
+      <q-btn-group push v-else>
+        <q-btn dense text-color="white" :color="color_personal" icon="perm_identity"
+               label="Personal" push @click="buttonHandle('Personal')"></q-btn>
+        <q-btn dense text-color="white" :color="color_group" icon="groups" label="Group" push
+               @click="buttonHandle('Group')"></q-btn>
+      </q-btn-group>
+    </q-toolbar>
   </div>
   <div v-show="isPersonal">
-    <assignment-table :columns="columns_personal" :rows="rows_personal" :project-id="projectId" :group-id="groupId" table-title="Personal">
+    <assignment-table :columns="columns_personal" :rows="rows_personal" :project-id="projectId"
+                      :group-id="groupId" table-title="Personal">
     </assignment-table>
   </div>
   <div v-show="isGroup">
+
     <assignment-table
       @updateAssList="getAssignmentList"
       :columns="columns_group" :rows="rows_group" :project-id="projectId" :group-id="groupId" table-title="Group">
+
     </assignment-table>
   </div>
 </template>
@@ -42,7 +49,7 @@ export default {
       color_personal: 'secondary',
       color_group: 'grey-4',
 
-      userData:useUserStore(),
+      userData: useUserStore(),
 
       columns_personal: [
         {
@@ -67,7 +74,13 @@ export default {
           position: 'left'
         },
         {name: 'Deadline', align: 'left', label: 'Deadline', field: 'deadLine', sortable: true},
-        {name: 'Instructor', align: 'left', label: 'Instructor', field: 'instructor', sortable: false},
+        {
+          name: 'Instructor',
+          align: 'left',
+          label: 'Instructor',
+          field: 'instructor',
+          sortable: false
+        },
         {name: 'MoreInfo', align: 'left', label: 'More Info', field: 'moreInfo', sortable: false}
       ],
       rows_personal: [
@@ -106,7 +119,13 @@ export default {
           position: 'left'
         },
         {name: 'Deadline', align: 'left', label: 'Deadline', field: 'deadLine', sortable: true},
-        {name: 'Instructor', align: 'left', label: 'Instructor', field: 'instructor', sortable: false},
+        {
+          name: 'Instructor',
+          align: 'left',
+          label: 'Instructor',
+          field: 'instructor',
+          sortable: false
+        },
         {name: 'MoreInfo', align: 'left', label: 'More Info', field: 'moreInfo', sortable: false}
       ],
       rows_group: [
@@ -128,7 +147,7 @@ export default {
       projectId: -1,
 
       isPersonal: ref(true),
-      isGroup : ref(false),
+      isGroup: ref(false),
       isGroupLeader: ref(false),
     }
   },
@@ -152,7 +171,9 @@ export default {
       console.log("尝试获取ProjectId...\n")
       this.projectId = this.$route.params.projectID;
       this.projectId = parseInt(this.projectId);
-      console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
+      console.log(
+        "在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId)
+        + "。\n");
     },
     // 获取该学生的所在小组的ID
     getGroupId() {
@@ -160,8 +181,10 @@ export default {
         (response) => {
           this.groupId = response.data.body.key;
           this.isGroupLeader = response.data.body.value;
-          console.log("获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
-          console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为：" + typeof (this.isGroupLeader) + "。\n");
+          console.log(
+            "获取到的GroupId为：" + this.groupId + "，类型为：" + typeof (this.groupId) + "。\n");
+          console.log("获取到的isGroupLeader为：" + this.isGroupLeader + "，类型为："
+            + typeof (this.isGroupLeader) + "。\n");
         }
       ).catch((error) => {
         console.log("errorHere");
@@ -170,7 +193,7 @@ export default {
     },
     // 获取该学生的所有作业列表
     getAssignmentList() {
-      api.get('/ass-list/'+ this.projectId +'/0/10000').then((res) => {
+      api.get('/ass-list/' + this.projectId + '/0/10000').then((res) => {
         this.rows_group = []
         this.rows_personal = []
         // console.clear()
@@ -178,31 +201,30 @@ export default {
         // console.log("res:")
         // console.log(res);
         for (let i = 0; i < res.data.body.length; i++) {
-            let tmp ={};
-            if (res.data.body[i].type ==='i'){
-              tmp['AssignmentNamePro'] = res.data.body[i].title;
-              tmp['AssignmentName'] = res.data.body[i].assignmentId;
-              tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
-              tmp['instructor'] = res.data.body[i].creatorName;
-              tmp['moreInfo'] = res.data.body[i].moreInfo;
-              this.rows_personal.push(tmp)
-              // console.log("个人作业 序号i值为:" + i)
-              // console.log("res.data.body[i].type:"+ res.data.body[i].type)
-              // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
-              // console.log(tmp)
-            }
-            else {
-              tmp['AssignmentNamePro'] = res.data.body[i].title;
-              tmp['AssignmentName'] = res.data.body[i].assignmentId;
-              tmp['deadLine'] = res.data.body[i].deadline.replace('T',' ');
-              tmp['instructor'] = res.data.body[i].creatorName;
-              tmp['moreInfo'] = res.data.body[i].moreInfo;
-              this.rows_group.push(tmp)
-              // console.log("小组作业 序号i值为:" + i)
-              // console.log("res.data.body[i].type:"+ res.data.body[i].type)
-              // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
-              // console.log(tmp)
-            }
+          let tmp = {};
+          if (res.data.body[i].type === 'i') {
+            tmp['AssignmentNamePro'] = res.data.body[i].title;
+            tmp['AssignmentName'] = res.data.body[i].assignmentId;
+            tmp['deadLine'] = res.data.body[i].deadline.replace('T', ' ');
+            tmp['instructor'] = res.data.body[i].creatorName;
+            tmp['moreInfo'] = res.data.body[i].moreInfo;
+            this.rows_personal.push(tmp)
+            // console.log("个人作业 序号i值为:" + i)
+            // console.log("res.data.body[i].type:"+ res.data.body[i].type)
+            // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
+            // console.log(tmp)
+          } else {
+            tmp['AssignmentNamePro'] = res.data.body[i].title;
+            tmp['AssignmentName'] = res.data.body[i].assignmentId;
+            tmp['deadLine'] = res.data.body[i].deadline.replace('T', ' ');
+            tmp['instructor'] = res.data.body[i].creatorName;
+            tmp['moreInfo'] = res.data.body[i].moreInfo;
+            this.rows_group.push(tmp)
+            // console.log("小组作业 序号i值为:" + i)
+            // console.log("res.data.body[i].type:"+ res.data.body[i].type)
+            // console.log("res.data.body[i].type ==='i':" + res.data.body[i].type ==='i')
+            // console.log(tmp)
+          }
         }
         // console.log()
         // console.log(this.rows_group);
@@ -214,7 +236,8 @@ export default {
     }
   },
   components: {
-    AssignmentTable: defineAsyncComponent(() => import('src/components/Component_Li/table/assignmentTable.vue')),
+    AssignmentTable: defineAsyncComponent(
+      () => import('src/components/Component_Li/table/assignmentTable.vue')),
   },
   mounted() {
     this.getProjectId();

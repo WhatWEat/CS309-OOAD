@@ -84,22 +84,31 @@ onMounted(() => {
           icon: 'account_box',
           link: `/person/${userid.value}`
         },
-        {
-          title: 'Admin',
-          icon: 'airplay',
-          link: `/admin`
-        },
-        {
-          title: 'Logout',
-          icon: 'logout',
-          link: `/logout/${userid.value}`
-        },
-
       ]
+    if (identity.value === 0) {
+      essentialLinks.value.push({
+        title: 'Admin',
+        icon: 'airplay',
+        link: `/admin`
+      });
+      essentialLinks.value.push({
+        title: 'Logout',
+        icon: 'logout',
+        link: `/logout/${userid.value}`
+      });
+    } else {
+      essentialLinks.value.push({
+        title: 'Logout',
+        icon: 'logout',
+        link: `/logout/${userid.value}`
+      });
+    }
   })
 
 });
-const leftDrawerOpen = ref(true)
+
+const {identity} = useUserStore()
+const leftDrawerOpen = ref(false)
 const miniState = ref(true)
 const isFresh = ref(true)
 onMounted(() => {

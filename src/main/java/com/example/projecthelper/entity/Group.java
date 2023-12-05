@@ -49,6 +49,14 @@ public class Group implements Cloneable{
         this.projectId = projectId;
     }
 
+//    public Group(String groupName, Long projectId, String description, List<String> technicalStack, List<Boolean> visibility) {
+//        this.groupName = groupName;
+//        this.projectId = projectId;
+//        this.description = description;
+//        this.technicalStack = technicalStack;
+//        this.visibility = visibility;
+//    }
+
     public Group() {
     }
 

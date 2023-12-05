@@ -1,135 +1,3 @@
-<!--<template>-->
-<!--  <div>-->
-<!--    <q-card class="no-shadow" bordered>-->
-<!--      <q-card-section class="text-h6">-->
-<!--        Bar Chart-->
-<!--        <q-btn icon="fa fa-download" class="float-right" @click="SaveImage" flat dense>-->
-<!--          <q-tooltip>Download PNG</q-tooltip>-->
-<!--        </q-btn>-->
-<!--      </q-card-section>-->
-<!--      <q-card-section>-->
-<!--        <ECharts ref="barchart"  :option="options"-->
-<!--                 class="q-mt-md"-->
-<!--                 :resizable="true"-->
-<!--                 autoresize style="height: 300px;"-->
-<!--        />-->
-<!--      </q-card-section>-->
-<!--    </q-card>-->
-<!--  </div>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--import {defineComponent, ref} from 'vue';-->
-<!--import ECharts from 'vue-echarts';-->
-<!--import "echarts";-->
-<!--import {api} from "boot/axios";-->
-<!--import {useRouter} from "vue-router";-->
-
-<!--const  router = useRouter()-->
-<!--const project_id = ref(router.currentRoute.value.params.projectID)-->
-<!--const gradeRanges = ref({-->
-<!--  bad: 0,-->
-<!--  ordinary: 0,-->
-<!--  good: 0,-->
-<!--  excellent: 0,-->
-<!--});-->
-<!--const data = ref([])-->
-<!--export default defineComponent({-->
-<!--  name: "BarChart",-->
-<!--  setup() {-->
-<!--    return {-->
-<!--      options: {-->
-<!--        legend: {-->
-<!--          bottom: 10,-->
-<!--        },-->
-<!--        tooltip: {},-->
-<!--        dataset: {-->
-<!--          source: [-->
-<!--            ['product', '2015', '2016', '2017'],-->
-<!--            ['Matcha Latte', 43.3, 85.8, 93.7],-->
-<!--            ['Milk Tea', 83.1, 73.4, 55.1],-->
-<!--            ['Cheese Cocoa', 86.4, 65.2, 82.5],-->
-<!--            ['Walnut Brownie', 72.4, 53.9, 39.1]-->
-<!--          ]-->
-<!--        },-->
-<!--        grid: {-->
-<!--          left: '3%',-->
-<!--          right: '4%',-->
-<!--          bottom: '20%',-->
-<!--          top: '5%',-->
-<!--          containLabel: true-->
-<!--        },-->
-<!--        xAxis: {type: 'category'},-->
-<!--        yAxis: {},-->
-<!--        // Declare several bar series, each will be mapped-->
-<!--        // to a column of dataset.source by default.-->
-<!--        series: [-->
-<!--          {type: 'bar'},-->
-<!--          {type: 'bar'},-->
-<!--          {type: 'bar'}-->
-<!--        ]-->
-<!--      },-->
-<!--    }-->
-<!--  },-->
-<!--  components:{-->
-<!--    ECharts-->
-<!--  },-->
-<!--  methods: {-->
-<!--    SaveImage() {-->
-<!--      const linkSource = this.$refs.barchart.getDataURL();-->
-<!--      const downloadLink = document.createElement('a');-->
-<!--      document.body.appendChild(downloadLink);-->
-<!--      downloadLink.href = linkSource;-->
-<!--      downloadLink.target = '_self';-->
-<!--      downloadLink.download = 'BarChart.png';-->
-<!--      downloadLink.click();-->
-<!--    },-->
-<!--    fetchData() {-->
-<!--      api-->
-<!--        .get(-->
-<!--          `/GradeBook/${project_id.value}`-->
-<!--        )-->
-<!--        .then((res) => {-->
-<!--          data.value = res.data;-->
-
-<!--          data.value.forEach((item) => {-->
-<!--            const grade = item.value.grade;-->
-
-<!--            if (grade >= 0 && grade <= 59) {-->
-<!--              gradeRanges.value.bad++;-->
-<!--            } else if (grade >= 60 && grade <= 79) {-->
-<!--              gradeRanges.value.ordinary++;-->
-<!--            } else if (grade >= 80 && grade <= 89) {-->
-<!--              ggradeRanges.value.good++;-->
-<!--            } else if (grade >= 90) {-->
-<!--              gradeRanges.value.excellent++;-->
-<!--            }-->
-<!--          });-->
-
-<!--          const chartData = Object.entries(gradeRanges).reduce(-->
-<!--            (result, [range, count]) => {-->
-<!--              result.product.push(range);-->
-<!--              result.data[0].push(count);-->
-<!--              return result;-->
-<!--            },-->
-<!--            {-->
-<!--              product: [],-->
-<!--              data: [[]],-->
-<!--            }-->
-<!--          );-->
-<!--        }).catch((err) => {-->
-<!--        console.log('err', err)-->
-<!--        console.log('cuowu')-->
-<!--      });-->
-<!--    }-->
-
-<!--  }-->
-
-<!--})-->
-<!--</script>-->
-
-<!--<style scoped>-->
-<!--</style>-->
 <template>
   <div>
     <q-card class="no-shadow" bordered>
@@ -140,7 +8,7 @@
         </q-btn>
       </q-card-section>
       <q-card-section>
-        <ECharts ref="barchart"  :option="options"
+        <ECharts ref="barchart" :option="options"
                  class="q-mt-md"
                  :resizable="true"
                  autoresize style="height: 300px;"
@@ -150,28 +18,77 @@
   </div>
 </template>
 
+
 <script>
-import {defineComponent} from 'vue';
+import {defineComponent, onMounted, ref} from 'vue';
 import ECharts from 'vue-echarts';
 import "echarts";
+import {api} from "boot/axios"
+import {useRouter} from "vue-router";
 
 export default defineComponent({
   name: "BarChart",
+  components: {
+    ECharts,
+  },
   setup() {
-    return {
-      options: {
-        legend: {
-          bottom: 10,
-        },
+    const data = ref([]);
+    const options = ref({});
+    const router = useRouter()
+    const project_id = ref(router.currentRoute.value.params.projectID)
+
+    onMounted(() => {
+      api
+        .get(`/tea/allGradeBook/${project_id.value}`)
+        .then((res) => {
+          let hashmap = res.data.body;
+          let saveData = [];
+          for (const [studentID, grades] of Object.entries(hashmap)) {
+            saveData = saveData.concat(grades);
+          }
+          data.value = saveData;
+          processData(); // 调用处理数据的函数，来生成图表设置
+        })
+        .catch((err) => {
+          console.log("err", err);
+        });
+    });
+
+    function processData() {
+      // 这里根据具体数据结构来做调整
+      const scoreSegments = ['0-50', '51-70', '71-80', '81-90', '91-100'];
+      let assignmentScores = {}; // 存储每项作业对应分数段的学生人数
+
+      // 假设 data.value 是一个包含所有分数的数组
+      data.value.forEach(grades => {
+        const {assignmentId,grade} = grades; // 假设每个 grade 都有assignment和score字段
+        if (!assignmentScores[assignmentId]) {
+          assignmentScores[assignmentId] = scoreSegments.map(() => 0);
+        }
+        const segmentIndex = scoreSegments.findIndex(segment => {
+          const [min, max] = segment.split('-').map(Number);
+          return grade >= min && grade <= max;
+        });
+        if (segmentIndex !== -1) {
+          assignmentScores[assignmentId][segmentIndex]++;
+        }
+      });
+
+      // 准备 datasetSource
+      const datasetSource = [
+        ['assignment', ...scoreSegments],
+        ...Object.keys(assignmentScores).map(assignmentId => [
+          assignmentId,
+          ...assignmentScores[assignmentId]
+        ])
+      ];
+
+      // 更新 options
+      options.value = {
+        legend: {bottom: 10},
         tooltip: {},
         dataset: {
-          source: [
-            ['product', '2015', '2016', '2017'],
-            ['Matcha Latte', 43.3, 85.8, 93.7],
-            ['Milk Tea', 83.1, 73.4, 55.1],
-            ['Cheese Cocoa', 86.4, 65.2, 82.5],
-            ['Walnut Brownie', 72.4, 53.9, 39.1]
-          ]
+          source: datasetSource,
         },
         grid: {
           left: '3%',
@@ -182,20 +99,17 @@ export default defineComponent({
         },
         xAxis: {type: 'category'},
         yAxis: {},
-        // Declare several bar series, each will be mapped
-        // to a column of dataset.source by default.
-        series: [
-          {type: 'bar'},
-          {type: 'bar'},
-          {type: 'bar'}
-        ]
-      },
+        series: scoreSegments.map(() => ({type: 'bar'})),
+      };
     }
-  },
-  components:{
-    ECharts
+
+    // 确保返回响应式引用
+    return {
+      options,
+    };
   },
   methods: {
+    // 方法维持不变
     SaveImage() {
       const linkSource = this.$refs.barchart.getDataURL();
       const downloadLink = document.createElement('a');
@@ -205,9 +119,12 @@ export default defineComponent({
       downloadLink.download = 'BarChart.png';
       downloadLink.click();
     },
-  }
-})
+  },
+});
 </script>
+
 
 <style scoped>
 </style>
+
+

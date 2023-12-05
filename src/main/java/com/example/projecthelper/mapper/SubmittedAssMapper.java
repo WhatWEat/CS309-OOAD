@@ -18,11 +18,9 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
         //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
     void submitAss(SubmittedAssignment submittedAssignment) throws PSQLException;
 
-    @Insert("insert into evaluation(assignmentId, commentgroup, commentedgroup,grade, content, comment, submittedTime)\n" +
-            "VALUES (#{assignmentId}, #{commentgroup},#{commentedgroup},#{grade}, #{content}, #{comment}, now()) ;")
-
-        //此处assignmentId、projectId不为空，text&comment长度为1000，filepath暂定为200
-    void submitEva(Evaluation evaluation) throws PSQLException;
+    @Insert("insert into evaluation(assignmentId, commentGroup, commentedGroup,grade, content, commentTime)\n" +
+            "VALUES (#{assignmentId}, #{commentGroup},#{commentedGroup},#{grade}, #{content}, now()) ;")
+    void submitEva(Evaluation evaluation);
 
     @Delete("delete from submittedassignment where assignmentid = 1;")
     void deleteSubmittedAssByAssId(Long assId);
@@ -30,8 +28,8 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     @Delete("delete from submittedAssignment where assignmentId = #{assignmentId} and submitterId = #{submitterId};")
     void deleteOriginalSubmit(SubmittedAssignment submittedAssignment);
 
-    @Delete("delete from evaluation where assignmentId = #{assignmentId} and commentgroup = #{commentgroup} " +
-            "and commentedgroup = #{commentedgroup};")
+    @Delete("delete from evaluation where assignmentId = #{assignmentId} and commentgroup = #{commentGroup} " +
+            "and commentedgroup = #{commentedGroup};")
     void deleteOriginalEva(Evaluation evaluation);
 
     @Select("select * from submittedAssignment where submitId = #{submitId}")

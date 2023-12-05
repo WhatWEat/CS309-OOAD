@@ -69,6 +69,7 @@ import { useQuasar } from 'quasar';
 import {api} from 'boot/axios';
 import {useUserStore} from 'src/composables/useUserStore';
 import {getAvatarUrl} from "src/composables/usefulFunction";
+import {useUser} from "../../stores/user-store";
 
 export default defineComponent({
   setup() {
@@ -109,7 +110,8 @@ export default defineComponent({
     })
     function goToLogin() {
       api.delete('/logout')
-      localStorage.setItem('Token', '')
+      const userStore = useUser();
+      userStore.reset();
       router.push('/login')
     }
 

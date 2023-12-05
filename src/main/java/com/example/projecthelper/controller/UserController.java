@@ -148,7 +148,7 @@ public class UserController {
         return ResponseResult.ok(groups, "Success", JWTUtil.updateJWT(jwt));
     }
 
-    @GetMapping("ass/{ass_id}")
+    @GetMapping("/ass/{ass_id}")
     public ResponseResult<KeyValueWrapper<Assignment, SubmittedAssignment>> getAssById(@PathVariable Long ass_id, HttpServletRequest request){
         String jwt = HTTPUtil.getHeader(request, HTTPUtil.TOKEN_HEADER);
         Long userId = Long.parseLong(JWTUtil.getUserIdByToken(jwt));

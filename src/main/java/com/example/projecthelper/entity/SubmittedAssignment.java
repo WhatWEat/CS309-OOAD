@@ -15,6 +15,8 @@ public class SubmittedAssignment {
     private Long assignmentId;
     private Float grade;
     private Long submitterId;
+    @TableField(exist = false)
+    private String submitterName;
     private String text;
     private String comment;
     private List<String> filepaths;

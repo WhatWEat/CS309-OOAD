@@ -13,7 +13,7 @@
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
       <q-table
-        :rows="data"
+        :rows="data1"
         :columns="columns1"
         row-key="id"
         dense
@@ -166,9 +166,12 @@ const {identity} = useUserStore()
 const router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([]);
+const data1 = ref<gradeProps[]>([]);
+const newData = ref<gradeProps[]>([]);
 const filter = ref('')
 const $q = useQuasar();
 const assignmentID = ref(-1);
+const review = ref('wang')
 const columns = [
   {
     name: "assignmentId",
@@ -237,20 +240,11 @@ const columns = [
 
 const columns1 = [
   {
-    name: "title",
+    name: "submitterId",
     required: true,
-    label: "title",
+    label: "submitterId",
     align: "left",
-    field: row => row.title,
-    format: val => `${val}`,
-    sortable: true
-  },
-  {
-    name: "submitterName",
-    required: true,
-    label: "submitterName",
-    align: "left",
-    field: row => row.submitterName,
+    field: row => row.submitterId,
     format: val => `${val}`,
     sortable: true
   },
@@ -338,18 +332,14 @@ async function onRefresh() {
 
 // 保存
 async function save(grade: gradeProps) {
-  console.log('edit', grade)
   await nextTick()
-  console.log('comment', grade.comment)
   api.post('/tea/grade_ass', {
     grade: grade.grade,
-    assignmentId: grade.assignmentId,
+    assignmentId: assignmentID.value,
     submitterId: grade.submitterId,
     comment: grade.comment,
-    review: grade.review
+    review: review.value
   }).then((res) => {
-    console.log('comment in api', grade.comment)
-    console.log(res)
     $q.notify({
       position: 'top',
       message: 'save success',
@@ -375,8 +365,16 @@ function saveUploadAvatar() {
         assignmentId: assignmentID.value,
       },
     }).then((res) => {
-      data.value = res.data.body;
-      console.log('data',data.value)
+      data1.value = res.data.body;
+      console.log('data1',data1.value);
+      newData.value = data1.value.concat((data.value));
+      console.log('new', newData);
+      data.value = newData.value;
+      console.log('data' ,data)
+      data.value.forEach(item => {
+        save(item);
+      });
+
     }).catch((err) => {
       console.log(err)
     })

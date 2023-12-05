@@ -203,7 +203,7 @@ public class UserService {
                 jwt = checkCode(type_num_code.getValue().getValue(),type_num_code.getValue().getKey(),FUNCTION.__MODIFY_PHONE_,false);
                 if (Objects.equals(
                         stringRedisTemplate.opsForValue().get(
-                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_NUMBER_)
+                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_)
                         ),type_num_code.getValue().getKey())
                 ){
                     stringRedisTemplate.delete(getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_));

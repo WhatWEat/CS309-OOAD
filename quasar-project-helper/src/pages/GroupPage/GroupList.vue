@@ -267,7 +267,7 @@
       </template>
       <create-groups-form :project-id="parseInt(projectId, 10)" @successDialog="handleSuccess"
                           @unfold="show_set_form=false"
-                          @error-dialog="handleError"></create-groups-form>
+                          @error-dialog="handleError" @renewGroupList="getGroupList"></create-groups-form>
     </el-dialog>
   </div>
   <!--  这里是confirmDialog的报错提示部分,可以是报错，可以是提示,只有一个确认按钮-->

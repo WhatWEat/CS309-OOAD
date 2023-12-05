@@ -13,7 +13,7 @@
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
       <q-table
-        :rows="data"
+        :rows="data1"
         :columns="columns1"
         row-key="id"
         dense

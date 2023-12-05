@@ -3,7 +3,7 @@
     <q-card class="no-shadow" flat>
       <q-card-section class="text-h6">
         Bar Chart
-        <q-btn icon="fa fa-download" class="float-right" @click="downloadChart" flat dense>
+        <q-btn icon="fa fa-download" class="float-right" @click="downloadChart(myChart)" flat dense>
           <q-tooltip>Download PNG</q-tooltip>
         </q-btn>
       </q-card-section>
@@ -19,7 +19,7 @@ import type {EChartsOption} from 'echarts';
 import "echarts";
 import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {gradeProps} from "src/composables/comInterface";
-
+import {downloadChart, truncate} from "src/composables/usefulFunction";
 const chart = ref<HTMLElement>();
 let myChart: echarts.ECharts | null = null;
 const props = defineProps({
@@ -28,6 +28,7 @@ const props = defineProps({
   all_assignment: Boolean,
   student_set: Set<number>,
   all_student: Boolean,
+  assignment_map: Map<number, string>,
 });
 onMounted(() => {
   if (chart.value) {
@@ -48,22 +49,6 @@ onBeforeUnmount(() => {
   }
 })
 
-function downloadChart() {
-  if (!myChart) return;
-
-  const url = myChart.getDataURL({
-    type: 'png',
-    pixelRatio: 2,
-    backgroundColor: '#fff'
-  });
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'chart.png';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
 const tableTab = ['score', 'amount', 'assignment'];
 
@@ -90,7 +75,7 @@ function setOption() {
     temp.push(value[1]);
     if (value[0] < min) min = value[0];
     if (value[0] > max) max = value[0];
-    temp.push(key);
+    temp.push(truncate(key+" "+props.assignment_map!.get(key), 8));
     source.push(temp);
   }
   source.sort((a, b) => {

@@ -7,10 +7,7 @@
           <q-tooltip>Download PNG</q-tooltip>
         </q-btn>
       </q-card-section>
-      <q-card-section>
-        <div ref="chart" style="width: 600px; height: 400px;"></div>
-
-      </q-card-section>
+      <div ref="chart" style="width: 500px; height: 400px;"></div>
     </q-card>
   </div>
 </template>
@@ -76,7 +73,7 @@ function setOption() {
     let temp = [];
     temp.push(item.grade);
     temp.push(1);
-    if (props.all_assignment || props.assignment_set!.has(item.assignmentId)){
+    if ((props.all_assignment || props.assignment_set!.has(item.assignmentId)) && (props.all_student || props.student_set!.has(Number(item.submitterId)))) {
       if (!map.has(item.assignmentId)) {
         map.set(item.assignmentId, temp);
       } else {

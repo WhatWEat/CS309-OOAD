@@ -6,7 +6,7 @@
         <q-separator/>
         <span v-if="!assignmentAll">
           <q-chip removable v-for="(i,index) in assignmentConditional" :key="i" square @remove="assignmentConditional.splice(index,1)">
-            <q-avatar color="green">{{ i }}</q-avatar>
+            <q-avatar color="green" class="col-auto">{{ i }}</q-avatar>
             做作业
           </q-chip>
         </span>
@@ -14,7 +14,7 @@
         <q-separator/>
         <span v-if="!userAll">
           <q-chip removable v-for="(i, index) in userConditional" :key="i" square @remove="userConditional.splice(index, 1)">
-            <q-avatar color="red">{{ i }}</q-avatar>
+            <q-avatar color="red" class="col-auto">{{ i }}</q-avatar>
             tyl
           </q-chip>
         </span>

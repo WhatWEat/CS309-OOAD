@@ -41,6 +41,8 @@
               </q-item-section>
             </q-item>
           </q-card>
+
+
           <q-card class="my-card" style="min-width: 540px;left: 0px;min-height: 120px;">
             <q-item>
               <q-item-section>

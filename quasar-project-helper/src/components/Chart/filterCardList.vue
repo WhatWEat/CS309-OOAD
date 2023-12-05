@@ -13,9 +13,7 @@
             <q-item-section class="row">
                             <span>
                               <q-chip square dense class="col-3" color="blue-4"> {{person}}</q-chip>
-                              <span class="col">
-                                No Name
-                              </span>
+
                             </span>
             </q-item-section>
           </q-item>
@@ -35,12 +33,6 @@
             <q-item-section class="row">
                             <span>
                               <q-chip square dense class="col-3 text-white" color="primary"> {{person}}</q-chip>
-                              <span class="col" v-if="props.map_list===undefined">
-                                No Name
-                              </span>
-                              <span v-else>
-                                You dong xi
-                              </span>
                             </span>
             </q-item-section>
           </q-item>

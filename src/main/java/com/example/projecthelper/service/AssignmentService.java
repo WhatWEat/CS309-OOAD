@@ -510,6 +510,9 @@ public class AssignmentService {
     }
 
     public void gradeAss(SubmittedAssignment submittedAssignment, Long userId, Integer identity) {
+        if (submittedAssignment.getAssignmentId() == null){
+            throw new InvalidFormException("学生尚未提交");
+        }
         SubmittedAssignment sub = submittedAssMapper.viewSub(submittedAssignment.getAssignmentId(),
                 submittedAssignment.getSubmitterId());
         if (sub == null) {
@@ -528,6 +531,9 @@ public class AssignmentService {
             if (taId == null)
                 throw new AccessDeniedException("无权查看别人发布的作业");
         }
+        if (submittedAssignment.getGrade()>ass.getFullMark()){
+            throw new AccessDeniedException("分数超出上限");
+        }
         try {
             submittedAssMapper.gradeAss(submittedAssignment);
         } catch (Exception e) {
@@ -540,16 +546,11 @@ public class AssignmentService {
         if(projectMapper.checkStuInProj(userId,projectId) == null){
             throw new AccessDeniedException("您不在project中");
         }
-        Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
-        List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
-        if (group!=null){
-            submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
-        }
-
+        List<SubmittedAssignment> submittedAssignments = allSub(projectId,userId);
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();
@@ -557,8 +558,13 @@ public class AssignmentService {
     public List<SubmittedAssignment> allSub(Long projectId, Long userId){
         Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
         List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
+        User user = usersMapper.findUserById(userId);
         if (group!=null){
             submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
+        }
+        for (SubmittedAssignment submittedAssignment: submittedAssignments){
+            submittedAssignment.setSubmitterName(user.getName());
+            submittedAssignment.setTitle(assignmentMapper.findAssById(submittedAssignment.getAssignmentId()).getTitle());
         }
         return submittedAssignments;
     }
@@ -570,16 +576,13 @@ public class AssignmentService {
         }
         List<User> stus = usersMapper.findStuByProj(projectId);
         List<KeyValueWrapper<Long,List<SubmittedAssignment>>> submittedAssignments = new ArrayList<>();
-
         for (User stu : stus){
             submittedAssignments.add(new KeyValueWrapper<>(stu.getUserId(),allSub(projectId,stu.getUserId())));
         }
-
-
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();

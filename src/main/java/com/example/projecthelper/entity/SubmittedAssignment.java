@@ -17,6 +17,8 @@ public class SubmittedAssignment {
     private Long submitterId;
     @TableField(exist = false)
     private String submitterName;
+    @TableField(exist = false)
+    private String title;
     private String text;
     private String comment;
     private List<String> filepaths;
@@ -25,6 +27,7 @@ public class SubmittedAssignment {
     private Long togroup;
     @TableField(exist = false)
     private List<MultipartFile> files;
+
     public SubmittedAssignment(Long submitId, Long assignmentId, Long submitterId) {
         this.assignmentId = assignmentId;
         this.submitterId = submitterId;

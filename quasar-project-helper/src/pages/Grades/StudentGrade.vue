@@ -13,7 +13,7 @@
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
       <q-table
-        :rows="data1"
+        :rows="data"
         :columns="columns1"
         row-key="id"
         dense
@@ -166,8 +166,8 @@ const {identity} = useUserStore()
 const router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([]);
-const data1 = ref<gradeProps[]>([]);
-const newData = ref<gradeProps[]>([]);
+//const data1 = ref<gradeProps[]>([]);
+//const newData = ref<gradeProps[]>([]);
 const filter = ref('')
 const $q = useQuasar();
 const assignmentID = ref(-1);
@@ -293,6 +293,7 @@ const isLoadingChart = ref(false);
 
 async function onRefresh() {
   isLoadingGrade.value = true;
+  console.log('refresh11')
   if (identity.value == 3) {
     // TODO 增加分页
     api
@@ -308,7 +309,7 @@ async function onRefresh() {
       }).catch((err) => {
       console.log('err', err)
     });
-  } else if (identity.value !== -1) {
+  } else if (identity.value === 1) {
     api
       .get(
         `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
@@ -320,8 +321,7 @@ async function onRefresh() {
           .reduce((acc, val) => acc.concat(val), []);
 
         data.value = saveData;
-        console.log(saveData)
-
+        console.log('savedata',data.value)
         isLoadingGrade.value = false;
       })
       .catch((err) => {
@@ -335,7 +335,7 @@ async function save(grade: gradeProps) {
   await nextTick()
   api.post('/tea/grade_ass', {
     grade: grade.grade,
-    assignmentId: assignmentID.value,
+    assignmentId: grade.assignmentId,
     submitterId: grade.submitterId,
     comment: grade.comment,
     review: review.value
@@ -353,27 +353,20 @@ async function save(grade: gradeProps) {
 
 const model = ref(null), isShowDialog = ref(false);
 const excel_file = ref();
-
+// const router = useRouter();
 function saveUploadAvatar() {
   isShowDialog.value = false;
   if (model.value) {
     excel_file.value = model.value;
     let formdata = new FormData();
     formdata.append('file', excel_file.value);
-    api.post('/tea/grade_ass_with_file',formdata,{
-      params: {
-        assignmentId: assignmentID.value,
-      },
-    }).then((res) => {
-      data1.value = res.data.body;
-      console.log('data1',data1.value);
-      newData.value = data1.value.concat((data.value));
-      console.log('new', newData);
-      data.value = newData.value;
-      console.log('data' ,data)
-      data.value.forEach(item => {
-        save(item);
-      });
+    formdata.append('assignmentId', assignmentID.value);
+    api.post('/tea/grade_ass_with_file',formdata
+    ).then((res) => {
+      console.log('res',res.data)
+      data.value = res.data.body;
+      model.value = null;
+      router.go(0);
 
     }).catch((err) => {
       console.log(err)

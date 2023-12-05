@@ -29,7 +29,6 @@
     <assignment-table
       @updateAssList="getAssignmentList"
       :columns="columns_group" :rows="rows_group" :project-id="projectId" :group-id="groupId" table-title="Group">
-
     </assignment-table>
   </div>
 </template>

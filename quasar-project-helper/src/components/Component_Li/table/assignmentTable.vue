@@ -67,7 +67,7 @@
   <div v-show="show_assignment_detail">
     <AssignmentsDetail @updateAssList="this.$emit('updateAssList')"
                        :AssignmentAttachment="AssignmentAttachment"
-                       :AssignmentDetail="AssignmentDetail"
+                       :AssignmentBackUp="AssignmentDetail"
                        :group-id="groupId"
                        :project-id="projectId"></AssignmentsDetail>
   </div>

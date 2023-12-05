@@ -32,9 +32,9 @@
                   flat
                   icon="send"
                   @click="sendCode"
-                  v-if="countdown_phone === 0"
+                  v-if="countdown === 0"
                 />
-                <div v-else>{{ countdown_phone }}s</div>
+                <div v-else>{{ countdown }}s</div>
               </template>
             </q-input>
           </q-card-section>
@@ -42,22 +42,22 @@
             <q-input
               dense
               outlined
-              v-model="loginPhone"
+              v-model="loginEmail"
               label="Email"
               class="col-12"
             >
             </q-input>
             <q-space class="col-1"/>
-            <q-input dense outline class="col-11" label="Code" v-model="phoneCode">
+            <q-input dense outline class="col-11" label="Code" v-model="emailCode">
               <template v-slot:append>
                 <q-btn
                   dense
                   flat
                   icon="send"
                   @click="sendCode"
-                  v-if="countdown_phone === 0"
+                  v-if="countdown === 0"
                 />
-                <div v-else>{{ countdown_phone }}s</div>
+                <div v-else>{{ countdown }}s</div>
               </template>
             </q-input>
           </q-card-section>
@@ -129,14 +129,14 @@
 <script setup>
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {QForm} from "quasar";
+import {QForm, useQuasar} from "quasar";
 import {api} from "boot/axios";
 
 const router = useRouter()
 
 const phoneNumber = ref('')
 const verificationCode = ref('')
-
+const $q = useQuasar()
 const loginPhone = ref(''), phoneCode = ref(''), countdown_phone = ref(0)
 const loginEmail = ref(''), emailCode = ref(''), countdown_email = ref(0)
 const type = ref('phone')
@@ -148,27 +148,28 @@ const password_dict = ref({
 
 function sendCode() {
   // TODO 发送手机验证码
+  console.log('email', loginEmail.value);
   api.post(`/get_forget_password_code`,{
-    key: type.value == 'phone' ? "1" : "2",
-    value: loginPhone.value,
+    key: type.value === 'phone' ? "1" : "2",
+    value: type.value === 'phone' ? loginPhone.value : loginEmail.value,
   }).then(res => {
-    console.log('合成',email)
-    $q.notify({
-      color: "green",
-      textColor: "white",
-      icon: "mail",
-      message: "Code has been sent",
-    });
-    countdown.value = 60;
-    const interval = setInterval(() => {
-      countdown.value--;
-      if (countdown.value === 0) {
-        clearInterval(interval);
-      }
-    }, 1000);
+    console.log('合成',type.value === 'phone' ? loginPhone.value : loginEmail.value)
   }).catch(err => {
     console.log(err)
   })
+  $q.notify({
+    color: "green",
+    textColor: "white",
+    icon: "mail",
+    message: "Code has been sent",
+  });
+  countdown.value = 60;
+  const interval = setInterval(() => {
+    countdown.value--;
+    if (countdown.value === 0) {
+      clearInterval(interval);
+    }
+  }, 1000);
 }
 const password_input = ref(null)
 function verifyPhoneNumber() {
@@ -176,7 +177,28 @@ function verifyPhoneNumber() {
   if (!password_input.value) return;
   password_input.value.validate().then((success) => {
     if (success) {
-      // 验证成功
+      api.post('/change_forget_password',{
+        key: {
+          key: type.value === 'phone' ? "1" : "2",
+          value: password_dict.value.confirm_new_password
+        },
+        value: {
+          key: type.value === 'phone' ? loginPhone.value.toString() : loginEmail.value.toString(),
+          value: type.value === 'phone' ? phoneCode.value.toString() : emailCode.value.toString(),
+        }
+      }).then(res => {
+        console.log(res)
+        $q.notify({
+          color: "green",
+          textColor: "white",
+          icon: "mail",
+          message: "Change password successfully",
+        });
+        localStorage.setItem('Token',res.data.jwt_token)
+        router.push('/')
+      }).catch(err => {
+        console.log(err)
+      })
       console.log('验证成功')
     }
   })

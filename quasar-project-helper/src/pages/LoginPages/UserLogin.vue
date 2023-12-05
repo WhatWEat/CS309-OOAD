@@ -96,7 +96,7 @@
                     class="col-12"
                   >
                   </q-input>
-                  <q-input dense outline class="col-12" label="Code">
+                  <q-input v-model="phone_code" dense outline class="col-12" label="Code">
                     <template v-slot:append>
                       <q-btn
                         dense
@@ -199,21 +199,20 @@ const loginPhone = ref("");
 const phone_code = ref("");
 // TODO 没有清理上次登录的jwt
 function sendPhoneCode() {
-  api.post(`/request_code`, loginPhone.value,{
+  api.post(`/request_massage`, loginPhone.value,{
     headers: {
       'Content-Type': 'text/plain'
     }}).then(res => {
-    console.log('合成',email)
     $q.notify({
       color: "green",
       textColor: "white",
       icon: "mail",
       message: "Code has been sent",
     });
-    countdown.value = 60;
+    countdown_phone.value = 60;
     const interval = setInterval(() => {
-      countdown.value--;
-      if (countdown.value === 0) {
+      countdown_phone.value--;
+      if (countdown_phone.value === 0) {
         clearInterval(interval);
       }
     }, 1000);
@@ -287,12 +286,26 @@ function loginByEmail() {
 }
 
 function loginByPhone() {
-  api.get("/phone-login", {
-    params: {
-      phone: loginPhone.value,
-      code: phone_code.value,
-    },
-  })
+  console.log('code',phone_code.value)
+  console.log('code',loginPhone.value)
+  api.post("/login_with_phone_code", {
+    key: loginPhone.value,
+    value: phone_code.value.toString(),
+  }).then((res) => {
+    console.log(res.data);
+    if (res.data.statusCode === 200) {
+      localStorage.setItem("Token", res.data.jwt_token);
+      router.push("/");
+    }
+  }).catch((err) => {
+    $q.notify({
+      message: err.response.data.msg,
+      position: "center",
+    });
+    console.log(err);
+    console.log(loginPhone.value);
+    console.log(phone_code.value);
+});
 }
 
 function login() {

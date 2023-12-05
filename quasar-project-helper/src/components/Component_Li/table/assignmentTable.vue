@@ -86,7 +86,7 @@
   </div>
   <!--  创建作业表单部分-->
   <div>
-    <el-dialog v-model="show_create_ass_table" center=true>
+    <el-dialog v-model="show_create_ass_table" center=true class="rounded-xl"  :style="{'min-width': '400px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
@@ -95,7 +95,7 @@
   </div>
   <!--  修改作业表单部分-->
   <div>
-    <el-dialog v-model="show_edit_ass_table" center=true>
+    <el-dialog v-model="show_edit_ass_table" center=true class="rounded-xl" :style="{'min-width': '450px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Assignment</div>
       </template>
@@ -109,6 +109,8 @@ import {defineAsyncComponent, defineComponent, ref} from 'vue'
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import cloneDeep from "lodash/cloneDeep";
+import { useQuasar } from 'quasar'
+
 
 export default defineComponent({
   name: "AssignmentTable",
@@ -172,6 +174,9 @@ export default defineComponent({
   },
   data() {
     return {
+      $q :useQuasar() ,
+      formWidth:'50%',
+
       search: '',
       selected: [],
       p_x: ref(200),
@@ -396,6 +401,18 @@ export default defineComponent({
         this.groupId_temp = cloneDeep(newVal);
       },
       deep: true
+    },
+    '$q.screen.width': {
+      immediate: true,
+      handler(newVal, oldVal) {
+        if(this.$q.screen.lt.sm){
+          this.formWidth = '95%'
+          console.log('screen width is less than sm')
+        }
+        else {
+          this.formWidth = '50%'}
+        console.log('screen width is not less than sm')
+      }
     }
   },
   emits: ['updateAssList']

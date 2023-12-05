@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="ruleFormRef" :model="formData_temp" :rules="formRules" class="demo-ruleForm">
+  <el-form ref="ruleFormRef" :model="formData_temp" :rules="formRules" class="demo-ruleForm" >
     <!--    <el-form-item label="GroupId" prop="groupId">-->
     <!--      <el-input v-model="formData_temp.groupId"></el-input>-->
     <!--    </el-form-item>-->

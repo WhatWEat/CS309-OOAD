@@ -177,21 +177,21 @@ export default defineComponent({
         instructor: [
           {
             required: true,
-            message: '请输入指导老师姓名',
+            message: '请输入指导老师ID',
             trigger: 'blur',
           },
         ],
         leader: [
           {
             required: true,
-            message: '请输入小组长姓名',
+            message: '请输入小组长ID',
             trigger: 'blur',
           },
         ],
         members: [
           {
             required: true,
-            message: '请输入小组成员学号',
+            message: '请输入小组成员ID',
             trigger: 'blur',
           },
         ],
@@ -284,11 +284,11 @@ export default defineComponent({
               "groupId": this.formData.groupId,
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
-              "instructorId": Object.values(this.formData_temp.instructor)[0],
-              "leaderId": Object.values(this.formData_temp.leader)[0],
+              "instructorId": this.formData_temp.instructor,
+              "leaderId": this.formData_temp.leader,
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
               "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
-              "memberIds": Object.values(this.formData_temp.members),
+              "memberIds": this.formData_temp.members,
             }
           ).then((res) => {
             console.log("提交成功了");

@@ -226,8 +226,10 @@ public class GroupService {
             StringBuilder sb = new StringBuilder();
             if(group.getInstructorId() == null || projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
                 sb.append("无效的instructorId|");
-            if(group.getLeaderId() == null ||  groupMapper.checkStuInGroup(group.getGroupId(), group.getLeaderId()) == null)
-                sb.append("无效的leaderId|");
+            if(group.getLeaderId() != null &&
+                (groupMapper.findGroupOfStuInProject(group.getLeaderId(), pjId) == null ||
+                    projectMapper.checkStuInProj(group.getLeaderId(), pjId) != null))
+                sb.append("无效的leaderId");
             if(group.getMaxsize() == null || group.getMaxsize() < findMemberOfGroup(group.getGroupId()))
                 sb.append("maxsize小于现在的人数|");
             if(group.getReportTime() == null || group.getReportTime().isBefore(LocalDateTime.now()))
@@ -246,13 +248,17 @@ public class GroupService {
                     .filter(e -> groupMapper.findGroupOfStuInProject(e, pjId) == null)
                     .filter(e -> !Objects.equals(e, group.getLeaderId()))
                     .collect(Collectors.toSet());
-            validIds = validIds.stream().limit(group.getMaxsize()-1).collect(Collectors.toSet());
-            validIds.add(group.getLeaderId());
+            if(group.getLeaderId() != null){
+                validIds = validIds.stream().limit(group.getMaxsize()-1).collect(Collectors.toSet());
+                validIds.add(group.getLeaderId());
+            }else {
+                validIds = validIds.stream().limit(group.getMaxsize()).collect(Collectors.toSet());
+            }
             groupMapper.deleteStuInGroup(group.getGroupId());
             groupMapper.insertStuIntoGps(validIds, group.getGroupId());
             try {
                 groupMapper.updateGroupForTea(group);
-                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
+//                groupMapper.updateVisibility(group.getGroupId(),group.getVisibility().toArray(new Boolean[0]));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

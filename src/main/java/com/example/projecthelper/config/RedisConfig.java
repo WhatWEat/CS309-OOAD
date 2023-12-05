@@ -1,5 +1,6 @@
 package com.example.projecthelper.config;
 
+import com.example.projecthelper.entity.Assignment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -42,6 +44,28 @@ public class RedisConfig {
         // 使用GenericJackson2JsonRedisSerializer来序列化和反序列化Redis的value值
         template.setValueSerializer(redisSerializer());
         template.setHashValueSerializer(redisSerializer());
+
+        template.afterPropertiesSet();
+
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, Assignment> redisAssTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Assignment> template = new RedisTemplate<>();
+
+        template.setConnectionFactory(factory);
+
+        // 使用StringRedisSerializer来序列化和反序列化Redis的key值
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+
+        // 使用GenericJackson2JsonRedisSerializer来序列化和反序列化Redis的value值
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        Jackson2JsonRedisSerializer<Assignment> serializer = new Jackson2JsonRedisSerializer<>(mapper, Assignment.class);
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
 
         template.afterPropertiesSet();
 

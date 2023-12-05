@@ -203,11 +203,11 @@ public class UserService {
                 jwt = checkCode(type_num_code.getValue().getValue(),type_num_code.getValue().getKey(),FUNCTION.__MODIFY_PHONE_,false);
                 if (Objects.equals(
                         stringRedisTemplate.opsForValue().get(
-                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_NUMBER_)
+                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_)
                         ),type_num_code.getValue().getKey())
                 ){
                     stringRedisTemplate.delete(getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_));
-                    usersMapper.updateEmail(userId,type_num_code.getValue().getKey());
+                    usersMapper.updatePhone(userId,type_num_code.getValue().getKey());
                 }
                 else
                     throw new AccountFrozenException("无法修改手机号");
@@ -233,11 +233,11 @@ public class UserService {
     public void sendCodeToChangeNumber(KeyValueWrapper<Integer, String> typeNum, Long userId){
         switch (typeNum.getKey()){
             case 1 -> {
-                User user = usersMapper.findUserByPhone(typeNum.getKey().toString());
+                User user = usersMapper.findUserByPhone(typeNum.getValue());
                 if (user != null)
                     throw new InvalidFormException("手机号已被注册");
                 try {
-                    sendMassage(typeNum.getKey().toString(), FUNCTION.__MODIFY_PHONE_,false);
+                    sendMassage(typeNum.getValue(), FUNCTION.__MODIFY_PHONE_,false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -306,6 +306,7 @@ public class UserService {
     }
     public void request_phone(String to){
         try {
+
             sendMassage(to, FUNCTION.__LOGIN__, true);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -338,7 +339,7 @@ public class UserService {
             stringRedisTemplate.delete(getRedisKey(phone,function));
             User user;
             if (needJwt) {
-                user = usersMapper.findUserByMail(phone);
+                user = usersMapper.findUserByPhone(phone);
                 return JWTUtil.createJWT(String.valueOf(user.getUserId()), String.valueOf(user.getIdentity()));
             }
             return null;

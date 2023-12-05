@@ -76,7 +76,7 @@
               square
               class="text-white"
               :color="getColor(index)"
-              removable
+              :removable="userid === person_id"
               @remove="removeTeam(index)"
             >
               {{ tag }}

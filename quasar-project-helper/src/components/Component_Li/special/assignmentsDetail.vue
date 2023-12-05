@@ -11,7 +11,7 @@
                 </q-avatar>
               </q-btn>
             </q-item-section>
-            <q-item-section>
+            <q-item-section v-if="!isPhone">
               <q-item-label style="font-weight:bolder; font-size: x-large">{{
                   this.AssignmentDetail.AssignmentName
                 }}
@@ -21,6 +21,7 @@
                 }}
               </q-item-label>
             </q-item-section>
+
             <q-item-section side>
               <q-btn flat size="lg">
                 <span v-if="AssignmentDetail.state===2" style="font-weight: 1000;color: #3CA278;font-size:large">-- Returned</span>
@@ -100,13 +101,25 @@
 
       <div class="col-sm-12 col-xs-12 col-md-5 q-pa-md">
         <q-card ref="card2" :style="{'min-height':minHeight}" class="my-card rounded-xl">
-          <q-item :style="{'height':'80px'}" clickable>
+          <q-item :style="{'min-height':'80px'}" clickable>
             <q-item-section>
+              <q-btn flat>
               <q-item-label class="text-h5 text-weight-bold">Assignment attachment</q-item-label>
               <q-item-label class="text-subtitle1 text-weight-light">Submit time: {{
                   this.AssignmentDetail.submitTime
                 }}
               </q-item-label>
+              </q-btn>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn flat>
+              <q-select
+                dense
+                filled
+                v-model="selectedAssignment_Name"
+                :options="assignmentOptions"
+                style="width: 150px"
+              /></q-btn>
             </q-item-section>
           </q-item>
 
@@ -275,8 +288,6 @@
               </div>
             </div>
           </div>
-
-
           <!--     教师批改作业-->
           <div v-else>
             <!--      提交作业的部分-->
@@ -344,6 +355,8 @@ import {defineAsyncComponent, defineComponent, ref} from 'vue';
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import {getDownloadBlob} from "src/composables/usefulFunction";
+import {useQuasar} from "quasar";
+import cloneDeep from "lodash/cloneDeep";
 
 export default defineComponent({
   name: "AssignmentDetail",
@@ -353,8 +366,15 @@ export default defineComponent({
   },
   data() {
     return {
+      $q: useQuasar(),
       userData: useUserStore(),
 
+      AssignmentDetail: cloneDeep(this.AssignmentBackUp),
+      selectedAssignment_Name: '',
+      assignmentOptions:[],
+      allAssignment: [],
+
+      isPhone :ref(true)  ,
       editorInput: '',
       editorInputEvaluator: [],
       grade: '',
@@ -374,6 +394,21 @@ export default defineComponent({
   },
   mounted() {
     console.log('detail 加载');
+    console.log('val BackUp ', this.AssignmentBackUp);
+    if (this.$q.screen.lt.md) {
+      this.width = '50%'
+      this.isPhone = true
+      this.$q.notify({
+        message: 'Please use a larger screen to display the table',
+        color: 'red',
+        icon: 'warning',
+        position: 'top',
+        timeout: 2000,
+      })
+    }else {
+      this.width = '32%'
+      this.isPhone = false
+    }
   },
   methods: {
     onFilesAdded(files) {
@@ -460,6 +495,19 @@ export default defineComponent({
       this.formData = new FormData();
     },
     postGradeAssignment() {
+      if (this.grade > this.AssignmentDetail.matGrade){
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Grade should be less than the max grade:' + this.AssignmentDetail.matGrade,
+          icon: 'report_problem',
+          progress: true,
+          timeout: 3000,
+        })
+        return
+      }
+
+
       let formData = new FormData()
       if (this.editorInput === '') {
         this.$q.notify({
@@ -670,6 +718,38 @@ export default defineComponent({
       }
     },
 
+    getAllSubmittedAss(){
+      console.clear()
+      console.log(('/tea/view_all_submitted_ass/'+this.AssignmentDetail.assignmentId +'/0/1000'))
+      api.get(('/tea/view_all_submitted_ass/'+this.AssignmentDetail.assignmentId +'/0/1000')).then((res) => {
+        console.log(res)
+        this.assignmentOptions = []
+        if (this.allAssignment === null){
+          this.allAssignment= []
+          this.selectedAssignment_Name = {label:'No Submit',value:0}
+          // this.assignmentOptions=[{lable:'No Submit',value:0}]
+        }
+        else {
+          this.allAssignment = res.data.body;
+          this.selectedAssignment_Name = {label:this.allAssignment[0].submitterName,value:0}
+          for (let i = 0; i < this.allAssignment.length; i++) {
+            let key = this.allAssignment[i].submitterName;
+            this.assignmentOptions.push({label: key, value: i})
+          }
+        }
+        console.log(this.allAssignment)
+        console.log(this.allAssignment.length)
+        console.log(this.assignmentOptions)
+      }).catch((err) => {
+        // this.$q.notify({
+        //   type: 'negative',
+        //   message: '获取全部作业出错'
+        // })
+        // this.selectedAssignment_Name = {label:'No Submit',value:0}
+        console.log(err)
+      })
+    },
+
     // TODO disable presentation time
     getToComment() {
       api.get('/stu/to_comment/' + this.AssignmentDetail.assignmentId).then((res) => {
@@ -698,7 +778,7 @@ export default defineComponent({
     }
   },
   props: {
-    AssignmentDetail: {
+    AssignmentBackUp:{
       required: true,
       default: {
         assignmentId: -1,
@@ -724,6 +804,32 @@ export default defineComponent({
         submitterId: null,
       }
     },
+    // AssignmentDetail: {
+    //   required: true,
+    //   default: {
+    //     assignmentId: -1,
+    //     AssignmentName: 'Assignment 1',
+    //     studentName: "Liwehao",
+    //     submitTime: '2020-10-7',
+    //     deadLine: '2020-10-10',
+    //     instructor: 'Qi-Kun Xue1',
+    //     grade: '100',
+    //     matGrade: '100',
+    //     isReturned: true,
+    //     moreInfo: 'Dev',
+    //     state: 0,
+    //     filePaths: null,
+    //     files: null,
+    //     type: null,
+    //     requireExtension: '',
+    //     filesSubmit: null,
+    //     filePathsSubmit: null,
+    //     comment: null,
+    //     text: null,
+    //     review: null,
+    //     submitterId: null,
+    //   }
+    // },
     AssignmentAttachment: {
       required: true,
       default: [
@@ -749,15 +855,68 @@ export default defineComponent({
     },
   },
   watch: {
-    AssignmentDetail: {
+    AssignmentBackUp: {
       handler: function (val, oldVal) {
-        console.log(val);
-        if (this.AssignmentDetail.type === 'e' && (this.userData.identity === 3)) {
+        console.log('val BackUp ',val)
+        this.AssignmentDetail = cloneDeep(val)
+        this.allAssignment = []
+        this.selectedAssignment_Name = ''
+        this.assignmentOptions = []
+        if (this.AssignmentBackUp.type === 'e' && (this.userData.identity === 3)) {
           this.getToComment()
+        }
+        this.getAllSubmittedAss()
+      },
+      deep: true
+    },
+    '$q.screen.width': {
+      handler: function (val, oldVal) {
+        if(this.$q.screen.lt.md){
+          this.width = '50%'
+          this.isPhone = true
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: 'Please use PC to view the details!',
+            icon: 'report_problem',
+            timeout: 3000,
+          })
+        }else {
+          this.width = '32%'
+          this.isPhone = false
+          // this.$q.notify({
+          //   color: 'negative',
+          //   position: 'top',
+          //   message: 'Please use PC to view the details!',
+          //   icon: 'report_problem',
+          //   timeout: 5000,
+          // })
         }
       },
       deep: true
     },
+    selectedAssignment_Name:{
+      handler: function (val, oldVal) {
+          console.log('更新了选择的展示的作业,index：',val)
+        console.log(this.selectedAssignment_Name)
+          let indexTmp = val['value']
+        console.log('index：',indexTmp)
+        console.log('this.allAssignment:',this.allAssignment)
+          this.AssignmentDetail.assignmentId = this.allAssignment[indexTmp].assignmentId
+          this.AssignmentDetail.studentName = this.allAssignment[indexTmp].submitterName
+          this.AssignmentDetail.submitTime = this.allAssignment[indexTmp].submittedTime
+          this.AssignmentDetail.grade = this.allAssignment[indexTmp].grade === null ? 'Not Graded' : this.allAssignment[indexTmp].grade
+          this.AssignmentDetail.isReturned = this.allAssignment[indexTmp].grade >= 0 ? 'true': 'false'
+          this.AssignmentDetail.filePaths = this.allAssignment[indexTmp].filePaths
+          this.AssignmentDetail.files = this.allAssignment[indexTmp].files
+          this.AssignmentDetail.text = this.allAssignment[indexTmp].text
+          this.AssignmentDetail.comment = this.allAssignment[indexTmp].comment
+          this.AssignmentDetail.state = this.allAssignment[indexTmp].grade === null ? 1 : 2
+        console.log('新的提交的作业')
+        console.log(this.AssignmentDetail)
+      },
+      deep: true
+    }
   },
   emits: ['updateAssList']
 })

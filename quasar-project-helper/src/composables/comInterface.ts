@@ -30,6 +30,7 @@ withDefaults(defineProps<noticeProps>(), {
 
 export interface gradeProps {
   homeworkId: number;
+  title?: string;
   projectId: number;
   assignmentId: number;
   submitterId: string;
@@ -37,6 +38,7 @@ export interface gradeProps {
   comment: string;
   review: string;
   submittedTime?: string;
+  submitterName?: string;
 }
 withDefaults(defineProps<gradeProps>(), {
   homeworkId: 0,

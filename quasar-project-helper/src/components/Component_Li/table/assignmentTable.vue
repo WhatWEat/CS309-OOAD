@@ -8,6 +8,7 @@
       :rows="rows_temp"
       :separator="separator"
       :title="tableTitle"
+      :grid="$q.screen.lt.sm"
       card-class="bg-grey-2"
       class="rounded-xl"
       row-key="AssignmentName"
@@ -86,7 +87,7 @@
   </div>
   <!--  创建作业表单部分-->
   <div>
-    <el-dialog v-model="show_create_ass_table" center=true class="rounded-xl"  :style="{'min-width': '400px', 'width': formWidth}">
+    <el-dialog v-model="show_create_ass_table" :center=true class="rounded-xl"  :style="{'min-width': '400px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
@@ -95,7 +96,7 @@
   </div>
   <!--  修改作业表单部分-->
   <div>
-    <el-dialog v-model="show_edit_ass_table" center=true class="rounded-xl" :style="{'min-width': '450px', 'width': formWidth}">
+    <el-dialog v-model="show_edit_ass_table" :center=true class="rounded-xl" :style="{'min-width': '450px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Assignment</div>
       </template>
@@ -202,37 +203,37 @@ export default defineComponent({
       show_deleteDialog_teacher: ref(false),
 
       AssignmentDetail: {
-        assignmentId: -1,
-        AssignmentName: 'Assignment 1',
-        studentName: "Liwehao",
-        submitTime: '2020-10-7',
-        deadLine: '2020-10-10',
-        instructor: 'Qi-Kun Xue1',
-        grade: '100',
-        state: 1,
-        matGrade: '100',
-        isReturned: true,
-        moreInfo: 'Course Assignment 4:\n' +
-          '\n' +
-          'Chapter 4：Exercise 2，Exercise 8，and Exercise 22\n' +
-          '\n' +
-          'Deadline: Please submit your homework through the Sakai system before 10:20AM on April 11, 2023.  \n' +
-          '\n' +
-          'Please note that you have only one chance to submit your homework in the SAKAI system.\n' +
-          '\n' +
-          'No re-submission is allowed.\n' +
-          '\n' +
-          'No late submission is allowed.',
-        filePaths: null,
-        files: null,
-        type: null,
-        requireExtension: '',
-        filesSubmit: null,
-        filePathsSubmit: null,
-        comment:null,
-        text:null,
-        review:null,
-        submitterId: null,
+        // assignmentId: -1,
+        // AssignmentName: 'Assignment 1',
+        // studentName: "Liwehao",
+        // submitTime: '2020-10-7',
+        // deadLine: '2020-10-10',
+        // instructor: 'Qi-Kun Xue1',
+        // grade: '100',
+        // state: 1,
+        // matGrade: '100',
+        // isReturned: true,
+        // moreInfo: 'Course Assignment 4:\n' +
+        //   '\n' +
+        //   'Chapter 4：Exercise 2，Exercise 8，and Exercise 22\n' +
+        //   '\n' +
+        //   'Deadline: Please submit your homework through the Sakai system before 10:20AM on April 11, 2023.  \n' +
+        //   '\n' +
+        //   'Please note that you have only one chance to submit your homework in the SAKAI system.\n' +
+        //   '\n' +
+        //   'No re-submission is allowed.\n' +
+        //   '\n' +
+        //   'No late submission is allowed.',
+        // filePaths: null,
+        // files: null,
+        // type: null,
+        // requireExtension: '',
+        // filesSubmit: null,
+        // filePathsSubmit: null,
+        // comment:null,
+        // text:null,
+        // review:null,
+        // submitterId: null,
       },
       AssignmentAttachment: [
         {

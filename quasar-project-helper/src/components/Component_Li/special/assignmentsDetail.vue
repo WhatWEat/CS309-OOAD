@@ -626,7 +626,7 @@ export default defineComponent({
 
     //**********************************GET***************************************
     async getAssFile(filePaths) {
-      let identity = null;
+      let identity = '';
       if (this.userData.identity === 3) {
         identity = 'stu'
       } else if (this.userData.identity === 2) {
@@ -636,6 +636,8 @@ export default defineComponent({
       } else {
         identity = 'adm'
       }
+      console.log('identity',identity)
+      console.log('userdataidentity',this.userData.identity)
 
       let isSuccess = false;
       await api.get(('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths), {responseType: 'blob'}).then((res) => {
@@ -669,7 +671,7 @@ export default defineComponent({
         this.fileName = filePaths;
         this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
         this.showPDF = true;
-        // console.log("应该到了吧")
+        console.log("应该到了吧")
       } else if (isSuccess && (filePaths.slice(-3) === '.md' || filePaths.slice(-3) === '.MD')) {
         this.fileName = filePaths;
         this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
@@ -677,6 +679,18 @@ export default defineComponent({
       }
     },
     async getAssFileSubmit(filePaths) {
+
+      let identity = '';
+      if (this.userData.identity === 3) {
+        identity = 'stu'
+      } else if (this.userData.identity === 2) {
+        identity = 'ta'
+      } else if (this.userData.identity === 1) {
+        identity = 'tea'
+      } else {
+        identity = 'adm'
+      }
+
       console.log(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths))
       let isSuccess = false;
       await api.get(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths),
@@ -709,12 +723,12 @@ export default defineComponent({
       if (isSuccess && filePaths.slice(-4) === '.pdf') {
         console.log("进入")
         this.fileName = filePaths;
-        this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
+        this.getApiUrl = ('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths);
         this.showPDF = true;
         // console.log("应该到了吧")
       } else if (isSuccess && (filePaths.slice(-3) === '.md' || filePaths.slice(-3) === '.MD')) {
         this.fileName = filePaths;
-        this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
+        this.getApiUrl = ('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths);
         this.showMD = true;
       }
     },

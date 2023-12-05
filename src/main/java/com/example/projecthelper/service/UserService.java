@@ -237,7 +237,7 @@ public class UserService {
                 if (user != null)
                     throw new InvalidFormException("手机号已被注册");
                 try {
-                    sendMassage(typeNum.getKey().toString(), FUNCTION.__MODIFY_PHONE_,false);
+                    sendMassage(typeNum.getValue(), FUNCTION.__MODIFY_PHONE_,false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

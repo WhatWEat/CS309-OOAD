@@ -258,6 +258,7 @@ export default defineComponent({
                 timeout: 3000,
               }
             )
+            this.$emit('renewGroupList');
           }).catch((err) => {
             // this.errorMessage.text = err.response.data.msg;
             // this.$emit("errorDialog", this.errorMessage);
@@ -305,6 +306,7 @@ export default defineComponent({
                 timeout: 3000,
               }
             )
+            this.$emit('renewGroupList');
           }).catch((err) => {
             console.log("提交失败了");
             console.log(err)
@@ -418,7 +420,7 @@ export default defineComponent({
       }
     }
   },
-  emits: ['successDialog', 'errorDialog', 'unfold'],
+  emits: ['successDialog', 'errorDialog', 'unfold', 'renewGroupList'],
   watch: {
     formData: {
       handler: function (val, oldVal) {

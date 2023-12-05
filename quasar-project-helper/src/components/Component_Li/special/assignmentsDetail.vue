@@ -897,7 +897,7 @@ export default defineComponent({
     },
     selectedAssignment_Name:{
       handler: function (val, oldVal) {
-          console.log('更新了选择的展示的作业,index：',val)
+        console.log('更新了选择的展示的作业,index：',val)
         console.log(this.selectedAssignment_Name)
           let indexTmp = val['value']
         console.log('index：',indexTmp)

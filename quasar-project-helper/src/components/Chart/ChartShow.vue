@@ -1,63 +1,49 @@
 <template>
-  <q-card flat bordered>
-    <q-card-section horizontal class="row">
+  <q-card bordered flat>
+    <q-card-section class="row" horizontal>
       <q-card-section class="q-pt-xs" style="width: 500px">
         <div class="text-overline">Assignment Statistics</div>
         <q-separator />
         <span v-if="!assignmentAll">
-          <q-chip
-            removable
-            v-for="(i, index) in assignmentConditional"
-            :key="i"
-            square
-            @remove="assignmentConditional.splice(index, 1)"
-          >
-            <q-avatar color="green" class="col-auto">{{ i }}</q-avatar>
-            做作业
+          <q-chip v-for="(i,index) in assignmentConditional" :key="i" removable square
+                  @remove="assignmentConditional.splice(index,1)" :color="lightColors[Math.floor(Math.random() * lightColors.length)]" class="col-auto">
+            做作业:{{ i }}
           </q-chip>
         </span>
-        <q-chip removable square v-else @remove="assignmentAll = false">
-          All Assignment</q-chip
-        >
+        <q-chip v-else removable square @remove="assignmentAll=false" :color="lightColors[Math.floor(Math.random() * lightColors.length)]"> All Assignment</q-chip>
+
         <q-separator />
         <span v-if="!userAll">
-          <q-chip
-            removable
-            v-for="(i, index) in userConditional"
-            :key="i"
-            square
-            @remove="userConditional.splice(index, 1)"
-          >
-            <q-avatar color="red" class="col-auto">{{ i }}</q-avatar>
-            tyl
+          <q-chip v-for="(i, index) in userConditional" :key="i" removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]"
+                  @remove="userConditional.splice(index, 1)">
+<!--            <q-avatar class="col-auto" color="red">{{ i }}</q-avatar>-->
+            tyl:{{ i }}
           </q-chip>
         </span>
-        <q-chip removable square v-else @remove="userAll = false">
-          All Student</q-chip
-        >
+        <q-chip v-else removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]" @remove="userAll=false"> All Student</q-chip>
       </q-card-section>
       <q-separator vertical />
       <q-card-section>
         <q-item-section side>
           <q-btn
             avatar
-            flat
             color="primary"
-            @click="editAddConditional"
-            size="sm"
+            flat
             round
+            size="sm"
+            @click="editAddConditional"
           >
-            <q-avatar size="20px" icon="edit"></q-avatar>
+            <q-avatar icon="edit" size="20px"></q-avatar>
           </q-btn>
           <q-btn
             avatar
-            flat
             color="primary"
-            @click="clearAllConditional"
-            size="sm"
+            flat
             round
+            size="sm"
+            @click="clearAllConditional"
           >
-            <q-avatar size="20px" icon="delete_outline"></q-avatar>
+            <q-avatar icon="delete_outline" size="20px"></q-avatar>
           </q-btn>
         </q-item-section>
         <q-card-section side></q-card-section>
@@ -155,13 +141,13 @@
         </q-list>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" v-close-popup />
+        <!--        <q-btn flat label="Cancel" color="primary" v-close-popup/>-->
         <q-btn
-          flat
-          label="Save"
-          color="positive"
-          @click="saveInfo"
           v-close-popup
+          color="positive"
+          flat
+          label="Done"
+          @click="saveInfo"
         />
       </q-card-actions>
     </q-card>
@@ -187,6 +173,22 @@ const student_id_list = ref<number[]>([]),
 const assignment_list = ref<number[]>([]),
   assignment_list_map = ref<Map<number, string>>(new Map());
 const project_id = ref(0);
+const lightColors = [
+  'primary',
+  'positive',
+  'info',
+  'warning',
+  'pink-3',
+  'red-3',
+  'blue-5',
+  'orange-3',
+  'purple-3',
+  'brown-3',
+  'green-3',
+  'grey-3',
+  'deep-purple-3',
+  'light-blue-4'
+];
 onMounted(() => {
   project_id.value = useProjectId();
   onFresh();

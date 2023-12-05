@@ -519,7 +519,7 @@ public class AssignmentService {
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();
@@ -551,7 +551,7 @@ public class AssignmentService {
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
-        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize){
+        if (submittedAssignments.size()>=page*pageSize && submittedAssignments.size()<(page+1)*pageSize && submittedAssignments.size()>0){
             return submittedAssignments.subList(page*pageSize,submittedAssignments.size()-1);
         }
         else return new ArrayList<>();

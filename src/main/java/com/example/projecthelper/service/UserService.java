@@ -207,7 +207,7 @@ public class UserService {
                         ),type_num_code.getValue().getKey())
                 ){
                     stringRedisTemplate.delete(getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_));
-                    usersMapper.updateEmail(userId,type_num_code.getValue().getKey());
+                    usersMapper.updatePhone(userId,type_num_code.getValue().getKey());
                 }
                 else
                     throw new AccountFrozenException("无法修改手机号");

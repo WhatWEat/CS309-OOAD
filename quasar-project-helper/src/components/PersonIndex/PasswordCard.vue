@@ -1,7 +1,7 @@
 <template>
   <div class="col-lg-7 col-md-8 col-xs-12 col-sm-12">
-    <q-form ref="subform">
-      <q-card :class="props.bg_color">
+    <q-form ref="subform" class="rounded-xl">
+      <q-card :class="`${props.bg_color} rounded-xl`">
         <q-card-section class="text-h6 q-pa-sm">
           <div class="text-h6">Change Password</div>
         </q-card-section>
@@ -49,7 +49,7 @@
           </q-item>
         </q-card-section>
         <q-card-actions align="center">
-          <q-btn class="text-capitalize bg-primary text-white" @click="changePassword">Change
+          <q-btn class="text-capitalize bg-primary text-white rounded-lg" @click="changePassword">Change
             Password
           </q-btn>
         </q-card-actions>

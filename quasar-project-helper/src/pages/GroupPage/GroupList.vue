@@ -213,6 +213,7 @@
                       :instructor="card_data.instructor"
                       :leader="card_data.leader" :max-size="card_data.groupMaxSize" :members="card_data.members"
                       :presentation-time="card_data.presentationTime"
+                      :groupName="card_data.groupName"
                       :style="{width: '100%' , 'border-radius': '20px'}">
         >
       </directory-card>
@@ -611,6 +612,7 @@ export default {
             instructor: response.data.body.instructorId,
             leader: response.data.body.leaderId,
             moreInfo: response.data.body.description,
+            groupName: response.data.body.groupName,
           };
           this.formData.groupId = groupId;
           this.formData.maxSize = tmp.groupMaxSize;
@@ -623,8 +625,8 @@ export default {
           // presentation是2023-10-01T16:00:00这种格式，需要转换
           this.formData.data1_presentation = tmp.presentationTime.slice(0, 10)
           this.formData.data2_presentation = tmp.presentationTime.slice(11, 19)
-          this.formData.instructor = Object.values(tmp.instructor);
-          this.formData.leader = Object.values(tmp.leader);
+          this.formData.instructor = tmp.instructor;
+          this.formData.leader = tmp.leader;
           this.formData.members = tmp.members;
           this.formData.technicalStack = tmp.technicalStack;
           this.formData.desc = tmp.moreInfo;
@@ -717,8 +719,8 @@ export default {
             // 将data解析为自己需要的格式
             let temp = {
               groupId: response.data.body[i].groupId,
-              groupSize: response.data.body[i].members.length,
-              groupMember: response.data.body[i].members.toString(),
+              groupSize:response.data.body[i].members===null ? 'Invisiable': response.data.body[i].members.length,
+              groupMember: response.data.body[i].members ===null? ['Invisiable']: response.data.body[i].members.toString(),
               instructor: response.data.body[i].instructorName,
               projectName: 'Dev Name',
               deadLine: formatDateString(response.data.body[i].deadline),
@@ -745,15 +747,16 @@ export default {
           let tmp = {
             avatar: avatarUrl,
             groupId: response.data.body.groupId,
-            groupSize: response.data.body.members.length,
+            groupSize: response.data.body.members === null ? ['Invisiable'] :response.data.body.members.length,
             groupMaxSize: response.data.body.maxsize,
-            members: merger(response.data.body.members, response.data.body.memberIds),
+            members:  response.data.body.members === null ? ['Invisiable'] : merger(response.data.body.members, response.data.body.memberIds),
             creationTime: formatDateString(response.data.body.teamTime),
             deadline: formatDateString(response.data.body.deadline),
             presentationTime: formatDateString(response.data.body.reportTime),
             instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
-            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
-            moreInfo: response.data.body.description
+            leader: response.data.body.leader ===null ? ['Invisiable'] :merger(response.data.body.leaderName, response.data.body.leaderId),
+            moreInfo: response.data.body.description,
+            groupName: response.data.body.groupName,
           }
           this.card_data = tmp
           this.show_detail = true;

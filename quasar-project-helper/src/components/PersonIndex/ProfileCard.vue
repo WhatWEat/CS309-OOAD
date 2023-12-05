@@ -1,6 +1,6 @@
 <template>
   <div class="col-lg-7 col-md-8 col-xs-12 col-sm-12">
-    <q-card :class="props.bg_color">
+    <q-card :class="`${props.bg_color} rounded-xl`" >
       <q-card-section>
         <div class="text-h6">Profile-{{ personIdentity }}</div>
       </q-card-section>
@@ -9,7 +9,7 @@
         <q-form class="row">
           <div class="row justify-center col-12">
             <div class=" q-pb-md">
-              <q-btn round @click="clickAvatar">
+              <q-btn  round @click="clickAvatar">
                 <q-avatar size="50px">
                   <img v-if="avatar_preview" :src="avatar_preview">
                   <q-icon v-else name="person"></q-icon>
@@ -164,7 +164,7 @@
                 :suffix="$q.screen.lt.sm ? undefined : selectedEmailDomain"
                 :label="$q.screen.gt.xs ? undefined : selectedEmailDomain">
                 <template v-slot:append>
-                  <q-btn-dropdown dense flat :disable="!isEditing">
+                  <q-btn-dropdown dense flat :disable="!isEditing" class="rounded-lg" >
                     <q-list>
                       <q-item clickable v-close-popup v-for="(item, index) in emailDomains"
                               :key="index"
@@ -203,21 +203,21 @@
         <div>
           <q-btn
             label="Edit"
-            class="text-capitalize"
+            class="text-capitalize rounded-lg"
             v-if="!isEditing"
             @click="isEditing = true"
             color="primary"
           />
           <q-btn
             label="Save"
-            class="q-mx-lg text-capitalize"
+            class="q-mx-lg text-capitalize rounded-lg"
             v-else
             color="green"
             type="submit"
             @click="beforeSaveVerify"
           />
           <q-btn
-            class="text-capitalize"
+            class="text-capitalize rounded-lg"
             label="Cancel"
             v-if="isEditing"
             color="red"

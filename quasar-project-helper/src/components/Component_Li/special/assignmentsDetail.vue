@@ -460,6 +460,19 @@ export default defineComponent({
       this.formData = new FormData();
     },
     postGradeAssignment() {
+      if (this.grade > this.AssignmentDetail.matGrade){
+        this.$q.notify({
+          color: 'negative',
+          position: 'top',
+          message: 'Grade should be less than the max grade:' + this.AssignmentDetail.matGrade,
+          icon: 'report_problem',
+          progress: true,
+          timeout: 3000,
+        })
+        return
+      }
+
+
       let formData = new FormData()
       if (this.editorInput === '') {
         this.$q.notify({

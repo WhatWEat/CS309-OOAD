@@ -1,6 +1,7 @@
 <template>
-  <q-page class="q-pa-sm">
-    <div class="row q-col-gutter-sm justify-center">
+  <q-page class="q-pa-md">
+    <div class="row q-col-gutter-md justify-center">
+
       <ProfileCard bg_color="bg-blue-1"></ProfileCard>
       <PasswordCard v-if="personId===userid"></PasswordCard>
     </div>

@@ -61,6 +61,15 @@
     <q-card-section class="row">
       <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
         <span style="font-weight: bold;">
+          Group Name :
+        </span>
+        <span style="font-weight: normal;">
+          {{ groupName }}
+        </span>
+      </div>
+
+      <div class="q-pa-sm text-grey-8 text-weight-bold text-subtitle1 row col-12">
+        <span style="font-weight: bold;">
           Creation Time :
         </span>
         <span style="font-weight: normal;">
@@ -148,7 +157,7 @@ export default defineComponent({
       return descriptionProps
     }
   },
-  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail' , 'instructor','leader', "maxSize", "creationTime", "presentationTime"]
+  props: ['avatar', 'groupId', 'members', 'groupSize', 'deadline', 'detail' , 'instructor','leader', "maxSize", "creationTime", "presentationTime",'groupName']
 })
 </script>
 

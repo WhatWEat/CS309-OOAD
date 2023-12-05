@@ -81,6 +81,7 @@ public class AssignmentService {
             if (Objects.equals(taOfProj, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
             results =
                     assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
@@ -99,6 +100,7 @@ public class AssignmentService {
             if (Objects.equals(checker, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
 
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
@@ -349,11 +351,13 @@ public class AssignmentService {
             case "g" -> {
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId());
                 if (gpId != null) {
-                    if (!Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
+                    if (Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
                         fileService.removeFilesOfSubmittedAss(assignment, gpId);
                         submittedAssMapper.removeAss(assignmentId, gpId);
                         return;
                     }
+                    else
+                        throw new AccessDeniedException("你不是小组长");
                 }
                 throw new AccessDeniedException("你不在小组中");
             }

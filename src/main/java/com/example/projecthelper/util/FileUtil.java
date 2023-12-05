@@ -108,7 +108,7 @@ public class FileUtil {
                     gradeColumn = i;
                 } else if (cellValue.equalsIgnoreCase("comment")) {
                     commentColumn = i;
-                } else if (cellValue.equalsIgnoreCase("review")) {
+                } else if (cellValue.equalsIgnoreCase("rcdcdfeview")) {
                     reviewColumn = i;
                 }
             }

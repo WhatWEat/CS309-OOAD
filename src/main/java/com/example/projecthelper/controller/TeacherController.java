@@ -218,6 +218,7 @@ public class TeacherController {
                                                  @RequestParam("requireExtension") String requireExtension,
                                                  @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Assignment assignment = new Assignment();
+        System.err.println(type);
         assignment.setTitle(title);
         assignment.setDescription(description);
         assignment.setProjectId(projectId);
@@ -314,7 +315,7 @@ public class TeacherController {
         assignmentService.gradeAss(
                 submittedAssignment,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(null, "Success", JWTUtil.updateJWT(jwt));
     }
@@ -328,7 +329,7 @@ public class TeacherController {
         List<SubmittedAssignment> result = assignmentService.gradeAssWithFile(
                 file, assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
 

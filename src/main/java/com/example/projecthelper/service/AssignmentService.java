@@ -81,6 +81,7 @@ public class AssignmentService {
             if (Objects.equals(taOfProj, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
             results =
                     assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
         }
@@ -95,11 +96,12 @@ public class AssignmentService {
         if (projId == -1) {
             results = assignmentMapper.getAssByStu(userId, pageSize, page * pageSize);
         } else {
-            System.err.println(userId + " " + projId);
             Long checker = projectMapper.checkStuInProj(userId, projId);
             if (Objects.equals(checker, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
+
+
             results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
         try {
@@ -134,15 +136,34 @@ public class AssignmentService {
         String type = assignment.getType();
         SubmittedAssignment submittedAssignment = null;
         if(identity == 3){
-            if(type.equals("i"))
+            if(type.equals("i")){
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+                if(submittedAssignment != null){
+                    User user = usersMapper.findUserById(user_id);
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+            }
             if(type.equals("g")){
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(user_id, assignment.getProjectId());
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, gpId);
+                if(submittedAssignment != null){
+                    Group gp = groupMapper.findGroupById(gpId);
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
             }
         }
         else {
             submittedAssignment = assignmentMapper.findLatestSubAssByAssId(ass_id);
+            if(submittedAssignment != null){
+                if(type.equals("i")){
+                    User user = usersMapper.findUserById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+                else if (type.equals("g")){
+                    Group gp = groupMapper.findGroupById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
+            }
         }
         assignment.setState(
             Assignment.AssignmentState.getState(assignment, submittedAssignment).getValue()
@@ -217,6 +238,8 @@ public class AssignmentService {
         //FUNC: 检查学生是否有权限提交作业, 即是否在proj中
         Assignment originAss = assignmentMapper.findAssById(submittedAss.getAssignmentId());
         if (originAss == null || projectMapper.checkStuInProj(userId, originAss.getProjectId()) == null) {
+            System.err.println(originAss);
+            System.err.println(userId);
             throw new AccessDeniedException("无权提交作业");
         }
         //PROC: 先判断这个是group assignment还是individual assignment
@@ -328,11 +351,13 @@ public class AssignmentService {
             case "g" -> {
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(userId, assignment.getProjectId());
                 if (gpId != null) {
-                    if (!Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
+                    if (Objects.equals(userId, groupMapper.findLeaderByGroup(gpId))) {
                         fileService.removeFilesOfSubmittedAss(assignment, gpId);
                         submittedAssMapper.removeAss(assignmentId, gpId);
                         return;
                     }
+                    else
+                        throw new AccessDeniedException("你不是小组长");
                 }
                 throw new AccessDeniedException("你不在小组中");
             }
@@ -472,6 +497,7 @@ public class AssignmentService {
         Assignment ass = assignmentMapper.findAssById(sub.getAssignmentId());
         if (ass == null)
             throw new AccessDeniedException("无效的作业id");
+        System.err.println(identity);
         if (identity == 1) {
             Long teaId = projectMapper.findTeacherByProject(ass.getProjectId());
             if (!Objects.equals(teaId, userId))

@@ -299,31 +299,33 @@ public class NoticeService {
     public void createApplicationNotice(KeyValueWrapper<Long, Notice> gpId_notice, Long userId) {
         //FUNC: 确定userId在group中
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
-        if(group == null ||
+        if (group == null ||
             groupMapper.findGroupOfStuInProject(userId, group.getProjectId()) != null
-        ){
+        ) {
             throw new InvalidFormException("无效的groupId或者已经加入小组");
         }
-        try {
-            AbstractNoticeFactory anf = new ApplicationFactory();
-            Notice notice = gpId_notice.getValue();
-            notice.setCreatorId(userId);
-            notice.setGroupId(group.getGroupId());
-            notice.setProjectId(group.getProjectId());
-            notice = anf.createNotice(notice);
-            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(), Notice.Type.RECRUITMENT.getValue());
-            if(previous != null){
-                previous.setCreateTime(LocalDateTime.now());
-                noticeMapper.updateNoticeTime(previous);
-            }
-            else {
-                noticeMapper.createNotice(notice);
-                System.err.println(notice.getNoticeId());
-                noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
-            }
-        } catch (Exception e) {
-            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+
+        AbstractNoticeFactory anf = new ApplicationFactory();
+        Notice notice = gpId_notice.getValue();
+        notice.setCreatorId(userId);
+        notice.setGroupId(group.getGroupId());
+        notice.setProjectId(group.getProjectId());
+
+        notice = anf.createNotice(notice);
+        Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, group.getLeaderId(),
+            Notice.Type.APPLICATION.getValue());
+        if (previous != null) {
+            previous.setCreateTime(LocalDateTime.now());
+            noticeMapper.updateNoticeTime(previous);
+        } else {
+            noticeMapper.createNotice(notice);
+            System.err.println(notice.getNoticeId());
+            noticeMapper.stuViewNotice(notice.getNoticeId(), group.getLeaderId());
         }
+//        } catch (Exception e) {
+//            System.err.println(e.getMessage());
+////            throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
+//        }
     }
 
     public void createRemoveNotice(KeyValueWrapper<Long, KeyValueWrapper<Long, Notice>> gpId_notice, Long userId){
@@ -332,8 +334,8 @@ public class NoticeService {
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
         Long stuId = gpId_notice.getValue().getKey();
         if(group == null || !Objects.equals(
-                groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
-                group.getGroupId())){
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
             throw new InvalidFormException("无效的groupId");
         }
         if (!userId.equals(group.getLeaderId())){
@@ -353,17 +355,17 @@ public class NoticeService {
             notice.setProjectId(group.getProjectId());
             notice = rmf.createNotice(notice);
 
-                groupMapper.removeMember(group.getGroupId(), stuId);
-                Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, gpId_notice.getValue().getKey(), Notice.Type.REMOVE.getValue());
-                if(previous != null) {
-                    previous.setCreateTime(LocalDateTime.now());
-                    noticeMapper.createNotice(notice);
-                    noticeMapper.insertStuView(Collections.singleton(gpId_notice.getValue().getKey()), notice.getNoticeId());
+            groupMapper.removeMember(group.getGroupId(), stuId);
+            Notice previous = noticeMapper.getPreviousUndecidedNotice(userId, gpId_notice.getValue().getKey(), Notice.Type.REMOVE.getValue());
+            if(previous != null) {
+                previous.setCreateTime(LocalDateTime.now());
+                noticeMapper.createNotice(notice);
+                noticeMapper.insertStuView(Collections.singleton(gpId_notice.getValue().getKey()), notice.getNoticeId());
 
-                }else {
-                        noticeMapper.createNotice(notice);
-                        noticeMapper.stuViewNotice(notice.getNoticeId(),stuId);
-                    }
+            }else {
+                noticeMapper.createNotice(notice);
+                noticeMapper.stuViewNotice(notice.getNoticeId(),stuId);
+            }
         } catch (Exception e) {
             throw new InvalidFormException("title、content、creatorId、projectId均不为空，title长度上限为200，content为5000");
         }
@@ -374,16 +376,16 @@ public class NoticeService {
         Group group = groupMapper.findGroupById(gpId_notice.getKey());
         Long stuId = gpId_notice.getValue().getKey();
         if(group == null || !Objects.equals(
-                groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
-                group.getGroupId())){
+            groupMapper.findGroupOfStuInProject(userId, group.getProjectId()).getGroupId(),
+            group.getGroupId())){
             throw new InvalidFormException("无效的groupId");
         }
         if (!userId.equals(group.getLeaderId())){
             throw new InvalidFormException("您不是组长");
         }
         if (groupMapper.findGroupOfStuInProject(stuId, group.getProjectId()) == null||
-                !Objects.equals(groupMapper.findGroupOfStuInProject(stuId, group.getProjectId()).getGroupId(),
-                        group.getGroupId())){
+            !Objects.equals(groupMapper.findGroupOfStuInProject(stuId, group.getProjectId()).getGroupId(),
+                group.getGroupId())){
             throw new InvalidFormException("所选成员不在组中");
         }
 
@@ -507,37 +509,37 @@ public class NoticeService {
 //    }
 
 
-    public boolean stuViewNotice(long notice_id, long[] stu_id, long user_id) {
-        //多个学生看到通知
-        long creator_id;
-        creator_id = noticeMapper.findCreatorByNotice(notice_id);
-        if (user_id == creator_id) {
-            for (long stuId : stu_id) {
-                try {
-                    noticeMapper.stuViewNotice(notice_id, stuId);
-                } catch (PSQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return true;
-        }
-        return false;
-    }
+//    public boolean stuViewNotice(long notice_id, long[] stu_id, long user_id) {
+//        //多个学生看到通知
+//        long creator_id;
+//        creator_id = noticeMapper.findCreatorByNotice(notice_id);
+//        if (user_id == creator_id) {
+//            for (long stuId : stu_id) {
+//                try {
+//                    noticeMapper.stuViewNotice(notice_id, stuId);
+//                } catch (PSQLException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
 
-    public boolean stu1ViewNotice(long notice_id, long stu_id, long user_id) {
-        //一个学生
-        long creator_id;
-        creator_id = noticeMapper.findCreatorByNotice(notice_id);
-        if (user_id == creator_id) {
-            try {
-                noticeMapper.stuViewNotice(notice_id, stu_id);
-            } catch (PSQLException e) {
-                throw new RuntimeException(e);
-            }
-            return true;
-        }
-        return false;
-    }
+//    public boolean stu1ViewNotice(long notice_id, long stu_id, long user_id) {
+//        //一个学生
+//        long creator_id;
+//        creator_id = noticeMapper.findCreatorByNotice(notice_id);
+//        if (user_id == creator_id) {
+//            try {
+//                noticeMapper.stuViewNotice(notice_id, stu_id);
+//            } catch (PSQLException e) {
+//                throw new RuntimeException(e);
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
 
     public boolean deleteStuViewNotice(long notice_id, long stu_id, long user_id) {
         long creator_id;

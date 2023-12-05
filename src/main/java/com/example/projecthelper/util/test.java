@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(generateValidJWT("12110001", "3"));
+        System.out.println(JWTUtil.getUserIdByToken("eyJ0eXAiOiJKV1QiLCJ0eXBlIjoiSldUIiwiYWxnIjoiSFM1MTIifQ.eyJzdWIiOiIxMjExMDAxMyIsImV4cCI6MTcwMTg3NDQzMiwiaWRlbnRpdHlDb2RlIjoiMyIsImlhdCI6MTcwMTcwMTYzMn0.nBab1OmulIot8IHpuuNfS2IXnuyLiNjAIFDJVzVYB4bAIJvfInQS-VyWnRUciAETNOf4fC2PoUoG3ObCRLwr-Q"));
+        System.out.println(generateValidJWT("12110013", "3"));
     }
 
     public static String generateValidJWT(String userId, String identityCode){

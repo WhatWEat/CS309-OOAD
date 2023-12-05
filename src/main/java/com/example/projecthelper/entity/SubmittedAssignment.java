@@ -23,6 +23,8 @@ public class SubmittedAssignment {
     private Long togroup;
     @TableField(exist = false)
     private List<MultipartFile> files;
+    @TableField(exist = false)
+    private String submitterName;
     public SubmittedAssignment(Long submitId, Long assignmentId, Long submitterId) {
         this.assignmentId = assignmentId;
         this.submitterId = submitterId;

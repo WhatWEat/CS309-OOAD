@@ -496,12 +496,7 @@ public class AssignmentService {
         if(projectMapper.checkStuInProj(userId,projectId) == null){
             throw new AccessDeniedException("您不在project中");
         }
-        Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
-        List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
-        if (group!=null){
-            submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
-        }
-
+        List<SubmittedAssignment> submittedAssignments = allSub(projectId,userId);
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }
@@ -513,8 +508,12 @@ public class AssignmentService {
     public List<SubmittedAssignment> allSub(Long projectId, Long userId){
         Group group = groupMapper.findGroupOfStuInProject(userId, projectId);
         List<SubmittedAssignment> submittedAssignments = submittedAssMapper.findStuSubByProject(projectId,userId);
+        User user = usersMapper.findUserById(userId);
         if (group!=null){
             submittedAssignments.addAll(submittedAssMapper.findGroupSubByProject(projectId,group.getGroupId()));
+        }
+        for (SubmittedAssignment submittedAssignment: submittedAssignments){
+            submittedAssignment.setSubmitterName(user.getName());
         }
         return submittedAssignments;
     }
@@ -526,12 +525,9 @@ public class AssignmentService {
         }
         List<User> stus = usersMapper.findStuByProj(projectId);
         List<KeyValueWrapper<Long,List<SubmittedAssignment>>> submittedAssignments = new ArrayList<>();
-
         for (User stu : stus){
             submittedAssignments.add(new KeyValueWrapper<>(stu.getUserId(),allSub(projectId,stu.getUserId())));
         }
-
-
         if (submittedAssignments.size()>=(page+1)*pageSize){
             return submittedAssignments.subList(page*pageSize,(page+1)*pageSize-1);
         }

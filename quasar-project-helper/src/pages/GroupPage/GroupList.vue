@@ -256,7 +256,7 @@
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
       <group-form :project-id="projectId" type="Create" @errorDialog="handleError"
-                  @successDialog="handleSuccess" @unfold="show_insert_form = false"></group-form>
+                  @renewGroupList="this.getGroupList" @successDialog="handleSuccess" @unfold="show_insert_form = false"></group-form>
     </el-dialog>
   </div>
   <!--  这里是设置批量创建小组弹窗部分-->

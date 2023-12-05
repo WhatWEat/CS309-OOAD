@@ -270,7 +270,7 @@ watch(pagination, (newVal, oldVal) => {
     onRefresh();
   }
 })
-const isLoadingChart = ref(true);
+const isLoadingChart = ref(false);
 
 async function onRefresh() {
   isLoadingGrade.value = true;

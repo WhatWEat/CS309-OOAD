@@ -263,8 +263,8 @@ function loginStudentId() {
       position: "center",
     });
     console.log(err);
-    console.log(loginValue);
-    console.log(password);
+    console.log(loginValue.value);
+    console.log(password.value);
   });
 }
 //1053246332

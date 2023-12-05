@@ -1,126 +1,148 @@
 <template>
   <div>
-    <q-card class="no-shadow" bordered>
+    <q-card class="no-shadow" flat>
       <q-card-section class="text-h6">
         Bar Chart
-        <q-btn icon="fa fa-download" class="float-right" @click="SaveImage" flat dense>
+        <q-btn icon="fa fa-download" class="float-right" @click="downloadChart" flat dense>
           <q-tooltip>Download PNG</q-tooltip>
         </q-btn>
       </q-card-section>
-      <q-card-section>
-        <ECharts ref="barchart" :option="options"
-                 class="q-mt-md"
-                 :resizable="true"
-                 autoresize style="height: 300px;"
-        />
-      </q-card-section>
+      <div ref="chart" style="width: 500px; height: 400px;"></div>
     </q-card>
   </div>
 </template>
 
 
-<script>
-import {defineComponent, onMounted, ref} from 'vue';
-import ECharts from 'vue-echarts';
+<script setup lang="ts">
+import * as echarts from 'echarts';
+import type {EChartsOption} from 'echarts';
 import "echarts";
-import {api} from "boot/axios"
-import {useRouter} from "vue-router";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {gradeProps} from "src/composables/comInterface";
 
-export default defineComponent({
-  name: "BarChart",
-  components: {
-    ECharts,
-  },
-  setup() {
-    const data = ref([]);
-    const options = ref({});
-    const router = useRouter()
-    const project_id = ref(router.currentRoute.value.params.projectID)
-
-    onMounted(() => {
-      api
-        .get(`/tea/allGradeBook/${project_id.value}`)
-        .then((res) => {
-          let hashmap = res.data.body;
-          let saveData = [];
-          for (const [studentID, grades] of Object.entries(hashmap)) {
-            saveData = saveData.concat(grades);
-          }
-          data.value = saveData;
-          processData(); // 调用处理数据的函数，来生成图表设置
-        })
-        .catch((err) => {
-          console.log("err", err);
-        });
-    });
-
-    function processData() {
-      // 这里根据具体数据结构来做调整
-      const scoreSegments = ['0-50', '51-70', '71-80', '81-90', '91-100'];
-      let assignmentScores = {}; // 存储每项作业对应分数段的学生人数
-
-      // 假设 data.value 是一个包含所有分数的数组
-      data.value.forEach(grades => {
-        const {assignmentId,grade} = grades; // 假设每个 grade 都有assignment和score字段
-        if (!assignmentScores[assignmentId]) {
-          assignmentScores[assignmentId] = scoreSegments.map(() => 0);
-        }
-        const segmentIndex = scoreSegments.findIndex(segment => {
-          const [min, max] = segment.split('-').map(Number);
-          return grade >= min && grade <= max;
-        });
-        if (segmentIndex !== -1) {
-          assignmentScores[assignmentId][segmentIndex]++;
-        }
-      });
-
-      // 准备 datasetSource
-      const datasetSource = [
-        ['assignment', ...scoreSegments],
-        ...Object.keys(assignmentScores).map(assignmentId => [
-          assignmentId,
-          ...assignmentScores[assignmentId]
-        ])
-      ];
-
-      // 更新 options
-      options.value = {
-        legend: {bottom: 10},
-        tooltip: {},
-        dataset: {
-          source: datasetSource,
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '20%',
-          top: '5%',
-          containLabel: true
-        },
-        xAxis: {type: 'category'},
-        yAxis: {},
-        series: scoreSegments.map(() => ({type: 'bar'})),
-      };
-    }
-
-    // 确保返回响应式引用
-    return {
-      options,
-    };
-  },
-  methods: {
-    // 方法维持不变
-    SaveImage() {
-      const linkSource = this.$refs.barchart.getDataURL();
-      const downloadLink = document.createElement('a');
-      document.body.appendChild(downloadLink);
-      downloadLink.href = linkSource;
-      downloadLink.target = '_self';
-      downloadLink.download = 'BarChart.png';
-      downloadLink.click();
-    },
-  },
+const chart = ref<HTMLElement>();
+let myChart: echarts.ECharts | null = null;
+const props = defineProps({
+  tableData: Array<gradeProps>,
+  assignment_set: Set<number>,
+  all_assignment: Boolean,
+  student_set: Set<number>,
+  all_student: Boolean,
 });
+onMounted(() => {
+  if (chart.value) {
+    myChart = echarts.init(chart.value);
+    setOption();
+    myChart.setOption(option.value);
+  }
+})
+watch(props, (newVal, oldVal) => {
+  if (myChart) {
+    setOption();
+    myChart.setOption(option.value);
+  }
+})
+onBeforeUnmount(() => {
+  if (myChart) {
+    myChart.dispose();
+  }
+})
+
+function downloadChart() {
+  if (!myChart) return;
+
+  const url = myChart.getDataURL({
+    type: 'png',
+    pixelRatio: 2,
+    backgroundColor: '#fff'
+  });
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'chart.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+const tableTab = ['score', 'amount', 'assignment'];
+
+function setOption() {
+  let source = [], map = new Map();
+  props.tableData!.forEach((item) => {
+    let temp = [];
+    temp.push(item.grade);
+    temp.push(1);
+    if ((props.all_assignment || props.assignment_set!.has(item.assignmentId)) && (props.all_student || props.student_set!.has(Number(item.submitterId)))) {
+      if (!map.has(item.assignmentId)) {
+        map.set(item.assignmentId, temp);
+      } else {
+        let current = map.get(item.assignmentId);
+        current[0] = (current[0] * current[1]++ + item.grade) / current[1];
+        map.set(item.assignmentId, current);
+      }
+    }
+  })
+  let min = 100000, max = 0;
+  for (let [key, value] of map) {
+    let temp = [];
+    temp.push(value[0]);
+    temp.push(value[1]);
+    if (value[0] < min) min = value[0];
+    if (value[0] > max) max = value[0];
+    temp.push(key);
+    source.push(temp);
+  }
+  source.sort((a, b) => {
+    return a[2] - b[2];
+  })
+  source.unshift(tableTab);
+  option.value.dataset.source = source;
+  option.value.visualMap.min = Math.min(min - 10, 0)
+  option.value.visualMap.max = Math.max(max + 10, 100);
+  console.log('soure', source);
+}
+
+const option = ref({
+  dataset: {
+    source: [
+      ['score', 'amount', 'assignment'],
+
+    ]
+  },
+  grid: {containLabel: true},
+  xAxis: {
+    name: 'amount',
+    minInterval: 1,
+  },
+  yAxis: {
+    name: 'assignment',
+    type: 'category'},
+  visualMap: {
+    orient: 'horizontal',
+    left: 'center',
+    min: 10,
+    max: 100,
+    text: ['High Score', 'Low Score'],
+    // Map the score column to color
+    dimension: 0,
+    inRange: {
+      color: ['#65B581', '#FFCE34', '#FD665F']
+    }
+  },
+  series: [
+    {
+      type: 'bar',
+      encode: {
+        // Map the "amount" column to X axis.
+        x: 'amount',
+        // Map the "product" column to Y axis
+        y: 'assignment'
+      }
+    }
+  ]
+});
+
 </script>
 
 

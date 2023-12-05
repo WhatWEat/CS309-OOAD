@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-card class="no-shadow" bordered>
+    <q-card class="no-shadow"  flat>
       <q-card-section class="text-h6">
         Line Chart
       </q-card-section>

@@ -203,7 +203,7 @@ public class UserService {
                 jwt = checkCode(type_num_code.getValue().getValue(),type_num_code.getValue().getKey(),FUNCTION.__MODIFY_PHONE_,false);
                 if (Objects.equals(
                         stringRedisTemplate.opsForValue().get(
-                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_NUMBER_)
+                                getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_)
                         ),type_num_code.getValue().getKey())
                 ){
                     stringRedisTemplate.delete(getRedisKey(String.valueOf(userId),FUNCTION.__MODIFY_PHONE_));
@@ -233,11 +233,11 @@ public class UserService {
     public void sendCodeToChangeNumber(KeyValueWrapper<Integer, String> typeNum, Long userId){
         switch (typeNum.getKey()){
             case 1 -> {
-                User user = usersMapper.findUserByPhone(typeNum.getKey().toString());
+                User user = usersMapper.findUserByPhone(typeNum.getValue());
                 if (user != null)
                     throw new InvalidFormException("手机号已被注册");
                 try {
-                    sendMassage(typeNum.getKey().toString(), FUNCTION.__MODIFY_PHONE_,false);
+                    sendMassage(typeNum.getValue(), FUNCTION.__MODIFY_PHONE_,false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

@@ -27,7 +27,9 @@ public class GroupManagerFactory {
         return gmf;
     }
 
-    public GroupManager getGroupManager(Long gpId, GroupMapper groupMapper, NoticeMapper noticeMapper){
+    public GroupManager getGroupManager(
+        Long gpId, GroupMapper groupMapper, NoticeMapper noticeMapper
+    ){
         if(!idGmMap.containsKey(gpId)){
             synchronized (GroupManagerFactory.class){
                 if(!idGmMap.containsKey(gpId)){

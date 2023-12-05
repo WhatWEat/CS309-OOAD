@@ -226,10 +226,10 @@ public class GroupService {
             StringBuilder sb = new StringBuilder();
             if(group.getInstructorId() == null || projectMapper.checkTaInProj(pjId, group.getInstructorId()) == null)
                 sb.append("无效的instructorId|");
-            if(group.getLeaderId() != null &&
-                (groupMapper.findGroupOfStuInProject(group.getLeaderId(), pjId) == null ||
-                    projectMapper.checkStuInProj(group.getLeaderId(), pjId) != null))
-                sb.append("无效的leaderId");
+//            if(group.getLeaderId() != null &&
+//                (groupMapper.findGroupOfStuInProject(group.getLeaderId(), pjId) != null ||
+//                    projectMapper.checkStuInProj(group.getLeaderId(), pjId) == null))
+//                sb.append("无效的leaderId");
             if(group.getMaxsize() == null || group.getMaxsize() < findMemberOfGroup(group.getGroupId()))
                 sb.append("maxsize小于现在的人数|");
             if(group.getReportTime() == null || group.getReportTime().isBefore(LocalDateTime.now()))

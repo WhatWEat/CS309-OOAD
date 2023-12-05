@@ -17,13 +17,6 @@ public class ResponseResult<T>{
     private String msg; //响应信息
     private String jwt_token;
 
-    public ResponseResult(int statusCode, T bd, String msg, String JWT_token) {
-        this.statusCode = statusCode;
-        this.body = bd;
-        this.msg = msg;
-        this.jwt_token = JWT_token;
-    }
-
     public static <T> ResponseResult<T> ok(T bd, String msg, String JWT_token){
         return new ResponseResult<>(StatusCode.OK.getValue(), bd, msg, JWT_token);
     }
@@ -42,6 +35,13 @@ public class ResponseResult<T>{
 
     public static <T> ResponseResult<T> internalError(T bd, String msg){
         return new ResponseResult<>(StatusCode.INTERNAL_SERVER_ERROR.getValue(), bd, msg, null);
+    }
+
+    public ResponseResult(int statusCode, T bd, String msg, String JWT_token) {
+        this.statusCode = statusCode;
+        this.body = bd;
+        this.msg = msg;
+        this.jwt_token = JWT_token;
     }
 
 

@@ -87,12 +87,7 @@ onMounted(() => {
         {
           title: 'Grade',
           icon: 'school',
-          link: `/projects/${projectID.value}/sgrade`
-        },
-        {
-          title: 'TGrade',
-          icon: 'school',
-          link: `/projects/${projectID.value}/tgrade`
+          link: `/projects/${projectID.value}/grade`
         },
         {
           title: 'Person',

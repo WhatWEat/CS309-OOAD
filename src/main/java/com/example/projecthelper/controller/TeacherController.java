@@ -84,7 +84,8 @@ public class TeacherController {
         );
         return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
     }
-    @PostMapping("/add_stu_to_project")
+
+    @PostMapping("/add_stu_to_project") //FUNC: 会覆盖掉之前的stu
     public ResponseResult<Object> addStuToProject(
         HttpServletRequest request,
         @RequestParam("file") MultipartFile file) {

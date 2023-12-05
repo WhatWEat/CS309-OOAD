@@ -8,6 +8,7 @@ import com.example.projecthelper.util.Wrappers.KeyValueWrapper;
 import com.example.projecthelper.util.Wrappers.ObjectWrapper;
 import java.util.List;
 import java.util.Set;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -84,6 +85,9 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     @Select("select stuId from stuInProject where projectId = #{projectId}")
     List<Long> findStuIdsByProject(Long projectId);
+
+    @Delete("delete from stuInProject where projectId = #{projectId}")
+    void deleteAllStuFromProj(Long projectId);
 
     @Insert({
         "<script>",

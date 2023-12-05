@@ -113,7 +113,7 @@ public class ProjectService {
                 filter(e -> Objects.equals(userId, projectMapper.findTeacherByProject(e.getKey()))).
             collect(Collectors.toSet());
         result.forEach(e -> {
-            projectMapper.findStuIdsByProject(e.getKey()).forEach(e.getValue()::remove);
+            projectMapper.deleteAllStuFromProj(e.getKey());
             if(e.getValue() != null && !e.getValue().isEmpty())
                 projectMapper.insertStuIds(e.getKey(), e.getValue());
         });

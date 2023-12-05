@@ -3,7 +3,7 @@
     <q-card-section class="row" horizontal>
       <q-card-section class="q-pt-xs" style="width: 500px">
         <div class="text-overline">Assignment Statistics</div>
-        <q-separator/>
+        <q-separator />
         <span v-if="!assignmentAll">
           <q-chip v-for="(i,index) in assignmentConditional" :key="i" removable square
                   @remove="assignmentConditional.splice(index,1)" :color="lightColors[Math.floor(Math.random() * lightColors.length)]" class="col-auto">
@@ -12,6 +12,10 @@
         </span>
         <q-chip v-else removable square @remove="assignmentAll=false" :color="lightColors[Math.floor(Math.random() * lightColors.length)]"> All Assignment</q-chip>
         <q-separator/>
+        <q-chip removable square v-else @remove="assignmentAll = false">
+          All Assignment</q-chip
+        >
+        <q-separator />
         <span v-if="!userAll">
           <q-chip v-for="(i, index) in userConditional" :key="i" removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]"
                   @remove="userConditional.splice(index, 1)">
@@ -21,7 +25,7 @@
         </span>
         <q-chip v-else removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]" @remove="userAll=false"> All Student</q-chip>
       </q-card-section>
-      <q-separator vertical/>
+      <q-separator vertical />
       <q-card-section>
         <q-item-section side>
           <q-btn
@@ -48,13 +52,51 @@
         <q-card-section side></q-card-section>
       </q-card-section>
     </q-card-section>
-    <q-separator/>
+    <q-separator />
     <q-card-section>
-      <BarChart :all_assignment="assignmentAll"
-                :all_student="userAll"
-                :assignment_set="new Set(assignmentConditional)"
-                :student_set="new Set(userConditional)"
-                :table-data="charTable"></BarChart>
+      <q-tab-panels v-model="tab" animated>
+        <q-tab-panel name="barchart">
+          <BarChart
+            :table-data="charTable"
+            :student_set="new Set(userConditional)"
+            :assignment_set="new Set(assignmentConditional)"
+            :all_assignment="assignmentAll"
+            :all_student="userAll"
+            :assignment_map="assignment_list_map"
+          ></BarChart>
+        </q-tab-panel>
+
+        <q-tab-panel name="linearchar">
+          <LineChart
+            :table-data="charTable"
+            :student_set="new Set(userConditional)"
+            :assignment_set="new Set(assignmentConditional)"
+            :all_assignment="assignmentAll"
+            :all_student="userAll"
+            :user_map="student_list_map"
+            :assignment_map="assignment_list_map"
+          ></LineChart>
+        </q-tab-panel>
+
+        <q-tab-panel name="piechart">
+          <PieChart
+            :table-data="charTable"
+            :student_set="new Set(userConditional)"
+            :assignment_set="new Set(assignmentConditional)"
+            :all_assignment="assignmentAll"
+            :all_student="userAll"
+            :assignment_map="assignment_list_map"
+          ></PieChart>
+        </q-tab-panel>
+      </q-tab-panels>
+
+      <q-separator />
+
+      <q-tabs v-model="tab" dense align="justify" narrow-indicator>
+        <q-tab name="barchart" label="Bar Chart" />
+        <q-tab name="linearchar" label="Linear Chart" />
+        <q-tab name="piechart" label="Pie Chart" />
+      </q-tabs>
     </q-card-section>
   </q-card>
   <q-dialog v-model="isOpenEditConditional" persistent>
@@ -62,39 +104,39 @@
       <q-card-section class="row justify-center">
         <q-list style="width: 700px; max-width: 80vw">
           <q-expansion-item
-            default-opened
-            group="someGroup"
             header-class="text-h6"
+            default-opened
             label="Assignment choose"
+            group="someGroup"
           >
             <q-toggle
               v-model="assignmentAll"
               color="green"
-              keep-color
               label="All assignment"
+              keep-color
             >
             </q-toggle>
             <filter-card-list
-              v-if="!assignmentAll"
               :id_list="assignment_list"
+              v-if="!assignmentAll"
               @update:selected="assignmentConditional = $event"
             ></filter-card-list>
           </q-expansion-item>
           <q-separator></q-separator>
           <q-expansion-item
-            group="someGroup"
             header-class="text-h6"
             label="Person choose"
+            group="someGroup"
           >
             <q-toggle
               v-model="userAll"
               color="primary"
-              keep-color
               label="All student"
+              keep-color
             />
             <filter-card-list
-              v-if="!userAll"
               :id_list="student_id_list"
+              v-if="!userAll"
               @update:selected="userConditional = $event"
             >
             </filter-card-list>
@@ -115,14 +157,18 @@
   </q-dialog>
 </template>
 
-<script lang="ts" setup>
-import {onMounted, ref} from "vue";
-import {api} from "boot/axios";
-import {gradeProps} from "src/composables/comInterface";
-import {useProjectId} from "src/composables/usefulFunction";
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { api } from "boot/axios";
+import { gradeProps, projectProps } from "src/composables/comInterface";
+import { useProjectId } from "src/composables/usefulFunction";
+import { computed } from "vue-demi";
 import FilterCardList from "components/Chart/filterCardList.vue";
 import BarChart from "components/Chart/BarChart.vue";
+import LineChart from "components/Chart/LineChart.vue";
+import PieChart from "components/Chart/PieChart.vue";
 
+const tab = ref("barchart");
 const charTable = ref<gradeProps[]>([]),
   charStudentIdList = ref<Map<number, gradeProps[]>>(new Map());
 const student_id_list = ref<number[]>([]),
@@ -164,6 +210,8 @@ function onFresh() {
       for (let [key, value] of charStudentIdList.value) {
         value.forEach((item) => {
           assignment_set.add(item.assignmentId);
+          assignment_list_map.value.set(item.assignmentId, item.title!);
+          student_list_map.value.set(Number(item.submitterId), item.submitterName!);
         });
       }
       assignment_list.value = Array.from(assignment_set);

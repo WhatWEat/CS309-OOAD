@@ -1,195 +1,120 @@
 <template>
   <div>
-    <q-card class="no-shadow"  flat>
+    <q-card class="no-shadow" flat>
       <q-card-section class="text-h6">
-        Line Chart
+        Linear Chart
+        <q-btn icon="fa fa-download" class="float-right" @click="downloadChart(myChart)" flat dense>
+          <q-tooltip>Download PNG</q-tooltip>
+        </q-btn>
       </q-card-section>
-      <q-card-section>
-        <ECharts :option="options"
-                 class="q-mt-md"
-                 :resizable="true"
-                 autoresize style="height: 300px;"
-        />
-      </q-card-section>
+      <div ref="chart" style="width: 500px; height: 400px;"></div>
     </q-card>
   </div>
 </template>
 
-<script>
-import * as echarts from 'echarts'
-import ECharts from "vue-echarts";
-import {defineComponent} from "vue";
-export default defineComponent({
-  name: "LineChart",
-  components:{
-    ECharts
-  },
-  data() {
-    return {
-      options: {
-        color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087', '#FFBF00'],
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'cross',
-            label: {
-              backgroundColor: '#6a7985'
-            }
-          }
-        },
-        legend: {
-          data: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5'],
-          bottom: 10,
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '20%',
-          top: '5%',
-          containLabel: true
-        },
-        xAxis: [
-          {
-            type: 'category',
-            boundaryGap: false,
-            data: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-          }
-        ],
-        yAxis: [
-          {
-            type: 'value'
-          }
-        ],
-        series: [
-          {
-            name: 'Line 1',
-            type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(128, 255, 165)'
-              }, {
-                offset: 1,
-                color: 'rgba(1, 191, 236)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: [140, 232, 101, 264, 90, 340, 250]
-          },
-          {
-            name: 'Line 2',
-            type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(0, 221, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(77, 119, 255)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: [120, 282, 111, 234, 220, 340, 310]
-          },
-          {
-            name: 'Line 3',
-            type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(55, 162, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(116, 21, 219)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: [320, 132, 201, 334, 190, 130, 220]
-          },
-          {
-            name: 'Line 4',
-            type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(255, 0, 135)'
-              }, {
-                offset: 1,
-                color: 'rgba(135, 0, 157)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: [220, 402, 231, 134, 190, 230, 120]
-          },
-          {
-            name: 'Line 5',
-            type: 'line',
-            stack: 'Total',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            label: {
-              show: true,
-              position: 'top'
-            },
-            areaStyle: {
-              opacity: 0.8,
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(255, 191, 0)'
-              }, {
-                offset: 1,
-                color: 'rgba(224, 62, 76)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: [220, 302, 181, 234, 210, 290, 150]
-          }
-        ]
+<script setup lang="ts">
+import * as echarts from 'echarts';
+import type {EChartsOption} from 'echarts';
+import "echarts";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {gradeProps} from "src/composables/comInterface";
+import {downloadChart, truncate} from "src/composables/usefulFunction";
+
+const chart = ref<HTMLElement>();
+let myChart: echarts.ECharts | null = null;
+const props = defineProps({
+  tableData: Array<gradeProps>,
+  assignment_set: Set<number>,
+  all_assignment: Boolean,
+  student_set: Set<number>,
+  all_student: Boolean,
+  user_map: Map<number, string>,
+  assignment_map: Map<number, string>,
+});
+
+onMounted(() => {
+  if (chart.value) {
+    myChart = echarts.init(chart.value);
+    setOption();
+    myChart.setOption(option.value);
+  }
+})
+watch(props, (newVal, oldVal) => {
+  if (myChart) {
+    setOption();
+    myChart.setOption(option.value);
+  }
+})
+onBeforeUnmount(() => {
+  if (myChart) {
+    myChart.dispose();
+  }
+})
+const dataDict = {
+  name: '',
+  type: 'line',
+  stack: 'Total',
+  data: []
+};
+function setOption(){
+  // 第一维度是学号 第二位是作业号， 第三维是成绩
+  let userMap = new Map<string, Map<number, number>>();
+  let assignmentSet = new Set<number>(), userSet = new Set<string>();
+  for (let item of props.tableData!){
+    if ((props.all_student || props.student_set!.has(Number(item.submitterId))) &&
+      props.all_assignment || props.assignment_set!.has(Number(item.assignmentId))){
+      userMap.set(item.submitterId, new Map());
+      assignmentSet.add(item.assignmentId);
+      userSet.add(item.submitterId);
+      userMap.get(item.submitterId)!.set(item.assignmentId, item.grade);
+    }
+  }
+  for (let [key, value] of userMap){
+    for(let assignment of assignmentSet){
+      if (!value.has(assignment)){
+        value.set(assignment, 0);
       }
     }
   }
-})
+  let assignmentList = Array.from(assignmentSet).map((item) => Number(item));
+  assignmentList.sort((a, b) => a - b);
+  option.value.legend.data = Array.from(userSet).map((item) => item.toString());
+  option.value.xAxis.data = assignmentList.map((item) => truncate(item.toString()+props.assignment_map?.get(Number(item)),7));
+  option.value.series = [];
+  for(const user of userSet.keys()){
+    let temp = JSON.parse(JSON.stringify(dataDict));
+    temp.name = user.toString();
+    for (const assignment of assignmentList){
+      temp.data.push(userMap.get(user)!.get(assignment));
+    }
+    option.value.series.push(temp);
+  }
+}
+const option = ref({
+  tooltip: {
+    trigger: 'axis'
+  },
+  legend: {
+    data: ['']
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+
+  ]
+});
 </script>
 
 <style scoped>

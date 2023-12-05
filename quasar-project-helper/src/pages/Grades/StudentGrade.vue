@@ -80,8 +80,14 @@
           <q-td key="assignmentId" :props="props">
             <span>{{ props.row.assignmentId }}</span>
           </q-td>
+          <q-td key="title" :props="props">
+            <span>{{ props.row.title }}</span>
+          </q-td>
           <q-td key="submitterId" :props="props">
             <span>{{ props.row.submitterId }}</span>
+          </q-td>
+          <q-td key="submitterName" :props="props">
+            <span>{{ props.row.submitterName }}</span>
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
@@ -174,11 +180,29 @@ const columns = [
     sortable: true
   },
   {
+    name: "title",
+    required: true,
+    label: "title",
+    align: "left",
+    field: row => row.title,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
     name: "submitterId",
     required: true,
     label: "submitterId",
     align: "left",
     field: row => row.submitterId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "submitterName",
+    required: true,
+    label: "submitterName",
+    align: "left",
+    field: row => row.submitterName,
     format: val => `${val}`,
     sortable: true
   },
@@ -213,20 +237,20 @@ const columns = [
 
 const columns1 = [
   {
-    name: "assignmentId",
+    name: "title",
     required: true,
-    label: "assignmentId",
+    label: "title",
     align: "left",
-    field: row => row.assignmentId,
+    field: row => row.title,
     format: val => `${val}`,
     sortable: true
   },
   {
-    name: "submitterId",
+    name: "submitterName",
     required: true,
-    label: "submitterId",
+    label: "submitterName",
     align: "left",
-    field: row => row.submitterId,
+    field: row => row.submitterName,
     format: val => `${val}`,
     sortable: true
   },
@@ -249,6 +273,7 @@ const columns1 = [
     sortable: true
   },
 ]
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
@@ -345,14 +370,13 @@ function saveUploadAvatar() {
     excel_file.value = model.value;
     let formdata = new FormData();
     formdata.append('file', excel_file.value);
-    api.post('/tea/grade_ass_with_file', {
+    api.post('/tea/grade_ass_with_file',formdata,{
       params: {
-        file: formdata,
         assignmentId: assignmentID.value,
       },
     }).then((res) => {
-      console.log('data',data.value)
       data.value = res.data.body;
+      console.log('data',data.value)
     }).catch((err) => {
       console.log(err)
     })

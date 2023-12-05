@@ -6,9 +6,9 @@
     <el-form-item label="GroupMaxSize" prop="maxSize">
       <el-input v-model.number="formData_temp.maxSize"></el-input>
     </el-form-item>
-<!--    <el-form-item label="GroupName" prop="groupName">-->
-<!--      <el-input v-model="formData_temp.groupName"></el-input>-->
-<!--    </el-form-item>-->
+    <el-form-item label="GroupName" prop="groupName">
+      <el-input v-model="formData_temp.groupName"></el-input>
+    </el-form-item>
     <el-form-item label="Deadline" required>
       <el-col :span="11">
         <el-form-item prop="date1_deadline">
@@ -116,6 +116,7 @@
 import {defineComponent, ref} from "vue";
 import {descriptionProps} from "element-plus";
 import {api} from "boot/axios";
+import cloneDeep from "lodash/cloneDeep";
 
 export default defineComponent({
   name: "GroupFrom",
@@ -126,20 +127,7 @@ export default defineComponent({
   },
   data() {
     return {
-      formData_temp: {
-        groupId: this.formData.groupId,
-        maxSize: this.formData.maxSize,
-        groupName: this.formData.groupName,
-        date1_deadline: this.formData.date1_deadline,
-        date2_deadline: this.formData.date2_deadline,
-        data1_presentation: this.formData.data1_presentation,
-        data2_presentation: this.formData.data2_presentation,
-        instructor: this.formData.instructor,
-        leader: this.formData.leader,
-        members: this.formData.members,
-        technicalStack: this.formData.technicalStack,
-        desc: this.formData.desc
-      },
+      formData_temp: cloneDeep(this.formData),
       formRules: {
         groupId: [
           {required: true, message: "请输入小组ID", trigger: 'blur'},
@@ -216,6 +204,7 @@ export default defineComponent({
           {required: false, message: '请填写更多信息', trigger: 'blur'}
         ]
       },
+
       inputVisible_members: false,
       inputValue_members: '',
       inputVisible_technical: false,
@@ -223,19 +212,6 @@ export default defineComponent({
 
       isEdit: ref(this.type === 'Edit'),
       isCreate: ref(this.type !== 'Edit'),
-
-      errorMessage: {
-        'icon_name': 'error',
-        'icon_color': 'red',
-        'icon_text_color': 'black',
-        'text': ""
-      },
-      successMessage: {
-        'icon_name': 'done',
-        'icon_color': 'blue',
-        'icon_text_color': 'white',
-        'text': ""
-      }
     };
   },
   methods: {
@@ -366,9 +342,11 @@ export default defineComponent({
       console.log('handleInputConfirm_members')
       console.log(this.inputValue_members)
       if (this.inputValue_members !== '') {
-        this.formData_temp.members[this.inputValue_members] = this.inputValue_members
+        console.log('开始插入,DEbug部分，查看formData_temp：'  + '\n')
+        console.log(this.formData_temp)
+        this.formData_temp.members.push(this.inputValue_members)
         console.log('Have pushed' + this.inputValue_members + '\n')
-        // console.log('Now members are: ' + this.formData_temp.members + '\n')
+        console.log('Now members are: ' + this.formData_temp.members + '\n')
       }
       else {
         console.log('inputValue_members is null')
@@ -387,20 +365,21 @@ export default defineComponent({
       this.inputValue_technical = ''
     },
     handleClose_members(member) {
-      console.log('handleClose_members')
-      console.log(member)
-      console.log(this.formData_temp.members)
-      // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
-      // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
-      Object.keys(this.formData_temp.members).forEach((key) => {
-        if (this.formData_temp.members[key] === member) {
-          delete(this.formData_temp.members[key]);
-          console.log('Have deleted' + member + '\n')
-        }
-        console.log('not found' + member + '\n')
-        console.log(this.formData_temp.members[key] +' ' + member + '\n')
-      });
-      console.log(this.formData_temp.members)
+      // console.log('handleClose_members')
+      // console.log(member)
+      // console.log(this.formData_temp.members)
+      // // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      // // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      // Object.keys(this.formData_temp.members).forEach((key) => {
+      //   if (this.formData_temp.members[key] === member) {
+      //     delete(this.formData_temp.members[key]);
+      //     console.log('Have deleted' + member + '\n')
+      //   }
+      //   console.log('not found' + member + '\n')
+      //   console.log(this.formData_temp.members[key] +' ' + member + '\n')
+      // });
+      // console.log(this.formData_temp.members)
+      this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
 
     },
     handleClose_technical(technical) {

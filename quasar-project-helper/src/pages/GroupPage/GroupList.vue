@@ -170,7 +170,6 @@
     </div>
   </div>
 
-
   <!--  这里是本组信息部分-->
 
   <!--  这里是弹窗部分-->
@@ -580,7 +579,6 @@ export default {
       });
     },
     handleEditClick(row) {
-      this.show_edit_form = true;
       if (row !== undefined) {
         this.selected_row.row = row;
       }
@@ -592,12 +590,12 @@ export default {
             groupId: response.data.body.groupId,
             groupSize: response.data.body.members.length,
             groupMaxSize: response.data.body.maxsize,
-            members: merger(response.data.body.members, response.data.body.memberIds),
+            members: response.data.body.memberIds,
             creationTime: formatDateStringPro(response.data.body.teamTime),
             deadline: formatDateStringPro(response.data.body.deadline),
             presentationTime: formatDateStringPro(response.data.body.reportTime),
-            instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
-            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
+            instructor: response.data.body.instructorId,
+            leader: response.data.body.leaderId,
             moreInfo: response.data.body.description,
           };
           this.formData.groupId = groupId;
@@ -624,6 +622,8 @@ export default {
         console.log("errorHere");
         console.log(error);
       });
+
+      this.show_edit_form = true;
     },
     handleDeleClick(row) {
       if (row !== undefined) {

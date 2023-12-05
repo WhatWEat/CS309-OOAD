@@ -533,6 +533,7 @@ public class AssignmentService {
         }
         for (SubmittedAssignment submittedAssignment: submittedAssignments){
             submittedAssignment.setSubmitterName(user.getName());
+            submittedAssignment.setTitle(assignmentMapper.findAssById(submittedAssignment.getAssignmentId()).getTitle());
         }
         return submittedAssignments;
     }

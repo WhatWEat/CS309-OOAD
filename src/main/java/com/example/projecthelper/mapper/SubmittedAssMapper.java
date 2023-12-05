@@ -54,7 +54,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
 //    void removeGroupAss(long assignmentId, long groupId);
 
     @Select("""
-            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup,title
+            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup
             FROM submittedAssignment sa
             join assignment a on sa.assignmentid = a.assignmentid
             WHERE type = 'i' and projectId = #{projectId} AND submitterid = #{stuId};
@@ -63,7 +63,7 @@ public interface SubmittedAssMapper extends BaseMapper<SubmittedAssignment> {
     List<SubmittedAssignment> findStuSubByProject(long projectId, long stuId);
 
     @Select("""
-            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup,title
+            SELECT sa.assignmentid, grade, submitterid, text, comment, review, submittedtime, togroup, togroup
             FROM submittedAssignment sa
             join assignment a on sa.assignmentid = a.assignmentid
             WHERE type = 'g' and projectId = #{projectId} AND submitterid = #{groupId};

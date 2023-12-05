@@ -171,18 +171,6 @@
   </div>
 
 
-  <div class="row justify-center">
-    <div class="col-6">
-      <q-card >
-        <q-card-section>sdf</q-card-section>
-        <q-btn >sdf sdf</q-btn>
-      </q-card>
-    </div>
-  </div>
-
-
-
-
   <!--  这里是本组信息部分-->
 
   <!--  这里是弹窗部分-->
@@ -252,18 +240,20 @@
     </q-dialog>
   </div>
   <!--  这里是Edit表单弹窗部分-->
-  <div>
-    <el-dialog v-model="show_edit_form" :center=true>
-      <template v-slot:header>
-        <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
-      </template>
-      <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
-                  @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
-    </el-dialog>
+  <div class="row">
+    <div class="col-11">
+      <el-dialog v-model="show_edit_form" :center=true>
+        <template v-slot:header>
+          <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
+        </template>
+        <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+                    @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
+      </el-dialog>
+    </div>
   </div>
   <!--  这里是创建表单弹窗改部分-->
-  <div>
-    <el-dialog v-model="show_insert_form" :center=true>
+  <div class="row">
+    <el-dialog v-model="show_insert_form" :center=true >
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -336,6 +326,8 @@ import {useQuasar} from "quasar";
 //import {useUserStore} from 'src/composables/useUserStore';
 //import {formatDateString, merger} from "src/composables/usefulFunction";
 // TODO 权限管理，学生可以浏览，老师可以编辑 handleAddClick
+// TODO disable presentation time
+// TODO 检测edit表单bug
 export default {
   name: 'GroupTeacherPage',
   userStore: useUserStore(),
@@ -698,6 +690,7 @@ export default {
     getProjectId() {
       console.log("尝试获取ProjectId...\n")
       this.projectId = this.$route.params.projectID;
+      console.log()
       console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
     },
     // 获取界面的GroupList的相关信息.即为概括性group信息部分
@@ -778,7 +771,7 @@ export default {
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
       console.log("尝试获取GroupUserSelfDetail...\n")
-      if(this.groupId === -1) return;
+      if (this.groupId === -1) return;
       api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body
@@ -884,26 +877,47 @@ export default {
         }
       }).then(
         async (response) => {
-          this.dialogMessage = {
-            'icon_name': 'done',
-            'icon_color': 'green',
-            'icon_text_color': 'white',
-            'text': response.data.msg,
-          }
+          // this.dialogMessage = {
+          //   'icon_name': 'done',
+          //   'icon_color': 'green',
+          //   'icon_text_color': 'white',
+          //   'text': response.data.msg,
+          // }
           // 上面执行完毕后,弹出对话框
-          await this.$nextTick();
-          this.show_confirm_dialog = true;
+          // await this.$nextTick();
+          // this.show_confirm_dialog = true;
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'done',
+            message: response.data.msg,
+            position: 'top',
+            timeout: 3000,
+            progress: true,
+          })
+          console.clear();
+          console.log('response 这里');
+          console.log(response);
         }
       ).catch(async (error) => {
-        this.dialogMessage = {
-          'icon_name': 'error',
-          'icon_color': 'red',
-          'icon_text_color': 'white',
-          'text': error.response.data.msg,
-        }
-        // 上面执行完毕后,弹出对话框
-        await this.$nextTick();
-        this.show_confirm_dialog = true;
+        // this.dialogMessage = {
+        //   'icon_name': 'error',
+        //   'icon_color': 'red',
+        //   'icon_text_color': 'white',
+        //   'text': error.response.data.msg,
+        // }
+        // // 上面执行完毕后,弹出对话框
+        // await this.$nextTick();
+        // this.show_confirm_dialog = true;
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: error.response.data.msg,
+          position: 'top',
+          timeout: 3000,
+          progress: true,
+        })
       });
       this.invite_member_id = ''
     },
@@ -939,25 +953,43 @@ export default {
     },
     deleteLeaveGroup() {
       let groupId = this.selected_row.row.groupId;
-      api.delete('/stu/leave_group').then(
+      api.delete('/stu/leave_group/' + this.projectId).then(
         (response) => {
           console.log(response);
-          this.dialogMessage = {
-            'icon_name': 'done',
-            'icon_color': 'green',
-            'icon_text_color': 'white',
-            'text': response.data.msg,
-          }
-          this.show_confirm_dialog = true;
+          // this.dialogMessage = {
+          //   'icon_name': 'done',
+          //   'icon_color': 'green',
+          //   'icon_text_color': 'white',
+          //   'text': response.data.msg,
+          // }
+          // this.show_confirm_dialog = true;
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'done',
+            message: response.data.msg,
+            position: 'top',
+            timeout: 3000,
+            progress: true,
+          })
         }
       ).catch((error) => {
-        this.dialogMessage = {
-          'icon_name': 'error',
-          'icon_color': 'red',
-          'icon_text_color': 'white',
-          'text': error.response.data.msg,
-        }
-        this.show_confirm_dialog = true;
+        // this.dialogMessage = {
+        //   'icon_name': 'error',
+        //   'icon_color': 'red',
+        //   'icon_text_color': 'white',
+        //   'text': error.response.data.msg,
+        // }
+        // this.show_confirm_dialog = true;
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: error.response.data.msg,
+          position: 'top',
+          timeout: 3000,
+          progress: true,
+        })
       });
     },
   },

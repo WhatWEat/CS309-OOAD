@@ -93,7 +93,6 @@ import {api} from "boot/axios";
 import cloneDeep from "lodash/cloneDeep";
 import {ref} from "vue";
 
-
 export default {
   data() {
     return {
@@ -122,20 +121,21 @@ export default {
 
     //**************************POST**************************
     postCreateAssignment() {
-      console.log("postCreateAssignment");
-      this.formDate.append('title', this.form_temp.title);
-      this.formDate.append('description', this.form_temp.desc);
-      this.formDate.append('projectId', this.projectId_temp);
-      this.formDate.append('fullMark', this.form_temp.fullMark);
-      this.formDate.append('type', this.form_temp.type);
-      this.formDate.append('deadline', this.form_temp.deadline.data + 'T' + this.form_temp.deadline.time);
-      this.formDate.append('requireExtension', this.form_temp.requireExtension);
+      let formDate = new FormData();
+
+      formDate.append('title', this.form_temp.title);
+      formDate.append('description', this.form_temp.desc);
+      formDate.append('projectId', this.projectId_temp);
+      formDate.append('fullMark', this.form_temp.fullMark);
+      formDate.append('type', this.form_temp.type.substring(0, 1));
+      formDate.append('deadline', this.form_temp.deadline.data + 'T' + this.form_temp.deadline.time);
+      formDate.append('requireExtension', this.form_temp.requireExtension);
 
       // for (let i = 0; i < this.form_temp.fileList.length; i++) {
       //   this.formDate.append('file', this.form_temp.fileList[i].raw);
       // }
       for (let i = 0; i < this.form_temp.fileList.length; i++) {
-        this.formDate.append('files', this.form_temp.fileList[i].raw)
+        formDate.append('files', this.form_temp.fileList[i].raw)
         // console.log("看看进来没有,文件如下:");
         // console.log(this.fileList[i].raw.type);
         // console.log(this.fileList[i].raw);
@@ -147,7 +147,7 @@ export default {
       // console.clear()
 
 
-      api.post('/tea/post_assignment', this.formDate,{
+      api.post('/tea/post_assignment', formDate,{
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -174,6 +174,7 @@ export default {
         });
       })
       this.$emit('unfold');
+      this.$emit('updateAssList');
     }
   },
   props: {
@@ -211,7 +212,7 @@ export default {
       default: -1,
     },
   },
-  emits: ['unfold'],
+  emits: ['unfold','updateAssList'],
   watch: {
     projectId: {
       handler: function (newVal, oldVal) {

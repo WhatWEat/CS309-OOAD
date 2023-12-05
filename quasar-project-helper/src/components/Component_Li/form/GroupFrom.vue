@@ -6,9 +6,9 @@
     <el-form-item label="GroupMaxSize" prop="maxSize">
       <el-input v-model.number="formData_temp.maxSize"></el-input>
     </el-form-item>
-    <el-form-item label="GroupName" prop="groupName">
-      <el-input v-model="formData_temp.groupName"></el-input>
-    </el-form-item>
+<!--    <el-form-item label="GroupName" prop="groupName">-->
+<!--      <el-input v-model="formData_temp.groupName"></el-input>-->
+<!--    </el-form-item>-->
     <el-form-item label="Deadline" required>
       <el-col :span="11">
         <el-form-item prop="date1_deadline">
@@ -109,6 +109,7 @@
       <el-button @click="resetForm('ruleFormRef')">重置</el-button>
     </el-form-item>
   </el-form>
+  {{this.formData_temp}}
 </template>
 
 <script>
@@ -269,11 +270,25 @@ export default defineComponent({
               "technicalStack": this.formData_temp.technicalStack,
             }
           ).then((res) => {
-            this.successMessage.text = res.data.msg;
-            this.$emit("successDialog", this.successMessage);
+            // this.successMessage.text = res.data.msg;
+            // this.$emit("successDialog", this.successMessage);
+            this.$q.notify(
+              {
+                message: res.data.msg,
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'done',
+                position: 'top',
+                timeout: 3000,
+              }
+            )
           }).catch((err) => {
-            this.errorMessage.text = err.response.data.msg;
-            this.$emit("errorDialog", this.errorMessage);
+            // this.errorMessage.text = err.response.data.msg;
+            // this.$emit("errorDialog", this.errorMessage);
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.msg
+            })
           })
         } else {
           console.log('error submit!!');
@@ -290,11 +305,11 @@ export default defineComponent({
           this.$emit('unfold');
           api.post('/tea/modify_group_info',
             {
+              "groupId": this.formData.groupId,
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
               "instructorId": Object.values(this.formData_temp.instructor)[0],
               "leaderId": Object.values(this.formData_temp.leader)[0],
-              "groupId": this.formData_temp.groupId,
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
               "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
               "memberIds": Object.values(this.formData_temp.members),
@@ -302,19 +317,33 @@ export default defineComponent({
           ).then((res) => {
             console.log("提交成功了");
             console.log(res);
-            this.successMessage.text = res.data.msg;
-            this.$emit("successDialog", this.successMessage);
+            // this.successMessage.text = res.data.msg;
+            // this.$emit("successDialog", this.successMessage);
+            this.$q.notify(
+              {
+                message: res.data.msg,
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'done',
+                position: 'top',
+                timeout: 3000,
+              }
+            )
           }).catch((err) => {
             console.log("提交失败了");
             console.log(err)
-            this.errorMessage.text = err.response.data.msg;
-            this.$emit("errorDialog", this.errorMessage);
+            // this.errorMessage.text = err.response.data.msg;
+            // this.$emit("errorDialog", this.errorMessage);
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.msg
+            })
             console.log({
+              "groupId": this.formData.groupId,
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
-              "instructorId": Object.values(this.formData_temp.instructor),
-              "leaderId": Object.values(this.formData_temp.leader),
-              "groupId": this.formData_temp.groupId,
+              "instructorId": Object.values(this.formData_temp.instructor)[0],
+              "leaderId": Object.values(this.formData_temp.leader)[0],
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
               "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
               "memberIds": Object.values(this.formData_temp.members),
@@ -336,16 +365,17 @@ export default defineComponent({
     handleInputConfirm_members() {
       console.log('handleInputConfirm_members')
       console.log(this.inputValue_members)
-      if (this.inputValue_members) {
+      if (this.inputValue_members !== '') {
         this.formData_temp.members[this.inputValue_members] = this.inputValue_members
-        console.log('Have pushed' + this.inputValue_members.value + '\n')
-        console.log('Now members are: ' + this.formData_temp.members + '\n')
+        console.log('Have pushed' + this.inputValue_members + '\n')
+        // console.log('Now members are: ' + this.formData_temp.members + '\n')
       }
       else {
         console.log('inputValue_members is null')
       }
-      this.inputVisible_members = false
       this.inputValue_members = ''
+      this.inputVisible_members = false
+      console.log('结束插入：' + this.formData_temp.members + '\n')
     },
     handleInputConfirm_technical() {
       if (this.inputValue_technical) {
@@ -357,7 +387,21 @@ export default defineComponent({
       this.inputValue_technical = ''
     },
     handleClose_members(member) {
-      this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      console.log('handleClose_members')
+      console.log(member)
+      console.log(this.formData_temp.members)
+      // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      Object.keys(this.formData_temp.members).forEach((key) => {
+        if (this.formData_temp.members[key] === member) {
+          delete(this.formData_temp.members[key]);
+          console.log('Have deleted' + member + '\n')
+        }
+        console.log('not found' + member + '\n')
+        console.log(this.formData_temp.members[key] +' ' + member + '\n')
+      });
+      console.log(this.formData_temp.members)
+
     },
     handleClose_technical(technical) {
       this.formData_temp.technicalStack.splice(this.formData_temp.technicalStack.indexOf(technical), 1);

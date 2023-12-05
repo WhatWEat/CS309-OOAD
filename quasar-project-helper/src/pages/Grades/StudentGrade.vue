@@ -128,10 +128,10 @@
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
-  <q-dialog v-model="isLoadingChart">
-    <ChartShow>
-    </ChartShow>
-  </q-dialog>
+<!--  <q-dialog v-model="isLoadingChart">-->
+<!--    <ChartShow>-->
+<!--    </ChartShow>-->
+<!--  </q-dialog>-->
   <!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
   <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
   <!--      <bar-chart></bar-chart>-->

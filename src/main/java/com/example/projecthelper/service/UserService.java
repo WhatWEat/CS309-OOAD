@@ -233,7 +233,7 @@ public class UserService {
     public void sendCodeToChangeNumber(KeyValueWrapper<Integer, String> typeNum, Long userId){
         switch (typeNum.getKey()){
             case 1 -> {
-                User user = usersMapper.findUserByPhone(typeNum.getKey().toString());
+                User user = usersMapper.findUserByPhone(typeNum.getValue());
                 if (user != null)
                     throw new InvalidFormException("手机号已被注册");
                 try {

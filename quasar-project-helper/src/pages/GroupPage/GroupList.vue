@@ -26,9 +26,9 @@
         </template>
         <!--        右上方按钮插槽-->
         <template v-slot:top-right>
-          <q-toolbar class="bg-grey-4 text-white rounded-borders ">
+          <q-toolbar class="bg-grey-5 text-white rounded-borders ">
             <!--            这里是下拉框-->
-            <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
+            <q-btn-dropdown v-if="this.userData.identity<3" color="grey-5" icon="menu">
               <q-list class="bg-grey-4 text-black rounded-borders">
                 <q-item v-close-popup clickable @click="show_set_form = true">
                   <q-item-label style="font-weight: bolder">Create Groups</q-item-label>
@@ -345,6 +345,9 @@ export default {
         leader: true,
         maxSize: true,
         moreInformation: true,
+
+        visibility: true,
+        memberAdminister: true,
       },
 
       isGroupLeader: ref(false),
@@ -446,24 +449,24 @@ export default {
       ],
 
       rows: [
-        {
-          groupId: 1,
-          groupSize: 4,
-          groupMember: 'John, Mary, Peter, Paul, Liweihao',
-          instructor: 'Dr. Smith',
-          projectName: 'Project 1',
-          deadLine: '2021-10-01',
-          moreInfo: 'https://www.google.com\n' + '测试多文字时显示效果\n'
-        },
-        {
-          groupId: 2,
-          groupSize: 4,
-          groupMember: 'John, Mary, Peter, Paul',
-          instructor: 'Dr. Smith',
-          projectName: 'Project 2',
-          deadLine: '2021-10-01',
-          moreInfo: 'https://www.google.com'
-        },
+        // {
+        //   groupId: 1,
+        //   groupSize: 4,
+        //   groupMember: 'John, Mary, Peter, Paul, Liweihao',
+        //   instructor: 'Dr. Smith',
+        //   projectName: 'Project 1',
+        //   deadLine: '2021-10-01',
+        //   moreInfo: 'https://www.google.com\n' + '测试多文字时显示效果\n'
+        // },
+        // {
+        //   groupId: 2,
+        //   groupSize: 4,
+        //   groupMember: 'John, Mary, Peter, Paul',
+        //   instructor: 'Dr. Smith',
+        //   projectName: 'Project 2',
+        //   deadLine: '2021-10-01',
+        //   moreInfo: 'https://www.google.com'
+        // },
       ],
 
       separator: 'cell',
@@ -641,6 +644,7 @@ export default {
         this.selected_row.row = row;
       }
       console.log(row, 'rows');
+      this.warning_date.text = 'Are you sure you want to delete this group?';
       this.show_warning = true;
     },
     // 用来学生申请加入小组
@@ -772,6 +776,8 @@ export default {
           if (this.isGroupLeader) {
             this.disableList.moreInformation = false;
             this.disableList.presentationTime = false;
+            this.disableList.visibility = false;
+            this.disableList.memberAdminister = false;
           }
         }
       ).catch((error) => {

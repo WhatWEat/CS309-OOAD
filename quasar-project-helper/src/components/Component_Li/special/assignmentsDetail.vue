@@ -336,21 +336,6 @@
 
 
 
-  {{ AssignmentDetail }}
-  ???
-
-  <div class="d-flex justify-space-around align-center bg-grey-lighten-4">
-    <div class="ma-4">
-      <div class="text-subtitle-2">Cover</div>
-      <v-img
-        class="bg-white rounded-xl"
-        width="300"
-        :aspect-ratio="1"
-        src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
-        cover
-      ></v-img>
-    </div>
-  </div>
 
 </template>
 
@@ -503,10 +488,18 @@ export default defineComponent({
       formData.append("comment", this.editorInput)
       formData.append("review", this.editorInput)
 
-      api.post('/tea/grade_ass', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      let tmpNotFormData = {
+        "grade":  this.grade,
+        "assignmentId": this.AssignmentDetail.assignmentId,
+        "submitterId":  this.AssignmentDetail.submitterId,
+        "comment": this.editorInput,
+        "review": this.editorInput
+      }
+
+      console.log('老师评分的内容为:')
+      console.log(tmpNotFormData)
+
+      api.post('/tea/grade_ass', tmpNotFormData, {
       }).then((res) => {
         console.log(res)
         this.$q.notify({
@@ -759,7 +752,7 @@ export default defineComponent({
     AssignmentDetail: {
       handler: function (val, oldVal) {
         console.log(val);
-        if (this.AssignmentDetail.type === 'e') {
+        if (this.AssignmentDetail.type === 'e' && (this.userData.identity === 3)) {
           this.getToComment()
         }
       },

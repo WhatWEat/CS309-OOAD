@@ -138,18 +138,18 @@ export default defineComponent({
       required: true,
       type: Array,
       default: () => [
-        {
-          AssignmentName: 'Assignment 1',
-          deadLine: '2020-10-10',
-          instructor: 'Qi-Kun Xue1',
-          moreInfo: 'View Details1'
-        },
-        {
-          AssignmentName: 'Assignment 2',
-          deadLine: '2020-10-11',
-          instructor: 'Qi-Kun Xue2',
-          moreInfo: 'View Details2'
-        },
+        // {
+        //   AssignmentName: 'Assignment 1',
+        //   deadLine: '2020-10-10',
+        //   instructor: 'Qi-Kun Xue1',
+        //   moreInfo: 'View Details1'
+        // },
+        // {
+        //   AssignmentName: 'Assignment 2',
+        //   deadLine: '2020-10-11',
+        //   instructor: 'Qi-Kun Xue2',
+        //   moreInfo: 'View Details2'
+        // },
       ]
     },
     separator: {

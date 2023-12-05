@@ -109,7 +109,7 @@
       <el-button @click="resetForm('ruleFormRef')">重置</el-button>
     </el-form-item>
   </el-form>
-  {{this.formData_temp}}
+<!--  {{this.formData_temp}}-->
 </template>
 
 <script>

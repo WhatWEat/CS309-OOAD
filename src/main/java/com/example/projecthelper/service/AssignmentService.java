@@ -506,6 +506,9 @@ public class AssignmentService {
             if (taId == null)
                 throw new AccessDeniedException("无权查看别人发布的作业");
         }
+        if (submittedAssignment.getGrade()>ass.getFullMark()){
+            throw new AccessDeniedException("分数超出上限");
+        }
         try {
             submittedAssMapper.gradeAss(submittedAssignment);
         } catch (Exception e) {

@@ -80,8 +80,14 @@
           <q-td key="assignmentId" :props="props">
             <span>{{ props.row.assignmentId }}</span>
           </q-td>
+          <q-td key="title" :props="props">
+            <span>{{ props.row.title }}</span>
+          </q-td>
           <q-td key="submitterId" :props="props">
             <span>{{ props.row.submitterId }}</span>
+          </q-td>
+          <q-td key="submitterName" :props="props">
+            <span>{{ props.row.submitterName }}</span>
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
@@ -128,18 +134,18 @@
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
-<!--  <q-dialog v-model="isLoadingChart">-->
-<!--    <ChartShow>-->
-<!--    </ChartShow>-->
-<!--  </q-dialog>-->
-  <!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
-  <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
-  <!--      <bar-chart></bar-chart>-->
-  <!--    </div>-->
-  <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
-  <!--      <pie-chart></pie-chart>-->
-  <!--    </div>-->
-  <!--  </div>-->
+  <q-dialog v-model="isLoadingChart">
+    <ChartShow>
+    </ChartShow>
+  </q-dialog>
+<!--    <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
+<!--      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--        <bar-chart></bar-chart>-->
+<!--      </div>-->
+<!--      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--        <pie-chart></pie-chart>-->
+<!--      </div>-->
+<!--    </div>-->
 </template>
 
 <script lang="ts" setup>
@@ -174,11 +180,29 @@ const columns = [
     sortable: true
   },
   {
+    name: "title",
+    required: true,
+    label: "title",
+    align: "left",
+    field: row => row.title,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
     name: "submitterId",
     required: true,
     label: "submitterId",
     align: "left",
     field: row => row.submitterId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "submitterName",
+    required: true,
+    label: "submitterName",
+    align: "left",
+    field: row => row.submitterName,
     format: val => `${val}`,
     sortable: true
   },
@@ -213,20 +237,20 @@ const columns = [
 
 const columns1 = [
   {
-    name: "assignmentId",
+    name: "title",
     required: true,
-    label: "assignmentId",
+    label: "title",
     align: "left",
-    field: row => row.assignmentId,
+    field: row => row.title,
     format: val => `${val}`,
     sortable: true
   },
   {
-    name: "submitterId",
+    name: "submitterName",
     required: true,
-    label: "submitterId",
+    label: "submitterName",
     align: "left",
-    field: row => row.submitterId,
+    field: row => row.submitterName,
     format: val => `${val}`,
     sortable: true
   },

@@ -157,6 +157,8 @@ export default {
             message: 'Create Assignment Success',
             type: 'success'
           });
+          this.$emit('unfold');
+          this.$emit('updateAssList');
         } else {
           console.log("ERR 在创建作业时");
           console.log(res);
@@ -173,8 +175,6 @@ export default {
           type: 'error'
         });
       })
-      this.$emit('unfold');
-      this.$emit('updateAssList');
     }
   },
   props: {

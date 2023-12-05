@@ -558,6 +558,7 @@ export default defineComponent({
           timeout: 3000,
         })
         this.$emit('update')
+        this.$emit('updateAssList')
       }).catch((err) => {
         // console.log(err)
         // console.log(formData.getAll('grade'))
@@ -912,6 +913,7 @@ export default defineComponent({
           this.AssignmentDetail.text = this.allAssignment[indexTmp].text
           this.AssignmentDetail.comment = this.allAssignment[indexTmp].comment
           this.AssignmentDetail.state = this.allAssignment[indexTmp].grade === null ? 1 : 2
+        this.AssignmentDetail.submitterId = this.allAssignment[indexTmp].submitterId
         console.log('新的提交的作业')
         console.log(this.AssignmentDetail)
       },

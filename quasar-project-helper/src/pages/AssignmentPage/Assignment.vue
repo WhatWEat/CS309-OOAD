@@ -21,7 +21,9 @@
     </q-toolbar>
   </div>
   <div v-show="isPersonal">
-    <assignment-table :columns="columns_personal" :rows="rows_personal" :project-id="projectId"
+    <assignment-table
+      @updateAssList="getAssignmentList"
+      :columns="columns_personal" :rows="rows_personal" :project-id="projectId"
                       :group-id="groupId" table-title="Personal">
     </assignment-table>
   </div>

@@ -273,6 +273,7 @@ const columns1 = [
     sortable: true
   },
 ]
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
@@ -369,14 +370,13 @@ function saveUploadAvatar() {
     excel_file.value = model.value;
     let formdata = new FormData();
     formdata.append('file', excel_file.value);
-    api.post('/tea/grade_ass_with_file', {
+    api.post('/tea/grade_ass_with_file',formdata,{
       params: {
-        file: formdata,
         assignmentId: assignmentID.value,
       },
     }).then((res) => {
-      console.log('data',data.value)
       data.value = res.data.body;
+      console.log('data',data.value)
     }).catch((err) => {
       console.log(err)
     })

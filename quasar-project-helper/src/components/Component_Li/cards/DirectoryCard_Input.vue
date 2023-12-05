@@ -477,6 +477,63 @@ export default defineComponent({
           this.groupData_temp.memberIds
         })
       })
+
+      // console.clear()
+      // console.log("这里是提交修改部分")
+      // console.log( this.groupData.members)
+      // console.log( Object.values(this.groupData.members).length)
+
+      let tmp_memberIds = this.groupData.memberIds
+      let tmp_memberIds_modified = Object.values(this.groupData_temp.members)
+
+      for (let i = 0; i < Object.values(this.groupData.members).length; i++) {
+        if (!tmp_memberIds_modified.includes(tmp_memberIds[i])) {
+          console.log("删除了" + tmp_memberIds[i])
+          console.log('请求体为:')
+          console.log({
+            'key': this.groupData.groupId,
+            'value': {
+              'key': tmp_memberIds[i],
+              'value':{
+                'title':'You are fired',
+                'content':'Sorry, you are fired by your leader',
+              }
+            }
+          })
+          api.post('/stu/remove_member',
+            {
+              'key': this.groupData.groupId,
+              'value': {
+                'key': tmp_memberIds[i],
+                'value':{
+                  'title':'You are fired',
+                  'content':'Sorry, you are fired by your leader',
+                }
+              }
+            }
+          ).then((res) => {
+            this.$q.notify({
+              color: 'green-4',
+              textColor: 'white',
+              icon: 'cloud_done',
+              message: res.data.msg,
+              position: 'top',
+              timeout: 3000,
+            })
+          }).catch((err) => {
+            this.$q.notify({
+              color: 'red-4',
+              textColor: 'white',
+              icon: 'cloud_done',
+              message: err.response.data.msg,
+              position: 'top',
+              timeout: 3000,
+            })
+            console.log(err)
+          })
+        }
+      }
+
     },
   },
   data() {

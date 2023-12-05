@@ -171,7 +171,6 @@
   </div>
 
 
-
   <!--  这里是本组信息部分-->
 
   <!--  这里是弹窗部分-->
@@ -241,18 +240,20 @@
     </q-dialog>
   </div>
   <!--  这里是Edit表单弹窗部分-->
-  <div>
-    <el-dialog v-model="show_edit_form" :center=true>
-      <template v-slot:header>
-        <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
-      </template>
-      <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
-                  @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
-    </el-dialog>
+  <div class="row">
+    <div class="col-11">
+      <el-dialog v-model="show_edit_form" :center=true>
+        <template v-slot:header>
+          <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
+        </template>
+        <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+                    @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
+      </el-dialog>
+    </div>
   </div>
   <!--  这里是创建表单弹窗改部分-->
-  <div>
-    <el-dialog v-model="show_insert_form" :center=true>
+  <div class="row">
+    <el-dialog v-model="show_insert_form" :center=true >
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -317,7 +318,7 @@ import {
   formatDateStringPro,
   getAvatarUrlById,
   getUserData,
-  merger, useProjectId
+  merger
 } from "src/composables/usefulFunction";
 import {useQuasar} from "quasar";
 //import {api} from 'boot/axios';
@@ -770,7 +771,7 @@ export default {
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
       console.log("尝试获取GroupUserSelfDetail...\n")
-      if(this.groupId === -1) return;
+      if (this.groupId === -1) return;
       api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body
@@ -952,7 +953,7 @@ export default {
     },
     deleteLeaveGroup() {
       let groupId = this.selected_row.row.groupId;
-      api.delete('/stu/leave_group/'+this.projectId).then(
+      api.delete('/stu/leave_group/' + this.projectId).then(
         (response) => {
           console.log(response);
           // this.dialogMessage = {

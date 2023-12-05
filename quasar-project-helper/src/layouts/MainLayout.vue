@@ -96,7 +96,19 @@ onMounted(() => {
         icon: 'logout',
         link: `/logout/${userid.value}`
       });
-    } else {
+    } else if (identity.value === 1){
+      essentialLinks.value.push({
+        title: 'Teacher',
+        icon: 'airplay',
+        link: `/teacher`
+      });
+      essentialLinks.value.push({
+        title: 'Logout',
+        icon: 'logout',
+        link: `/logout/${userid.value}`
+      });
+    }
+    else {
       essentialLinks.value.push({
         title: 'Logout',
         icon: 'logout',

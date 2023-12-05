@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md" >
+  <div class="q-pa-md">
     <q-file
       v-if="identity<=2 && identity>=0"
       color="purple-12"
@@ -8,15 +8,23 @@
       @update:model-value="showDialog"
     >
       <template v-slot:prepend>
-        <q-icon name="attach_file" />
+        <q-icon name="attach_file"/>
       </template>
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
-      <q-input v-model="assignmentId" label="Assignment ID" type="number"/>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
-      </q-card-actions>
+      <q-table
+        :rows="data"
+        :columns="columns1"
+        row-key="id"
+        dense
+        flat
+        bordered
+      >
+        <template v-slot:top-right>
+          <q-btn label="Upload" color="green" @click="saveUploadAvatar"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
+        </template>
+      </q-table>
     </q-dialog>
     <q-table
       title="Grades"
@@ -77,8 +85,9 @@
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
-            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0" @save="save(props.row)">
-              <q-input type="number" v-model="scope.value" dense autofocus />
+            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope"
+                          v-if="identity<=2 && identity>=0" @save="save(props.row)">
+              <q-input type="number" v-model="scope.value" dense autofocus/>
             </q-popup-edit>
           </q-td>
           <q-td key="comment" :props="props">
@@ -112,7 +121,7 @@
         <q-space style="width: 20px"/>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon name="search"/>
           </template>
         </q-input>
       </template>
@@ -123,22 +132,22 @@
     <ChartShow>
     </ChartShow>
   </q-dialog>
-<!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
-<!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
-<!--      <bar-chart></bar-chart>-->
-<!--    </div>-->
-<!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
-<!--      <pie-chart></pie-chart>-->
-<!--    </div>-->
-<!--  </div>-->
+  <!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
+  <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+  <!--      <bar-chart></bar-chart>-->
+  <!--    </div>-->
+  <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+  <!--      <pie-chart></pie-chart>-->
+  <!--    </div>-->
+  <!--  </div>-->
 </template>
 
 <script lang="ts" setup>
 import {formatDateString, truncate, useProjectId} from "src/composables/usefulFunction";
-import {nextTick,onMounted, ref, watch} from 'vue';
+import {nextTick, onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
-import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
 import {useQuasar} from "quasar";
@@ -148,12 +157,12 @@ import ChartShow from "components/Chart/ChartShow.vue";
 //import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
-const  router = useRouter()
+const router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
 const data = ref<gradeProps[]>([]);
 const filter = ref('')
 const $q = useQuasar();
-const assignmentId = ref(-1);
+const assignmentID = ref(-1);
 const columns = [
   {
     name: "assignmentId",
@@ -202,24 +211,62 @@ const columns = [
   },
 ]
 
+const columns1 = [
+  {
+    name: "assignmentId",
+    required: true,
+    label: "assignmentId",
+    align: "left",
+    field: row => row.assignmentId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "submitterId",
+    required: true,
+    label: "submitterId",
+    align: "left",
+    field: row => row.submitterId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "grade",
+    required: true,
+    label: "grade",
+    align: "left",
+    field: row => row.grade,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "comment",
+    required: true,
+    label: "comment",
+    align: "left",
+    field: row => row.comment,
+    format: val => `${val}`,
+    sortable: true
+  },
+]
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 })
 // 初始化
 const isLoadingGrade = ref(true);
-onMounted(()=>{
+onMounted(() => {
   project_id.value = useProjectId().toString();
-  watchEffect(()=>{
-    if (identity.value !== -1 && isLoadingGrade.value){
+  watchEffect(() => {
+    if (identity.value !== -1 && isLoadingGrade.value) {
       console.log('initit')
       onRefresh();
       isLoadingGrade.value = false;
     }
   })
 })
-watch(pagination, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
+watch(pagination, (newVal, oldVal) => {
+  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage) {
     onRefresh();
   }
 })
@@ -237,12 +284,12 @@ async function onRefresh() {
       )
       .then((res) => {
         data.value = res.data.body;
-        console.log('dddddd' ,data.value)
+        console.log('dddddd', data.value)
         isLoadingGrade.value = false;
       }).catch((err) => {
       console.log('err', err)
     });
-  }else if(identity.value !== -1) {
+  } else if (identity.value !== -1) {
     api
       .get(
         `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
@@ -250,11 +297,11 @@ async function onRefresh() {
         }`
       )
       .then((res) => {
-
         let saveData = res.data.body.map(item => item.value)
           .reduce((acc, val) => acc.concat(val), []);
 
         data.value = saveData;
+        console.log(saveData)
 
         isLoadingGrade.value = false;
       })
@@ -289,21 +336,24 @@ async function save(grade: gradeProps) {
   })
 }
 
-const model = ref(null),isShowDialog = ref(false);
+const model = ref(null), isShowDialog = ref(false);
 const excel_file = ref();
+
 function saveUploadAvatar() {
   isShowDialog.value = false;
-  if(model.value){
+  if (model.value) {
     excel_file.value = model.value;
     let formdata = new FormData();
-    formdata.append('file',excel_file.value);
-    api.post('/tea/grade_ass_with_file',formdata,{
+    formdata.append('file', excel_file.value);
+    api.post('/tea/grade_ass_with_file', {
       params: {
-        assignmentId: assignmentId
-      }
-    }).then((res)=>{
+        file: formdata,
+        assignmentId: assignmentID.value,
+      },
+    }).then((res) => {
+      console.log('data',data.value)
       data.value = res.data.body;
-    }).catch((err)=>{
+    }).catch((err) => {
       console.log(err)
     })
   }
@@ -311,7 +361,16 @@ function saveUploadAvatar() {
 
 
 function showDialog() {
-  isShowDialog.value = true;
+  const userInput = prompt('Please enter the assignmentId:');
+  if (userInput !== null) {
+    // 用户点击了确定按钮并输入了内容
+    console.log('User input:', userInput);
+    assignmentID.value = parseInt(userInput);
+    isShowDialog.value = true;
+  } else {
+    console.log('User canceled input.');
+  }
+
   console.log('isShowDialog', isShowDialog.value)
 }
 
@@ -319,7 +378,6 @@ function cancelUploadAvatar() {
   isShowDialog.value = false;
   model.value = null;
 }
-
 
 
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="ruleFormRef" :model="formData_temp" :rules="formRules" class="demo-ruleForm">
+  <el-form ref="ruleFormRef" :model="formData_temp" :rules="formRules" class="demo-ruleForm" >
     <!--    <el-form-item label="GroupId" prop="groupId">-->
     <!--      <el-input v-model="formData_temp.groupId"></el-input>-->
     <!--    </el-form-item>-->
@@ -109,12 +109,14 @@
       <el-button @click="resetForm('ruleFormRef')">重置</el-button>
     </el-form-item>
   </el-form>
+<!--  {{this.formData_temp}}-->
 </template>
 
 <script>
 import {defineComponent, ref} from "vue";
 import {descriptionProps} from "element-plus";
 import {api} from "boot/axios";
+import cloneDeep from "lodash/cloneDeep";
 
 export default defineComponent({
   name: "GroupFrom",
@@ -125,20 +127,7 @@ export default defineComponent({
   },
   data() {
     return {
-      formData_temp: {
-        groupId: this.formData.groupId,
-        maxSize: this.formData.maxSize,
-        groupName: this.formData.groupName,
-        date1_deadline: this.formData.date1_deadline,
-        date2_deadline: this.formData.date2_deadline,
-        data1_presentation: this.formData.data1_presentation,
-        data2_presentation: this.formData.data2_presentation,
-        instructor: this.formData.instructor,
-        leader: this.formData.leader,
-        members: this.formData.members,
-        technicalStack: this.formData.technicalStack,
-        desc: this.formData.desc
-      },
+      formData_temp: cloneDeep(this.formData),
       formRules: {
         groupId: [
           {required: true, message: "请输入小组ID", trigger: 'blur'},
@@ -215,6 +204,7 @@ export default defineComponent({
           {required: false, message: '请填写更多信息', trigger: 'blur'}
         ]
       },
+
       inputVisible_members: false,
       inputValue_members: '',
       inputVisible_technical: false,
@@ -222,19 +212,6 @@ export default defineComponent({
 
       isEdit: ref(this.type === 'Edit'),
       isCreate: ref(this.type !== 'Edit'),
-
-      errorMessage: {
-        'icon_name': 'error',
-        'icon_color': 'red',
-        'icon_text_color': 'black',
-        'text': ""
-      },
-      successMessage: {
-        'icon_name': 'done',
-        'icon_color': 'blue',
-        'icon_text_color': 'white',
-        'text': ""
-      }
     };
   },
   methods: {
@@ -269,11 +246,25 @@ export default defineComponent({
               "technicalStack": this.formData_temp.technicalStack,
             }
           ).then((res) => {
-            this.successMessage.text = res.data.msg;
-            this.$emit("successDialog", this.successMessage);
+            // this.successMessage.text = res.data.msg;
+            // this.$emit("successDialog", this.successMessage);
+            this.$q.notify(
+              {
+                message: res.data.msg,
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'done',
+                position: 'top',
+                timeout: 3000,
+              }
+            )
           }).catch((err) => {
-            this.errorMessage.text = err.response.data.msg;
-            this.$emit("errorDialog", this.errorMessage);
+            // this.errorMessage.text = err.response.data.msg;
+            // this.$emit("errorDialog", this.errorMessage);
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.msg
+            })
           })
         } else {
           console.log('error submit!!');
@@ -290,11 +281,11 @@ export default defineComponent({
           this.$emit('unfold');
           api.post('/tea/modify_group_info',
             {
+              "groupId": this.formData.groupId,
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
               "instructorId": Object.values(this.formData_temp.instructor)[0],
               "leaderId": Object.values(this.formData_temp.leader)[0],
-              "groupId": this.formData_temp.groupId,
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
               "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
               "memberIds": Object.values(this.formData_temp.members),
@@ -302,19 +293,33 @@ export default defineComponent({
           ).then((res) => {
             console.log("提交成功了");
             console.log(res);
-            this.successMessage.text = res.data.msg;
-            this.$emit("successDialog", this.successMessage);
+            // this.successMessage.text = res.data.msg;
+            // this.$emit("successDialog", this.successMessage);
+            this.$q.notify(
+              {
+                message: res.data.msg,
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'done',
+                position: 'top',
+                timeout: 3000,
+              }
+            )
           }).catch((err) => {
             console.log("提交失败了");
             console.log(err)
-            this.errorMessage.text = err.response.data.msg;
-            this.$emit("errorDialog", this.errorMessage);
+            // this.errorMessage.text = err.response.data.msg;
+            // this.$emit("errorDialog", this.errorMessage);
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.msg
+            })
             console.log({
+              "groupId": this.formData.groupId,
               "maxsize": this.formData_temp.maxSize,
               "groupName": this.formData_temp.groupName,
-              "instructorId": Object.values(this.formData_temp.instructor),
-              "leaderId": Object.values(this.formData_temp.leader),
-              "groupId": this.formData_temp.groupId,
+              "instructorId": Object.values(this.formData_temp.instructor)[0],
+              "leaderId": Object.values(this.formData_temp.leader)[0],
               "reportTime": this.formData_temp.data1_presentation + "T" + this.formData_temp.data2_presentation,
               "deadline": this.formData_temp.date1_deadline + "T" + this.formData_temp.date2_deadline,
               "memberIds": Object.values(this.formData_temp.members),
@@ -336,16 +341,19 @@ export default defineComponent({
     handleInputConfirm_members() {
       console.log('handleInputConfirm_members')
       console.log(this.inputValue_members)
-      if (this.inputValue_members) {
-        this.formData_temp.members[this.inputValue_members] = this.inputValue_members
-        console.log('Have pushed' + this.inputValue_members.value + '\n')
+      if (this.inputValue_members !== '') {
+        console.log('开始插入,DEbug部分，查看formData_temp：'  + '\n')
+        console.log(this.formData_temp)
+        this.formData_temp.members.push(this.inputValue_members)
+        console.log('Have pushed' + this.inputValue_members + '\n')
         console.log('Now members are: ' + this.formData_temp.members + '\n')
       }
       else {
         console.log('inputValue_members is null')
       }
-      this.inputVisible_members = false
       this.inputValue_members = ''
+      this.inputVisible_members = false
+      console.log('结束插入：' + this.formData_temp.members + '\n')
     },
     handleInputConfirm_technical() {
       if (this.inputValue_technical) {
@@ -357,7 +365,22 @@ export default defineComponent({
       this.inputValue_technical = ''
     },
     handleClose_members(member) {
+      // console.log('handleClose_members')
+      // console.log(member)
+      // console.log(this.formData_temp.members)
+      // // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      // // this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+      // Object.keys(this.formData_temp.members).forEach((key) => {
+      //   if (this.formData_temp.members[key] === member) {
+      //     delete(this.formData_temp.members[key]);
+      //     console.log('Have deleted' + member + '\n')
+      //   }
+      //   console.log('not found' + member + '\n')
+      //   console.log(this.formData_temp.members[key] +' ' + member + '\n')
+      // });
+      // console.log(this.formData_temp.members)
       this.formData_temp.members.splice(this.formData_temp.members.indexOf(member), 1);
+
     },
     handleClose_technical(technical) {
       this.formData_temp.technicalStack.splice(this.formData_temp.technicalStack.indexOf(technical), 1);

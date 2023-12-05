@@ -329,7 +329,7 @@ public class TeacherController {
         List<SubmittedAssignment> result = assignmentService.gradeAssWithFile(
                 file, assignmentId,
                 Long.parseLong(JWTUtil.getUserIdByToken(jwt)),
-                Integer.parseInt(JWTUtil.getUserIdByToken(jwt))
+                Integer.parseInt(JWTUtil.getIdentityCodeByToken(jwt))
         );
         return ResponseResult.ok(result, "Success", JWTUtil.updateJWT(jwt));
 

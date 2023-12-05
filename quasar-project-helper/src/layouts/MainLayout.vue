@@ -108,7 +108,7 @@ onMounted(() => {
 });
 
 const {identity} = useUserStore()
-const leftDrawerOpen = ref(true)
+const leftDrawerOpen = ref(false)
 const miniState = ref(true)
 const isFresh = ref(true)
 onMounted(() => {

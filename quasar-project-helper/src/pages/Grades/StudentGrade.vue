@@ -104,6 +104,12 @@
         </q-tr>
       </template>
       <template v-slot:top-right>
+        <q-btn flat round @click="isLoadingChart=true" v-if="identity<=2 && identity >= 0">
+          <q-avatar icon="equalizer" size="42px">
+
+          </q-avatar>
+        </q-btn>
+        <q-space style="width: 20px"/>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
           <template v-slot:append>
             <q-icon name="search" />
@@ -113,6 +119,10 @@
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
+  <q-dialog v-model="isLoadingChart">
+    <ChartShow>
+    </ChartShow>
+  </q-dialog>
 <!--  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
 <!--    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
 <!--      <bar-chart></bar-chart>-->
@@ -134,6 +144,7 @@ import {watchEffect} from "vue-demi";
 import {useQuasar} from "quasar";
 import BarChart from "components/Chart/BarChart.vue";
 import PieChart from "components/Chart/PieChart.vue";
+import ChartShow from "components/Chart/ChartShow.vue";
 //import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
@@ -198,6 +209,7 @@ const pagination = ref({
 // 初始化
 const isLoadingGrade = ref(true);
 onMounted(()=>{
+  project_id.value = useProjectId().toString();
   watchEffect(()=>{
     if (identity.value !== -1 && isLoadingGrade.value){
       console.log('initit')
@@ -211,6 +223,7 @@ watch(pagination, (newVal, oldVal)=>{
     onRefresh();
   }
 })
+const isLoadingChart = ref(true);
 
 async function onRefresh() {
   isLoadingGrade.value = true;
@@ -237,20 +250,12 @@ async function onRefresh() {
         }`
       )
       .then((res) => {
-        let hashmap = res.data.body;
-         console.log('ddddd',res.data.body)
-        // let saveData = []
-        // for (const [key, value] of Object.entries(hashmap)) {
-        //   saveData = saveData.concat(value);
-        // }
+
         let saveData = res.data.body.map(item => item.value)
           .reduce((acc, val) => acc.concat(val), []);
 
-        console.log('save' ,saveData)
         data.value = saveData;
-        // // console.log('datadezhi',data.value);
-        // data.value = res.data.body.map(item => item.value);
-        // console.log('datadezhi',data.value);
+
         isLoadingGrade.value = false;
       })
       .catch((err) => {
@@ -258,15 +263,6 @@ async function onRefresh() {
       });
   }
 }
-// async function created() {
-//   await onRefresh();
-// }
-//
-// async function beforeRouteUpdate(to, from, next) {
-//   console.info("beforeRouteUpdate");
-//   await onRefresh();
-//   next();
-// }
 
 // 保存
 async function save(grade: gradeProps) {
@@ -324,24 +320,6 @@ function cancelUploadAvatar() {
   model.value = null;
 }
 
-function onFileChange(){
-  const file = model.value
-  if(file){
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      avatar_preview.value = reader.result as string
-    }
-    reader.onerror = (error) => {
-      console.log(error)
-    }
-    isShowDialog.value = true
-  }
-}
 
-onMounted(() => {
-  project_id.value = useProjectId();
-  onRefresh();
-});
 
 </script>

@@ -40,17 +40,20 @@ export const useUser = defineStore('user', {
           }
         }
       } catch (error) {
-        localStorage.setItem('Token', '');
-        this.userid = -1;
-        this.username = null;
-        this.identity = -1;
-        this.jwt_token = null;
+        this.reset();
         const router = useRouter();
         await router.push('/login');
         console.log('该部分在pinaia的user-store.ts中');
         console.log(error);
       }
       return this.userid;
+    },
+    reset(){
+      this.userid = -1;
+      this.username = null;
+      this.identity = -1;
+      this.jwt_token = null;
+      localStorage.setItem('Token', '');
     }
   },
 });

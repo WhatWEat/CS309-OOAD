@@ -11,10 +11,7 @@
           </q-chip>
         </span>
         <q-chip v-else removable square @remove="assignmentAll=false" :color="lightColors[Math.floor(Math.random() * lightColors.length)]"> All Assignment</q-chip>
-        <q-separator/>
-        <q-chip removable square v-else @remove="assignmentAll = false">
-          All Assignment</q-chip
-        >
+
         <q-separator />
         <span v-if="!userAll">
           <q-chip v-for="(i, index) in userConditional" :key="i" removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]"

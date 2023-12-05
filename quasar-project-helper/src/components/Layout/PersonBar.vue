@@ -16,7 +16,7 @@
           <Messages :messages="messages"></Messages>
           <q-card class="text-center no-shadow no-border">
             <q-btn label="View All" style="max-width: 120px !important;" flat dense
-                   to="/announcement"
+                   to="/announcements"
                    class="text-indigo-8"></q-btn>
           </q-card>
         </q-list>

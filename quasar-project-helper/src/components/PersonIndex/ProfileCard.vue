@@ -383,7 +383,7 @@ function beforeSaveVerify() {
   if (phone.value !== personInfo.value.phone) {
     saveVerifyType.value = 1;
   }
-  if (!(email.value == '' && personInfo.value.email == null )&& email.value + '@' + selectedEmailDomain.value !== personInfo.value.email) {
+  if (!(email.value == '' && personInfo.value.email == null ) && email.value + selectedEmailDomain.value !== personInfo.value.email) {
     saveVerifyType.value += 2;
   }
   if (saveVerifyType.value !== 0) {

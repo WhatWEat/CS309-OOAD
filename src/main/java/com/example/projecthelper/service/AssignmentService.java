@@ -95,12 +95,12 @@ public class AssignmentService {
         if (projId == -1) {
             results = assignmentMapper.getAssByStu(userId, pageSize, page * pageSize);
         } else {
-            System.err.println(userId + " " + projId);
             Long checker = projectMapper.checkStuInProj(userId, projId);
             if (Objects.equals(checker, null)) {
                 throw new AccessDeniedException("无权访问该project");
             }
-            results = assignmentCache.getAssignmentsInProj(projId, pageSize, page * pageSize);
+
+            results = assignmentMapper.getAssByProj(projId, pageSize, page * pageSize);
         }
         try {
             results.forEach(a ->
@@ -134,15 +134,34 @@ public class AssignmentService {
         String type = assignment.getType();
         SubmittedAssignment submittedAssignment = null;
         if(identity == 3){
-            if(type.equals("i"))
+            if(type.equals("i")){
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, user_id);
+                if(submittedAssignment != null){
+                    User user = usersMapper.findUserById(user_id);
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+            }
             if(type.equals("g")){
                 Long gpId = groupMapper.findGroupIdOfUserInAProj(user_id, assignment.getProjectId());
                 submittedAssignment = assignmentMapper.findSubAssById(ass_id, gpId);
+                if(submittedAssignment != null){
+                    Group gp = groupMapper.findGroupById(gpId);
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
             }
         }
         else {
             submittedAssignment = assignmentMapper.findLatestSubAssByAssId(ass_id);
+            if(submittedAssignment != null){
+                if(type.equals("i")){
+                    User user = usersMapper.findUserById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(user.getName());
+                }
+                else if (type.equals("g")){
+                    Group gp = groupMapper.findGroupById(submittedAssignment.getSubmitterId());
+                    submittedAssignment.setSubmitterName(gp.getGroupName());
+                }
+            }
         }
         assignment.setState(
             Assignment.AssignmentState.getState(assignment, submittedAssignment).getValue()

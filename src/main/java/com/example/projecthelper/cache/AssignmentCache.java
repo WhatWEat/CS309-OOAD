@@ -32,7 +32,7 @@ public class AssignmentCache {
         // 尝试从缓存中获取数据
         String key = ASS_CACHE_KEY+pjId;
         Long listSize = redisTemplate.opsForList().size(key);
-        if(listSize != null){
+        if(listSize != null && listSize != 0){
             List<Assignment> assignments = redisTemplate.opsForList().range(key, offset, Math.min(offset+limit, listSize-1));
             if (assignments == null) {
                 System.err.println("assignments == null");

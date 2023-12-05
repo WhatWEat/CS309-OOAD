@@ -26,9 +26,9 @@
         </template>
         <!--        右上方按钮插槽-->
         <template v-slot:top-right>
-          <q-toolbar class="bg-grey-4 text-white rounded-borders ">
+          <q-toolbar class="bg-grey-5 text-white rounded-borders ">
             <!--            这里是下拉框-->
-            <q-btn-dropdown v-if="this.userData.identity<3" color="grey-4" icon="menu">
+            <q-btn-dropdown v-if="this.userData.identity<3" color="grey-5" icon="menu">
               <q-list class="bg-grey-4 text-black rounded-borders">
                 <q-item v-close-popup clickable @click="show_set_form = true">
                   <q-item-label style="font-weight: bolder">Create Groups</q-item-label>
@@ -170,19 +170,6 @@
     </div>
   </div>
 
-
-  <div class="row justify-center">
-    <div class="col-6">
-      <q-card >
-        <q-card-section>sdf</q-card-section>
-        <q-btn >sdf sdf</q-btn>
-      </q-card>
-    </div>
-  </div>
-
-
-
-
   <!--  这里是本组信息部分-->
 
   <!--  这里是弹窗部分-->
@@ -253,17 +240,17 @@
   </div>
   <!--  这里是Edit表单弹窗部分-->
   <div>
-    <el-dialog v-model="show_edit_form" :center=true>
-      <template v-slot:header>
-        <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
-      </template>
-      <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
-                  @successDialog="handleSuccess" @unfold="show_edit_form=false"></group-form>
-    </el-dialog>
+      <el-dialog  v-model="show_edit_form" :center=true  :width="formWidth" :style="{'min-width':'400px', 'border-radius': '25px'}">
+        <template v-slot:header>
+          <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
+        </template>
+        <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+                    @successDialog="handleSuccess" @unfold="show_edit_form=false" ></group-form>
+      </el-dialog>
   </div>
   <!--  这里是创建表单弹窗改部分-->
-  <div>
-    <el-dialog v-model="show_insert_form" :center=true>
+  <div class="row">
+    <el-dialog v-model="show_insert_form" :center=true :width="formWidth" :style="{'min-width':'400px', 'border-radius': '25px'}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Group</div>
       </template>
@@ -336,11 +323,15 @@ import {useQuasar} from "quasar";
 //import {useUserStore} from 'src/composables/useUserStore';
 //import {formatDateString, merger} from "src/composables/usefulFunction";
 // TODO 权限管理，学生可以浏览，老师可以编辑 handleAddClick
+// TODO disable presentation time
+// TODO 检测edit表单bug
 export default {
   name: 'GroupTeacherPage',
   userStore: useUserStore(),
   data() {
     return {
+      formWidth:'50%',
+
       projectId: '',
 
       groupId: -1,
@@ -354,6 +345,9 @@ export default {
         leader: true,
         maxSize: true,
         moreInformation: true,
+
+        visibility: true,
+        memberAdminister: true,
       },
 
       isGroupLeader: ref(false),
@@ -455,24 +449,24 @@ export default {
       ],
 
       rows: [
-        {
-          groupId: 1,
-          groupSize: 4,
-          groupMember: 'John, Mary, Peter, Paul, Liweihao',
-          instructor: 'Dr. Smith',
-          projectName: 'Project 1',
-          deadLine: '2021-10-01',
-          moreInfo: 'https://www.google.com\n' + '测试多文字时显示效果\n'
-        },
-        {
-          groupId: 2,
-          groupSize: 4,
-          groupMember: 'John, Mary, Peter, Paul',
-          instructor: 'Dr. Smith',
-          projectName: 'Project 2',
-          deadLine: '2021-10-01',
-          moreInfo: 'https://www.google.com'
-        },
+        // {
+        //   groupId: 1,
+        //   groupSize: 4,
+        //   groupMember: 'John, Mary, Peter, Paul, Liweihao',
+        //   instructor: 'Dr. Smith',
+        //   projectName: 'Project 1',
+        //   deadLine: '2021-10-01',
+        //   moreInfo: 'https://www.google.com\n' + '测试多文字时显示效果\n'
+        // },
+        // {
+        //   groupId: 2,
+        //   groupSize: 4,
+        //   groupMember: 'John, Mary, Peter, Paul',
+        //   instructor: 'Dr. Smith',
+        //   projectName: 'Project 2',
+        //   deadLine: '2021-10-01',
+        //   moreInfo: 'https://www.google.com'
+        // },
       ],
 
       separator: 'cell',
@@ -553,6 +547,17 @@ export default {
     }
   },
   methods: {
+    updateStatus() {
+      if(this.$q.screen.lt.sm){
+        this.formWidth = '95%'
+        console.log('小屏幕')
+      }
+      else{
+        this.formWidth = '50%'
+        console.log('大屏幕')
+      }
+    },
+
     // 导出GroupList表格
     exportTable() {
       this.$refs.table.exportCsv({
@@ -588,7 +593,6 @@ export default {
       });
     },
     handleEditClick(row) {
-      this.show_edit_form = true;
       if (row !== undefined) {
         this.selected_row.row = row;
       }
@@ -600,12 +604,12 @@ export default {
             groupId: response.data.body.groupId,
             groupSize: response.data.body.members.length,
             groupMaxSize: response.data.body.maxsize,
-            members: merger(response.data.body.members, response.data.body.memberIds),
+            members: response.data.body.memberIds,
             creationTime: formatDateStringPro(response.data.body.teamTime),
             deadline: formatDateStringPro(response.data.body.deadline),
             presentationTime: formatDateStringPro(response.data.body.reportTime),
-            instructor: merger(response.data.body.instructorName, response.data.body.instructorId),
-            leader: merger(response.data.body.leaderName, response.data.body.leaderId),
+            instructor: response.data.body.instructorId,
+            leader: response.data.body.leaderId,
             moreInfo: response.data.body.description,
           };
           this.formData.groupId = groupId;
@@ -632,12 +636,15 @@ export default {
         console.log("errorHere");
         console.log(error);
       });
+
+      this.show_edit_form = true;
     },
     handleDeleClick(row) {
       if (row !== undefined) {
         this.selected_row.row = row;
       }
       console.log(row, 'rows');
+      this.warning_date.text = 'Are you sure you want to delete this group?';
       this.show_warning = true;
     },
     // 用来学生申请加入小组
@@ -698,6 +705,7 @@ export default {
     getProjectId() {
       console.log("尝试获取ProjectId...\n")
       this.projectId = this.$route.params.projectID;
+      console.log()
       console.log("在Monted中获取到的ProjectId为：" + this.projectId + "，类型为：" + typeof (this.projectId) + "。\n");
     },
     // 获取界面的GroupList的相关信息.即为概括性group信息部分
@@ -768,6 +776,8 @@ export default {
           if (this.isGroupLeader) {
             this.disableList.moreInformation = false;
             this.disableList.presentationTime = false;
+            this.disableList.visibility = false;
+            this.disableList.memberAdminister = false;
           }
         }
       ).catch((error) => {
@@ -778,7 +788,7 @@ export default {
     // 获取该学生的所在小组的详细信息
     getGroupUserSelfDetail() {
       console.log("尝试获取GroupUserSelfDetail...\n")
-      if(this.groupId === -1) return;
+      if (this.groupId === -1) return;
       api.get('/getGroupInfo/' + this.groupId).then(
         (response) => {
           let tmp = response.data.body
@@ -884,26 +894,47 @@ export default {
         }
       }).then(
         async (response) => {
-          this.dialogMessage = {
-            'icon_name': 'done',
-            'icon_color': 'green',
-            'icon_text_color': 'white',
-            'text': response.data.msg,
-          }
+          // this.dialogMessage = {
+          //   'icon_name': 'done',
+          //   'icon_color': 'green',
+          //   'icon_text_color': 'white',
+          //   'text': response.data.msg,
+          // }
           // 上面执行完毕后,弹出对话框
-          await this.$nextTick();
-          this.show_confirm_dialog = true;
+          // await this.$nextTick();
+          // this.show_confirm_dialog = true;
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'done',
+            message: response.data.msg,
+            position: 'top',
+            timeout: 3000,
+            progress: true,
+          })
+          console.clear();
+          console.log('response 这里');
+          console.log(response);
         }
       ).catch(async (error) => {
-        this.dialogMessage = {
-          'icon_name': 'error',
-          'icon_color': 'red',
-          'icon_text_color': 'white',
-          'text': error.response.data.msg,
-        }
-        // 上面执行完毕后,弹出对话框
-        await this.$nextTick();
-        this.show_confirm_dialog = true;
+        // this.dialogMessage = {
+        //   'icon_name': 'error',
+        //   'icon_color': 'red',
+        //   'icon_text_color': 'white',
+        //   'text': error.response.data.msg,
+        // }
+        // // 上面执行完毕后,弹出对话框
+        // await this.$nextTick();
+        // this.show_confirm_dialog = true;
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: error.response.data.msg,
+          position: 'top',
+          timeout: 3000,
+          progress: true,
+        })
       });
       this.invite_member_id = ''
     },
@@ -939,25 +970,43 @@ export default {
     },
     deleteLeaveGroup() {
       let groupId = this.selected_row.row.groupId;
-      api.delete('/stu/leave_group').then(
+      api.delete('/stu/leave_group/' + this.projectId).then(
         (response) => {
           console.log(response);
-          this.dialogMessage = {
-            'icon_name': 'done',
-            'icon_color': 'green',
-            'icon_text_color': 'white',
-            'text': response.data.msg,
-          }
-          this.show_confirm_dialog = true;
+          // this.dialogMessage = {
+          //   'icon_name': 'done',
+          //   'icon_color': 'green',
+          //   'icon_text_color': 'white',
+          //   'text': response.data.msg,
+          // }
+          // this.show_confirm_dialog = true;
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'done',
+            message: response.data.msg,
+            position: 'top',
+            timeout: 3000,
+            progress: true,
+          })
         }
       ).catch((error) => {
-        this.dialogMessage = {
-          'icon_name': 'error',
-          'icon_color': 'red',
-          'icon_text_color': 'white',
-          'text': error.response.data.msg,
-        }
-        this.show_confirm_dialog = true;
+        // this.dialogMessage = {
+        //   'icon_name': 'error',
+        //   'icon_color': 'red',
+        //   'icon_text_color': 'white',
+        //   'text': error.response.data.msg,
+        // }
+        // this.show_confirm_dialog = true;
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: error.response.data.msg,
+          position: 'top',
+          timeout: 3000,
+          progress: true,
+        })
       });
     },
   },
@@ -994,6 +1043,12 @@ export default {
     groupId: function (newVal, oldVal) {
       console.log("groupId changed");
       this.getGroupUserSelfDetail();
+    },
+    '$q.screen.width': {
+      immediate: true,
+      handler(newVal, oldVal) {
+          this.updateStatus();
+      }
     }
   },
   computed: {

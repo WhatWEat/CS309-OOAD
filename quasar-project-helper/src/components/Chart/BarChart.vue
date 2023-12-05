@@ -1,213 +1,137 @@
-<!--<template>-->
-<!--  <div>-->
-<!--    <q-card class="no-shadow" bordered>-->
-<!--      <q-card-section class="text-h6">-->
-<!--        Bar Chart-->
-<!--        <q-btn icon="fa fa-download" class="float-right" @click="SaveImage" flat dense>-->
-<!--          <q-tooltip>Download PNG</q-tooltip>-->
-<!--        </q-btn>-->
-<!--      </q-card-section>-->
-<!--      <q-card-section>-->
-<!--        <ECharts ref="barchart"  :option="options"-->
-<!--                 class="q-mt-md"-->
-<!--                 :resizable="true"-->
-<!--                 autoresize style="height: 300px;"-->
-<!--        />-->
-<!--      </q-card-section>-->
-<!--    </q-card>-->
-<!--  </div>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--import {defineComponent, ref} from 'vue';-->
-<!--import ECharts from 'vue-echarts';-->
-<!--import "echarts";-->
-<!--import {api} from "boot/axios";-->
-<!--import {useRouter} from "vue-router";-->
-
-<!--const  router = useRouter()-->
-<!--const project_id = ref(router.currentRoute.value.params.projectID)-->
-<!--const gradeRanges = ref({-->
-<!--  bad: 0,-->
-<!--  ordinary: 0,-->
-<!--  good: 0,-->
-<!--  excellent: 0,-->
-<!--});-->
-<!--const data = ref([])-->
-<!--export default defineComponent({-->
-<!--  name: "BarChart",-->
-<!--  setup() {-->
-<!--    return {-->
-<!--      options: {-->
-<!--        legend: {-->
-<!--          bottom: 10,-->
-<!--        },-->
-<!--        tooltip: {},-->
-<!--        dataset: {-->
-<!--          source: [-->
-<!--            ['product', '2015', '2016', '2017'],-->
-<!--            ['Matcha Latte', 43.3, 85.8, 93.7],-->
-<!--            ['Milk Tea', 83.1, 73.4, 55.1],-->
-<!--            ['Cheese Cocoa', 86.4, 65.2, 82.5],-->
-<!--            ['Walnut Brownie', 72.4, 53.9, 39.1]-->
-<!--          ]-->
-<!--        },-->
-<!--        grid: {-->
-<!--          left: '3%',-->
-<!--          right: '4%',-->
-<!--          bottom: '20%',-->
-<!--          top: '5%',-->
-<!--          containLabel: true-->
-<!--        },-->
-<!--        xAxis: {type: 'category'},-->
-<!--        yAxis: {},-->
-<!--        // Declare several bar series, each will be mapped-->
-<!--        // to a column of dataset.source by default.-->
-<!--        series: [-->
-<!--          {type: 'bar'},-->
-<!--          {type: 'bar'},-->
-<!--          {type: 'bar'}-->
-<!--        ]-->
-<!--      },-->
-<!--    }-->
-<!--  },-->
-<!--  components:{-->
-<!--    ECharts-->
-<!--  },-->
-<!--  methods: {-->
-<!--    SaveImage() {-->
-<!--      const linkSource = this.$refs.barchart.getDataURL();-->
-<!--      const downloadLink = document.createElement('a');-->
-<!--      document.body.appendChild(downloadLink);-->
-<!--      downloadLink.href = linkSource;-->
-<!--      downloadLink.target = '_self';-->
-<!--      downloadLink.download = 'BarChart.png';-->
-<!--      downloadLink.click();-->
-<!--    },-->
-<!--    fetchData() {-->
-<!--      api-->
-<!--        .get(-->
-<!--          `/GradeBook/${project_id.value}`-->
-<!--        )-->
-<!--        .then((res) => {-->
-<!--          data.value = res.data;-->
-
-<!--          data.value.forEach((item) => {-->
-<!--            const grade = item.value.grade;-->
-
-<!--            if (grade >= 0 && grade <= 59) {-->
-<!--              gradeRanges.value.bad++;-->
-<!--            } else if (grade >= 60 && grade <= 79) {-->
-<!--              gradeRanges.value.ordinary++;-->
-<!--            } else if (grade >= 80 && grade <= 89) {-->
-<!--              ggradeRanges.value.good++;-->
-<!--            } else if (grade >= 90) {-->
-<!--              gradeRanges.value.excellent++;-->
-<!--            }-->
-<!--          });-->
-
-<!--          const chartData = Object.entries(gradeRanges).reduce(-->
-<!--            (result, [range, count]) => {-->
-<!--              result.product.push(range);-->
-<!--              result.data[0].push(count);-->
-<!--              return result;-->
-<!--            },-->
-<!--            {-->
-<!--              product: [],-->
-<!--              data: [[]],-->
-<!--            }-->
-<!--          );-->
-<!--        }).catch((err) => {-->
-<!--        console.log('err', err)-->
-<!--        console.log('cuowu')-->
-<!--      });-->
-<!--    }-->
-
-<!--  }-->
-
-<!--})-->
-<!--</script>-->
-
-<!--<style scoped>-->
-<!--</style>-->
 <template>
   <div>
-    <q-card class="no-shadow" bordered>
+    <q-card class="no-shadow" flat>
       <q-card-section class="text-h6">
         Bar Chart
-        <q-btn icon="fa fa-download" class="float-right" @click="SaveImage" flat dense>
+        <q-btn icon="fa fa-download" class="float-right" @click="downloadChart(myChart)" flat dense>
           <q-tooltip>Download PNG</q-tooltip>
         </q-btn>
       </q-card-section>
-      <q-card-section>
-        <ECharts ref="barchart"  :option="options"
-                 class="q-mt-md"
-                 :resizable="true"
-                 autoresize style="height: 300px;"
-        />
-      </q-card-section>
+      <div ref="chart" style="width: 500px; height: 400px;"></div>
     </q-card>
   </div>
 </template>
 
-<script>
-import {defineComponent} from 'vue';
-import ECharts from 'vue-echarts';
-import "echarts";
 
-export default defineComponent({
-  name: "BarChart",
-  setup() {
-    return {
-      options: {
-        legend: {
-          bottom: 10,
-        },
-        tooltip: {},
-        dataset: {
-          source: [
-            ['product', '2015', '2016', '2017'],
-            ['Matcha Latte', 43.3, 85.8, 93.7],
-            ['Milk Tea', 83.1, 73.4, 55.1],
-            ['Cheese Cocoa', 86.4, 65.2, 82.5],
-            ['Walnut Brownie', 72.4, 53.9, 39.1]
-          ]
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '20%',
-          top: '5%',
-          containLabel: true
-        },
-        xAxis: {type: 'category'},
-        yAxis: {},
-        // Declare several bar series, each will be mapped
-        // to a column of dataset.source by default.
-        series: [
-          {type: 'bar'},
-          {type: 'bar'},
-          {type: 'bar'}
-        ]
-      },
-    }
-  },
-  components:{
-    ECharts
-  },
-  methods: {
-    SaveImage() {
-      const linkSource = this.$refs.barchart.getDataURL();
-      const downloadLink = document.createElement('a');
-      document.body.appendChild(downloadLink);
-      downloadLink.href = linkSource;
-      downloadLink.target = '_self';
-      downloadLink.download = 'BarChart.png';
-      downloadLink.click();
-    },
+<script setup lang="ts">
+import * as echarts from 'echarts';
+import type {EChartsOption} from 'echarts';
+import "echarts";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {gradeProps} from "src/composables/comInterface";
+import {downloadChart, truncate} from "src/composables/usefulFunction";
+const chart = ref<HTMLElement>();
+let myChart: echarts.ECharts | null = null;
+const props = defineProps({
+  tableData: Array<gradeProps>,
+  assignment_set: Set<number>,
+  all_assignment: Boolean,
+  student_set: Set<number>,
+  all_student: Boolean,
+  assignment_map: Map<number, string>,
+});
+onMounted(() => {
+  if (chart.value) {
+    myChart = echarts.init(chart.value);
+    setOption();
+    myChart.setOption(option.value);
   }
 })
+watch(props, (newVal, oldVal) => {
+  if (myChart) {
+    setOption();
+    myChart.setOption(option.value);
+  }
+})
+onBeforeUnmount(() => {
+  if (myChart) {
+    myChart.dispose();
+  }
+})
+
+
+const tableTab = ['score', 'amount', 'assignment'];
+
+function setOption() {
+  let source = [], map = new Map();
+  props.tableData!.forEach((item) => {
+    let temp = [];
+    temp.push(item.grade);
+    temp.push(1);
+    if ((props.all_assignment || props.assignment_set!.has(item.assignmentId)) && (props.all_student || props.student_set!.has(Number(item.submitterId)))) {
+      if (!map.has(item.assignmentId)) {
+        map.set(item.assignmentId, temp);
+      } else {
+        let current = map.get(item.assignmentId);
+        current[0] = (current[0] * current[1]++ + item.grade) / current[1];
+        map.set(item.assignmentId, current);
+      }
+    }
+  })
+  let min = 100000, max = 0;
+  for (let [key, value] of map) {
+    let temp = [];
+    temp.push(value[0]);
+    temp.push(value[1]);
+    if (value[0] < min) min = value[0];
+    if (value[0] > max) max = value[0];
+    temp.push(truncate(key+" "+props.assignment_map!.get(key), 8));
+    source.push(temp);
+  }
+  source.sort((a, b) => {
+    return a[2] - b[2];
+  })
+  source.unshift(tableTab);
+  option.value.dataset.source = source;
+  option.value.visualMap.min = Math.min(min - 10, 0)
+  option.value.visualMap.max = Math.max(max + 10, 100);
+  console.log('soure', source);
+}
+
+const option = ref({
+  dataset: {
+    source: [
+      ['score', 'amount', 'assignment'],
+
+    ]
+  },
+  grid: {containLabel: true},
+  xAxis: {
+    name: 'amount',
+    minInterval: 1,
+  },
+  yAxis: {
+    name: 'assignment',
+    type: 'category'},
+  visualMap: {
+    orient: 'horizontal',
+    left: 'center',
+    min: 10,
+    max: 100,
+    text: ['High Score', 'Low Score'],
+    // Map the score column to color
+    dimension: 0,
+    inRange: {
+      color: ['#65B581', '#FFCE34', '#FD665F']
+    }
+  },
+  series: [
+    {
+      type: 'bar',
+      encode: {
+        // Map the "amount" column to X axis.
+        x: 'amount',
+        // Map the "product" column to Y axis
+        y: 'assignment'
+      }
+    }
+  ]
+});
+
 </script>
+
 
 <style scoped>
 </style>
+
+

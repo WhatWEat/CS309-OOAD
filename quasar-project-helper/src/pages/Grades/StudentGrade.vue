@@ -1,43 +1,99 @@
 <template>
-  <div class="q-pa-md" >
+  <div class="q-pa-md">
     <q-file
       v-if="identity<=2 && identity>=0"
       color="purple-12"
       v-model="model"
       label="upload file to grade"
-      @update:model-value="onFileChange"
+      @update:model-value="showDialog"
     >
       <template v-slot:prepend>
-        <q-icon name="attach_file" />
+        <q-icon name="attach_file"/>
       </template>
     </q-file>
     <q-dialog v-model="isShowDialog" v-if="identity<=2 && identity>=0">
-      <p>Are you sure to save this file</p>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
-      </q-card-actions>
+      <q-table
+        :rows="data"
+        :columns="columns1"
+        row-key="id"
+        dense
+        flat
+        bordered
+      >
+        <template v-slot:top-right>
+          <q-btn label="Upload" color="green" @click="saveUploadAvatar"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar"/>
+        </template>
+      </q-table>
     </q-dialog>
     <q-table
       title="Grades"
+      :grid="$q.screen.lt.sm"
       :rows="data"
       :columns="columns"
       :filter="filter"
       row-key="name"
       v-model:pagination="pagination"
+      :loading="isLoadingGrade"
       flat>
+      <template v-slot:item="props">
+        <div
+          class="q-py-xs col-12 grid-style-transition"
+          :style="props.selected ? 'transform: scale(0.95);' : ''"
+        >
+          <q-card :class="props.selected ? 'bg-grey-2' : ''">
+            <q-card-section class="row items-center">
+              <q-checkbox dense v-model="props.selected" :label="props.row.name"/>
+              <q-space>
+              </q-space>
+            </q-card-section>
+            <q-separator/>
+            <q-list dense>
+              <q-item v-for="col in props.cols.filter(col => col.name !== 'submittedTime')"
+                      :key="col.name">
+                <q-item-section>
+                  <q-item-label>{{ col.label }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label caption>
+                    <div v-html="truncate(col.value,20)">
+                    </div>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label> submittedTime</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label caption>
+                    {{ formatDateString(props.row.submittedTime) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
+      </template>
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="homework" :props="props">
-            <span>{{ props.row.name }}</span>
+          <q-td key="assignmentId" :props="props">
+            <span>{{ props.row.assignmentId }}</span>
           </q-td>
-          <q-td key="studentID" :props="props">
-            <span>{{ props.row.studentID }}</span>
+          <q-td key="title" :props="props">
+            <span>{{ props.row.title }}</span>
+          </q-td>
+          <q-td key="submitterId" :props="props">
+            <span>{{ props.row.submitterId }}</span>
+          </q-td>
+          <q-td key="submitterName" :props="props">
+            <span>{{ props.row.submitterName }}</span>
           </q-td>
           <q-td key="grade" :props="props">
             <span>{{ props.row.grade }}</span>
-            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope" v-if="identity<=2 && identity>=0">
-              <q-input type="number" v-model="scope.value" dense autofocus />
+            <q-popup-edit v-model="props.row.grade" title="Update the grade" buttons v-slot="scope"
+                          v-if="identity<=2 && identity>=0" @save="save(props.row)">
+              <q-input type="number" v-model="scope.value" dense autofocus/>
             </q-popup-edit>
           </q-td>
           <q-td key="comment" :props="props">
@@ -46,6 +102,7 @@
               buttons
               v-model="props.row.comment"
               v-slot="scope"
+              @save="save(props.row)"
               v-if="identity<=2 && identity>=0"
             >
               <q-editor
@@ -56,67 +113,96 @@
               />
             </q-popup-edit>
           </q-td>
-          <q-td key="reviewerName" :props="props">
-            <span>{{ props.row.reviewerName }}</span>
-          </q-td>
-          <q-td key="createTime" :props="props">
-            <span>{{ formatDateString(props.row.createTime) }}</span>
+          <q-td key="submittedTime" :props="props">
+            <span>{{ formatDateString(props.row.submittedTime) }}</span>
           </q-td>
         </q-tr>
       </template>
       <template v-slot:top-right>
+        <q-btn flat round @click="isLoadingChart=true" v-if="identity<=2 && identity >= 0">
+          <q-avatar icon="equalizer" size="42px">
+
+          </q-avatar>
+        </q-btn>
+        <q-space style="width: 20px"/>
         <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
           <template v-slot:append>
-            <q-icon name="search" />
+            <q-icon name="search"/>
           </template>
         </q-input>
       </template>
     </q-table>
     <q-separator v-if="data.length > 0"/>
   </div>
-  <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-      <bar-chart></bar-chart>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-      <line-chart></line-chart>
-    </div>
-  </div>
+  <q-dialog v-model="isLoadingChart">
+    <ChartShow>
+    </ChartShow>
+  </q-dialog>
+<!--    <div class="row q-col-gutter-sm q-py-sm" v-if="identity<=2 && identity>=0">-->
+<!--      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--        <bar-chart></bar-chart>-->
+<!--      </div>-->
+<!--      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">-->
+<!--        <pie-chart></pie-chart>-->
+<!--      </div>-->
+<!--    </div>-->
 </template>
 
 <script lang="ts" setup>
-import {formatDateString, useProjectId} from "src/composables/usefulFunction";
-import {onMounted, ref, watch} from 'vue';
+import {formatDateString, truncate, useProjectId} from "src/composables/usefulFunction";
+import {nextTick, onMounted, ref, watch} from 'vue';
 import {defaultGrade, gradeProps} from "src/composables/comInterface";
 import {api} from "boot/axios"
-import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
 import {useUserStore} from "src/composables/useUserStore";
 import {watchEffect} from "vue-demi";
+import {useQuasar} from "quasar";
 import BarChart from "components/Chart/BarChart.vue";
-import LineChart from "components/Chart/LineChart.vue";
+import PieChart from "components/Chart/PieChart.vue";
+import ChartShow from "components/Chart/ChartShow.vue";
+//import LineChart from "components/Chart/LineChart.vue";
 
 const {identity} = useUserStore()
-const  router = useRouter()
+const router = useRouter()
 const project_id = ref(router.currentRoute.value.params.projectID)
-const data = ref<gradeProps[]>([defaultGrade]);
+const data = ref<gradeProps[]>([]);
 const filter = ref('')
-const model = ref(null),isShowDialog = ref(false), avatar_preview = ref('')
+const $q = useQuasar();
+const assignmentID = ref(-1);
 const columns = [
   {
-    name: "homework",
+    name: "assignmentId",
     required: true,
-    label: "homework",
+    label: "assignmentId",
     align: "left",
-    field: row => row.name,
+    field: row => row.assignmentId,
     format: val => `${val}`,
     sortable: true
   },
   {
-    name: "studentID",
+    name: "title",
     required: true,
-    label: "studentID",
+    label: "title",
     align: "left",
-    field: row => row.studentID,
+    field: row => row.title,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "submitterId",
+    required: true,
+    label: "submitterId",
+    align: "left",
+    field: row => row.submitterId,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "submitterName",
+    required: true,
+    label: "submitterName",
+    align: "left",
+    field: row => row.submitterName,
     format: val => `${val}`,
     sortable: true
   },
@@ -139,20 +225,50 @@ const columns = [
     sortable: true
   },
   {
-    name: "reviewerName",
+    name: "submittedTime",
     required: true,
-    label: "reviewer",
-    align: "center",
-    field: row => row.reviewerName,
+    label: "submitted time",
+    align: "left",
+    field: row => row.submittedTime,
+    format: val => `${val}`,
+    sortable: true
+  },
+]
+
+const columns1 = [
+  {
+    name: "title",
+    required: true,
+    label: "title",
+    align: "left",
+    field: row => row.title,
     format: val => `${val}`,
     sortable: true
   },
   {
-    name: "createTime",
+    name: "submitterName",
     required: true,
-    label: "create time",
+    label: "submitterName",
     align: "left",
-    field: row => row.createTime,
+    field: row => row.submitterName,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "grade",
+    required: true,
+    label: "grade",
+    align: "left",
+    field: row => row.grade,
+    format: val => `${val}`,
+    sortable: true
+  },
+  {
+    name: "comment",
+    required: true,
+    label: "comment",
+    align: "left",
+    field: row => row.comment,
     format: val => `${val}`,
     sortable: true
   },
@@ -162,87 +278,130 @@ const pagination = ref({
   page: 1,
   rowsPerPage: 10,
 })
-
-watch(pagination, (newVal, oldVal)=>{
-  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage){
+// 初始化
+const isLoadingGrade = ref(true);
+onMounted(() => {
+  project_id.value = useProjectId().toString();
+  watchEffect(() => {
+    if (identity.value !== -1 && isLoadingGrade.value) {
+      console.log('initit')
+      onRefresh();
+      isLoadingGrade.value = false;
+    }
+  })
+})
+watch(pagination, (newVal, oldVal) => {
+  if (newVal.page !== oldVal.page || newVal.rowsPerPage !== oldVal.rowsPerPage) {
     onRefresh();
   }
 })
+const isLoadingChart = ref(false);
 
 async function onRefresh() {
+  isLoadingGrade.value = true;
   if (identity.value == 3) {
+    // TODO 增加分页
     api
       .get(
-        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+        `/stu/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
           pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
         }`
       )
       .then((res) => {
-        data.value = res.data;
-        console.log(data.value)
+        data.value = res.data.body;
+        console.log('dddddd', data.value)
+        isLoadingGrade.value = false;
       }).catch((err) => {
       console.log('err', err)
-      console.log('cuowu')
     });
-  }else {
+  } else if (identity.value !== -1) {
     api
       .get(
-        `/GradeBook/${project_id.value}/${pagination.value.page - 1}/${
+        `/tea/allGradeBook/${project_id.value}/${pagination.value.page - 1}/${
           pagination.value.rowsPerPage == 0 ? 9999 : pagination.value.rowsPerPage
         }`
       )
       .then((res) => {
-        const hashmap = res.data;
-        for (const [studentID, grades] of Object.entries(hashmap)) {
-          data.value.studentID = studentID;
-          data.value = grades
-        }
+        let saveData = res.data.body.map(item => item.value)
+          .reduce((acc, val) => acc.concat(val), []);
+
+        data.value = saveData;
+        console.log(saveData)
+
+        isLoadingGrade.value = false;
       })
       .catch((err) => {
         console.log("err", err);
       });
   }
 }
-async function created() {
-  await onRefresh();
+
+// 保存
+async function save(grade: gradeProps) {
+  console.log('edit', grade)
+  await nextTick()
+  console.log('comment', grade.comment)
+  api.post('/tea/grade_ass', {
+    grade: grade.grade,
+    assignmentId: grade.assignmentId,
+    submitterId: grade.submitterId,
+    comment: grade.comment,
+    review: grade.review
+  }).then((res) => {
+    console.log('comment in api', grade.comment)
+    console.log(res)
+    $q.notify({
+      position: 'top',
+      message: 'save success',
+      color: 'positive'
+    })
+    onRefresh();
+  }).catch(err => {
+    console.log(err)
+  })
 }
 
-async function beforeRouteUpdate(to, from, next) {
-  console.info("beforeRouteUpdate");
-  await onRefresh();
-  next();
-}
+const model = ref(null), isShowDialog = ref(false);
+const excel_file = ref();
 
 function saveUploadAvatar() {
   isShowDialog.value = false;
-  if(model.value){
-    data.value.name = model.value.name;
-    model.value = null;
+  if (model.value) {
+    excel_file.value = model.value;
+    let formdata = new FormData();
+    formdata.append('file', excel_file.value);
+    api.post('/tea/grade_ass_with_file',formdata,{
+      params: {
+        assignmentId: assignmentID.value,
+      },
+    }).then((res) => {
+      data.value = res.data.body;
+      console.log('data',data.value)
+    }).catch((err) => {
+      console.log(err)
+    })
   }
+}
+
+
+function showDialog() {
+  const userInput = prompt('Please enter the assignmentId:');
+  if (userInput !== null) {
+    // 用户点击了确定按钮并输入了内容
+    console.log('User input:', userInput);
+    assignmentID.value = parseInt(userInput);
+    isShowDialog.value = true;
+  } else {
+    console.log('User canceled input.');
+  }
+
+  console.log('isShowDialog', isShowDialog.value)
 }
 
 function cancelUploadAvatar() {
   isShowDialog.value = false;
   model.value = null;
 }
-function onFileChange(){
-  const file = model.value
-  if(file){
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      avatar_preview.value = reader.result as string
-    }
-    reader.onerror = (error) => {
-      console.log(error)
-    }
-    isShowDialog.value = true
-  }
-}
 
-onMounted(() => {
-  project_id.value = useProjectId();
-  onRefresh();
-});
 
 </script>

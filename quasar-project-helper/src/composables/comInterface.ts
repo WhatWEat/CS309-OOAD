@@ -30,97 +30,95 @@ withDefaults(defineProps<noticeProps>(), {
 
 export interface gradeProps {
   homeworkId: number;
+  title?: string;
   projectId: number;
-  name: string;
-  studentID: string;
+  assignmentId: number;
+  submitterId: string;
   grade: number;
   comment: string;
-  reviewerId: number;
-  reviewerName?: string;
-  createTime?: string;
+  review: string;
+  submittedTime?: string;
+  submitterName?: string;
 }
 withDefaults(defineProps<gradeProps>(), {
   homeworkId: 0,
   projectId: 0,
-  name: "assignment1",
-  studentID:'12110000',
+  assignmentId: 1,
+  submitterId:'12110000',
   grade: 90,
   comment: "excellent",
-  reviewerId: 0,
-  reviewerName: "wang",
-  createTime: "2021-06-01 00:00:00",
+  review: 'wang',
+  submittedTime: "2021-06-01 00:00:00",
 })
 
 export interface tgradeProps {
   homeworkId: number;
   projectId: number;
-  name: string;
-  studentID: string;
+  assignmentId: number;
+  submitterId: string;
   grade: number;
   comment: string;
-  reviewerId: number;
-  reviewerName?: string;
-  createTime?: string;
+  review: string;
+  submittedTime?: string;
 }
 withDefaults(defineProps<tgradeProps>(), {
   homeworkId: 0,
   projectId: 0,
-  name: "assignment1",
-  studentID: "12110000",
+  assignmentId:1,
+  submitterId: "12110000",
   grade: 90,
   comment: "excellent",
-  reviewerId: 0,
-  reviewerName: "wang",
-  createTime: "2021-06-01 00:00:00",
+  review: 'wang',
+  submittedTime: "2021-06-01 00:00:00",
 })
 
 export interface createProps {
-  studentID: string;
+  userId: string;
   password: string;
   email: string;
   phone: string;
 }
 withDefaults(defineProps<createProps>(), {
-  studentID: "12110001",
+  userId: "12110001",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
 })
 
 export interface resetProps {
-  studentID: string;
+  userId: string;
   password: string;
   email: string;
   phone: string;
 }
 withDefaults(defineProps<resetProps>(), {
-  studentID: "12110002",
+  userId: "12110002",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
 })
 
 export interface freezeProps {
-  studentID: string;
-  password: string;
-  email: string;
-  phone: string;
+  userId: string;
+  password?: string;
+  email?: string;
+  phone?: string;
 }
 withDefaults(defineProps<freezeProps>(), {
-  studentID: "12110003",
+  userId: "12110003",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
 })
 
 export interface unfreezeProps {
-  studentID: string;
+  userId: string;
   password: string;
   email: string;
   phone: string;
 }
 withDefaults(defineProps<unfreezeProps>(), {
-  studentID: "12110004",
+  userId: "12110004",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -139,26 +137,24 @@ export const defaultNotice: noticeProps = {
 export const defaultGrade: gradeProps = {
   homeworkId: 0,
   projectId: 0,
-  name: 'assignment1',
-  studentID:'12110000',
+  assignmentId: 1,
+  submitterId:'12110000',
   grade: 90,
   comment: 'excellent',
-  reviewerName: 'wang',
-  reviewerId: 0,
+  review: 'wang',
 }
 
 export const defaultTGrade: tgradeProps = {
   homeworkId: 0,
   projectId: 0,
-  name: 'assignment1',
-  studentID:'12110000',
+  assignmentId: 1,
+  submitterId:'12110000',
   grade: 90,
   comment: 'excellent',
-  reviewerName: 'wang',
-  reviewerId: 0,
+  review: 'wang',
 }
 export const defaultCreate: createProps = {
-  studentID: "12110001",
+  userId: "12110001",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -166,7 +162,7 @@ export const defaultCreate: createProps = {
 
 
 export const defaultReset: resetProps = {
-  studentID: "12110002",
+  userId: "12110002",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -174,7 +170,7 @@ export const defaultReset: resetProps = {
 
 
 export const defaultFreeze: freezeProps = {
-  studentID: "12110003",
+  userId: "12110003",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",
@@ -182,7 +178,7 @@ export const defaultFreeze: freezeProps = {
 
 
 export const defaultUnfreeze: unfreezeProps = {
-  studentID: "12110004",
+  userId: "12110004",
   password: "Aa@123456",
   email: "123456@qq.com",
   phone: "12345678910",

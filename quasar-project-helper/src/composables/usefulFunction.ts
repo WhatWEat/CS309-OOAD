@@ -2,6 +2,7 @@ import {api} from "boot/axios";
 import {useRoute} from 'vue-router';
 import {isArray} from "util";
 import Vue, { ComponentOptions } from 'vue'
+import * as echarts from "echarts";
 
 export function truncate(str: string, num = 15, endSymbol = '...'): string {
   // 超过多少长度就截断字符串，截断和面加上什么符号
@@ -102,6 +103,23 @@ export function getDownloadBlob(blobFile: Blob, fileName: string) {
 
   document.body.removeChild(link);
   URL.revokeObjectURL(blobUrl);
+}
+// download chart
+export function downloadChart(myChart: echarts.ECharts | null) {
+  if (!myChart) return;
+
+  const url = myChart.getDataURL({
+    type: 'png',
+    pixelRatio: 2,
+    backgroundColor: '#fff'
+  });
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'chart.png';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 //******************Li weihao******************//
 export function merger(key: object, value: []): object;

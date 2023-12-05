@@ -87,12 +87,7 @@ onMounted(() => {
         {
           title: 'Grade',
           icon: 'school',
-          link: `/projects/${projectID.value}/sgrade`
-        },
-        {
-          title: 'TGrade',
-          icon: 'school',
-          link: `/projects/${projectID.value}/tgrade`
+          link: `/projects/${projectID.value}/grade`
         },
         {
           title: 'Person',
@@ -105,7 +100,7 @@ onMounted(() => {
 })
 
 
-const leftDrawerOpen = ref(true)
+const leftDrawerOpen = ref(false)
 const miniState = ref(true)
 
 function toggleLeftDrawer() {

@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
       <q-page class="flex bg-image flex-center">
-        <q-card v-bind:style="$q.screen.lt.sm?{'width': '80%'}:{'width':'50%'}">
+        <q-card v-bind:style="$q.screen.lt.sm?{'width': '70%'}:{'width':'50%'}">
           <q-card-section>
             <q-avatar size="103px" class="absolute-center shadow-10">
               <img src="profile.svg">
@@ -130,6 +130,7 @@
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {QForm} from "quasar";
+import {api} from "boot/axios";
 
 const router = useRouter()
 
@@ -139,6 +140,7 @@ const verificationCode = ref('')
 const loginPhone = ref(''), phoneCode = ref(''), countdown_phone = ref(0)
 const loginEmail = ref(''), emailCode = ref(''), countdown_email = ref(0)
 const type = ref('phone')
+const countdown = ref(0)
 const password_dict = ref({
   new_password: '',
   confirm_new_password: ''
@@ -146,21 +148,27 @@ const password_dict = ref({
 
 function sendCode() {
   // TODO 发送手机验证码
-  // api.get()
-  $q.notify({
-    color: "green",
-    textColor: "white",
-    icon: "mail",
-    message: "Code has been sent",
-  });
-  // 开始倒计时
-  countdown_phone.value = 60;
-  const interval = setInterval(() => {
-    countdown_phone.value--;
-    if (countdown_phone.value === 0) {
-      clearInterval(interval);
-    }
-  }, 1000);
+  api.post(`/get_forget_password_code`,{
+    key: type.value == 'phone' ? "1" : "2",
+    value: loginPhone.value,
+  }).then(res => {
+    console.log('合成',email)
+    $q.notify({
+      color: "green",
+      textColor: "white",
+      icon: "mail",
+      message: "Code has been sent",
+    });
+    countdown.value = 60;
+    const interval = setInterval(() => {
+      countdown.value--;
+      if (countdown.value === 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }).catch(err => {
+    console.log(err)
+  })
 }
 const password_input = ref(null)
 function verifyPhoneNumber() {

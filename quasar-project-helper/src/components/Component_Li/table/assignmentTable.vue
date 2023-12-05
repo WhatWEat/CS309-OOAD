@@ -8,6 +8,7 @@
       :rows="rows_temp"
       :separator="separator"
       :title="tableTitle"
+      :grid="$q.screen.lt.sm"
       card-class="bg-grey-2"
       class="rounded-xl"
       row-key="AssignmentName"
@@ -38,6 +39,7 @@
           </q-input>
         </q-toolbar>
       </template>
+
     </q-table>
   </div>
 
@@ -63,7 +65,8 @@
   </div>
   <!--  作业详情部分-->
   <div v-show="show_assignment_detail">
-    <AssignmentsDetail :AssignmentAttachment="AssignmentAttachment"
+    <AssignmentsDetail @updateAssList="this.$emit('updateAssList')"
+                       :AssignmentAttachment="AssignmentAttachment"
                        :AssignmentDetail="AssignmentDetail"
                        :group-id="groupId"
                        :project-id="projectId"></AssignmentsDetail>
@@ -84,16 +87,16 @@
   </div>
   <!--  创建作业表单部分-->
   <div>
-    <el-dialog v-model="show_create_ass_table" center=true>
+    <el-dialog v-model="show_create_ass_table" :center=true class="rounded-xl"  :style="{'min-width': '400px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Create Assignment</div>
       </template>
-      <assignment-form @unfold="this.show_create_ass_table = false" :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
+      <assignment-form @updateAssList="this.$emit('updateAssList')" @unfold="this.show_create_ass_table = false" :group-id="this.groupId_temp" :project-id="this.projectId_temp"></assignment-form>
     </el-dialog>
   </div>
   <!--  修改作业表单部分-->
   <div>
-    <el-dialog v-model="show_edit_ass_table" center=true>
+    <el-dialog v-model="show_edit_ass_table" :center=true class="rounded-xl" :style="{'min-width': '450px', 'width': formWidth}">
       <template v-slot:header>
         <div style="font-size: 20px; font-weight: bolder">Edit Assignment</div>
       </template>
@@ -107,6 +110,8 @@ import {defineAsyncComponent, defineComponent, ref} from 'vue'
 import {useUserStore} from "src/composables/useUserStore";
 import {api} from "boot/axios";
 import cloneDeep from "lodash/cloneDeep";
+import { useQuasar } from 'quasar'
+
 
 export default defineComponent({
   name: "AssignmentTable",
@@ -134,18 +139,18 @@ export default defineComponent({
       required: true,
       type: Array,
       default: () => [
-        {
-          AssignmentName: 'Assignment 1',
-          deadLine: '2020-10-10',
-          instructor: 'Qi-Kun Xue1',
-          moreInfo: 'View Details1'
-        },
-        {
-          AssignmentName: 'Assignment 2',
-          deadLine: '2020-10-11',
-          instructor: 'Qi-Kun Xue2',
-          moreInfo: 'View Details2'
-        },
+        // {
+        //   AssignmentName: 'Assignment 1',
+        //   deadLine: '2020-10-10',
+        //   instructor: 'Qi-Kun Xue1',
+        //   moreInfo: 'View Details1'
+        // },
+        // {
+        //   AssignmentName: 'Assignment 2',
+        //   deadLine: '2020-10-11',
+        //   instructor: 'Qi-Kun Xue2',
+        //   moreInfo: 'View Details2'
+        // },
       ]
     },
     separator: {
@@ -170,6 +175,9 @@ export default defineComponent({
   },
   data() {
     return {
+      $q :useQuasar() ,
+      formWidth:'50%',
+
       search: '',
       selected: [],
       p_x: ref(200),
@@ -195,37 +203,37 @@ export default defineComponent({
       show_deleteDialog_teacher: ref(false),
 
       AssignmentDetail: {
-        assignmentId: -1,
-        AssignmentName: 'Assignment 1',
-        studentName: "Liwehao",
-        submitTime: '2020-10-7',
-        deadLine: '2020-10-10',
-        instructor: 'Qi-Kun Xue1',
-        grade: '100',
-        state: 1,
-        matGrade: '100',
-        isReturned: true,
-        moreInfo: 'Course Assignment 4:\n' +
-          '\n' +
-          'Chapter 4：Exercise 2，Exercise 8，and Exercise 22\n' +
-          '\n' +
-          'Deadline: Please submit your homework through the Sakai system before 10:20AM on April 11, 2023.  \n' +
-          '\n' +
-          'Please note that you have only one chance to submit your homework in the SAKAI system.\n' +
-          '\n' +
-          'No re-submission is allowed.\n' +
-          '\n' +
-          'No late submission is allowed.',
-        filePaths: null,
-        files: null,
-        type: null,
-        requireExtension: '',
-        filesSubmit: null,
-        filePathsSubmit: null,
-        comment:null,
-        text:null,
-        review:null,
-        submitterId: null,
+        // assignmentId: -1,
+        // AssignmentName: 'Assignment 1',
+        // studentName: "Liwehao",
+        // submitTime: '2020-10-7',
+        // deadLine: '2020-10-10',
+        // instructor: 'Qi-Kun Xue1',
+        // grade: '100',
+        // state: 1,
+        // matGrade: '100',
+        // isReturned: true,
+        // moreInfo: 'Course Assignment 4:\n' +
+        //   '\n' +
+        //   'Chapter 4：Exercise 2，Exercise 8，and Exercise 22\n' +
+        //   '\n' +
+        //   'Deadline: Please submit your homework through the Sakai system before 10:20AM on April 11, 2023.  \n' +
+        //   '\n' +
+        //   'Please note that you have only one chance to submit your homework in the SAKAI system.\n' +
+        //   '\n' +
+        //   'No re-submission is allowed.\n' +
+        //   '\n' +
+        //   'No late submission is allowed.',
+        // filePaths: null,
+        // files: null,
+        // type: null,
+        // requireExtension: '',
+        // filesSubmit: null,
+        // filePathsSubmit: null,
+        // comment:null,
+        // text:null,
+        // review:null,
+        // submitterId: null,
       },
       AssignmentAttachment: [
         {
@@ -394,8 +402,21 @@ export default defineComponent({
         this.groupId_temp = cloneDeep(newVal);
       },
       deep: true
+    },
+    '$q.screen.width': {
+      immediate: true,
+      handler(newVal, oldVal) {
+        if(this.$q.screen.lt.sm){
+          this.formWidth = '95%'
+          console.log('screen width is less than sm')
+        }
+        else {
+          this.formWidth = '50%'}
+        console.log('screen width is not less than sm')
+      }
     }
-  }
+  },
+  emits: ['updateAssList']
 })
 </script>
 

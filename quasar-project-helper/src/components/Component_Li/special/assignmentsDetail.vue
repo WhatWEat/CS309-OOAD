@@ -1,5 +1,5 @@
 <template>
-  <div class="" style="">
+  <div >
     <div class="row justify-between">
       <div class="col-sm-12 col-xs-12 col-md-7 q-pa-md">
         <q-card ref="card1" :style="{'min-height':minHeight}" class="my-card rounded-xl">
@@ -130,7 +130,7 @@
           </div>
 
 
-<!--          提交作业后的返回值部分-->
+          <!--          提交作业后的返回值部分-->
           <div
             v-if="this.AssignmentDetail.state!==0 && this.AssignmentDetail.state!==3 && this.AssignmentDetail.state!==4">
             <!--      虚拟的分割线部分-->
@@ -152,7 +152,7 @@
             </div>
             <div class="row">
               <div class="q-pa-md col-12">
-                <q-card :style="{width:'100%'}" >
+                <q-card :style="{width:'100%'}" class="rounded-xl">
                   <q-card-section>
                     <q-item>
                       <q-item-section :style="{'width':this.width}" avatar>
@@ -168,9 +168,11 @@
                       <q-item-section :style="{'width':this.width}" avatar>
                         <span class="text-h6 text-weight-bold">Comment: </span>
                       </q-item-section>
-                      <q-item-section >
+                      <q-item-section>
                              <span class="text-h6 text-weight-regular">
-                                    {{ this.AssignmentDetail.comment === null ? 'No Comment' : this.AssignmentDetail.comment }}
+                                    {{
+                                 this.AssignmentDetail.comment === null ? 'No Comment' : this.AssignmentDetail.comment
+                               }}
                             </span>
                       </q-item-section>
                     </q-item>
@@ -187,7 +189,7 @@
             </div>
           </div>
 
-<!--          下方的根据人来展示的部分-->
+          <!--          下方的根据人来展示的部分-->
           <!--      虚拟的分割线部分-->
           <q-separator color="white" size="35px"/>
           <!--      下半部分-->
@@ -208,16 +210,16 @@
             <q-item>
               <q-item-section>
                 <q-uploader
-                  ref="uploader"
+                  ref="uploader_stu"
                   :auto-upload="false"
                   :hide-upload-btn="true"
+                  class="rounded-lg"
                   label="Max number of files (3)"
                   max-files="3"
                   multiple
                   style="width: 100%"
                   @added="onFilesAdded"
                   @removed="onFilesRemoved"
-                  class="rounded-lg"
                 ></q-uploader>
               </q-item-section>
             </q-item>
@@ -225,49 +227,56 @@
             <q-item>
               <q-item-section>
                 <q-editor
+                  ref="editor_stu"
                   v-model="editorInput" :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
-                  placeholder="Type your description here..."
-                  class="rounded-lg">
+                  class="rounded-lg"
+                  placeholder="Type your description here...">
                 </q-editor>
               </q-item-section>
             </q-item>
           </div>
           <!--     特殊作业提交-->
           <div v-else-if="userData.identity===3">
-            <!--      提交作业的部分-->
-            <q-item clickable>
-              <q-item-section>
-                <q-item-label style="font-weight: bolder;font-size: x-large">Peer Evaluation</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-btn color="primary" dense flat icon="upload" size="md" @click="postGradeAssignment">
-                  <q-tooltip :offset="[10, 10]" anchor="center left" self="center right">Submit your Grade!
-                  </q-tooltip>
-                </q-btn>
-              </q-item-section>
-            </q-item>
-            <!--      作业评论部分-->
-            <div>
-              <q-item>
-                <q-input v-model.number="grade" label="Grade" outlined type="number">
-                  <template v-slot:append>
-                    <q-avatar>
-                      <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg">
-                    </q-avatar>
-                  </template>
-                </q-input>
-              </q-item>
-              <q-item>
+            <div v-for="(group,index) in this.toComment" :key="group">
+              <!--      提交作业的部分-->
+              <q-item clickable>
                 <q-item-section>
-                  <q-editor v-model="editorInput" :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
-                            :square="true" min-height="3rem"
-                            placeholder="Type your description here...">
-                  </q-editor>
+                  <q-item-label style="font-weight: bolder;font-size: x-large">Peer Evaluation ID: {{
+                      group
+                    }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn color="primary" dense flat icon="upload" size="md" @click="postGradePeerEvaluation(group,index)">
+                    <q-tooltip :offset="[10, 10]" anchor="center left" self="center right">Submit your Grade!
+                    </q-tooltip>
+                  </q-btn>
                 </q-item-section>
               </q-item>
+              <!--      作业评论部分-->
+              <div>
+                <q-item>
+                  <q-input v-model.number="gradeEvaluator[index]" label="Grade" outlined type="number">
+                    <template v-slot:append>
+                      <q-avatar>
+                        <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg">
+                      </q-avatar>
+                    </template>
+                  </q-input>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-editor v-model="editorInputEvaluator[index]" :definitions="{bold: {icon:bold, tip: '彩蛋被你发现了!'}}"
+                              :square="true" min-height="3rem"
+                              placeholder="Type your description here...">
+                    </q-editor>
+                  </q-item-section>
+                </q-item>
+              </div>
             </div>
-
           </div>
+
+
           <!--     教师批改作业-->
           <div v-else>
             <!--      提交作业的部分-->
@@ -303,11 +312,11 @@
         </q-card>
       </div>
     </div>
-
   </div>
 
   <div>
-    <q-dialog v-model="this.showPDF" :full-heigh="true" :full-width="true" :persistent="true" transition-duration="1000">
+    <q-dialog v-model="this.showPDF" :full-heigh="true" :full-width="true" :persistent="true"
+              transition-duration="1000">
       <q-card :bordered="true" :square=false>
         <PDFViewer :fileName=this.fileName
                    :getApiUrl=this.getApiUrl>
@@ -317,14 +326,16 @@
   </div>
 
   <div>
-    <q-dialog v-model="this.showMD" :full-heigh="true" :full-width="true" :persistent="true" transition-duration="1000">
+    <q-dialog v-model="this.showMD" :full-heigh="true" :full-width="true" transition-duration="1000">
       <q-card :bordered="true" :square=false>
         <MDViewer :get-content-url='this.getApiUrl'>
         </MDViewer>
       </q-card>
     </q-dialog>
   </div>
-  {{ AssignmentDetail }}
+
+
+
 
 </template>
 
@@ -345,7 +356,9 @@ export default defineComponent({
       userData: useUserStore(),
 
       editorInput: '',
+      editorInputEvaluator: [],
       grade: '',
+      gradeEvaluator: [],
       fileName: '',
 
       width: '32%',
@@ -354,7 +367,9 @@ export default defineComponent({
 
       getApiUrl: '',
       showPDF: ref(false),
-      showMD: ref(false)
+      showMD: ref(false),
+
+      toComment: [],
     }
   },
   mounted() {
@@ -425,11 +440,13 @@ export default defineComponent({
         this.$q.notify({
           color: 'positive',
           position: 'top',
-          message: 'Submit successfully!',
+          message: res.data.msg,
           icon: 'check',
           timeout: 3000,
         })
-        this.$emit('update')
+        this.$refs.uploader_stu.reset()
+        this.editorInput = ''
+        this.$emit('updateAssList')
       }).catch((err) => {
         console.log(err)
         this.$q.notify({
@@ -440,6 +457,7 @@ export default defineComponent({
           timeout: 1000,
         })
       })
+      this.formData = new FormData();
     },
     postGradeAssignment() {
       let formData = new FormData()
@@ -453,8 +471,7 @@ export default defineComponent({
           timeout: 3000,
         })
         return
-      }
-      else if (this.grade === '') {
+      } else if (this.grade === '') {
         this.$q.notify({
           color: 'negative',
           position: 'top',
@@ -471,10 +488,18 @@ export default defineComponent({
       formData.append("comment", this.editorInput)
       formData.append("review", this.editorInput)
 
-      api.post('/tea/grade_ass', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      let tmpNotFormData = {
+        "grade":  this.grade,
+        "assignmentId": this.AssignmentDetail.assignmentId,
+        "submitterId":  this.AssignmentDetail.submitterId,
+        "comment": this.editorInput,
+        "review": this.editorInput
+      }
+
+      console.log('老师评分的内容为:')
+      console.log(tmpNotFormData)
+
+      api.post('/tea/grade_ass', tmpNotFormData, {
       }).then((res) => {
         console.log(res)
         this.$q.notify({
@@ -495,16 +520,74 @@ export default defineComponent({
         this.$q.notify({
           color: 'negative',
           position: 'top',
-          message:  err.response.data.msg,
+          message: err.response.data.msg,
           icon: 'report_problem',
           timeout: 3000,
         })
       })
+
+    },
+    postGradePeerEvaluation(evaluatedGroupId,index) {
+      console.clear()
+      let submitData =  {
+        'assignmentId': this.AssignmentDetail.assignmentId,
+        'content' : this.editorInputEvaluator[index],
+        'grade' : this.gradeEvaluator[index],
+        'commentedGroup': this.toComment[index],
+      }
+      console.log('submitData')
+      console.log(submitData)
+      let  formData = new FormData()
+      formData.append('assignmentId', this.AssignmentDetail.assignmentId)
+      formData.append('content', this.editorInputEvaluator[index])
+      formData.append('grade', this.gradeEvaluator[index])
+      formData.append('commentedGroup', this.toComment[index])
+
+
+      api.post('/stu/submit_evaluation',
+        formData
+        , {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      ).then(
+        (res) => {
+          this.$q.notify({
+            color: 'positive',
+            position: 'top',
+            message: res.data.msg,
+            icon: 'check',
+            timeout: 3000,
+          })
+          this.getToComment();
+        }
+      ).catch(
+        (err) => {
+          console.log(err)
+          this.$q.notify({
+            color: 'negative',
+            position: 'top',
+            message: err.response.data.msg,
+            icon: 'report_problem',
+            timeout: 3000,
+          })
+        })
     },
 
     //**********************************GET***************************************
     async getAssFile(filePaths) {
-      let identity = this.userData.identity === 3 ? 'stu' : 'tea';
+      let identity = null;
+      if (this.userData.identity === 3) {
+        identity = 'stu'
+      } else if (this.userData.identity === 2) {
+        identity = 'ta'
+      } else if (this.userData.identity === 1) {
+        identity = 'tea'
+      } else {
+        identity = 'adm'
+      }
+
       let isSuccess = false;
       await api.get(('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths), {responseType: 'blob'}).then((res) => {
         getDownloadBlob(res.data, filePaths)
@@ -545,28 +628,27 @@ export default defineComponent({
       }
     },
     async getAssFileSubmit(filePaths) {
-      console.log(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths))
+      console.log(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths))
       let isSuccess = false;
-      await api.get(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths),
-        {responseType: 'blob'}).
-      then((res) => {
-          getDownloadBlob(res.data, filePaths)
-          this.$q.notify({
-            color: 'positive',
-            position: 'top',
-            message: 'Download successfully!',
-            icon: 'check',
-            timeout: 1000,
-          })
-          isSuccess = true
-          console.log("到这里了吧" + isSuccess)
-        }).catch((err) => {
-          this.$q.notify({
-            type: 'negative',
-            message: err.response.statusText
-          })
-          console.log(err)
+      await api.get(('/get_submitted_ass_file/' + this.AssignmentDetail.assignmentId +'/'+ this.AssignmentDetail.submitterId + '/' + filePaths),
+        {responseType: 'blob'}).then((res) => {
+        getDownloadBlob(res.data, filePaths)
+        this.$q.notify({
+          color: 'positive',
+          position: 'top',
+          message: 'Download successfully!',
+          icon: 'check',
+          timeout: 1000,
         })
+        isSuccess = true
+        console.log("到这里了吧" + isSuccess)
+      }).catch((err) => {
+        this.$q.notify({
+          type: 'negative',
+          message: err.response.statusText
+        })
+        console.log(err)
+      })
 
 
       // console.clear()
@@ -586,6 +668,33 @@ export default defineComponent({
         this.getApiUrl = ('/' + identity + '/get_ass_file/' + this.AssignmentDetail.assignmentId + '/' + filePaths);
         this.showMD = true;
       }
+    },
+
+    // TODO disable presentation time
+    getToComment() {
+      api.get('/stu/to_comment/' + this.AssignmentDetail.assignmentId).then((res) => {
+        if (res.data.statusCode === 200) {
+          this.toComment = res.data.body
+          for (let i = 0; i < this.toComment.length; i++) {
+            this.gradeEvaluator[i] = ''
+            this.editorInputEvaluator[i] = ''
+          }
+
+          console.clear()
+          console.log('/stu/to_comment/')
+          console.log(this.toComment)
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: 'This is a "negative" type notification in evaluation' + res.data.msg
+          })
+        }
+      }).catch((err) => {
+        this.$q.notify({
+          type: 'negative',
+          message: 'This is a "negative" type notification in evaluation' + err.response.data.msg
+        })
+      })
     }
   },
   props: {
@@ -612,7 +721,7 @@ export default defineComponent({
         comment: null,
         text: null,
         review: null,
-        submitterId:null,
+        submitterId: null,
       }
     },
     AssignmentAttachment: {
@@ -643,10 +752,14 @@ export default defineComponent({
     AssignmentDetail: {
       handler: function (val, oldVal) {
         console.log(val);
+        if (this.AssignmentDetail.type === 'e' && (this.userData.identity === 3)) {
+          this.getToComment()
+        }
       },
       deep: true
     },
   },
+  emits: ['updateAssList']
 })
 </script>
 

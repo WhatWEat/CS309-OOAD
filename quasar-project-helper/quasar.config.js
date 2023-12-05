@@ -91,6 +91,7 @@ module.exports = configure(function (/* ctx */) {
       proxy: {
         '/api': {
           target: 'https://8.134.200.127:8443',
+          // target: 'https://10.26.139.124:8443',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, ''),

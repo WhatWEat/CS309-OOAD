@@ -80,7 +80,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['change', 'delete', 'errorDialog', "unfold","successDialog"])
+const emit = defineEmits(['change', 'delete', 'errorDialog', "unfold","successDialog",'renewGroupList'])
 
 const FormData = reactive<FormData>({
   groupSize: '',
@@ -187,6 +187,7 @@ const postCreateMultiGroup = () => {
   ).then((response) => {
     successMessage.text = response.data.msg;
     emit('successDialog', successMessage)
+    emit('renewGroupList')
   }).catch((error) => {
     errorMessage.text = error.response.data.msg;
     emit('errorDialog', errorMessage)

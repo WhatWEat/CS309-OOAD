@@ -341,7 +341,6 @@ const columns = [
     sortable: true,
   },
 ];
-
 // 分页
 function testProps(row: noticeProps) {
   console.log(row)
@@ -468,10 +467,11 @@ function removeRow() {
       message: 'delete success',
       color: 'negative'
     })
+    onRefresh();
   }).catch(err => {
     console.log(err)
   })
-  onRefresh();
+
   selected.value = [];
 }
 
@@ -488,6 +488,7 @@ onMounted(() => {
 
 async function onRefresh() {
   loading.value = true;
+  await nextTick();
   let search = "";
   if (tags.value.size > 0) search = tags.value.keys().next().value;
   let project_id = Number.isNaN(projectID.value) ? -1 : projectID.value;

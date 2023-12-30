@@ -25,12 +25,16 @@
         <q-icon name="attach_file" />
       </template>
     </q-file>
-    <q-dialog v-model="isShowDialog1" >
-      <p>Are you sure to save this file</p>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar1"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar1"/>
-      </q-card-actions>
+    <q-dialog v-model="isShowDialog1">
+      <q-card>
+        <q-card-section  class="confirm-text">
+          Are you sure you want to upload the file?
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Upload" color='green' @click="saveUploadAvatar1"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar1"/>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
     <q-table
       title="Create"
@@ -46,12 +50,6 @@
           </q-td>
           <q-td key="password" :props="props">
             <span>{{ props.row.password }}</span>
-          </q-td>
-          <q-td key="email" :props="props">
-            <span>{{ props.row.email }}</span>
-          </q-td>
-          <q-td key="phone" :props="props">
-            <span>{{ props.row.phone }}</span>
           </q-td>
         </q-tr>
       </template>
@@ -76,12 +74,16 @@
         <q-icon name="attach_file" />
       </template>
     </q-file>
-    <q-dialog v-model="isShowDialog2" >
-      <p>Are you sure to save this file</p>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar2"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar2"/>
-      </q-card-actions>
+    <q-dialog v-model="isShowDialog2">
+      <q-card>
+        <q-card-section  class="confirm-text">
+          Are you sure you want to upload the file?
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Upload" color='green' @click="saveUploadAvatar2"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar2"/>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
     <q-table
       title="Reset"
@@ -122,12 +124,16 @@
         <q-icon name="attach_file" />
       </template>
     </q-file>
-    <q-dialog v-model="isShowDialog3" >
-      <p>Are you sure to save this file</p>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar3"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar3"/>
-      </q-card-actions>
+    <q-dialog v-model="isShowDialog3">
+      <q-card>
+        <q-card-section  class="confirm-text">
+          Are you sure you want to upload the file?
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Upload" color='green' @click="saveUploadAvatar3"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar3"/>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
     <q-table
       title="Freeze"
@@ -164,12 +170,16 @@
         <q-icon name="attach_file" />
       </template>
     </q-file>
-    <q-dialog v-model="isShowDialog4" >
-      <p>Are you sure to save this file</p>
-      <q-card-actions class="q-px-md">
-        <q-btn label="Upload" color='green' @click="saveUploadAvatar4"/>
-        <q-btn label="Cancel" color="red" @click="cancelUploadAvatar4"/>
-      </q-card-actions>
+    <q-dialog v-model="isShowDialog4">
+      <q-card>
+        <q-card-section  class="confirm-text">
+          Are you sure you want to upload the file?
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Upload" color='green' @click="saveUploadAvatar4"/>
+          <q-btn label="Cancel" color="red" @click="cancelUploadAvatar4"/>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
     <q-table
       title="Unfreeze"
@@ -203,20 +213,17 @@
 import { ref} from 'vue';
 import {
   createProps,
-  defaultCreate,
-  defaultFreeze,
-  defaultReset,
-  defaultUnfreeze, freezeProps, resetProps, unfreezeProps,
+   freezeProps, resetProps, unfreezeProps,
 } from "src/composables/comInterface";
 import {api} from "boot/axios"
 import { useRouter } from 'vue-router'
 import PersonBar from "components/Layout/PersonBar.vue";
 
 const  router = useRouter()
-const data1 = ref<createProps[]>([defaultCreate]);
-const data2 = ref<resetProps[]>([defaultReset]);
-const data3 = ref<freezeProps[]>([defaultFreeze]);
-const data4 = ref<unfreezeProps[]>([defaultUnfreeze]);
+const data1 = ref<createProps[]>([]);
+const data2 = ref<resetProps[]>([]);
+const data3 = ref<freezeProps[]>([]);
+const data4 = ref<unfreezeProps[]>([]);
 const filter1 = ref(''), filter2 = ref(''), filter3 = ref(''), filter4 = ref('')
 const model1 = ref(null), model2 = ref(null), model3 = ref(null), model4 = ref(null)
 const columns = [
@@ -235,22 +242,6 @@ const columns = [
     label: "password",
     align: "left",
     field: row => row.password,
-    format: val => `${val}`
-  },
-  {
-    name: "email",
-    required: true,
-    label: "email",
-    align: "left",
-    field: row => row.email,
-    format: val => `${val}`
-  },
-  {
-    name: "phone",
-    required: true,
-    label: "phone",
-    align: "left",
-    field: row => row.phone,
     format: val => `${val}`
   },
 ]
@@ -313,6 +304,7 @@ function saveUploadAvatar1() {
     formdata.append('file',excel_file1.value);
     api.post('/adm/create_multiple_users_with_file',formdata).then((res)=>{
       data1.value = res.data.body;
+      data1.value.shift();
       console.log('data1',data1.value)
     }).catch((err)=>{
       console.log('err', err)
@@ -416,3 +408,9 @@ function cancelUploadAvatar4() {
   model4.value = null;
 }
 </script>
+
+<style>
+.confirm-text {
+  font-size: 20px; /* Adjust this value to your preference */
+}
+</style>

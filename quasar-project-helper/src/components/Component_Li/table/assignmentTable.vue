@@ -291,7 +291,7 @@ export default defineComponent({
         timeout: 3000,
         actions: [
           { label: 'Cancel', color: 'green', handler: () => { /* ... */ } },
-          { label: 'Confirm', color: 'red', handler: ()=>{this.deleteAssignment(assignmentId)}}
+          { label: 'Confirm', color: 'red', handler: ()=>{this.deleteAssignment(assignmentId),this.$emit('updateAssList')} }
         ]
       })
     },
@@ -403,7 +403,7 @@ export default defineComponent({
       },
       deep: true
     },
-    '$q.screen.width': {
+    '$q.screen.lt.md': {
       immediate: true,
       handler(newVal, oldVal) {
         if(this.$q.screen.lt.sm){

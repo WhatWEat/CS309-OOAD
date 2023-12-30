@@ -286,9 +286,10 @@ function saveInfo() {
           message: "release success",
           color: "positive",
         });
+        emit("save");
         console.log(res.data);
       });
   }
-  emit("save");
+
 }
 </script>

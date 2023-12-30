@@ -245,7 +245,7 @@
         <template v-slot:header>
           <div style="font-size: 20px; font-weight: bolder">Edit Group Info</div>
         </template>
-        <group-form :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
+        <group-form @renewGroupList="getGroupList" :form-data="formData" :project-id="projectId" type="Edit" @errorDialog="handleError"
                     @successDialog="handleSuccess" @unfold="show_edit_form=false" ></group-form>
       </el-dialog>
   </div>
@@ -267,7 +267,7 @@
       </template>
       <create-groups-form :project-id="parseInt(projectId, 10)" @successDialog="handleSuccess"
                           @unfold="show_set_form=false"
-                          @error-dialog="handleError"></create-groups-form>
+                          @error-dialog="handleError" @renewGroupList="getGroupList"></create-groups-form>
     </el-dialog>
   </div>
   <!--  这里是confirmDialog的报错提示部分,可以是报错，可以是提示,只有一个确认按钮-->
@@ -1047,7 +1047,7 @@ export default {
       console.log("groupId changed");
       this.getGroupUserSelfDetail();
     },
-    '$q.screen.width': {
+    '$q.screen.lt.md': {
       immediate: true,
       handler(newVal, oldVal) {
           this.updateStatus();

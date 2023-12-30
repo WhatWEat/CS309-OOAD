@@ -7,7 +7,7 @@
         <span v-if="!assignmentAll">
           <q-chip v-for="(i,index) in assignmentConditional" :key="i" removable square
                   @remove="assignmentConditional.splice(index,1)" :color="lightColors[Math.floor(Math.random() * lightColors.length)]" class="col-auto">
-            做作业:{{ i }}
+            {{ i }}
           </q-chip>
         </span>
         <q-chip v-else removable square @remove="assignmentAll=false" :color="lightColors[Math.floor(Math.random() * lightColors.length)]"> All Assignment</q-chip>
@@ -17,7 +17,7 @@
           <q-chip v-for="(i, index) in userConditional" :key="i" removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]"
                   @remove="userConditional.splice(index, 1)">
 <!--            <q-avatar class="col-auto" color="red">{{ i }}</q-avatar>-->
-            tyl:{{ i }}
+            {{ i }}
           </q-chip>
         </span>
         <q-chip v-else removable square :color="lightColors[Math.floor(Math.random() * lightColors.length)]" @remove="userAll=false"> All Student</q-chip>
